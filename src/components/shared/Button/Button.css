@@ -1,0 +1,50 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border: 1px solid;
+  border-radius: 6px;
+  transition: all 0.15s;
+  font-family: inherit;
+  cursor: pointer;
+  opacity: 1;
+  padding: 10px 20px;
+  font-size: 12px;
+}
+
+.small {
+  padding: 6px 12px;
+  font-size: 11px;
+}
+
+.disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+.danger {
+  background: var(--danger-bg);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.success {
+  background: var(--success-bg);
+  border-color: var(--success);
+  color: var(--success);
+}

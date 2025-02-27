@@ -1,0 +1,46 @@
+.numeric-input {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--input);
+}
+
+.numeric-btn {
+  width: 30px;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+  font-family: inherit;
+  padding: 0;
+  user-select: none;
+}
+
+.numeric-btn.decrement-btn {
+  border-right: 1px solid var(--border);
+}
+
+.numeric-btn.increment-btn {
+  border-left: 1px solid var(--border);
+}
+
+.numeric-input-field {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 13px;
+  padding: 9px 4px;
+  font-family: inherit;
+  outline: none;
+  text-align: center;
+  min-width: 0;
+}
