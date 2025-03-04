@@ -1,0 +1,65 @@
+.planCard {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  transition: border-color 0.15s;
+}
+
+.planCard:hover {
+  border-color: var(--borderHov);
+}
+
+.planCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.planCardName {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.planCardDesc {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.planCardActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.planCardDelete {
+  background: none;
+  border: none;
+  color: var(--dim);
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.planCardBadgeRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.planCardFooter {
+  font-size: 11px;
+  color: var(--dim);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
