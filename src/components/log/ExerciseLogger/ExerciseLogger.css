@@ -1,0 +1,41 @@
+.exerciseLogger {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.exerciseLoggerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.exerciseLoggerTitle {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
+.exerciseLoggerStats {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+}
+
+.exerciseLoggerMax {
+  color: var(--accent);
+}
+
+.exerciseLoggerVolume {
+  color: var(--muted);
+}
+
+.exerciseLoggerSets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}

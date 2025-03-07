@@ -1,0 +1,42 @@
+.setRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.setRowIndex {
+  width: 22px;
+  text-align: center;
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.setRowUnit {
+  font-size: 11px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.setRowMultiplier {
+  font-size: 11px;
+  color: var(--dim);
+  flex-shrink: 0;
+}
+
+.setRowReps {
+  font-size: 11px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.setRowRemove {
+  background: none;
+  border: none;
+  color: var(--dim);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 4px;
+}
