@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./App.css";
 import { PlansTab } from "./components/plans";
 import { LogTab } from "./components/log";
+import { ProgressTab } from "./components/progress";
 import { TrainingPlan, WorkoutSession } from "./types";
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
         sessions={sessions}
         setSessions={setSessions}
       ></LogTab>
+      <ProgressTab plans={plans} sessions={sessions} />
       {lastLoggedPlan && (
         <section className="logInfo">
           <h2>Last logged plan</h2>
