@@ -1,38 +1,10 @@
-import { useState } from "react";
 import "./App.css";
-import { PlansTab } from "./components/plans";
-import { LogTab } from "./components/log";
-import { ProgressTab } from "./components/progress";
-import { TrainingPlan, WorkoutSession } from "./types";
+import GymTracker from "./GymTracker";
 
 function App() {
-  const [plans, setPlans] = useState<TrainingPlan[]>([]);
-  const [sessions, setSessions] = useState<WorkoutSession[]>([]);
-  const [lastLoggedPlan, setLastLoggedPlan] = useState<TrainingPlan | null>(
-    null,
-  );
-
-  const handleLogPlan = (plan: TrainingPlan) => {
-    setLastLoggedPlan(plan);
-    console.log("Logged training plan:", plan);
-  };
-
   return (
     <main>
-      <h1>Gym Tracker</h1>
-      <PlansTab plans={plans} setPlans={setPlans} onLogPlan={handleLogPlan} />
-      <LogTab
-        plans={plans}
-        sessions={sessions}
-        setSessions={setSessions}
-      ></LogTab>
-      <ProgressTab plans={plans} sessions={sessions} />
-      {lastLoggedPlan && (
-        <section className="logInfo">
-          <h2>Last logged plan</h2>
-          <p>{lastLoggedPlan.name}</p>
-        </section>
-      )}
+      <GymTracker />
     </main>
   );
 }
