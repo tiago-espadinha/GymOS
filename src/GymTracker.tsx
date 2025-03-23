@@ -28,8 +28,10 @@ export default function GymTracker() {
     (async () => {
       const p = await getFromStorage('gym:plans');
       const s = await getFromStorage('gym:sessions');
+      const t = await getFromStorage('gym:tab');
       setPlans(p || []);
       setSessions(s || []);
+      if (t) setTab(t);
       setLoaded(true);
     })();
   }, []);
@@ -45,6 +47,12 @@ export default function GymTracker() {
       saveToStorage('gym:sessions', sessions);
     }
   }, [sessions, loaded]);
+
+  useEffect(() => {
+    if (loaded) {
+      saveToStorage('gym:tab', tab);
+    }
+  }, [tab, loaded]);
 
   const handleLogPlan = (plan: TrainingPlan) => {
     setLogPlan(plan);

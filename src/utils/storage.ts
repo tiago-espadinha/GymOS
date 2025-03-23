@@ -1,7 +1,7 @@
 export async function getFromStorage(key: string): Promise<any> {
   try {
-    const result = await (window as any).storage.get(key);
-    return result ? JSON.parse(result.value) : null;
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : null;
   } catch {
     return null;
   }
@@ -9,7 +9,7 @@ export async function getFromStorage(key: string): Promise<any> {
 
 export async function saveToStorage(key: string, value: any): Promise<void> {
   try {
-    await (window as any).storage.set(key, JSON.stringify(value));
+    localStorage.setItem(key, JSON.stringify(value));
   } catch {
     // Silently fail
   }
