@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import {
   LineChart,
   Line,
@@ -8,15 +8,18 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Label, Select } from "../../shared";
+import { Label, Select, Button } from "../../shared";
 import Colors from "../../../constants/colors";
 import { formatDate } from "../../../utils/date";
 import { TrainingPlan, WorkoutSession } from "../../../types";
+import { exportToCSV, importFromCSV } from "../../../utils/csv";
 import "./ProgressTab.css";
 
 interface ProgressTabProps {
   plans: TrainingPlan[];
   sessions: WorkoutSession[];
+  setPlans: (plans: TrainingPlan[]) => void;
+  setSessions: (sessions: WorkoutSession[]) => void;
 }
 
 interface ChartPoint {
@@ -41,9 +44,58 @@ interface Stats {
   total: number;
 }
 
-export function ProgressTab({ plans, sessions }: ProgressTabProps) {
+export function ProgressTab({
+  plans,
+  sessions,
+  setPlans,
+  setSessions,
+}: ProgressTabProps) {
   const [selectedExId, setSelectedExId] = useState("");
   const [metric, setMetric] = useState<"maxWeight" | "volume">("maxWeight");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleExport = () => {
+    const csv = exportToCSV(plans, sessions);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `gym_data_${new Date().toISOString().split("T")[0]}.csv`,
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const csv = event.target?.result as string;
+      if (csv) {
+        if (
+          confirm(
+            "Importing data will replace your current plans and sessions. Are you sure?",
+          )
+        ) {
+          const { plans: importedPlans, sessions: importedSessions } =
+            importFromCSV(csv);
+          setPlans(importedPlans);
+          setSessions(importedSessions);
+        }
+      }
+    };
+    reader.readAsText(file);
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const allExercises = useMemo(() => {
     const map = new Map();
@@ -181,7 +233,28 @@ export function ProgressTab({ plans, sessions }: ProgressTabProps) {
 
   return (
     <div>
-      <div className="progressHeader">Progress Analysis</div>
+      <div className="progressHeader">
+        <span>Progress Analysis</span>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <Button variant="ghost" small onClick={handleExport}>
+            Export CSV
+          </Button>
+          <Button
+            variant="ghost"
+            small
+            onClick={() => fileInputRef.current?.click()}
+          >
+            Import CSV
+          </Button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImport}
+            accept=".csv"
+            style={{ display: "none" }}
+          />
+        </div>
+      </div>
 
       {allExercises.length === 0 ? (
         <div className="noExercises">
@@ -261,7 +334,9 @@ export function ProgressTab({ plans, sessions }: ProgressTabProps) {
                   ].map(({ label, value, color }) => (
                     <div key={label} className="statCard">
                       <div className="statLabel">{label}</div>
-                      <div className="statValue" style={{ color }}>{value}</div>
+                      <div className="statValue" style={{ color }}>
+                        {value}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -275,7 +350,10 @@ export function ProgressTab({ plans, sessions }: ProgressTabProps) {
                     { color: Colors.accent, label: "Neutral / Baseline" },
                   ].map(({ color, label }) => (
                     <div key={label} className="legendItem">
-                      <div className="legendColor" style={{ backgroundColor: color }} />
+                      <div
+                        className="legendColor"
+                        style={{ backgroundColor: color }}
+                      />
                       {label}
                     </div>
                   ))}

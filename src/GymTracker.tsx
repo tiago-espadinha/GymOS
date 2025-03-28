@@ -170,7 +170,14 @@ export default function GymTracker() {
             initialPlan={logPlan || undefined}
           />
         )}
-        {tab === 'progress' && <ProgressTab plans={plans} sessions={sessions} />}
+        {tab === 'progress' && (
+          <ProgressTab
+            plans={plans}
+            sessions={sessions}
+            setPlans={setPlans}
+            setSessions={setSessions}
+          />
+        )}
       </div>
     </div>
   );

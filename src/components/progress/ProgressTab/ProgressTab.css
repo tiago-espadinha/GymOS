@@ -32,6 +32,9 @@
   color: var(--text);
   letter-spacing: -0.02em;
   margin-bottom: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .noExercises {
