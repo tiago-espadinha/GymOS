@@ -172,6 +172,8 @@
   font-size: 12px;
   line-height: 1.7;
   color: var(--muted);
+  display: flex;
+  flex-direction: column;
 }
 
 .analysisLabel {
@@ -192,4 +194,90 @@
 
 .declineStat {
   color: var(--danger);
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.importModal {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.importModal h3 {
+  margin: 0 0 16px 0;
+  color: var(--accent);
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.importModal p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.modalQuestion {
+  color: var(--text) !important;
+  font-weight: 600;
+  margin-top: 24px;
+  margin-bottom: 24px !important;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+}
+
+.importModeToggle {
+  display: flex;
+  background: var(--card2);
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.modeButton {
+  padding: 6px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.modeButton.active {
+  background: var(--card);
+  color: var(--accent);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.modeButton:hover:not(.active) {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.03);
 }

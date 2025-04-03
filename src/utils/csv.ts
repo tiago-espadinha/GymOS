@@ -61,12 +61,17 @@ export function importFromCSV(csv: string): {
   sessions: WorkoutSession[];
 } {
   const lines = csv.split("\n");
-  if (lines.length <= 1) return { plans: [], sessions: [] };
+  if (lines.length === 0) return { plans: [], sessions: [] };
+
+  const header = lines[0].trim();
+  if (header !== CSV_HEADER) {
+    throw new Error("Invalid CSV format: Header mismatch.");
+  }
 
   const plansMap = new Map<string, TrainingPlan>();
-  const sessionsMap = new Map<string, WorkoutSession>();
+  const sessionRows: string[][] = [];
 
-  // Skip header
+  // First pass: Build Plans and collect session rows
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
@@ -74,8 +79,7 @@ export function importFromCSV(csv: string): {
     const parts = parseCSVLine(line);
     if (parts.length < 8) continue;
 
-    const [type, date, name, desc_notes, exercise, muscle, weight, reps] =
-      parts;
+    const [type, _date, name, desc_notes, exercise, muscle] = parts;
 
     if (type === "plan") {
       if (!plansMap.has(name)) {
@@ -87,7 +91,6 @@ export function importFromCSV(csv: string): {
         });
       }
       const plan = plansMap.get(name)!;
-      // Check if exercise already exists in this plan (compact format might repeat plan info for each exercise)
       if (!plan.exercises.find((e) => e.name === exercise)) {
         plan.exercises.push({
           id: generateId(),
@@ -96,37 +99,49 @@ export function importFromCSV(csv: string): {
         });
       }
     } else if (type === "session") {
-      const sessionKey = `${date}_${name}_${desc_notes}`;
-      if (!sessionsMap.has(sessionKey)) {
-        sessionsMap.set(sessionKey, {
-          id: generateId(),
-          planId: "", // We don't have the original plan ID
-          planName: name,
-          date,
-          notes: desc_notes,
-          exercises: [],
-        });
-      }
-      const session = sessionsMap.get(sessionKey)!;
+      sessionRows.push(parts);
+    }
+  }
 
-      let exLog = session.exercises.find((e) => e.name === exercise);
-      if (!exLog) {
-        exLog = {
-          id: generateId(),
-          name: exercise,
-          muscleGroup: muscle,
-          sets: [],
-        };
-        session.exercises.push(exLog);
-      }
+  const sessionsMap = new Map<string, WorkoutSession>();
 
-      if (weight && reps) {
-        exLog.sets.push({
-          id: generateId(),
-          weight,
-          reps,
-        });
-      }
+  // Second pass: Process sessions using plan info
+  for (const parts of sessionRows) {
+    const [_, date, name, desc_notes, exercise, muscle, weight, reps] = parts;
+    const sessionKey = `${date}_${name}_${desc_notes}`;
+
+    const plan = plansMap.get(name);
+
+    if (!sessionsMap.has(sessionKey)) {
+      sessionsMap.set(sessionKey, {
+        id: generateId(),
+        planId: plan?.id || "",
+        planName: name,
+        date,
+        notes: desc_notes,
+        exercises: [],
+      });
+    }
+    const session = sessionsMap.get(sessionKey)!;
+
+    let exLog = session.exercises.find((e) => e.name === exercise);
+    if (!exLog) {
+      const planEx = plan?.exercises.find((e) => e.name === exercise);
+      exLog = {
+        id: planEx?.id || generateId(),
+        name: exercise,
+        muscleGroup: muscle,
+        sets: [],
+      };
+      session.exercises.push(exLog);
+    }
+
+    if (weight && reps) {
+      exLog.sets.push({
+        id: generateId(),
+        weight,
+        reps,
+      });
     }
   }
 

@@ -50,8 +50,13 @@ export function ProgressTab({
   setPlans,
   setSessions,
 }: ProgressTabProps) {
-  const [selectedExId, setSelectedExId] = useState("");
+  const [selectedExName, setSelectedExName] = useState("");
   const [metric, setMetric] = useState<"maxWeight" | "volume">("maxWeight");
+  const [importState, setImportState] = useState<{
+    files: FileList;
+    plans: TrainingPlan[];
+    sessions: WorkoutSession[];
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = () => {
@@ -70,62 +75,146 @@ export function ProgressTab({
     document.body.removeChild(link);
   };
 
-  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileSelection = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const csv = event.target?.result as string;
-      if (csv) {
-        if (
-          confirm(
-            "Importing data will replace your current plans and sessions. Are you sure?",
-          )
-        ) {
-          const { plans: importedPlans, sessions: importedSessions } =
-            importFromCSV(csv);
-          setPlans(importedPlans);
-          setSessions(importedSessions);
+    const allImportedPlans: TrainingPlan[] = [];
+    const allImportedSessions: WorkoutSession[] = [];
+
+    try {
+      const readFiles = Array.from(files).map((file) => {
+        return new Promise<void>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const csv = event.target?.result as string;
+            if (csv) {
+              try {
+                const { plans: p, sessions: s } = importFromCSV(csv);
+                allImportedPlans.push(...p);
+                allImportedSessions.push(...s);
+                resolve();
+              } catch (err: any) {
+                reject(new Error(`File "${file.name}":\n${err.message}`));
+              }
+            } else {
+              resolve();
+            }
+          };
+          reader.readAsText(file);
+        });
+      });
+
+      await Promise.all(readFiles);
+      setImportState({
+        files,
+        plans: allImportedPlans,
+        sessions: allImportedSessions,
+      });
+    } catch (err: any) {
+      alert(err.message);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const finalizeImport = (mode: "append" | "replace") => {
+    if (!importState) return;
+
+    const { plans: importedPlans, sessions: importedSessions } = importState;
+
+    if (mode === "replace") {
+      setPlans(importedPlans);
+      setSessions(importedSessions);
+    } else {
+      // Append Mode: Merge logic
+      const newPlans = [...plans];
+      importedPlans.forEach((imp) => {
+        const existing = newPlans.find((p) => p.name === imp.name);
+        if (existing) {
+          // Merge exercises into existing plan
+          imp.exercises.forEach((impEx) => {
+            if (!existing.exercises.find((e) => e.name === impEx.name)) {
+              existing.exercises.push(impEx);
+            }
+          });
+        } else {
+          newPlans.push(imp);
         }
-      }
-    };
-    reader.readAsText(file);
-    // Reset input
+      });
+
+      const newSessions = [...sessions];
+      importedSessions.forEach((imp) => {
+        // Deduplicate sessions: check for same date, plan, and notes
+        const isDuplicate = newSessions.some(
+          (s) =>
+            s.date === imp.date &&
+            s.planName === imp.planName &&
+            s.notes === imp.notes,
+        );
+        if (!isDuplicate) {
+          newSessions.push(imp);
+        }
+      });
+
+      setPlans(newPlans);
+      setSessions(newSessions);
+    }
+
+    // Reset
+    setImportState(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const cancelImport = () => {
+    setImportState(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
   const allExercises = useMemo(() => {
-    const map = new Map();
+    const map = new Map<string, { name: string; muscleGroup: string }>();
     plans.forEach((plan) =>
       plan.exercises.forEach((ex) => {
-        if (!map.has(ex.id)) {
-          map.set(ex.id, { ...ex, planName: plan.name });
+        if (!map.has(ex.name)) {
+          map.set(ex.name, { name: ex.name, muscleGroup: ex.muscleGroup });
         }
       }),
     );
-    return Array.from(map.values());
-  }, [plans]);
+    // Also include exercises from sessions that might not be in plans
+    sessions.forEach((session) =>
+      session.exercises.forEach((ex) => {
+        if (!map.has(ex.name)) {
+          map.set(ex.name, { name: ex.name, muscleGroup: ex.muscleGroup });
+        }
+      }),
+    );
+    return Array.from(map.values()).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
+  }, [plans, sessions]);
 
   useMemo(() => {
-    if (allExercises.length > 0 && !selectedExId) {
-      setSelectedExId(allExercises[0].id);
+    if (allExercises.length > 0 && !selectedExName) {
+      setSelectedExName(allExercises[0].name);
     }
-  }, [allExercises, selectedExId]);
+  }, [allExercises, selectedExName]);
 
   const { chartData, stats } = useMemo(() => {
-    if (!selectedExId) return { chartData: [], stats: null };
+    if (!selectedExName) return { chartData: [], stats: null };
 
     const relevant = sessions
-      .filter((s) => s.exercises.some((e) => e.id === selectedExId))
+      .filter((s) => s.exercises.some((e) => e.name === selectedExName))
       .sort((a, b) => a.date.localeCompare(b.date));
 
     if (relevant.length === 0) return { chartData: [], stats: null };
 
     const points: ChartPoint[] = relevant.map((s) => {
-      const ex = s.exercises.find((e) => e.id === selectedExId);
+      const ex = s.exercises.find((e) => e.name === selectedExName);
       const maxWeight = ex
         ? ex.sets.reduce((m, st) => Math.max(m, parseFloat(st.weight) || 0), 0)
         : 0;
@@ -179,9 +268,9 @@ export function ProgressTab({
         total: analyzed.length,
       },
     };
-  }, [selectedExId, sessions, metric]);
+  }, [selectedExName, sessions, metric]);
 
-  const selected = allExercises.find((e) => e.id === selectedExId);
+  const selected = allExercises.find((e) => e.name === selectedExName);
 
   const CustomDot = ({ cx, cy, payload }: any) => {
     const col =
@@ -235,26 +324,64 @@ export function ProgressTab({
     <div>
       <div className="progressHeader">
         <span>Progress Analysis</span>
-        <div style={{ display: "flex", gap: "8px" }}>
-          <Button variant="ghost" small onClick={handleExport}>
-            Export CSV
-          </Button>
-          <Button
-            variant="ghost"
-            small
-            onClick={() => fileInputRef.current?.click()}
-          >
-            Import CSV
-          </Button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleImport}
-            accept=".csv"
-            style={{ display: "none" }}
-          />
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <Button variant="ghost" small onClick={handleExport}>
+              Export
+            </Button>
+            <Button
+              variant="primary"
+              small
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Import CSV
+            </Button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileSelection}
+              accept=".csv"
+              multiple
+              style={{ display: "none" }}
+            />
+          </div>
         </div>
       </div>
+
+      {importState && (
+        <div className="modalOverlay">
+          <div className="importModal">
+            <h3>Import Options</h3>
+            <p>
+              You are about to import {importState.files.length} file(s)
+              containing {importState.plans.length} plan(s) and{" "}
+              {importState.sessions.length} session(s).
+            </p>
+            <p className="modalQuestion">
+              Do you want to erase existing data or append to it?
+            </p>
+            <div className="modalActions">
+              <Button variant="ghost" onClick={cancelImport}>
+                Cancel
+              </Button>
+              <div style={{ display: "flex", gap: "12px" }}>
+                <Button
+                  variant="secondary"
+                  onClick={() => finalizeImport("append")}
+                >
+                  Append
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => finalizeImport("replace")}
+                >
+                  Erase & Replace
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {allExercises.length === 0 ? (
         <div className="noExercises">
@@ -265,10 +392,10 @@ export function ProgressTab({
           <div className="progressFilters">
             <div className="progressFilter">
               <Label>Exercise</Label>
-              <Select value={selectedExId} onChange={setSelectedExId}>
+              <Select value={selectedExName} onChange={setSelectedExName}>
                 {allExercises.map((ex) => (
-                  <option key={ex.id} value={ex.id}>
-                    {ex.name} — {ex.planName}
+                  <option key={ex.name} value={ex.name}>
+                    {ex.name}
                   </option>
                 ))}
               </Select>
@@ -415,9 +542,11 @@ export function ProgressTab({
 
               {stats && stats.total > 1 && (
                 <div className="analysisSummary">
-                  <span className="analysisLabel">Analysis · </span>
-                  {selected?.name} tracked across {stats.total} session
-                  {stats.total !== 1 ? "s" : ""}.
+                  <div>
+                    <span className="analysisLabel">Analysis · </span>
+                    {selected?.name} tracked across {stats.total} session
+                    {stats.total !== 1 ? "s" : ""}.
+                  </div>
                   {stats.improvements > 0 && (
                     <>
                       {" "}
