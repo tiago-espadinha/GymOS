@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -8,7 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Label, Select, Button } from "../../shared";
+import { Label, Select, Button, Search } from "../../shared";
 import Colors from "../../../constants/colors";
 import { formatDate } from "../../../utils/date";
 import { TrainingPlan, WorkoutSession } from "../../../types";
@@ -51,6 +51,9 @@ export function ProgressTab({
   setSessions,
 }: ProgressTabProps) {
   const [selectedExName, setSelectedExName] = useState("");
+  const [selectedPlanId, setSelectedPlanId] = useState("all");
+  const [exerciseSearch, setExerciseSearch] = useState("");
+  const [showExDropdown, setShowExDropdown] = useState(false);
   const [metric, setMetric] = useState<"maxWeight" | "volume">("maxWeight");
   const [importState, setImportState] = useState<{
     files: FileList;
@@ -58,6 +61,18 @@ export function ProgressTab({
     sessions: WorkoutSession[];
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowExDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleExport = () => {
     const csv = exportToCSV(plans, sessions);
@@ -178,29 +193,53 @@ export function ProgressTab({
 
   const allExercises = useMemo(() => {
     const map = new Map<string, { name: string; muscleGroup: string }>();
-    plans.forEach((plan) =>
+    
+    const filteredPlans = selectedPlanId === "all" 
+      ? plans 
+      : plans.filter(p => p.id === selectedPlanId);
+
+    filteredPlans.forEach((plan) =>
       plan.exercises.forEach((ex) => {
         if (!map.has(ex.name)) {
           map.set(ex.name, { name: ex.name, muscleGroup: ex.muscleGroup });
         }
       }),
     );
-    // Also include exercises from sessions that might not be in plans
-    sessions.forEach((session) =>
-      session.exercises.forEach((ex) => {
-        if (!map.has(ex.name)) {
-          map.set(ex.name, { name: ex.name, muscleGroup: ex.muscleGroup });
-        }
-      }),
-    );
+
+    // Also include exercises from sessions that might not be in plans, 
+    // but only if "All Plans" is selected or the session matches the selected plan name
+    const selectedPlanName = plans.find(p => p.id === selectedPlanId)?.name;
+    sessions.forEach((session) => {
+      if (selectedPlanId === "all" || session.planName === selectedPlanName) {
+        session.exercises.forEach((ex) => {
+          if (!map.has(ex.name)) {
+            map.set(ex.name, { name: ex.name, muscleGroup: ex.muscleGroup });
+          }
+        });
+      }
+    });
+
     return Array.from(map.values()).sort((a, b) =>
       a.name.localeCompare(b.name),
     );
-  }, [plans, sessions]);
+  }, [plans, sessions, selectedPlanId]);
+
+  const filteredExercises = useMemo(() => {
+    if (!exerciseSearch) return allExercises;
+    return allExercises.filter(ex => 
+      ex.name.toLowerCase().includes(exerciseSearch.toLowerCase())
+    );
+  }, [allExercises, exerciseSearch]);
 
   useMemo(() => {
-    if (allExercises.length > 0 && !selectedExName) {
-      setSelectedExName(allExercises[0].name);
+    if (allExercises.length > 0) {
+      // If current selection is not in the (potentially new) list, reset to first
+      if (!allExercises.find(ex => ex.name === selectedExName)) {
+        setSelectedExName(allExercises[0].name);
+        setExerciseSearch("");
+      }
+    } else {
+      setSelectedExName("");
     }
   }, [allExercises, selectedExName]);
 
@@ -383,23 +422,54 @@ export function ProgressTab({
         </div>
       )}
 
-      {allExercises.length === 0 ? (
+      {allExercises.length === 0 && selectedPlanId === "all" ? (
         <div className="noExercises">
           No exercises found. Create a training plan first.
         </div>
       ) : (
         <>
           <div className="progressFilters">
-            <div className="progressFilter">
-              <Label>Exercise</Label>
-              <Select value={selectedExName} onChange={setSelectedExName}>
-                {allExercises.map((ex) => (
-                  <option key={ex.name} value={ex.name}>
-                    {ex.name}
+            <div className="planFilter">
+              <Label>Filter by Plan</Label>
+              <Select value={selectedPlanId} onChange={setSelectedPlanId}>
+                <option value="all">All Plans</option>
+                {plans.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
                   </option>
                 ))}
               </Select>
             </div>
+
+            <div className="exerciseFilter" ref={dropdownRef}>
+              <Label>Exercise</Label>
+              <Search
+                value={exerciseSearch}
+                onChange={setExerciseSearch}
+                onFocus={() => setShowExDropdown(true)}
+                isOpen={showExDropdown}
+                placeholder={selectedExName || "Select exercise..."}
+              >
+                {filteredExercises.length > 0 ? (
+                  filteredExercises.map((ex) => (
+                    <div
+                      key={ex.name}
+                      className={`searchSelectOption ${selectedExName === ex.name ? "active" : ""}`}
+                      onClick={() => {
+                        setSelectedExName(ex.name);
+                        setExerciseSearch("");
+                        setShowExDropdown(false);
+                      }}
+                    >
+                      {ex.name}
+                    </div>
+                  ))
+                ) : (
+                  <div className="searchSelectNoResults">No results found</div>
+                )}
+              </Search>
+          </div>
+
             <div>
               <Label>Metric</Label>
               <div className="progressMetric">

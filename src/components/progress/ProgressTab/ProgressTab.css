@@ -54,8 +54,12 @@
   flex-wrap: wrap;
   align-items: end;
 }
-
-.progressFilter {
+.planFilter {
+  flex: 0.5;
+  min-width: 200px;
+}
+.progressFilter,
+.exerciseFilter {
   flex: 1;
   min-width: 200px;
 }
