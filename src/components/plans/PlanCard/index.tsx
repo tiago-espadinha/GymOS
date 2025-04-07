@@ -1,27 +1,49 @@
-import { Button, Badge } from '../../shared';
-import { MUSCLE_GROUP_COLORS } from '../../../constants/muscleGroups';
-import { TrainingPlan } from '../../../types';
-import './PlanCard.css';
+import { Button, Badge } from "../../shared";
+import { MUSCLE_GROUP_COLORS } from "../../../constants/muscleGroups";
+import { TrainingPlan } from "../../../types";
+import "./PlanCard.css";
 
 interface PlanCardProps {
   plan: TrainingPlan;
   onDelete: (id: string) => void;
   onLog: (plan: TrainingPlan) => void;
+  onToggleArchive: (id: string) => void;
 }
 
-export function PlanCard({ plan, onDelete, onLog }: PlanCardProps) {
+export function PlanCard({
+  plan,
+  onDelete,
+  onLog,
+  onToggleArchive,
+}: PlanCardProps) {
   return (
-    <div className="planCard">
+    <div className={`planCard ${plan.isArchived ? "isArchived" : ""}`}>
       <div className="planCardHeader">
         <div>
-          <div className="planCardName">{plan.name}</div>
+          <div className="planCardName">
+            {plan.name}
+            {plan.isArchived && <span className="archivedBadge">Archived</span>}
+          </div>
           {plan.desc && <div className="planCardDesc">{plan.desc}</div>}
         </div>
         <div className="planCardActions">
-          <Button onClick={() => onLog(plan)} small>
-            Log
+          {!plan.isArchived && (
+            <Button onClick={() => onLog(plan)} small>
+              Log
+            </Button>
+          )}
+          <Button
+            onClick={() => onToggleArchive(plan.id)}
+            small
+            variant={plan.isArchived ? "success" : "ghost"}
+          >
+            {plan.isArchived ? "Restore" : "Archive"}
           </Button>
-          <button onClick={() => onDelete(plan.id)} className="planCardDelete">
+          <button
+            onClick={() => onDelete(plan.id)}
+            className="planCardDelete"
+            title="Delete Plan"
+          >
             ×
           </button>
         </div>
@@ -36,7 +58,7 @@ export function PlanCard({ plan, onDelete, onLog }: PlanCardProps) {
       </div>
 
       <div className="planCardFooter">
-        {plan.exercises.length} exercise{plan.exercises.length !== 1 ? 's' : ''}
+        {plan.exercises.length} exercise{plan.exercises.length !== 1 ? "s" : ""}
       </div>
     </div>
   );

@@ -3,7 +3,7 @@
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 20px;
-  transition: border-color 0.15s;
+  transition: all 0.15s;
 }
 
 .planCard:hover {
@@ -44,9 +44,19 @@
   border: none;
   color: var(--dim);
   cursor: pointer;
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1;
-  padding: 0 2px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.planCardDelete:hover {
+  color: var(--danger);
+  background: var(--danger-bg);
 }
 
 .planCardBadgeRow {

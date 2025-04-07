@@ -19,6 +19,7 @@ export interface TrainingPlan {
   name: string;
   desc: string;
   exercises: Exercise[];
+  isArchived?: boolean;
 }
 
 export interface WorkoutSession {

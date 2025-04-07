@@ -166,11 +166,13 @@ export function LogTab({
           <Label>Training Plan</Label>
           <Select value={planId} onChange={handlePlanChange}>
             <option value="">Select a plan...</option>
-            {plans.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
+            {plans
+              .filter((p) => !p.isArchived || p.id === planId)
+              .map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} {p.isArchived ? "(Archived)" : ""}
+                </option>
+              ))}
           </Select>
         </div>
         <div>

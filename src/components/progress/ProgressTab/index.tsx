@@ -195,7 +195,7 @@ export function ProgressTab({
     const map = new Map<string, { name: string; muscleGroup: string }>();
     
     const filteredPlans = selectedPlanId === "all" 
-      ? plans 
+      ? plans.filter(p => !p.isArchived)
       : plans.filter(p => p.id === selectedPlanId);
 
     filteredPlans.forEach((plan) =>
@@ -433,11 +433,13 @@ export function ProgressTab({
               <Label>Filter by Plan</Label>
               <Select value={selectedPlanId} onChange={setSelectedPlanId}>
                 <option value="all">All Plans</option>
-                {plans.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
+                {plans
+                  .filter((p) => !p.isArchived || p.id === selectedPlanId)
+                  .map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} {p.isArchived ? "(Archived)" : ""}
+                    </option>
+                  ))}
               </Select>
             </div>
 
