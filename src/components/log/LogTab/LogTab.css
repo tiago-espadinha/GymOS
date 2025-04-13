@@ -34,6 +34,31 @@
   align-items: end;
 }
 
+@media (max-width: 600px) {
+  .logTabActions {
+    justify-content: center;
+  }
+
+  .logTabRecentInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .logTabRecentData {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .logTabRecentDate,
+  .logTabRecentNotes {
+    margin-left: 0px;
+  }
+}
+
 .logTabExercises {
   display: flex;
   flex-direction: column;
@@ -124,6 +149,7 @@
 .logTabRecentDate {
   font-size: 11px;
   color: var(--muted);
+  margin-left: 10px;
 }
 
 .logTabEditingIndicator {
@@ -154,6 +180,7 @@
   background: var(--card2);
   border-radius: 4px;
   padding: 4px 8px;
+  margin: 4px;
 }
 
 .logTabRecentExerciseWeight {

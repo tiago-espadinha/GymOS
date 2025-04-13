@@ -259,13 +259,13 @@ export function LogTab({
                   }}
                 >
                   <div className="logTabRecentHeader">
-                    <div>
+                    <div className="logTabRecentInfo">
                       <span className="logTabRecentPlanName">{s.planName}</span>
                       {s.notes && (
                         <span className="logTabRecentNotes">{s.notes}</span>
                       )}
                     </div>
-                    <div className="logTabRecentActions">
+                    <div className="logTabRecentData">
                       {totalVol > 0 && (
                         <span className="logTabRecentVolume">
                           {totalVol.toFixed(0)} kg
@@ -274,6 +274,8 @@ export function LogTab({
                       <span className="logTabRecentDate">
                         {formatDate(s.date)}
                       </span>
+                    </div>
+                    <div className="logTabRecentActions">
                       {!isEditing ? (
                         <Button
                           onClick={() => startEdit(s)}

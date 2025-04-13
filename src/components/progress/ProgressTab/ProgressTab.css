@@ -64,6 +64,25 @@
   min-width: 200px;
 }
 
+@media (max-width: 600px) {
+  .progressHeader {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .progressFilters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .planFilter,
+  .exerciseFilter {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+  }
+}
+
 .progressMetric {
   display: flex;
   gap: 6px;
@@ -112,6 +131,21 @@
   margin-bottom: 24px;
 }
 
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .statCard {
+    padding: 12px;
+  }
+}
+
 .statCard {
   background: var(--card);
   border: 1px solid var(--border);
@@ -146,6 +180,7 @@
   display: flex;
   gap: 18px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .legendItem {
@@ -219,9 +254,25 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 32px;
-  width: 100%;
+  width: 90%;
   max-width: 480px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 480px) {
+  .importModal {
+    padding: 24px 16px;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+    gap: 16px;
+  }
+
+  .modalActions > div {
+    flex-direction: column;
+    width: 100%;
+  }
 }
 
 .importModal h3 {
