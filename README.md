@@ -1,73 +1,40 @@
-# React + TypeScript + Vite
+# GymOS: Minimalist Gym Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A minimalist gym tracker built with React and Vite, designed for speed and mobile ergonomics. Track your progress with flexibility and without the clutter of traditional apps.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Plan Management**: Create, edit, and archive custom training routines to keep your workspace organized.
+- **Efficient Logging**: Fast session logging optimized for the gym floor, supporting sets, reps, and RPE-equivalent tracking.
+- **Progress Analytics**: Detailed visualization of strength gains (1RM estimates) and volume trends using Recharts.
+- **Mobile PWA**: Fully responsive, installable web app with bottom-tab navigation designed for one-handed mobile use.
+- **Data Portability**: Complete control over your data with CSV export and import capabilities.
 
-## React Compiler
+## Learning Objectives
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Architect a scalable React application using TypeScript for strict type safety.
+- Implement a responsive and installable Progressive Web App (PWA) with specialized mobile layouts.
+- Manage local data persistence using browser storage with robust error handling.
+- Build interactive data visualizations and performance analysis logic from scratch.
 
-## Expanding the ESLint configuration
+## Project Structure
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- `src/components/`: Feature-sliced UI components (Log, Plans, Progress, Shared).
+- `src/utils/`: Core logic for storage, CSV processing, and utility functions.
+- `src/types/`: Domain-specific TypeScript interfaces.
+- `public/`: PWA configuration, manifest, and static assets.
+- `GymTracker.tsx`: Main application container and navigation logic.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Requirements
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Node.js 18+
+- npm or yarn
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## How to Run
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Clone the repository and start the development server:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
