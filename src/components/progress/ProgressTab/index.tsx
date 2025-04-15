@@ -37,16 +37,6 @@ interface AnalyzedPoint extends ChartPoint {
   status: "baseline" | "improvement" | "stagnation" | "neutral";
 }
 
-interface Stats {
-  maxVal: number;
-  lastVal: number;
-  firstVal: number;
-  delta: number;
-  improvements: number;
-  stagnations: number;
-  total: number;
-}
-
 type TimeRange = "all" | "5" | "10" | "1m" | "3m";
 
 export function ProgressTab({
@@ -428,7 +418,7 @@ export function ProgressTab({
               </Button>
               <div style={{ display: "flex", gap: "12px" }}>
                 <Button
-                  variant="secondary"
+                  variant="ghost"
                   onClick={() => finalizeImport("append")}
                 >
                   Append
