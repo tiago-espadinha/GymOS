@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import { Label, Select, Button, Search } from "../../shared";
 import Colors from "../../../constants/colors";
-import { formatDate } from "../../../utils/date";
+import { formatDate, formatDateShort } from "../../../utils/date";
 import { TrainingPlan, WorkoutSession } from "../../../types";
 import { exportToCSV, importFromCSV } from "../../../utils/csv";
 import "./ProgressTab.css";
@@ -20,10 +20,13 @@ interface ProgressTabProps {
   sessions: WorkoutSession[];
   setPlans: (plans: TrainingPlan[]) => void;
   setSessions: (sessions: WorkoutSession[]) => void;
+  selectedExName: string;
+  setSelectedExName: (name: string) => void;
 }
 
 interface ChartPoint {
   date: string;
+  shortDate: string;
   rawDate: string;
   maxWeight: number;
   volume: number;
@@ -44,17 +47,21 @@ interface Stats {
   total: number;
 }
 
+type TimeRange = "all" | "5" | "10" | "1m" | "3m";
+
 export function ProgressTab({
   plans,
   sessions,
   setPlans,
   setSessions,
+  selectedExName,
+  setSelectedExName,
 }: ProgressTabProps) {
-  const [selectedExName, setSelectedExName] = useState("");
   const [selectedPlanId, setSelectedPlanId] = useState("all");
   const [exerciseSearch, setExerciseSearch] = useState("");
   const [showExDropdown, setShowExDropdown] = useState(false);
   const [metric, setMetric] = useState<"maxWeight" | "volume">("maxWeight");
+  const [timeRange, setTimeRange] = useState<TimeRange>("all");
   const [importState, setImportState] = useState<{
     files: FileList;
     plans: TrainingPlan[];
@@ -231,17 +238,17 @@ export function ProgressTab({
     );
   }, [allExercises, exerciseSearch]);
 
-  useMemo(() => {
+  useEffect(() => {
     if (allExercises.length > 0) {
       // If current selection is not in the (potentially new) list, reset to first
-      if (!allExercises.find(ex => ex.name === selectedExName)) {
+      if (!selectedExName || !allExercises.find(ex => ex.name === selectedExName)) {
         setSelectedExName(allExercises[0].name);
         setExerciseSearch("");
       }
-    } else {
+    } else if (selectedExName !== "") {
       setSelectedExName("");
     }
-  }, [allExercises, selectedExName]);
+  }, [allExercises, selectedExName, setSelectedExName]);
 
   const { chartData, stats } = useMemo(() => {
     if (!selectedExName) return { chartData: [], stats: null };
@@ -252,7 +259,7 @@ export function ProgressTab({
 
     if (relevant.length === 0) return { chartData: [], stats: null };
 
-    const points: ChartPoint[] = relevant.map((s) => {
+    let points: ChartPoint[] = relevant.map((s) => {
       const ex = s.exercises.find((e) => e.name === selectedExName);
       const maxWeight = ex
         ? ex.sets.reduce((m, st) => Math.max(m, parseFloat(st.weight) || 0), 0)
@@ -264,8 +271,24 @@ export function ProgressTab({
             0,
           )
         : 0;
-      return { date: formatDate(s.date), rawDate: s.date, maxWeight, volume };
+      return { 
+        date: formatDate(s.date), 
+        shortDate: formatDateShort(s.date),
+        rawDate: s.date, 
+        maxWeight, 
+        volume 
+      };
     });
+
+    // Time range filtering
+    if (timeRange === "5") points = points.slice(-5);
+    else if (timeRange === "10") points = points.slice(-10);
+    else if (timeRange === "1m" || timeRange === "3m") {
+      const cutoff = new Date();
+      cutoff.setMonth(cutoff.getMonth() - (timeRange === "1m" ? 1 : 3));
+      const cutoffStr = cutoff.toISOString().slice(0, 10);
+      points = points.filter(p => p.rawDate >= cutoffStr);
+    }
 
     const analyzed: AnalyzedPoint[] = [];
     let allTimeMax = 0;
@@ -307,7 +330,7 @@ export function ProgressTab({
         total: analyzed.length,
       },
     };
-  }, [selectedExName, sessions, metric]);
+  }, [selectedExName, sessions, metric, timeRange]);
 
   const selected = allExercises.find((e) => e.name === selectedExName);
 
@@ -472,7 +495,7 @@ export function ProgressTab({
               </Search>
           </div>
 
-            <div>
+            <div className="metricFilter">
               <Label>Metric</Label>
               <div className="progressMetric">
                 {[
@@ -483,6 +506,27 @@ export function ProgressTab({
                     key={m}
                     onClick={() => setMetric(m as "maxWeight" | "volume")}
                     className={`metricButton ${metric === m ? "active" : ""}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="timeRangeFilter">
+              <Label>Time Range</Label>
+              <div className="progressMetric">
+                {[
+                  ["all", "All"],
+                  ["5", "5S"],
+                  ["10", "10S"],
+                  ["1m", "1M"],
+                  ["3m", "3M"],
+                ].map(([r, label]) => (
+                  <button
+                    key={r}
+                    onClick={() => setTimeRange(r as TimeRange)}
+                    className={`metricButton ${timeRange === r ? "active" : ""}`}
                   >
                     {label}
                   </button>
@@ -558,57 +602,68 @@ export function ProgressTab({
                   ))}
                 </div>
 
-                <div className="chartArea">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={chartData}
-                      margin={{ top: 10, right: 20, bottom: 5, left: 0 }}
-                    >
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke={Colors.border}
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="date"
-                        tick={{
-                          fill: Colors.muted,
-                          fontSize: 11,
-                          fontFamily: "inherit",
-                        }}
-                        axisLine={{ stroke: Colors.border }}
-                        tickLine={false}
-                      />
-                      <YAxis
-                        tick={{
-                          fill: Colors.muted,
-                          fontSize: 11,
-                          fontFamily: "inherit",
-                        }}
-                        axisLine={false}
-                        tickLine={false}
-                        tickFormatter={(v) => `${v}`}
-                        width={45}
-                      />
-                      <Tooltip
-                        content={<CustomTooltip />}
-                        cursor={{ stroke: Colors.borderHov, strokeWidth: 1 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="value"
-                        stroke={Colors.accent}
-                        strokeWidth={2}
-                        dot={<CustomDot />}
-                        activeDot={{
-                          r: 8,
-                          fill: Colors.accent,
-                          stroke: Colors.bg,
-                          strokeWidth: 2,
-                        }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                <div className="chartWrapper">
+                  <div 
+                    className="chartArea" 
+                    style={{ minWidth: chartData.length > 15 ? `${chartData.length * 28}px` : "100%" }}
+                  >
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart
+                        data={chartData}
+                        margin={{ top: 10, right: 20, bottom: 5, left: 0 }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke={Colors.border}
+                          vertical={false}
+                        />
+                        <XAxis
+                          dataKey="date"
+                          tick={{
+                            fill: Colors.muted,
+                            fontSize: 10,
+                            fontFamily: "inherit",
+                          }}
+                          tickFormatter={(v) => {
+                            const point = chartData.find(d => d.date === v);
+                            return point ? point.shortDate : v;
+                          }}
+                          minTickGap={15}
+                          axisLine={{ stroke: Colors.border }}
+                          tickLine={false}
+                        />
+
+                        <YAxis
+                          tick={{
+                            fill: Colors.muted,
+                            fontSize: 11,
+                            fontFamily: "inherit",
+                          }}
+                          axisLine={false}
+                          tickLine={false}
+                          tickFormatter={(v) => `${v}`}
+                          width={45}
+                        />
+                        <Tooltip
+                          content={<CustomTooltip />}
+                          cursor={{ stroke: Colors.borderHov, strokeWidth: 1 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="value"
+                          stroke={Colors.accent}
+                          strokeWidth={2}
+                          dot={<CustomDot />}
+                          activeDot={{
+                            r: 8,
+                            fill: Colors.accent,
+                            stroke: Colors.bg,
+                            strokeWidth: 2,
+                          }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
 
@@ -633,8 +688,7 @@ export function ProgressTab({
                       {" "}
                       <span className="stagnationStat">
                         ⟳ {stats.stagnations} stagnation point
-                        {stats.stagnations !== 1 ? "s" : ""} detected — consider
-                        varying intensity, rep range, or rest periods.
+                        {stats.stagnations !== 1 ? "s" : ""} detected.
                       </span>
                     </>
                   )}

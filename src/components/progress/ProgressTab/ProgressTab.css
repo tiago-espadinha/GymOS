@@ -64,6 +64,20 @@
   min-width: 200px;
 }
 
+.timeRangeFilter {
+  display: flex;
+}
+
+.timeRangeFilter > .label {
+  margin: auto;
+  flex: 0.2;
+}
+
+.timeRangeFilter > .progressMetric,
+.timeRangeFilter > .progressMetric > .metricButton {
+  flex: 1;
+}
+
 @media (max-width: 600px) {
   .progressHeader {
     flex-direction: column;
@@ -76,10 +90,43 @@
   }
 
   .planFilter,
-  .exerciseFilter {
+  .exerciseFilter,
+  .metricFilter,
+  .timeRangeFilter {
     flex: none;
     width: 100%;
     min-width: 0;
+    display: flex;
+  }
+
+  .planFilter > .label,
+  .exerciseFilter > .label,
+  .metricFilter > .label {
+    margin: auto;
+    flex: 0.5;
+  }
+
+  .timeRangeFilter > .label {
+    display: none;
+  }
+
+  .planFilter > select {
+    margin-left: 12px;
+    flex: 1;
+  }
+
+  .exerciseFilter > .searchableSelect {
+    flex: 1;
+  }
+
+  .metricFilter > .progressMetric,
+  .timeRangeFilter > .progressMetric,
+  .progressMetric > .metricButton {
+    flex: 1;
+  }
+
+  .legend {
+    gap: 6px !important;
   }
 }
 
@@ -142,7 +189,7 @@
     grid-template-columns: repeat(2, 1fr);
   }
   .statCard {
-    padding: 12px;
+    padding: 12px !important;
   }
 }
 
@@ -176,6 +223,31 @@
   padding: 24px;
 }
 
+.chartWrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+}
+
+.chartWrapper::-webkit-scrollbar {
+  height: 4px;
+}
+
+.chartWrapper::-webkit-scrollbar-track {
+  background: var(--card2);
+  border-radius: 4px;
+}
+
+.chartWrapper::-webkit-scrollbar-thumb {
+  background: var(--border-hov);
+  border-radius: 4px;
+}
+
+.chartWrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
 .legend {
   display: flex;
   gap: 18px;
@@ -200,6 +272,13 @@
 
 .chartArea {
   height: 280px;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .chartArea {
+    /* No fixed min-width here, we will control it or let it be flexible */
+  }
 }
 
 .analysisSummary {

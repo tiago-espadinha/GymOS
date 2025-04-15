@@ -25,15 +25,18 @@ export default function GymTracker() {
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [logPlan, setLogPlan] = useState<TrainingPlan | null>(null);
+  const [selectedExName, setSelectedExName] = useState<string>("");
 
   useEffect(() => {
     (async () => {
       const p = await getFromStorage("gym:plans");
       const s = await getFromStorage("gym:sessions");
       const t = await getFromStorage("gym:tab");
+      const ex = await getFromStorage("gym:selectedExName");
       setPlans(p || []);
       setSessions(s || []);
       if (t) setTab(t);
+      if (ex) setSelectedExName(ex);
       setLoaded(true);
     })();
   }, []);
@@ -55,6 +58,12 @@ export default function GymTracker() {
       saveToStorage("gym:tab", tab);
     }
   }, [tab, loaded]);
+
+  useEffect(() => {
+    if (loaded) {
+      saveToStorage("gym:selectedExName", selectedExName);
+    }
+  }, [selectedExName, loaded]);
 
   const handleLogPlan = (plan: TrainingPlan) => {
     setLogPlan(plan);
@@ -131,6 +140,8 @@ export default function GymTracker() {
             sessions={sessions}
             setPlans={setPlans}
             setSessions={setSessions}
+            selectedExName={selectedExName}
+            setSelectedExName={setSelectedExName}
           />
         )}
       </div>

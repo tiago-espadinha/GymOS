@@ -10,7 +10,13 @@ export const formatDate = (d: string): string => {
   });
 };
 
+export const formatDateShort = (d: string): string => {
+  const date = new Date(d + 'T12:00:00');
+  return `${date.getMonth() + 1}/${date.getDate()}`;
+};
+
 export default {
   today,
   formatDate,
+  formatDateShort,
 };
