@@ -79,6 +79,7 @@ describe("active session", () => {
     ["missing fields", JSON.stringify({ planId: "p1" })],
     ["bad exercises", JSON.stringify({ planId: "p", planName: "n", date: "d", notes: "", exercises: [{ id: 1 }] })],
     ["bad sets", JSON.stringify({ planId: "p", planName: "n", date: "d", notes: "", exercises: [{ id: "e", name: "n", sets: [null] }] })],
+    ["a set without weight and reps", JSON.stringify({ planId: "p", planName: "n", date: "d", notes: "", exercises: [{ id: "e", name: "n", sets: [{ id: "s" }] }] })],
   ])("starts in browse mode when storage holds %s", (_label, raw) => {
     store.set(ACTIVE_SESSION_KEY, raw);
     expect(loadActiveSession()).toBeNull();

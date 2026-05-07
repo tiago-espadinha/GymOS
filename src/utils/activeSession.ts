@@ -77,7 +77,13 @@ export function parseActiveSession(raw: unknown): ActiveSession | null {
       typeof ex.id === "string" &&
       typeof ex.name === "string" &&
       Array.isArray(ex.sets) &&
-      ex.sets.every((s) => isObject(s) && typeof s.id === "string"),
+      ex.sets.every(
+        (s) =>
+          isObject(s) &&
+          typeof s.id === "string" &&
+          typeof s.weight === "string" &&
+          typeof s.reps === "string",
+      ),
   );
   if (!valid) return null;
   return { planId, planName, date, notes, exercises, editingId } as ActiveSession;
