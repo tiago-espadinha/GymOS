@@ -1,5 +1,6 @@
 import { NumericInput } from "../../shared";
-import { Set } from "../../../types";
+import { RestTimerChip } from "../../timers";
+import { Set, ExerciseCategory } from "../../../types";
 import "./SetRow.css";
 
 interface SetRowProps {
@@ -7,21 +8,27 @@ interface SetRowProps {
   index: number;
   onChange: (set: Set) => void;
   onRemove: () => void;
+  category: ExerciseCategory;
+  trackWeight?: boolean; // false for bodyweight-only calisthenics
 }
 
-export function SetRow({ set, index, onChange, onRemove }: SetRowProps) {
+export function SetRow({ set, index, onChange, onRemove, category, trackWeight = true }: SetRowProps) {
   return (
     <div className="setRow">
       <span className="setRowIndex">{index + 1}</span>
-      <NumericInput
-        value={set.weight}
-        onChange={(v) => onChange({ ...set, weight: v })}
-        placeholder="0"
-        step={2.5}
-        style={{ width: "116px" }}
-      />
-      <span className="setRowUnit">kg</span>
-      <span className="setRowMultiplier">×</span>
+      {trackWeight && (
+        <>
+          <NumericInput
+            value={set.weight}
+            onChange={(v) => onChange({ ...set, weight: v })}
+            placeholder="0"
+            step={2.5}
+            style={{ width: "116px" }}
+          />
+          <span className="setRowUnit">kg</span>
+          <span className="setRowMultiplier">×</span>
+        </>
+      )}
       <NumericInput
         value={set.reps}
         onChange={(v) => onChange({ ...set, reps: v })}
@@ -30,6 +37,8 @@ export function SetRow({ set, index, onChange, onRemove }: SetRowProps) {
         style={{ width: "96px" }}
       />
       <span className="setRowReps">reps</span>
+      <div className="setRowSpacer" />
+      <RestTimerChip baseId={set.id} category={category} />
       <button onClick={onRemove} className="setRowRemove">
         ×
       </button>

@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button, Input, Label, Select, Divider } from "../../shared";
 import { generateId } from "../../../utils/id";
 import { today, formatDate } from "../../../utils/date";
-import { TrainingPlan, WorkoutSession, ExerciseLog } from "../../../types";
+import { TrainingPlan, WorkoutSession, ExerciseLog, Set } from "../../../types";
+import { computeMetric, getExerciseMeta } from "../../../utils/metrics";
 import ExerciseLogger from "../ExerciseLogger";
 import Colors from "../../../constants/colors";
 import "./LogTab.css";
@@ -28,22 +29,26 @@ export function LogTab({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingPlanName, setEditingPlanName] = useState("");
 
+  const emptySet = (): Set => ({ id: generateId(), weight: "", reps: "" });
+
   const loadPlan = (plan: TrainingPlan) => {
     setExercises(
       plan.exercises.map((ex) => ({
         ...ex,
-        sets: [{ id: generateId(), weight: "", reps: "" }],
+        sets: [emptySet()],
       })),
     );
     setSaved(false);
   };
 
-  useEffect(() => {
-    if (initialPlan) {
-      setPlanId(initialPlan.id);
-      loadPlan(initialPlan);
-    }
-  }, [initialPlan?.id]);
+  // Load a plan handed in from the Plans tab once per plan id (state adjusted
+  // during render rather than in an effect, to avoid a cascading re-render).
+  const [loadedInitialPlanId, setLoadedInitialPlanId] = useState<string | null>(null);
+  if (initialPlan && initialPlan.id !== loadedInitialPlanId) {
+    setLoadedInitialPlanId(initialPlan.id);
+    setPlanId(initialPlan.id);
+    loadPlan(initialPlan);
+  }
 
   const handlePlanChange = (id: string) => {
     setPlanId(id);
@@ -66,9 +71,8 @@ export function LogTab({
       session.exercises.map((ex) => ({
         ...ex,
         sets: ex.sets.map((s) => ({
+          ...s,
           id: s.id || generateId(),
-          weight: s.weight,
-          reps: s.reps,
         })),
       })),
     );
@@ -93,7 +97,11 @@ export function LogTab({
       .map((ex) => ({
         ...ex,
         sets: ex.sets.filter(
-          (s) => parseFloat(s.weight) > 0 || parseInt(s.reps) > 0,
+          (s) =>
+            parseFloat(s.weight) > 0 ||
+            parseInt(s.reps) > 0 ||
+            Number(s.duration) > 0 ||
+            parseFloat(s.distance || "") > 0,
         ),
       }))
       .filter((ex) => ex.sets.length > 0);
@@ -123,7 +131,7 @@ export function LogTab({
       setExercises(
         exercises.map((ex) => ({
           ...ex,
-          sets: [{ id: generateId(), weight: "", reps: "" }],
+          sets: [emptySet()],
         })),
       );
       setNotes("");
@@ -297,15 +305,12 @@ export function LogTab({
                   </div>
                   <div className="logTabRecentExercises">
                     {s.exercises.map((ex) => {
-                      const maxW = Math.max(
-                        0,
-                        ...ex.sets.map((st) => parseFloat(st.weight) || 0),
-                      );
+                      const avg = computeMetric(ex.sets, getExerciseMeta(ex), "average");
                       return (
                         <div key={ex.id} className="logTabRecentExercise">
                           {ex.name}:{" "}
                           <span className="logTabRecentExerciseWeight">
-                            {maxW}kg
+                            {avg ? avg.label : "—"}
                           </span>
                           <span className="logTabRecentExerciseSets">
                             {" "}

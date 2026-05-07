@@ -1,9 +1,12 @@
 import { Button, Badge } from "../../shared";
 import Colors from "../../../constants/colors";
 import { MUSCLE_GROUP_COLORS } from "../../../constants/muscleGroups";
+import { CATEGORY_ICONS, CATEGORY_COLORS } from "../../../constants/exerciseTypes";
 import { generateId } from "../../../utils/id";
-import { ExerciseLog } from "../../../types";
+import { ExerciseLog, Set } from "../../../types";
+import { getExerciseMeta, computeMetric } from "../../../utils/metrics";
 import SetRow from "../SetRow";
+import TimedSetRow from "../TimedSetRow";
 import "./ExerciseLogger.css";
 
 interface ExerciseLoggerProps {
@@ -12,18 +15,22 @@ interface ExerciseLoggerProps {
 }
 
 export function ExerciseLogger({ exercise, onChange }: ExerciseLoggerProps) {
+  const meta = getExerciseMeta(exercise);
+  const { category, trackingType, trackDistance } = meta;
+
   const addSet = () => {
     const last = exercise.sets[exercise.sets.length - 1];
-    const seed = last
-      ? { weight: last.weight, reps: last.reps }
-      : { weight: "", reps: "" };
+    const seed: Partial<Set> =
+      trackingType === "time"
+        ? { duration: last?.duration, distance: "" }
+        : { weight: last?.weight || "", reps: last?.reps || "" };
     onChange({
       ...exercise,
-      sets: [...exercise.sets, { id: generateId(), ...seed }],
+      sets: [...exercise.sets, { id: generateId(), weight: "", reps: "", ...seed }],
     });
   };
 
-  const updateSet = (id: string, s: any) => {
+  const updateSet = (id: string, s: Set) => {
     onChange({
       ...exercise,
       sets: exercise.sets.map((set) => (set.id === id ? s : set)),
@@ -37,46 +44,56 @@ export function ExerciseLogger({ exercise, onChange }: ExerciseLoggerProps) {
     });
   };
 
-  const volume = exercise.sets.reduce(
-    (sum, s) => sum + (parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0),
-    0,
-  );
-  const maxW = Math.max(
-    0,
-    ...exercise.sets.map((s) => parseFloat(s.weight) || 0),
-  );
+  const average = computeMetric(exercise.sets, meta, "average");
+  const peak = computeMetric(exercise.sets, meta, "peak");
 
   return (
     <div className="exerciseLogger">
       <div className="exerciseLoggerHeader">
         <div>
-          <div className="exerciseLoggerTitle">{exercise.name}</div>
-          {volume > 0 && (
+          <div className="exerciseLoggerTitle">
+            <span className="exerciseLoggerCategoryIcon" style={{ color: CATEGORY_COLORS[category] }}>
+              {CATEGORY_ICONS[category]}
+            </span>
+            {exercise.name}
+          </div>
+          {(average || peak) && (
             <div className="exerciseLoggerStats">
-              <span className="exerciseLoggerMax">Max: {maxW} kg</span>
-              <span className="exerciseLoggerVolume">
-                Vol: {volume.toFixed(0)} kg
-              </span>
+              {average && <span className="exerciseLoggerAvg">Avg: {average.label}</span>}
+              {peak && <span className="exerciseLoggerMax">Peak: {peak.label}</span>}
             </div>
           )}
         </div>
-        <Badge
-          color={MUSCLE_GROUP_COLORS[exercise.muscleGroup] || Colors.muted}
-        >
+        <Badge color={MUSCLE_GROUP_COLORS[exercise.muscleGroup] || Colors.muted}>
           {exercise.muscleGroup}
         </Badge>
       </div>
 
       <div className="exerciseLoggerSets">
-        {exercise.sets.map((set, i) => (
-          <SetRow
-            key={set.id}
-            set={set}
-            index={i}
-            onChange={(newSet) => updateSet(set.id, { ...newSet, id: set.id })}
-            onRemove={() => removeSet(set.id)}
-          />
-        ))}
+        {exercise.sets.map((set, i) =>
+          trackingType === "time" ? (
+            <TimedSetRow
+              key={set.id}
+              set={set}
+              index={i}
+              onChange={(newSet) => updateSet(set.id, { ...newSet, id: set.id })}
+              onRemove={() => removeSet(set.id)}
+              category={category}
+              trackDistance={trackDistance}
+              distanceUnit={exercise.distanceUnit}
+            />
+          ) : (
+            <SetRow
+              key={set.id}
+              set={set}
+              index={i}
+              onChange={(newSet) => updateSet(set.id, { ...newSet, id: set.id })}
+              onRemove={() => removeSet(set.id)}
+              category={category}
+              trackWeight={meta.trackWeight}
+            />
+          ),
+        )}
       </div>
       <Button onClick={addSet} variant="ghost" small>
         + Set

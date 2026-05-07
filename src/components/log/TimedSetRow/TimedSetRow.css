@@ -1,0 +1,77 @@
+.timedSetRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.timedSetRowIndex {
+  min-width: 22px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dim);
+  padding-top: 8px;
+  flex-shrink: 0;
+}
+
+.timedSetRowMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.timedSetRowMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.timedSetRowRestToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.timedSetRowRestToggle input {
+  accent-color: var(--accent);
+}
+
+.timedSetRowLogged {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.timedSetRowDistance {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.timedSetRowDistanceUnit {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.timedSetRowRemove {
+  background: none;
+  border: none;
+  color: var(--dim);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+.timedSetRowRemove:hover {
+  color: var(--text);
+}

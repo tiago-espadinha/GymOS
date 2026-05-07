@@ -17,6 +17,13 @@
   font-weight: 800;
   color: var(--text);
   margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.exerciseLoggerCategoryIcon {
+  font-size: 11px;
 }
 
 .exerciseLoggerStats {
@@ -25,11 +32,12 @@
   font-size: 11px;
 }
 
-.exerciseLoggerMax {
+.exerciseLoggerAvg {
   color: var(--accent);
+  font-weight: 700;
 }
 
-.exerciseLoggerVolume {
+.exerciseLoggerMax {
   color: var(--muted);
 }
 
