@@ -35,6 +35,11 @@
   color: var(--color-accent);
 }
 
+.primary-button--lime {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
 .primary-button--dark:focus-visible {
   outline-color: var(--color-on-accent);
 }
