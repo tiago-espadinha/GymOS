@@ -21,7 +21,9 @@ export function Field({ label, error, ...rest }: FieldProps) {
         id={id}
         className="field__input"
         aria-invalid={error ? true : undefined}
-        aria-describedby={error ? errorId : undefined}
+        aria-describedby={
+          [rest['aria-describedby'], error && errorId].filter(Boolean).join(' ') || undefined
+        }
       />
       {error && (
         <p id={errorId} className="field__error">

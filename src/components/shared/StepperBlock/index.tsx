@@ -29,7 +29,7 @@ export function StepperBlock({
       >
         −
       </button>
-      <div className="stepper-block__reading">
+      <div className="stepper-block__reading" aria-live="polite">
         <span className="stepper-block__value">{value}</span>
         <span className="stepper-block__unit">{unit}</span>
       </div>

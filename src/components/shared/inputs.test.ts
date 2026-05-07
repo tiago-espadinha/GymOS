@@ -1,19 +1,15 @@
 import { createElement } from 'react'
+import type { ReactElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { Field } from './Field'
 import { StepperBlock } from './StepperBlock'
 import { stepValue } from './StepperBlock/stepValue'
-
-const css = import.meta.glob<string>('./{Field,StepperBlock}/*.css', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-})
-const cssOf = (name: string) =>
-  Object.entries(css).find(([path]) => path.includes(`/${name}/`))?.[1] ?? ''
+import { cssOf } from './testCss'
 
 const noop = () => {}
+
+type Clickable = ReactElement<{ onClick: () => void }>
 
 describe('stepValue', () => {
   it('adds and subtracts the step', () => {
@@ -53,6 +49,19 @@ describe('StepperBlock', () => {
     expect(render(5)).not.toContain('disabled')
   })
 
+  it('steps the value down and up by the step', () => {
+    const onChange = vi.fn()
+    const block = StepperBlock({ label: 'Weight', value: 60, unit: 'kg', step: 2.5, onChange })
+    const [minus, , plus] = block.props.children as Clickable[]
+    minus.props.onClick()
+    plus.props.onClick()
+    expect(onChange.mock.calls).toEqual([[57.5], [62.5]])
+  })
+
+  it('announces a changed value politely', () => {
+    expect(render(40)).toContain('aria-live="polite"')
+  })
+
   it('gives the buttons a 44 by 88 hit area and a 96px block', () => {
     const stepper = cssOf('StepperBlock')
     expect(stepper).toContain('min-width: var(--size-control)')
@@ -80,6 +89,18 @@ describe('Field', () => {
     expect(bad).toContain('>Required<')
     const describedBy = /aria-describedby="([^"]+)"/.exec(bad)?.[1]
     expect(bad).toContain(`id="${describedBy}"`)
+  })
+
+  it('keeps a caller description alongside the error', () => {
+    const hint = renderToStaticMarkup(
+      createElement(Field, { label: 'Name', 'aria-describedby': 'hint' }),
+    )
+    expect(hint).toContain('aria-describedby="hint"')
+
+    const both = renderToStaticMarkup(
+      createElement(Field, { label: 'Name', 'aria-describedby': 'hint', error: 'Required' }),
+    )
+    expect(both).toMatch(/aria-describedby="hint [^"]+"/)
   })
 
   it('passes disabled through to the input', () => {
