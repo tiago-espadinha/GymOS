@@ -29,10 +29,10 @@ export default function GymTracker() {
 
   useEffect(() => {
     (async () => {
-      const p = await getFromStorage("gym:plans");
-      const s = await getFromStorage("gym:sessions");
-      const t = await getFromStorage("gym:tab");
-      const ex = await getFromStorage("gym:selectedExName");
+      const p = await getFromStorage<TrainingPlan[]>("gym:plans");
+      const s = await getFromStorage<WorkoutSession[]>("gym:sessions");
+      const t = await getFromStorage<string>("gym:tab");
+      const ex = await getFromStorage<string>("gym:selectedExName");
       setPlans(p || []);
       setSessions(s || []);
       if (t) setTab(t);
