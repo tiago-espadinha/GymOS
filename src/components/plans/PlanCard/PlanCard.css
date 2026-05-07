@@ -7,7 +7,7 @@
 }
 
 .planCard:hover {
-  border-color: var(--borderHov);
+  border-color: var(--color-line-strong);
 }
 
 .planCardHeader {

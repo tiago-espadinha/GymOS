@@ -152,7 +152,7 @@
 
 .metricButton.active {
   border: 1px solid var(--color-accent);
-  background: var(--accentBg);
+  background: var(--color-surface);
   color: var(--color-accent);
 }
 

@@ -263,7 +263,7 @@ export function LogTab({
                   key={s.id}
                   className="logTabRecentItem"
                   style={{
-                    background: isEditing ? "var(--color-surface)" : "var(--color-surface)",
+                    background: "var(--color-surface)",
                     border: `1px solid ${isEditing ? "var(--color-accent)" : "var(--color-line)"}`,
                   }}
                 >

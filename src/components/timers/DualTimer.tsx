@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useTimer, formatClock } from "../../hooks/useTimer";
 import { PhaseTimer } from "./PhaseTimer";
 import { ExerciseCategory } from "../../types";
-import { CATEGORY_COLORS } from "../../constants/exerciseTypes";
 import "./timers.css";
 
 interface DualTimerProps {
@@ -31,7 +30,7 @@ export function DualTimer({
 }: DualTimerProps) {
   const workControls = useTimer(`${baseId}-work`, initialWorkTargetSec);
   const restControls = useTimer(`${baseId}-rest`, initialRestTargetSec);
-  const workColor = CATEGORY_COLORS[category];
+  const workColor = "var(--color-fill-work)";
 
   const [activePhase, setActivePhase] = useState<"idle" | "work" | "rest">("idle");
   const [workDoneSec, setWorkDoneSec] = useState<number | null>(null);

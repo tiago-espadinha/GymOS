@@ -80,7 +80,7 @@ export default function GymTracker() {
           justifyContent: "center",
           color: "var(--color-accent)",
           fontSize: "12px",
-          fontFamily: "monospace",
+          fontFamily: "var(--font-body)",
           letterSpacing: "0.2em",
           textTransform: "uppercase",
         }}

@@ -76,7 +76,7 @@ const CustomDot = ({ cx, cy, payload }: DotProps) => {
       ? "var(--color-accent)"
       : payload.status === "stagnation"
         ? "var(--color-text)"
-        : "var(--color-accent)";
+        : "var(--color-text-muted)";
   const r =
     payload.status === "improvement" || payload.status === "stagnation"
       ? 7
@@ -599,7 +599,7 @@ export function ProgressTab({
                   {[
                     { color: "var(--color-accent)", label: "Improvement (new PR)" },
                     { color: "var(--color-text)", label: "Stagnation (3+ sessions)" },
-                    { color: "var(--color-accent)", label: "Neutral / Baseline" },
+                    { color: "var(--color-text-muted)", label: "Neutral / Baseline" },
                   ].map(({ color, label }) => (
                     <div key={label} className="legendItem">
                       <div
