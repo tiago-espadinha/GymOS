@@ -1,7 +1,10 @@
-import { TrainingPlan, WorkoutSession } from "../types";
+import { TrainingPlan, WorkoutSession, ExerciseCategory, TrackingType } from "../types";
 import { generateId } from "./id";
 
-const CSV_HEADER = "type,date,name,desc_notes,exercise,muscle,weight,reps";
+const CSV_HEADER =
+  "type,date,name,desc_notes,exercise,muscle,category,tracking,weight,reps,duration,distance";
+// Older exports only had the first 8 columns (no category/tracking/duration/distance).
+const LEGACY_CSV_HEADER = "type,date,name,desc_notes,exercise,muscle,weight,reps";
 
 export function exportToCSV(
   plans: TrainingPlan[],
@@ -19,6 +22,10 @@ export function exportToCSV(
         escapeCSV(plan.desc),
         escapeCSV(ex.name),
         escapeCSV(ex.muscleGroup),
+        ex.category || "strength",
+        ex.trackingType || "reps",
+        "",
+        "",
         "",
         "",
       ];
@@ -37,8 +44,12 @@ export function exportToCSV(
           escapeCSV(session.notes),
           escapeCSV(ex.name),
           escapeCSV(ex.muscleGroup),
+          ex.category || "strength",
+          ex.trackingType || "reps",
           set.weight,
           set.reps,
+          set.duration || "",
+          set.distance || "",
         ];
         rows.push(row.join(","));
       });
@@ -64,7 +75,9 @@ export function importFromCSV(csv: string): {
   if (lines.length === 0) return { plans: [], sessions: [] };
 
   const header = lines[0].trim();
-  if (header !== CSV_HEADER) {
+  const isCurrent = header === CSV_HEADER;
+  const isLegacy = header === LEGACY_CSV_HEADER;
+  if (!isCurrent && !isLegacy) {
     throw new Error("Invalid CSV format: Header mismatch.");
   }
 
@@ -77,9 +90,16 @@ export function importFromCSV(csv: string): {
     if (!line) continue;
 
     const parts = parseCSVLine(line);
-    if (parts.length < 8) continue;
+    const minCols = isCurrent ? 12 : 8;
+    if (parts.length < minCols) continue;
 
-    const [type, _date, name, desc_notes, exercise, muscle] = parts;
+    const type = parts[0];
+    const name = parts[2];
+    const desc_notes = parts[3];
+    const exercise = parts[4];
+    const muscle = parts[5];
+    const category = (isCurrent ? parts[6] : "strength") as ExerciseCategory;
+    const trackingType = (isCurrent ? parts[7] : "reps") as TrackingType;
 
     if (type === "plan") {
       if (!plansMap.has(name)) {
@@ -96,6 +116,8 @@ export function importFromCSV(csv: string): {
           id: generateId(),
           name: exercise,
           muscleGroup: muscle,
+          category,
+          trackingType,
         });
       }
     } else if (type === "session") {
@@ -107,7 +129,18 @@ export function importFromCSV(csv: string): {
 
   // Second pass: Process sessions using plan info
   for (const parts of sessionRows) {
-    const [_, date, name, desc_notes, exercise, muscle, weight, reps] = parts;
+    const date = parts[1];
+    const name = parts[2];
+    const desc_notes = parts[3];
+    const exercise = parts[4];
+    const muscle = parts[5];
+    const category = (isCurrent ? parts[6] : "strength") as ExerciseCategory;
+    const trackingType = (isCurrent ? parts[7] : "reps") as TrackingType;
+    const weight = isCurrent ? parts[8] : parts[6];
+    const reps = isCurrent ? parts[9] : parts[7];
+    const duration = isCurrent ? parts[10] : "";
+    const distance = isCurrent ? parts[11] : "";
+
     const sessionKey = `${date}_${name}_${desc_notes}`;
 
     const plan = plansMap.get(name);
@@ -131,6 +164,8 @@ export function importFromCSV(csv: string): {
         id: planEx?.id || generateId(),
         name: exercise,
         muscleGroup: muscle,
+        category: planEx?.category || category,
+        trackingType: planEx?.trackingType || trackingType,
         sets: [],
       };
       session.exercises.push(exLog);
@@ -141,6 +176,16 @@ export function importFromCSV(csv: string): {
         id: generateId(),
         weight,
         reps,
+        duration: duration || undefined,
+        distance: distance || undefined,
+      });
+    } else if (duration || distance) {
+      exLog.sets.push({
+        id: generateId(),
+        weight: "",
+        reps: "",
+        duration: duration || undefined,
+        distance: distance || undefined,
       });
     }
   }
