@@ -1,5 +1,4 @@
 import { CSSProperties, JSX } from "react";
-import Colors from "../../../constants/colors";
 import "./Badge.css";
 
 interface BadgeProps {
@@ -8,14 +7,13 @@ interface BadgeProps {
 }
 
 export function Badge({ children, color }: BadgeProps): JSX.Element {
-  const col = color || Colors.muted;
+  const col = color || "var(--color-text-muted)";
   return (
     <span
       className="badge"
       style={
         {
-          border: `1px solid ${col}40`,
-          background: col + "18",
+          border: "1px solid var(--color-line-strong)",
           color: col,
         } as CSSProperties
       }

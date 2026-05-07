@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useTimer, formatClock } from "../../hooks/useTimer";
 import { PhaseTimer } from "./PhaseTimer";
 import { ExerciseCategory } from "../../types";
-import { CATEGORY_COLORS } from "../../constants/exerciseTypes";
 import "./timers.css";
 
 interface DualTimerProps {
@@ -17,7 +16,7 @@ interface DualTimerProps {
   onCommit: (workSeconds: number, restSeconds: number | null) => void;
 }
 
-const REST_COLOR = "#fbbf24"; // warm amber reads clearly as "recovery" against any work color
+const REST_COLOR = "var(--color-fill-rest)";
 
 export function DualTimer({
   baseId,
@@ -31,7 +30,7 @@ export function DualTimer({
 }: DualTimerProps) {
   const workControls = useTimer(`${baseId}-work`, initialWorkTargetSec);
   const restControls = useTimer(`${baseId}-rest`, initialRestTargetSec);
-  const workColor = CATEGORY_COLORS[category];
+  const workColor = "var(--color-fill-work)";
 
   const [activePhase, setActivePhase] = useState<"idle" | "work" | "rest">("idle");
   const [workDoneSec, setWorkDoneSec] = useState<number | null>(null);

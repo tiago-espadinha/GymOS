@@ -9,7 +9,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Label, Select, Button, Search } from "../../shared";
-import Colors from "../../../constants/colors";
 import { formatDate, formatDateShort } from "../../../utils/date";
 import { TrainingPlan, WorkoutSession, Exercise } from "../../../types";
 import { exportToCSV, importFromCSV } from "../../../utils/csv";
@@ -74,10 +73,10 @@ const CustomDot = ({ cx, cy, payload }: DotProps) => {
   if (!payload) return null;
   const col =
     payload.status === "improvement"
-      ? Colors.success
+      ? "var(--color-accent)"
       : payload.status === "stagnation"
-        ? Colors.warn
-        : Colors.accent;
+        ? "var(--color-text)"
+        : "var(--color-text-muted)";
   const r =
     payload.status === "improvement" || payload.status === "stagnation"
       ? 7
@@ -88,7 +87,7 @@ const CustomDot = ({ cx, cy, payload }: DotProps) => {
       cy={cy}
       r={r}
       fill={col}
-      stroke={Colors.card}
+      stroke={"var(--color-surface)"}
       strokeWidth={2}
     />
   );
@@ -98,10 +97,10 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   const statusMap: Record<string, { color: string; label: string }> = {
-    improvement: { color: Colors.success, label: "↑ New PR" },
-    stagnation: { color: Colors.warn, label: "⟳ Stagnation" },
-    baseline: { color: Colors.muted, label: "◎ Baseline" },
-    neutral: { color: Colors.muted, label: "→ Maintained" },
+    improvement: { color: "var(--color-accent)", label: "↑ New PR" },
+    stagnation: { color: "var(--color-text)", label: "⟳ Stagnation" },
+    baseline: { color: "var(--color-text-muted)", label: "◎ Baseline" },
+    neutral: { color: "var(--color-text-muted)", label: "→ Maintained" },
   };
   const st = statusMap[d.status];
   return (
@@ -567,22 +566,22 @@ export function ProgressTab({
                     {
                       label: "Personal Record",
                       value: stats.maxLabel,
-                      color: Colors.accent,
+                      color: "var(--color-accent)",
                     },
                     {
                       label: "Last Session",
                       value: stats.lastLabel,
-                      color: Colors.text,
+                      color: "var(--color-text)",
                     },
                     {
                       label: "Improvements",
                       value: stats.improvements,
-                      color: Colors.success,
+                      color: "var(--color-accent)",
                     },
                     {
                       label: "Stagnations",
                       value: stats.stagnations,
-                      color: stats.stagnations > 0 ? Colors.warn : Colors.dim,
+                      color: stats.stagnations > 0 ? "var(--color-text)" : "var(--color-text-muted)",
                     },
                   ].map(({ label, value, color }) => (
                     <div key={label} className="statCard">
@@ -598,9 +597,9 @@ export function ProgressTab({
               <div className="chartContainer">
                 <div className="legend">
                   {[
-                    { color: Colors.success, label: "Improvement (new PR)" },
-                    { color: Colors.warn, label: "Stagnation (3+ sessions)" },
-                    { color: Colors.accent, label: "Neutral / Baseline" },
+                    { color: "var(--color-accent)", label: "Improvement (new PR)" },
+                    { color: "var(--color-text)", label: "Stagnation (3+ sessions)" },
+                    { color: "var(--color-text-muted)", label: "Neutral / Baseline" },
                   ].map(({ color, label }) => (
                     <div key={label} className="legendItem">
                       <div
@@ -624,13 +623,13 @@ export function ProgressTab({
                       >
                         <CartesianGrid
                           strokeDasharray="3 3"
-                          stroke={Colors.border}
+                          stroke={"var(--color-line)"}
                           vertical={false}
                         />
                         <XAxis
                           dataKey="date"
                           tick={{
-                            fill: Colors.muted,
+                            fill: "var(--color-text-muted)",
                             fontSize: 10,
                             fontFamily: "inherit",
                           }}
@@ -639,13 +638,13 @@ export function ProgressTab({
                             return point ? point.shortDate : v;
                           }}
                           minTickGap={15}
-                          axisLine={{ stroke: Colors.border }}
+                          axisLine={{ stroke: "var(--color-line)" }}
                           tickLine={false}
                         />
 
                         <YAxis
                           tick={{
-                            fill: Colors.muted,
+                            fill: "var(--color-text-muted)",
                             fontSize: 11,
                             fontFamily: "inherit",
                           }}
@@ -656,18 +655,18 @@ export function ProgressTab({
                         />
                         <Tooltip
                           content={<CustomTooltip />}
-                          cursor={{ stroke: Colors.borderHov, strokeWidth: 1 }}
+                          cursor={{ stroke: "var(--color-line-strong)", strokeWidth: 1 }}
                         />
                         <Line
                           type="monotone"
                           dataKey="value"
-                          stroke={Colors.accent}
+                          stroke={"var(--color-accent)"}
                           strokeWidth={2}
                           dot={<CustomDot />}
                           activeDot={{
                             r: 8,
-                            fill: Colors.accent,
-                            stroke: Colors.bg,
+                            fill: "var(--color-accent)",
+                            stroke: "var(--color-bg)",
                             strokeWidth: 2,
                           }}
                         />

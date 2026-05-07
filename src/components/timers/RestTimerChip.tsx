@@ -10,7 +10,7 @@ interface RestTimerChipProps {
   category: ExerciseCategory;
 }
 
-const REST_COLOR = "#fbbf24";
+const REST_COLOR = "var(--color-fill-rest)";
 
 export function RestTimerChip({ baseId, category }: RestTimerChipProps) {
   const [expanded, setExpanded] = useState(false);

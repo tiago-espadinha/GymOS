@@ -1,13 +1,13 @@
 .planCard {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
   border-radius: 10px;
   padding: 20px;
   transition: all 0.15s;
 }
 
 .planCard:hover {
-  border-color: var(--borderHov);
+  border-color: var(--color-line-strong);
 }
 
 .planCardHeader {
@@ -21,14 +21,14 @@
 .planCardName {
   font-size: 15px;
   font-weight: 800;
-  color: var(--text);
+  color: var(--color-text);
   margin-bottom: 4px;
   letter-spacing: -0.01em;
 }
 
 .planCardDesc {
   font-size: 12px;
-  color: var(--muted);
+  color: var(--color-text-muted);
 }
 
 .planCardActions {
@@ -42,7 +42,7 @@
 .planCardDelete {
   background: none;
   border: none;
-  color: var(--dim);
+  color: var(--color-text-muted);
   cursor: pointer;
   font-size: 18px;
   line-height: 1;
@@ -55,8 +55,8 @@
 }
 
 .planCardDelete:hover {
-  color: var(--danger);
-  background: var(--danger-bg);
+  color: var(--color-danger);
+  background: var(--color-surface);
 }
 
 .planCardBadgeRow {
@@ -68,7 +68,7 @@
 
 .planCardFooter {
   font-size: 11px;
-  color: var(--dim);
+  color: var(--color-text-muted);
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;

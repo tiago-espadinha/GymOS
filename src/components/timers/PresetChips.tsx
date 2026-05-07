@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ExerciseCategory } from "../../types";
 import { DEFAULT_PRESETS, TimerPhase, formatPresetLabel } from "../../constants/timerPresets";
 import { addCustomPreset, loadTimerPrefs, presetKey } from "../../utils/timerPrefs";
-import "./PresetChips.css";
 
 interface PresetChipsProps {
   category: ExerciseCategory;

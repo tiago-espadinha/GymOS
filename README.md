@@ -7,7 +7,7 @@ A minimalist gym tracker built with React and Vite, designed for speed and mobil
 - **Plan Management**: Create, edit, and archive custom training routines to keep your workspace organized.
 - **Efficient Logging**: Fast session logging optimized for the gym floor, supporting sets, reps, and RPE-equivalent tracking.
 - **Progress Analytics**: Detailed visualization of strength gains (1RM estimates) and volume trends using Recharts.
-- **Mobile PWA**: Fully responsive, installable web app with bottom-tab navigation designed for one-handed mobile use.
+- **Mobile web app**: Phone-first layout with tab navigation and a web manifest. Fonts are bundled with the app, so no request leaves the origin. There is no service worker yet, so a full offline reload is not supported.
 - **Data Portability**: Complete control over your data with CSV export and import capabilities.
 
 ## Learning Objectives

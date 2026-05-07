@@ -16,7 +16,7 @@ export function TimerRing({
   strokeWidth = 7,
   progress,
   color,
-  trackColor = "var(--border)",
+  trackColor = "var(--color-line)",
   overtime = false,
   children,
   style,

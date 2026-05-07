@@ -1,7 +1,5 @@
 /*
- * Blackout design tokens.
- * Not imported yet: wiring this in is a later step that also retires the
- * old tokens in src/index.css and src/constants/colors.ts.
+ * Blackout design tokens, imported in src/main.tsx.
  */
 :root {
   color-scheme: dark;

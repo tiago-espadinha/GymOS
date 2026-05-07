@@ -21,9 +21,9 @@ export const CATEGORY_ICONS: Record<ExerciseCategory, string> = {
 };
 
 export const CATEGORY_COLORS: Record<ExerciseCategory, string> = {
-  strength: "#3b82f6",
-  calisthenics: "#34d399",
-  cardio: "#f87171",
+  strength: "var(--color-text)",
+  calisthenics: "var(--color-accent)",
+  cardio: "var(--color-danger)",
 };
 
 // Sensible default tracking type per category - still overridable per exercise

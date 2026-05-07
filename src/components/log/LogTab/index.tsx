@@ -5,7 +5,6 @@ import { today, formatDate } from "../../../utils/date";
 import { TrainingPlan, WorkoutSession, ExerciseLog, Set } from "../../../types";
 import { computeMetric, getExerciseMeta } from "../../../utils/metrics";
 import ExerciseLogger from "../ExerciseLogger";
-import Colors from "../../../constants/colors";
 import "./LogTab.css";
 
 interface LogTabProps {
@@ -264,8 +263,8 @@ export function LogTab({
                   key={s.id}
                   className="logTabRecentItem"
                   style={{
-                    background: isEditing ? Colors.warnBg : Colors.card,
-                    border: `1px solid ${isEditing ? Colors.warn + "60" : Colors.border}`,
+                    background: "var(--color-surface)",
+                    border: `1px solid ${isEditing ? "var(--color-accent)" : "var(--color-line)"}`,
                   }}
                 >
                   <div className="logTabRecentHeader">

@@ -4,8 +4,8 @@
   "description": "Minimalist Gym Tracker",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#090b12",
-  "theme_color": "#090b12",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "weights.png",

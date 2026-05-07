@@ -1,4 +1,3 @@
-import "./App.css";
 import GymTracker from "./GymTracker";
 
 function App() {

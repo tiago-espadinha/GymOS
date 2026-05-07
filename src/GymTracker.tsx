@@ -4,7 +4,6 @@ import { LogTab } from "./components/log";
 import { ProgressTab } from "./components/progress";
 import { TrainingPlan, WorkoutSession } from "./types";
 import { getFromStorage, saveToStorage } from "./utils/storage";
-import Colors from "./constants/colors";
 import "./GymTracker.css";
 
 interface TabConfig {
@@ -75,13 +74,13 @@ export default function GymTracker() {
       <div
         style={{
           minHeight: "100vh",
-          background: Colors.bg,
+          background: "var(--color-bg)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: Colors.accent,
+          color: "var(--color-accent)",
           fontSize: "12px",
-          fontFamily: "monospace",
+          fontFamily: "var(--font-body)",
           letterSpacing: "0.2em",
           textTransform: "uppercase",
         }}

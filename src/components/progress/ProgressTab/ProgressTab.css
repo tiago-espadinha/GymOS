@@ -1,6 +1,6 @@
 .customTooltip {
-  background: var(--card2);
-  border: 1px solid var(--border);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
   border-radius: 8px;
   padding: 12px 16px;
   font-size: 12px;
@@ -8,13 +8,13 @@
 }
 
 .tooltipDate {
-  color: var(--muted);
+  color: var(--color-text-muted);
   margin-bottom: 6px;
   font-size: 11px;
 }
 
 .tooltipValue {
-  color: var(--text);
+  color: var(--color-text);
   font-weight: 800;
   font-size: 18px;
   margin-bottom: 4px;
@@ -22,14 +22,14 @@
 }
 
 .tooltipStatus {
-  color: var(--accent);
+  color: var(--color-accent);
   font-weight: 600;
   font-size: 11px;
 }
 .progressHeader {
   font-size: 22px;
   font-weight: 800;
-  color: var(--text);
+  color: var(--color-text);
   letter-spacing: -0.02em;
   margin-bottom: 28px;
   display: flex;
@@ -40,11 +40,11 @@
 .noExercises {
   text-align: center;
   padding: 80px;
-  color: var(--muted);
+  color: var(--color-text-muted);
   font-size: 13px;
-  background: var(--card);
+  background: var(--color-surface);
   border-radius: 12px;
-  border: 1px dashed var(--border);
+  border: 1px dashed var(--color-line);
 }
 
 .progressFilters {
@@ -141,9 +141,9 @@
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-line);
   background: transparent;
-  color: var(--muted);
+  color: var(--color-text-muted);
   border-radius: 6px;
   cursor: pointer;
   font-family: inherit;
@@ -151,23 +151,23 @@
 }
 
 .metricButton.active {
-  border: 1px solid var(--accent);
-  background: var(--accentBg);
-  color: var(--accent);
+  border: 1px solid var(--color-accent);
+  background: var(--color-surface);
+  color: var(--color-accent);
 }
 
 .noSessions {
   text-align: center;
   padding: 60px;
-  color: var(--muted);
+  color: var(--color-text-muted);
   font-size: 13px;
-  background: var(--card);
+  background: var(--color-surface);
   border-radius: 10px;
-  border: 1px dashed var(--border);
+  border: 1px dashed var(--color-line);
 }
 
 .exerciseName {
-  color: var(--text);
+  color: var(--color-text);
   font-weight: 700;
 }
 
@@ -194,8 +194,8 @@
 }
 
 .statCard {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
   border-radius: 8px;
   padding: 16px;
 }
@@ -203,7 +203,7 @@
 .statLabel {
   font-size: 10px;
   font-weight: 700;
-  color: var(--muted);
+  color: var(--color-text-muted);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   margin-bottom: 10px;
@@ -212,13 +212,13 @@
 .statValue {
   font-size: 24px;
   font-weight: 800;
-  color: var(--text);
+  color: var(--color-text);
   letter-spacing: -0.02em;
 }
 
 .chartContainer {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
   border-radius: 10px;
   padding: 24px;
 }
@@ -235,17 +235,17 @@
 }
 
 .chartWrapper::-webkit-scrollbar-track {
-  background: var(--card2);
+  background: var(--color-surface);
   border-radius: 4px;
 }
 
 .chartWrapper::-webkit-scrollbar-thumb {
-  background: var(--border-hov);
+  background: var(--color-line-strong);
   border-radius: 4px;
 }
 
 .chartWrapper::-webkit-scrollbar-thumb:hover {
-  background: var(--muted);
+  background: var(--color-text-muted);
 }
 
 .legend {
@@ -260,7 +260,7 @@
   align-items: center;
   gap: 7px;
   font-size: 11px;
-  color: var(--muted);
+  color: var(--color-text-muted);
 }
 
 .legendColor {
@@ -283,35 +283,35 @@
 
 .analysisSummary {
   margin-top: 14px;
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
   border-radius: 8px;
   padding: 16px;
   font-size: 12px;
   line-height: 1.7;
-  color: var(--muted);
+  color: var(--color-text-muted);
   display: flex;
   flex-direction: column;
 }
 
 .analysisLabel {
-  color: var(--text);
+  color: var(--color-text);
   font-weight: 700;
 }
 
 .improvementStat {
-  color: var(--success);
+  color: var(--color-accent);
 }
 .stagnationStat {
-  color: var(--warn);
+  color: var(--color-text);
 }
 
 .gainStat {
-  color: var(--success);
+  color: var(--color-accent);
 }
 
 .declineStat {
-  color: var(--danger);
+  color: var(--color-danger);
 }
 
 .modalOverlay {
@@ -320,8 +320,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
+  background: var(--color-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -329,13 +328,13 @@
 }
 
 .importModal {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
   border-radius: 12px;
   padding: 32px;
   width: 90%;
   max-width: 480px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-none);
 }
 
 @media (max-width: 480px) {
@@ -356,20 +355,20 @@
 
 .importModal h3 {
   margin: 0 0 16px 0;
-  color: var(--accent);
+  color: var(--color-accent);
   font-size: 18px;
   letter-spacing: -0.01em;
 }
 
 .importModal p {
-  color: var(--muted);
+  color: var(--color-text-muted);
   font-size: 13px;
   line-height: 1.6;
   margin-bottom: 12px;
 }
 
 .modalQuestion {
-  color: var(--text) !important;
+  color: var(--color-text) !important;
   font-weight: 600;
   margin-top: 24px;
   margin-bottom: 24px !important;
@@ -384,10 +383,10 @@
 
 .importModeToggle {
   display: flex;
-  background: var(--card2);
+  background: var(--color-surface);
   padding: 3px;
   border-radius: 8px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-line);
 }
 
 .modeButton {
@@ -398,7 +397,7 @@
   text-transform: uppercase;
   border: none;
   background: transparent;
-  color: var(--muted);
+  color: var(--color-text-muted);
   border-radius: 5px;
   cursor: pointer;
   font-family: inherit;
@@ -406,12 +405,12 @@
 }
 
 .modeButton.active {
-  background: var(--card);
-  color: var(--accent);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  background: var(--color-surface);
+  color: var(--color-accent);
+  box-shadow: var(--shadow-none);
 }
 
 .modeButton:hover:not(.active) {
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.03);
+  color: var(--color-text);
+  background: var(--color-surface);
 }

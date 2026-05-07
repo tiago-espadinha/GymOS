@@ -5,11 +5,11 @@
 
 .searchSelectInput {
   width: 100%;
-  background: var(--input);
-  border: 1px solid var(--border);
+  background: var(--color-bg);
+  border: 1px solid var(--color-line);
   border-radius: 6px;
   box-sizing: border-box;
-  color: var(--text);
+  color: var(--color-text);
   font-size: 13px;
   padding: 9px 12px;
   font-family: inherit;
@@ -19,11 +19,11 @@
 }
 
 .searchSelectInput:focus {
-  border-color: var(--accent);
+  border-color: var(--color-accent);
 }
 
 .searchSelectInput::placeholder {
-  color: var(--text);
+  color: var(--color-text);
 }
 
 .searchSelectDropdown {
@@ -31,39 +31,39 @@
   top: 100%;
   left: 0;
   right: 0;
-  background: var(--input);
-  border: 1px solid var(--border);
+  background: var(--color-bg);
+  border: 1px solid var(--color-line);
   border-radius: 6px;
   margin-top: 4px;
   max-height: 250px;
   overflow-y: auto;
   z-index: 50;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-none);
 }
 
 .searchSelectOption {
   padding: 2px 14px;
   font-size: 13px;
-  color: var(--text);
+  color: var(--color-text);
   cursor: pointer;
   transition: all 0.1s;
   text-align: left;
 }
 
 .searchSelectOption:hover {
-  background: var(--accent);
-  color: #fff;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 .searchSelectOption.active {
-  color: var(--accent);
-  background: var(--accent-bg);
+  color: var(--color-accent);
+  background: var(--color-surface);
   font-weight: 600;
 }
 
 .searchSelectNoResults {
   padding: 14px;
   font-size: 12px;
-  color: var(--dim);
+  color: var(--color-text-muted);
   text-align: center;
 }
