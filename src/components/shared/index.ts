@@ -10,3 +10,5 @@ export { PrimaryButton } from './PrimaryButton';
 export { PillButton } from './PillButton';
 export { ChipGroup } from './ChipGroup';
 export { SegmentedControl } from './SegmentedControl';
+export { Field } from './Field';
+export { StepperBlock } from './StepperBlock';
