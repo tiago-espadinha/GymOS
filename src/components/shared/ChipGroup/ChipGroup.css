@@ -1,0 +1,30 @@
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip-group__chip {
+  min-height: var(--size-chip);
+  min-width: var(--size-control);
+  padding: 0 var(--space-4);
+  border: var(--border-chip);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--text-body-lg);
+  cursor: pointer;
+}
+
+.chip-group__chip[aria-pressed='true'] {
+  background: var(--color-inverse);
+  border-color: var(--color-inverse);
+  color: var(--color-on-inverse);
+}
+
+.chip-group__chip:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}

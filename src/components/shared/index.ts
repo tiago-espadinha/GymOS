@@ -8,3 +8,5 @@ export { Divider } from './Divider';
 export { Search } from './Search';
 export { PrimaryButton } from './PrimaryButton';
 export { PillButton } from './PillButton';
+export { ChipGroup } from './ChipGroup';
+export { SegmentedControl } from './SegmentedControl';
