@@ -172,7 +172,7 @@ export function LogTab({
       <div className="logTabForm">
         <div>
           <Label>Training Plan</Label>
-          <Select value={planId} onChange={handlePlanChange}>
+          <Select value={planId} onChange={handlePlanChange} ariaLabel="Training plan">
             <option value="">Select a plan...</option>
             {plans
               .filter((p) => !p.isArchived || p.id === planId)
@@ -189,6 +189,7 @@ export function LogTab({
             value={date}
             onChange={setDate}
             type="date"
+            ariaLabel="Session date"
             style={{ width: "160px" }}
           />
         </div>
@@ -215,6 +216,7 @@ export function LogTab({
               value={notes}
               onChange={setNotes}
               placeholder="How did it go? Any PRs or setbacks?"
+              ariaLabel="Session notes"
             />
           </div>
           <div className="logTabActions">

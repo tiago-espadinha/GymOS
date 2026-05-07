@@ -4,6 +4,7 @@ interface InputProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  ariaLabel?: string;
   type?: string;
   style?: CSSProperties;
 }
@@ -12,6 +13,7 @@ export function Input({
   value,
   onChange,
   placeholder,
+  ariaLabel,
   type = "text",
   style: x,
 }: InputProps) {
@@ -21,6 +23,7 @@ export function Input({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
+      aria-label={ariaLabel}
       className="input"
       style={{
         ...x,

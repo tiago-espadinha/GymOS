@@ -26,8 +26,8 @@
 }
 
 .primary {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
   color: #fff;
 }
 
