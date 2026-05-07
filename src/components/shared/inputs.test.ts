@@ -88,6 +88,11 @@ describe('Field', () => {
     )
   })
 
+  it('keeps the focus border on top of the error border', () => {
+    const field = cssOf('Field')
+    expect(field.indexOf(':focus-visible')).toBeGreaterThan(field.indexOf("[aria-invalid='true']"))
+  })
+
   it('is 52px tall and takes the lime border on focus', () => {
     const field = cssOf('Field')
     expect(field).toContain('min-height: var(--size-field)')
