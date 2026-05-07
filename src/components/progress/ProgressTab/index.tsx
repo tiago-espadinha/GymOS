@@ -11,8 +11,19 @@ import {
 import { Label, Select, Button, Search } from "../../shared";
 import Colors from "../../../constants/colors";
 import { formatDate, formatDateShort } from "../../../utils/date";
-import { TrainingPlan, WorkoutSession } from "../../../types";
+import { TrainingPlan, WorkoutSession, Exercise } from "../../../types";
 import { exportToCSV, importFromCSV } from "../../../utils/csv";
+import {
+  MetricKind,
+  DEFAULT_METRIC,
+  METRIC_LABELS,
+  getExerciseMeta,
+  resolveBranch,
+  availableMetrics,
+  computeMetric,
+  higherIsBetterFor,
+  formatMetricNumber,
+} from "../../../utils/metrics";
 import "./ProgressTab.css";
 
 interface ProgressTabProps {
@@ -28,29 +39,92 @@ interface ChartPoint {
   date: string;
   shortDate: string;
   rawDate: string;
-  maxWeight: number;
-  volume: number;
+  value: number;
+  label: string;
 }
 
 interface AnalyzedPoint extends ChartPoint {
-  value: number;
   status: "baseline" | "improvement" | "stagnation" | "neutral";
 }
 
 type TimeRange = "all" | "5" | "10" | "1m" | "3m";
+
+interface ChartPoint {
+  date: string;
+  label: string;
+  status: "improvement" | "stagnation" | "baseline" | "neutral";
+}
+
+interface DotProps {
+  cx?: number;
+  cy?: number;
+  payload?: ChartPoint;
+}
+
+interface TooltipProps {
+  active?: boolean;
+  payload?: Array<{ payload: ChartPoint }>;
+}
+
+function errorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
+const CustomDot = ({ cx, cy, payload }: DotProps) => {
+  if (!payload) return null;
+  const col =
+    payload.status === "improvement"
+      ? Colors.success
+      : payload.status === "stagnation"
+        ? Colors.warn
+        : Colors.accent;
+  const r =
+    payload.status === "improvement" || payload.status === "stagnation"
+      ? 7
+      : 5;
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={r}
+      fill={col}
+      stroke={Colors.card}
+      strokeWidth={2}
+    />
+  );
+};
+
+const CustomTooltip = ({ active, payload }: TooltipProps) => {
+  if (!active || !payload?.length) return null;
+  const d = payload[0].payload;
+  const statusMap: Record<string, { color: string; label: string }> = {
+    improvement: { color: Colors.success, label: "↑ New PR" },
+    stagnation: { color: Colors.warn, label: "⟳ Stagnation" },
+    baseline: { color: Colors.muted, label: "◎ Baseline" },
+    neutral: { color: Colors.muted, label: "→ Maintained" },
+  };
+  const st = statusMap[d.status];
+  return (
+    <div className="customTooltip">
+      <div className="tooltipDate">{d.date}</div>
+      <div className="tooltipValue">{d.label}</div>
+      <div className="tooltipStatus">{st.label}</div>
+    </div>
+  );
+};
 
 export function ProgressTab({
   plans,
   sessions,
   setPlans,
   setSessions,
-  selectedExName,
+  selectedExName: storedExName,
   setSelectedExName,
 }: ProgressTabProps) {
   const [selectedPlanId, setSelectedPlanId] = useState("all");
   const [exerciseSearch, setExerciseSearch] = useState("");
   const [showExDropdown, setShowExDropdown] = useState(false);
-  const [metric, setMetric] = useState<"maxWeight" | "volume">("maxWeight");
+  const [metricChoice, setMetric] = useState<MetricKind>(DEFAULT_METRIC);
   const [timeRange, setTimeRange] = useState<TimeRange>("all");
   const [importState, setImportState] = useState<{
     files: FileList;
@@ -108,8 +182,8 @@ export function ProgressTab({
                 allImportedPlans.push(...p);
                 allImportedSessions.push(...s);
                 resolve();
-              } catch (err: any) {
-                reject(new Error(`File "${file.name}":\n${err.message}`));
+              } catch (err) {
+                reject(new Error(`File "${file.name}":\n${errorMessage(err)}`));
               }
             } else {
               resolve();
@@ -125,8 +199,8 @@ export function ProgressTab({
         plans: allImportedPlans,
         sessions: allImportedSessions,
       });
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err) {
+      alert(errorMessage(err));
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
@@ -189,17 +263,15 @@ export function ProgressTab({
   };
 
   const allExercises = useMemo(() => {
-    const map = new Map<string, { name: string; muscleGroup: string }>();
-    
+    const map = new Map<string, Exercise>();
+
     const filteredPlans = selectedPlanId === "all" 
       ? plans.filter(p => !p.isArchived)
       : plans.filter(p => p.id === selectedPlanId);
 
     filteredPlans.forEach((plan) =>
       plan.exercises.forEach((ex) => {
-        if (!map.has(ex.name)) {
-          map.set(ex.name, { name: ex.name, muscleGroup: ex.muscleGroup });
-        }
+        if (!map.has(ex.name)) map.set(ex.name, ex);
       }),
     );
 
@@ -209,9 +281,7 @@ export function ProgressTab({
     sessions.forEach((session) => {
       if (selectedPlanId === "all" || session.planName === selectedPlanName) {
         session.exercises.forEach((ex) => {
-          if (!map.has(ex.name)) {
-            map.set(ex.name, { name: ex.name, muscleGroup: ex.muscleGroup });
-          }
+          if (!map.has(ex.name)) map.set(ex.name, ex);
         });
       }
     });
@@ -228,20 +298,21 @@ export function ProgressTab({
     );
   }, [allExercises, exerciseSearch]);
 
-  useEffect(() => {
-    if (allExercises.length > 0) {
-      // If current selection is not in the (potentially new) list, reset to first
-      if (!selectedExName || !allExercises.find(ex => ex.name === selectedExName)) {
-        setSelectedExName(allExercises[0].name);
-        setExerciseSearch("");
-      }
-    } else if (selectedExName !== "") {
-      setSelectedExName("");
-    }
-  }, [allExercises, selectedExName, setSelectedExName]);
+  // Fall back to the first exercise when the stored selection no longer exists.
+  const selectedExName = allExercises.some((ex) => ex.name === storedExName)
+    ? storedExName
+    : (allExercises[0]?.name ?? "");
+
+  const selected = allExercises.find((e) => e.name === selectedExName);
+  const meta = useMemo(() => (selected ? getExerciseMeta(selected) : null), [selected]);
+  const branch = meta ? resolveBranch(meta) : null;
+  const metricOptions = branch ? availableMetrics(branch) : [];
+
+  // Fall back to the default when the chosen metric doesn't apply to this exercise.
+  const metric = metricOptions.includes(metricChoice) ? metricChoice : DEFAULT_METRIC;
 
   const { chartData, stats } = useMemo(() => {
-    if (!selectedExName) return { chartData: [], stats: null };
+    if (!selectedExName || !meta) return { chartData: [], stats: null };
 
     const relevant = sessions
       .filter((s) => s.exercises.some((e) => e.name === selectedExName))
@@ -249,26 +320,22 @@ export function ProgressTab({
 
     if (relevant.length === 0) return { chartData: [], stats: null };
 
-    let points: ChartPoint[] = relevant.map((s) => {
-      const ex = s.exercises.find((e) => e.name === selectedExName);
-      const maxWeight = ex
-        ? ex.sets.reduce((m, st) => Math.max(m, parseFloat(st.weight) || 0), 0)
-        : 0;
-      const volume = ex
-        ? ex.sets.reduce(
-            (sum, st) =>
-              sum + (parseFloat(st.weight) || 0) * (parseInt(st.reps) || 0),
-            0,
-          )
-        : 0;
-      return { 
-        date: formatDate(s.date), 
-        shortDate: formatDateShort(s.date),
-        rawDate: s.date, 
-        maxWeight, 
-        volume 
-      };
-    });
+    let points: ChartPoint[] = relevant
+      .map((s) => {
+        const ex = s.exercises.find((e) => e.name === selectedExName);
+        const result = ex ? computeMetric(ex.sets, meta, metric) : null;
+        if (!result) return null;
+        return {
+          date: formatDate(s.date),
+          shortDate: formatDateShort(s.date),
+          rawDate: s.date,
+          value: result.value,
+          label: result.label,
+        };
+      })
+      .filter((p): p is ChartPoint => p !== null);
+
+    if (points.length === 0) return { chartData: [], stats: null };
 
     // Time range filtering
     if (timeRange === "5") points = points.slice(-5);
@@ -280,28 +347,37 @@ export function ProgressTab({
       points = points.filter(p => p.rawDate >= cutoffStr);
     }
 
+    const branchForMetric = resolveBranch(meta);
+    const higherIsBetter = higherIsBetterFor(branchForMetric, metric, meta.timeGoal);
+    const isBetter = (a: number, b: number) => (higherIsBetter ? a > b : a < b);
+
     const analyzed: AnalyzedPoint[] = [];
-    let allTimeMax = 0;
+    let allTimeBest = 0;
+    let allTimeBestLabel = points[0].label;
 
     for (let i = 0; i < points.length; i++) {
       const p = points[i];
-      const val = metric === "maxWeight" ? p.maxWeight : p.volume;
+      const val = p.value;
       let status: "baseline" | "improvement" | "stagnation" | "neutral" =
         "neutral";
 
       if (i === 0) {
         status = "baseline";
-        allTimeMax = val;
+        allTimeBest = val;
+        allTimeBestLabel = p.label;
       } else {
         const prev = analyzed[i - 1].value;
-        if (val > prev) {
+        if (isBetter(val, prev)) {
           status = "improvement";
-          if (val > allTimeMax) allTimeMax = val;
-        } else if (i >= 2 && val <= prev && prev <= analyzed[i - 2].value) {
+          if (isBetter(val, allTimeBest)) {
+            allTimeBest = val;
+            allTimeBestLabel = p.label;
+          }
+        } else if (i >= 2 && !isBetter(val, prev) && !isBetter(prev, analyzed[i - 2].value)) {
           status = "stagnation";
         }
       }
-      analyzed.push({ ...p, value: val, status });
+      analyzed.push({ ...p, status });
     }
 
     const vals = analyzed.map((p) => p.value);
@@ -311,66 +387,19 @@ export function ProgressTab({
     return {
       chartData: analyzed,
       stats: {
-        maxVal: allTimeMax,
+        maxVal: allTimeBest,
+        maxLabel: allTimeBestLabel,
         lastVal,
+        lastLabel: analyzed[analyzed.length - 1].label,
         firstVal,
         delta: lastVal - firstVal,
+        higherIsBetter,
         improvements: analyzed.filter((p) => p.status === "improvement").length,
         stagnations: analyzed.filter((p) => p.status === "stagnation").length,
         total: analyzed.length,
       },
     };
-  }, [selectedExName, sessions, metric, timeRange]);
-
-  const selected = allExercises.find((e) => e.name === selectedExName);
-
-  const CustomDot = ({ cx, cy, payload }: any) => {
-    const col =
-      payload.status === "improvement"
-        ? Colors.success
-        : payload.status === "stagnation"
-          ? Colors.warn
-          : Colors.accent;
-    const r =
-      payload.status === "improvement" || payload.status === "stagnation"
-        ? 7
-        : 5;
-    return (
-      <circle
-        cx={cx}
-        cy={cy}
-        r={r}
-        fill={col}
-        stroke={Colors.card}
-        strokeWidth={2}
-      />
-    );
-  };
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (!active || !payload?.length) return null;
-    const d = payload[0].payload;
-    const statusMap: Record<string, { color: string; label: string }> = {
-      improvement: { color: Colors.success, label: "↑ New PR" },
-      stagnation: { color: Colors.warn, label: "⟳ Stagnation" },
-      baseline: { color: Colors.muted, label: "◎ Baseline" },
-      neutral: { color: Colors.muted, label: "→ Maintained" },
-    };
-    const st = statusMap[d.status];
-    return (
-      <div className="customTooltip">
-        <div className="tooltipDate">{d.date}</div>
-        <div className="tooltipValue">
-          {metric === "maxWeight"
-            ? `${d.value} kg`
-            : `${d.value.toFixed(0)} kg·r`}
-        </div>
-        <div className="tooltipStatus">{st.label}</div>
-      </div>
-    );
-  };
-
-  const metricLabel = metric === "maxWeight" ? "kg" : "kg·rep";
+  }, [selectedExName, sessions, metric, timeRange, meta]);
 
   return (
     <div>
@@ -488,16 +517,13 @@ export function ProgressTab({
             <div className="metricFilter">
               <Label>Metric</Label>
               <div className="progressMetric">
-                {[
-                  ["maxWeight", "Max Weight"],
-                  ["volume", "Volume"],
-                ].map(([m, label]) => (
+                {metricOptions.map((m) => (
                   <button
                     key={m}
-                    onClick={() => setMetric(m as "maxWeight" | "volume")}
+                    onClick={() => setMetric(m)}
                     className={`metricButton ${metric === m ? "active" : ""}`}
                   >
-                    {label}
+                    {METRIC_LABELS[m]}
                   </button>
                 ))}
               </div>
@@ -540,18 +566,12 @@ export function ProgressTab({
                   {[
                     {
                       label: "Personal Record",
-                      value:
-                        metric === "maxWeight"
-                          ? `${stats.maxVal} kg`
-                          : stats.maxVal.toFixed(0),
+                      value: stats.maxLabel,
                       color: Colors.accent,
                     },
                     {
                       label: "Last Session",
-                      value:
-                        metric === "maxWeight"
-                          ? `${stats.lastVal} kg`
-                          : stats.lastVal.toFixed(0),
+                      value: stats.lastLabel,
                       color: Colors.text,
                     },
                     {
@@ -682,26 +702,19 @@ export function ProgressTab({
                       </span>
                     </>
                   )}
-                  {stats.delta > 0 && (
+                  {stats.delta !== 0 && (stats.higherIsBetter ? stats.delta > 0 : stats.delta < 0) && (
                     <>
                       {" "}
                       <span className="gainStat">
-                        Overall gain: +
-                        {metric === "maxWeight"
-                          ? `${stats.delta.toFixed(1)} kg`
-                          : `${stats.delta.toFixed(0)} ${metricLabel}`}
-                        .
+                        Overall gain: {formatMetricNumber(Math.abs(stats.delta), meta!, metric)}.
                       </span>
                     </>
                   )}
-                  {stats.delta < 0 && (
+                  {stats.delta !== 0 && (stats.higherIsBetter ? stats.delta < 0 : stats.delta > 0) && (
                     <>
                       {" "}
                       <span className="declineStat">
-                        Overall decline of{" "}
-                        {metric === "maxWeight"
-                          ? `${Math.abs(stats.delta).toFixed(1)} kg`
-                          : `${Math.abs(stats.delta).toFixed(0)} ${metricLabel}`}{" "}
+                        Overall decline of {formatMetricNumber(Math.abs(stats.delta), meta!, metric)}{" "}
                         from first session.
                       </span>
                     </>
