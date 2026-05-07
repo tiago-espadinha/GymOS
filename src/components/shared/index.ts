@@ -6,3 +6,5 @@ export { NumericInput } from './NumericInput';
 export { Badge } from './Badge';
 export { Divider } from './Divider';
 export { Search } from './Search';
+export { PrimaryButton } from './PrimaryButton';
+export { PillButton } from './PillButton';
