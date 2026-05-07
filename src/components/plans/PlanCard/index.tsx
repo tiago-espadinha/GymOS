@@ -1,5 +1,6 @@
 import { Button, Badge } from "../../shared";
 import { MUSCLE_GROUP_COLORS } from "../../../constants/muscleGroups";
+import { CATEGORY_ICONS } from "../../../constants/exerciseTypes";
 import { TrainingPlan } from "../../../types";
 import "./PlanCard.css";
 
@@ -52,7 +53,7 @@ export function PlanCard({
       <div className="planCardBadgeRow">
         {plan.exercises.map((ex) => (
           <Badge key={ex.id} color={MUSCLE_GROUP_COLORS[ex.muscleGroup]}>
-            {ex.name}
+            {CATEGORY_ICONS[ex.category || "strength"]} {ex.name}
           </Badge>
         ))}
       </div>

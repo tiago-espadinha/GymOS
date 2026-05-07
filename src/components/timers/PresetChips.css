@@ -1,0 +1,102 @@
+.preset-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.preset-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.preset-chip {
+  min-width: 48px;
+  height: 32px;
+  border: none;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.preset-chip:hover:not(:disabled) {
+  background-color: var(--bg-hov);
+}
+
+.preset-chip.active {
+  background-color: var(--accent);
+  color: var(--icon);
+  border-color: var(--accent);
+}
+
+.preset-chip.default {
+  /* Already styled */
+}
+
+.preset-chip.custom {
+  background-color: var(--muted-bg);
+  color: var(--muted);
+}
+
+.preset-chip.add-chip {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.custom-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: var(--input-bg);
+  color: var(--input-text);
+}
+
+.custom-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.confirm-btn, .cancel-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-btn {
+  background-color: var(--success);
+  color: white;
+}
+
+.cancel-btn {
+  background-color: var(--muted-bg);
+  color: var(--muted);
+}
