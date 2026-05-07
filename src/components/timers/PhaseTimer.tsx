@@ -92,7 +92,7 @@ export function PhaseTimer({
           color={color}
           overtime={isComplete}
         >
-          <div className="timerRingTime" style={{ color: isComplete ? color : "var(--text)" }}>
+          <div className="timerRingTime" style={{ color: isComplete ? color : "var(--color-text)" }}>
             {isComplete ? `+${formatClock(overtimeMs)}` : formattedElapsed}
           </div>
           <div className="timerRingTarget">/ {formatClock(targetMs)}</div>

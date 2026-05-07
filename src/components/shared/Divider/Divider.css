@@ -1,4 +1,4 @@
 .divider {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--color-line);
   margin: 28px 0;
 }

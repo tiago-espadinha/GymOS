@@ -26,25 +26,25 @@
 }
 
 .primary {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
-  color: #fff;
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 .ghost {
   background: transparent;
-  border-color: var(--border);
-  color: var(--muted);
+  border-color: var(--color-line);
+  color: var(--color-text-muted);
 }
 
 .danger {
-  background: var(--danger-bg);
-  border-color: var(--danger);
-  color: var(--danger);
+  background: var(--color-surface);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
 }
 
 .success {
-  background: var(--success-bg);
-  border-color: var(--success);
-  color: var(--success);
+  background: var(--color-surface);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }

@@ -1,5 +1,4 @@
 import { Button, Badge } from "../../shared";
-import Colors from "../../../constants/colors";
 import { MUSCLE_GROUP_COLORS } from "../../../constants/muscleGroups";
 import { CATEGORY_ICONS, CATEGORY_COLORS } from "../../../constants/exerciseTypes";
 import { generateId } from "../../../utils/id";
@@ -64,7 +63,7 @@ export function ExerciseLogger({ exercise, onChange }: ExerciseLoggerProps) {
             </div>
           )}
         </div>
-        <Badge color={MUSCLE_GROUP_COLORS[exercise.muscleGroup] || Colors.muted}>
+        <Badge color={MUSCLE_GROUP_COLORS[exercise.muscleGroup] || "var(--color-text-muted)"}>
           {exercise.muscleGroup}
         </Badge>
       </div>

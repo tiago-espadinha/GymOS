@@ -17,7 +17,7 @@ interface DualTimerProps {
   onCommit: (workSeconds: number, restSeconds: number | null) => void;
 }
 
-const REST_COLOR = "#fbbf24"; // warm amber reads clearly as "recovery" against any work color
+const REST_COLOR = "var(--color-fill-rest)";
 
 export function DualTimer({
   baseId,

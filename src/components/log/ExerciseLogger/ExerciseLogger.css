@@ -1,6 +1,6 @@
 .exerciseLogger {
-  background: var(--card2);
-  border: 1px solid var(--border);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
   border-radius: 8px;
   padding: 16px;
 }
@@ -15,7 +15,7 @@
 .exerciseLoggerTitle {
   font-size: 13px;
   font-weight: 800;
-  color: var(--text);
+  color: var(--color-text);
   margin-bottom: 3px;
   display: flex;
   align-items: center;
@@ -33,12 +33,12 @@
 }
 
 .exerciseLoggerAvg {
-  color: var(--accent);
+  color: var(--color-accent);
   font-weight: 700;
 }
 
 .exerciseLoggerMax {
-  color: var(--muted);
+  color: var(--color-text-muted);
 }
 
 .exerciseLoggerSets {

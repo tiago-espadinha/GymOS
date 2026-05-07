@@ -1,5 +1,4 @@
 import { CSSProperties } from "react";
-import Colors from "../../../constants/colors";
 import "./NumericInput.css";
 
 interface NumericInputProps {
@@ -36,12 +35,12 @@ export function NumericInput({
       <button
         onMouseDown={handleDecrement}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = Colors.accentBg;
-          e.currentTarget.style.color = Colors.accent;
+          e.currentTarget.style.background = "var(--color-surface)";
+          e.currentTarget.style.color = "var(--color-accent)";
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.background = "none";
-          e.currentTarget.style.color = Colors.muted;
+          e.currentTarget.style.color = "var(--color-text-muted)";
         }}
         className="numeric-btn decrement-btn"
       >
@@ -57,12 +56,12 @@ export function NumericInput({
       <button
         onMouseDown={handleIncrement}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = Colors.accentBg;
-          e.currentTarget.style.color = Colors.accent;
+          e.currentTarget.style.background = "var(--color-surface)";
+          e.currentTarget.style.color = "var(--color-accent)";
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.background = "none";
-          e.currentTarget.style.color = Colors.muted;
+          e.currentTarget.style.color = "var(--color-text-muted)";
         }}
         className="numeric-btn increment-btn"
       >
