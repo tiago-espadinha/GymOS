@@ -1,16 +1,9 @@
 import { createElement } from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
+import { renderToStaticMarkup as render } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { PillButton } from './PillButton'
 import { PrimaryButton } from './PrimaryButton'
-
-const css = import.meta.glob<string>('./{PrimaryButton,PillButton}/*.css', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-})
-
-const render = (el: Parameters<typeof renderToStaticMarkup>[0]) => renderToStaticMarkup(el)
+import { cssOf } from './testCss'
 
 describe('PrimaryButton', () => {
   it('is a non-submitting button by default', () => {
@@ -51,19 +44,16 @@ describe('PillButton', () => {
 })
 
 describe('button sizing', () => {
-  const byName = (name: string) =>
-    Object.entries(css).find(([path]) => path.includes(`/${name}/`))?.[1] ?? ''
-
   it('gives the pill the 44px control height', () => {
-    expect(byName('PillButton')).toContain('min-height: var(--size-control)')
+    expect(cssOf('PillButton')).toContain('min-height: var(--size-control)')
   })
 
   it('gives the primary button the 72px action height', () => {
-    expect(byName('PrimaryButton')).toContain('min-height: var(--size-action-primary)')
+    expect(cssOf('PrimaryButton')).toContain('min-height: var(--size-action-primary)')
   })
 
   it('shows a focus outline on both', () => {
-    expect(byName('PillButton')).toContain(':focus-visible')
-    expect(byName('PrimaryButton')).toContain(':focus-visible')
+    expect(cssOf('PillButton')).toMatch(/:focus-visible\s*{[^}]*outline: var\(--border-focus\)/)
+    expect(cssOf('PrimaryButton')).toMatch(/:focus-visible\s*{[^}]*outline: var\(--border-focus\)/)
   })
 })

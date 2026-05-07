@@ -20,7 +20,7 @@ export function SegmentedControl<T extends string>({
     <div
       role="group"
       aria-label={label}
-      className={`segmented segmented--${tone}`}
+      className={`segmented${tone === 'lime' ? ' segmented--lime' : ''}`}
     >
       {options.map((option) => (
         <button

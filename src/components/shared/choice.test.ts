@@ -1,22 +1,31 @@
 import { createElement } from 'react'
+import type { ReactElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { ChipGroup } from './ChipGroup'
 import { SegmentedControl } from './SegmentedControl'
-
-const css = import.meta.glob<string>('./{ChipGroup,SegmentedControl}/*.css', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-})
-const cssOf = (name: string) =>
-  Object.entries(css).find(([path]) => path.includes(`/${name}/`))?.[1] ?? ''
+import { cssOf } from './testCss'
 
 const options = [
   { value: 'kg', label: 'KG' },
   { value: 'lb', label: 'LB' },
 ]
 const noop = () => {}
+
+type Clickable = ReactElement<{ onClick: () => void }>
+
+describe('choosing an option', () => {
+  it.each([
+    ['ChipGroup', ChipGroup],
+    ['SegmentedControl', SegmentedControl],
+  ] as const)('%s reports the value of the option pressed', (_name, Component) => {
+    const onChange = vi.fn()
+    const group = Component({ label: 'Unit', options, value: 'kg', onChange })
+    const buttons = group.props.children as Clickable[]
+    buttons[1].props.onClick()
+    expect(onChange).toHaveBeenCalledExactlyOnceWith('lb')
+  })
+})
 
 describe('ChipGroup', () => {
   const html = renderToStaticMarkup(
