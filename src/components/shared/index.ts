@@ -12,3 +12,6 @@ export { ChipGroup } from './ChipGroup';
 export { SegmentedControl } from './SegmentedControl';
 export { Field } from './Field';
 export { StepperBlock } from './StepperBlock';
+export { SetTicks } from './SetTicks';
+export { ListRow } from './ListRow';
+export { TabBar } from './TabBar';
