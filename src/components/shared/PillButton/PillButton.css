@@ -9,7 +9,7 @@
   border-radius: var(--radius-pill);
   font-family: var(--font-display);
   font-weight: var(--weight-display);
-  font-size: var(--text-row-title);
+  font-size: var(--text-button);
   letter-spacing: var(--tracking-button);
   text-transform: uppercase;
   cursor: pointer;

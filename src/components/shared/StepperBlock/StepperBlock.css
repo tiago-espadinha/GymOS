@@ -41,13 +41,14 @@
   font-family: var(--font-display);
   font-weight: var(--weight-display);
   font-size: var(--text-stepper);
-  line-height: var(--leading-screen-title);
+  line-height: var(--leading-stepper);
   color: var(--color-text);
 }
 
 .stepper-block__unit {
   font-family: var(--font-body);
   font-size: var(--text-small);
+  font-weight: 700;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--color-text-muted);

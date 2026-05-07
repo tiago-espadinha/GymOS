@@ -14,7 +14,7 @@ export function ListRow({ title, subtitle, trailing, current }: ListRowProps) {
   return (
     <div
       aria-current={current ? 'true' : undefined}
-      className={`list-row${subtitle ? ' list-row--tall' : ''}${current ? ' list-row--current' : ''}`}
+      className={`list-row${subtitle || current ? ' list-row--tall' : ''}${current ? ' list-row--current' : ''}`}
     >
       <div className="list-row__text">
         <span className="list-row__title">{title}</span>

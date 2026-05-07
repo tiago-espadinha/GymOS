@@ -27,6 +27,7 @@
   font-family: var(--font-display);
   font-weight: var(--weight-display);
   font-size: var(--text-row-title);
+  line-height: 1;
   text-transform: uppercase;
 }
 

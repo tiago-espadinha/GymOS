@@ -4,14 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { ListRow } from './ListRow'
 import { SetTicks } from './SetTicks'
 import { TabBar } from './TabBar'
-
-const css = import.meta.glob<string>('./{ListRow,SetTicks,TabBar}/*.css', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-})
-const cssOf = (name: string) =>
-  Object.entries(css).find(([path]) => path.includes(`/${name}/`))?.[1] ?? ''
+import { cssOf } from './testCss'
 
 describe('SetTicks', () => {
   const html = renderToStaticMarkup(createElement(SetTicks, { total: 4, done: 3 }))
@@ -55,13 +48,14 @@ describe('ListRow', () => {
     expect(other).not.toContain('aria-current')
   })
 
-  it('is taller when it has a subtitle', () => {
-    expect(
-      renderToStaticMarkup(createElement(ListRow, { title: 'A', subtitle: 'b' })),
-    ).toContain('list-row--tall')
-    expect(renderToStaticMarkup(createElement(ListRow, { title: 'A' }))).not.toContain(
-      'list-row--tall',
-    )
+  it('is taller when it has a subtitle or is the current row', () => {
+    const tall = (props: object) =>
+      renderToStaticMarkup(createElement(ListRow, { title: 'A', ...props })).includes(
+        'list-row--tall',
+      )
+    expect(tall({ subtitle: 'b' })).toBe(true)
+    expect(tall({ current: true })).toBe(true)
+    expect(tall({})).toBe(false)
     expect(cssOf('ListRow')).toContain('min-height: var(--size-row-lg)')
   })
 })
@@ -89,6 +83,7 @@ describe('TabBar', () => {
   it('is 64px tall with a 4px lime top border on the active tab and a focus ring', () => {
     const bar = cssOf('TabBar')
     expect(bar).toContain('min-height: var(--size-tabbar)')
+    expect(bar).toMatch(/\.tab-bar\s*{[^}]*border-top: var\(--border-hairline\)/)
     expect(bar).toMatch(/aria-current='page'\]\s*{[^}]*border-top: var\(--border-tab-active\)/)
     expect(bar).toContain(':focus-visible')
   })

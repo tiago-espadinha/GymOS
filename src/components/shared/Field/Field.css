@@ -7,6 +7,7 @@
 .field__label {
   font-family: var(--font-body);
   font-size: var(--text-small);
+  font-weight: 700;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--color-text-muted);

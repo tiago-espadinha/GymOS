@@ -1,6 +1,6 @@
 .tab-bar {
   display: flex;
-  min-height: var(--size-tabbar);
+  border-top: var(--border-hairline);
   background: var(--color-bg);
 }
 
