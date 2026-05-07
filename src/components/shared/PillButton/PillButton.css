@@ -1,0 +1,57 @@
+.pill-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--size-control);
+  min-width: var(--size-control);
+  padding: 0 var(--space-5);
+  border: 2px solid transparent;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-button);
+  letter-spacing: var(--tracking-button);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity var(--motion-press) linear;
+}
+
+.pill-button:active:not(:disabled) {
+  opacity: 0.8;
+}
+
+.pill-button:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+.pill-button--lime {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.pill-button--white {
+  background: var(--color-inverse);
+  color: var(--color-on-inverse);
+}
+
+.pill-button--outline-white {
+  background: transparent;
+  border-color: var(--color-text);
+  color: var(--color-text);
+}
+
+.pill-button--outline-black {
+  background: transparent;
+  border-color: var(--color-on-accent);
+  color: var(--color-on-accent);
+}
+
+.pill-button--outline-black:focus-visible {
+  outline-color: var(--color-on-accent);
+}
+
+.pill-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

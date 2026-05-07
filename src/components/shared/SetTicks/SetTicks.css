@@ -1,0 +1,17 @@
+.set-ticks {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+
+.set-ticks__tick {
+  box-sizing: border-box;
+  width: var(--size-tick-w);
+  height: var(--size-tick-h);
+  border: 2px solid var(--color-line-empty);
+  border-radius: var(--radius-pill);
+}
+
+.set-ticks__tick--done {
+  background: currentColor;
+  border-color: currentColor;
+}

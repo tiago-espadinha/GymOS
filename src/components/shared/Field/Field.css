@@ -1,0 +1,46 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.field__label {
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.field__input {
+  min-height: var(--size-field);
+  padding: 0 var(--space-4);
+  border: 2px solid transparent;
+  border-radius: var(--radius-surface);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+}
+
+.field__input[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+/* After the invalid rule so a focused field with an error still shows focus. */
+.field__input:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.field__input:disabled {
+  opacity: 0.4;
+}
+
+.field__error {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-secondary);
+  color: var(--color-danger);
+}
