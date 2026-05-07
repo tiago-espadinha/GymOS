@@ -10,7 +10,7 @@ export const Colors = {
   border:      '#242638',
   borderHov:   '#383c58',
   text:        '#dce0f0',
-  muted:       '#565a7c',
+  muted:       '#8387ab',
   dim:         '#363952',
   success:     '#34d399',
   successBg:   'rgba(52,211,153,0.08)',
