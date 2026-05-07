@@ -1,9 +1,16 @@
 import { useState } from "react";
 import { Button, Input, Label, Select, Divider } from "../../shared";
-import { generateId } from "../../../utils/id";
 import { today, formatDate } from "../../../utils/date";
-import { TrainingPlan, WorkoutSession, ExerciseLog, Set } from "../../../types";
+import { TrainingPlan, WorkoutSession } from "../../../types";
 import { computeMetric, getExerciseMeta } from "../../../utils/metrics";
+import {
+  ActiveSession,
+  fromPlan,
+  fromSaved,
+  hasLoggedSets,
+  isLoggedSet,
+} from "../../../utils/activeSession";
+import { generateId } from "../../../utils/id";
 import ExerciseLogger from "../ExerciseLogger";
 import "./LogTab.css";
 
@@ -11,138 +18,79 @@ interface LogTabProps {
   plans: TrainingPlan[];
   sessions: WorkoutSession[];
   setSessions: (sessions: WorkoutSession[]) => void;
-  initialPlan?: TrainingPlan;
+  session: ActiveSession | null;
+  onBegin: (session: ActiveSession) => void;
+  onUpdate: (patch: Partial<ActiveSession>) => void;
+  onEnd: () => void;
 }
 
 export function LogTab({
   plans,
   sessions,
   setSessions,
-  initialPlan,
+  session,
+  onBegin,
+  onUpdate,
+  onEnd,
 }: LogTabProps) {
-  const [planId, setPlanId] = useState(initialPlan?.id || "");
-  const [date, setDate] = useState(today());
-  const [exercises, setExercises] = useState<ExerciseLog[]>([]);
-  const [notes, setNotes] = useState("");
-  const [saved, setSaved] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingPlanName, setEditingPlanName] = useState("");
+  const [homeDate, setHomeDate] = useState(today());
+  const [saved, setSaved] = useState("");
 
-  const emptySet = (): Set => ({ id: generateId(), weight: "", reps: "" });
-
-  const loadPlan = (plan: TrainingPlan) => {
-    setExercises(
-      plan.exercises.map((ex) => ({
-        ...ex,
-        sets: [emptySet()],
-      })),
-    );
-    setSaved(false);
-  };
-
-  // Load a plan handed in from the Plans tab once per plan id (state adjusted
-  // during render rather than in an effect, to avoid a cascading re-render).
-  const [loadedInitialPlanId, setLoadedInitialPlanId] = useState<string | null>(null);
-  if (initialPlan && initialPlan.id !== loadedInitialPlanId) {
-    setLoadedInitialPlanId(initialPlan.id);
-    setPlanId(initialPlan.id);
-    loadPlan(initialPlan);
-  }
+  const editingId = session?.editingId;
+  const date = session ? session.date : homeDate;
 
   const handlePlanChange = (id: string) => {
-    setPlanId(id);
-    if (editingId) {
-      setEditingId(null);
-      setEditingPlanName("");
-    }
     const plan = plans.find((p) => p.id === id);
-    if (plan) loadPlan(plan);
+    if (!plan) return;
+    setSaved("");
+    onBegin(fromPlan(plan, homeDate));
   };
 
-  const startEdit = (session: WorkoutSession) => {
-    setPlanId(session.planId || "");
-    setDate(session.date);
-    setNotes(session.notes || "");
-    setEditingPlanName(session.planName);
-    setEditingId(session.id);
-    setSaved(false);
-    setExercises(
-      session.exercises.map((ex) => ({
-        ...ex,
-        sets: ex.sets.map((s) => ({
-          ...s,
-          id: s.id || generateId(),
-        })),
-      })),
-    );
+  const startEdit = (previous: WorkoutSession) => {
+    setSaved("");
+    onBegin(fromSaved(previous));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditingPlanName("");
-    setExercises([]);
-    setPlanId("");
-    setNotes("");
-    setSaved(false);
+  const cancelSession = () => {
+    if (session && hasLoggedSets(session) && !window.confirm("Discard this session?")) {
+      return;
+    }
+    onEnd();
   };
 
   const saveSession = () => {
-    const plan = plans.find((p) => p.id === planId);
-    const planName = plan?.name || editingPlanName;
-    if (!planName && !editingId) return;
+    if (!session) return;
 
-    const validEx = exercises
-      .map((ex) => ({
-        ...ex,
-        sets: ex.sets.filter(
-          (s) =>
-            parseFloat(s.weight) > 0 ||
-            parseInt(s.reps) > 0 ||
-            Number(s.duration) > 0 ||
-            parseFloat(s.distance || "") > 0,
-        ),
-      }))
+    const validEx = session.exercises
+      .map((ex) => ({ ...ex, sets: ex.sets.filter(isLoggedSet) }))
       .filter((ex) => ex.sets.length > 0);
 
     if (validEx.length === 0) return;
 
-    const payload: Partial<WorkoutSession> = {
-      planId,
-      planName: planName || editingPlanName,
-      date,
-      notes: notes.trim(),
+    const payload = {
+      planId: session.planId,
+      planName: session.planName,
+      date: session.date,
+      notes: session.notes.trim(),
       exercises: validEx,
     };
 
     if (editingId) {
       setSessions(
-        sessions.map((s) =>
-          s.id === editingId ? ({ ...s, ...payload } as WorkoutSession) : s,
-        ),
+        sessions.map((s) => (s.id === editingId ? { ...s, ...payload } : s)),
       );
-      cancelEdit();
     } else {
-      setSessions([
-        { id: generateId(), ...payload } as WorkoutSession,
-        ...sessions,
-      ]);
-      setExercises(
-        exercises.map((ex) => ({
-          ...ex,
-          sets: [emptySet()],
-        })),
-      );
-      setNotes("");
+      setSessions([{ id: generateId(), ...payload }, ...sessions]);
     }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 4000);
+    setSaved(editingId ? "✓ Session updated!" : "✓ Session saved!");
+    setTimeout(() => setSaved(""), 4000);
+    onEnd();
   };
 
   const deleteSession = (id: string) => {
     if (window.confirm("Delete this session?")) {
       setSessions(sessions.filter((s) => s.id !== id));
-      if (editingId === id) cancelEdit();
     }
   };
 
@@ -154,39 +102,42 @@ export function LogTab({
         {editingId ? "Edit Session" : "Log Session"}
       </div>
 
-      {editingId && (
+      {saved && <div className="logTabSaved">{saved}</div>}
+
+      {editingId && session && (
         <div className="logTabEditing">
           <div className="logTabEditingText">
             <span>✏</span>
             <span>
-              Editing session · {editingPlanName} · {formatDate(date)}
+              Editing session · {session.planName} · {formatDate(date)}
             </span>
           </div>
-          <Button onClick={cancelEdit} variant="ghost" small>
-            Cancel
-          </Button>
         </div>
       )}
 
       <div className="logTabForm">
-        <div>
-          <Label>Training Plan</Label>
-          <Select value={planId} onChange={handlePlanChange} ariaLabel="Training plan">
-            <option value="">Select a plan...</option>
-            {plans
-              .filter((p) => !p.isArchived || p.id === planId)
-              .map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} {p.isArchived ? "(Archived)" : ""}
-                </option>
-              ))}
-          </Select>
-        </div>
+        {session ? (
+          <div className="logTabPlanName">{session.planName}</div>
+        ) : (
+          <div>
+            <Label>Training Plan</Label>
+            <Select value="" onChange={handlePlanChange} ariaLabel="Training plan">
+              <option value="">Select a plan...</option>
+              {plans
+                .filter((p) => !p.isArchived)
+                .map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+            </Select>
+          </div>
+        )}
         <div>
           <Label>Date</Label>
           <Input
             value={date}
-            onChange={setDate}
+            onChange={(d) => (session ? onUpdate({ date: d }) : setHomeDate(d))}
             type="date"
             ariaLabel="Session date"
             style={{ width: "160px" }}
@@ -194,17 +145,19 @@ export function LogTab({
         </div>
       </div>
 
-      {exercises.length > 0 ? (
+      {session ? (
         <>
           <div className="logTabExercises">
-            {exercises.map((ex) => (
+            {session.exercises.map((ex) => (
               <ExerciseLogger
                 key={ex.id}
                 exercise={ex}
                 onChange={(updated) =>
-                  setExercises((exs) =>
-                    exs.map((e) => (e.id === updated.id ? updated : e)),
-                  )
+                  onUpdate({
+                    exercises: session.exercises.map((e) =>
+                      e.id === updated.id ? updated : e,
+                    ),
+                  })
                 }
               />
             ))}
@@ -212,8 +165,8 @@ export function LogTab({
           <div className="logTabNotes">
             <Label>Session Notes (optional)</Label>
             <Input
-              value={notes}
-              onChange={setNotes}
+              value={session.notes}
+              onChange={(notes) => onUpdate({ notes })}
               placeholder="How did it go? Any PRs or setbacks?"
               ariaLabel="Session notes"
             />
@@ -222,31 +175,23 @@ export function LogTab({
             <Button onClick={saveSession}>
               {editingId ? "Update Session" : "Save Session"}
             </Button>
-            {editingId && (
-              <Button onClick={cancelEdit} variant="ghost">
-                Cancel
-              </Button>
-            )}
-            {saved && (
-              <span className="logTabSaved">
-                {editingId ? "✓ Session updated!" : "✓ Session saved!"}
-              </span>
-            )}
+            <Button onClick={cancelSession} variant="ghost">
+              Cancel
+            </Button>
           </div>
         </>
-      ) : !planId && !editingId ? (
+      ) : (
         <div className="logTabEmpty">
           Select a training plan to begin logging
         </div>
-      ) : null}
+      )}
 
-      {recent.length > 0 && (
+      {!session && recent.length > 0 && (
         <>
           <Divider />
           <div className="logTabRecentTitle">Recent Sessions</div>
           <div className="logTabRecentList">
             {recent.map((s) => {
-              const isEditing = editingId === s.id;
               const totalVol = s.exercises.reduce(
                 (sum, ex) =>
                   sum +
@@ -264,7 +209,7 @@ export function LogTab({
                   className="logTabRecentItem"
                   style={{
                     background: "var(--color-surface)",
-                    border: `1px solid ${isEditing ? "var(--color-accent)" : "var(--color-line)"}`,
+                    border: "1px solid var(--color-line)",
                   }}
                 >
                   <div className="logTabRecentHeader">
@@ -285,17 +230,9 @@ export function LogTab({
                       </span>
                     </div>
                     <div className="logTabRecentActions">
-                      {!isEditing ? (
-                        <Button
-                          onClick={() => startEdit(s)}
-                          variant="ghost"
-                          small
-                        >
-                          Edit
-                        </Button>
-                      ) : (
-                        <span className="logTabEditingIndicator">Editing…</span>
-                      )}
+                      <Button onClick={() => startEdit(s)} variant="ghost" small>
+                        Edit
+                      </Button>
                       <button
                         onClick={() => deleteSession(s.id)}
                         className="logTabDeleteButton"
