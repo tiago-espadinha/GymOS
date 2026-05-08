@@ -1,3 +1,7 @@
+.logTabTitle:focus {
+  outline: none;
+}
+
 .logTabTitle {
   font-size: 22px;
   font-weight: 800;
@@ -76,6 +80,10 @@
   align-items: center;
 }
 
+.logTabSaved:empty {
+  display: none;
+}
+
 .logTabSaved {
   margin-bottom: 16px;
   font-size: 12px;
@@ -109,6 +117,8 @@
 }
 
 .logTabRecentItem {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
   border-radius: 8px;
   padding: 16px;
   transition: all 0.2s;

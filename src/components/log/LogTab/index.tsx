@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Input, Label, Select, Divider } from "../../shared";
 import { today, formatDate } from "../../../utils/date";
-import { TrainingPlan, WorkoutSession } from "../../../types";
+import { ExerciseLog, TrainingPlan, WorkoutSession } from "../../../types";
 import { computeMetric, getExerciseMeta } from "../../../utils/metrics";
 import {
   ActiveSession,
@@ -21,6 +21,7 @@ interface LogTabProps {
   session: ActiveSession | null;
   onBegin: (session: ActiveSession) => void;
   onUpdate: (patch: Partial<ActiveSession>) => void;
+  onUpdateExercise: (exercise: ExerciseLog) => void;
   onEnd: () => void;
 }
 
@@ -31,10 +32,22 @@ export function LogTab({
   session,
   onBegin,
   onUpdate,
+  onUpdateExercise,
   onEnd,
 }: LogTabProps) {
   const [homeDate, setHomeDate] = useState(today());
   const [saved, setSaved] = useState("");
+
+  const titleRef = useRef<HTMLDivElement>(null);
+  const inSession = Boolean(session);
+
+  // Starting or ending a session removes the button that was focused, so move
+  // focus to the title instead of letting it fall back to the top of the page.
+  const mounted = useRef(false);
+  useEffect(() => {
+    if (mounted.current || inSession) titleRef.current?.focus();
+    mounted.current = true;
+  }, [inSession]);
 
   const editingId = session?.editingId;
   const date = session ? session.date : homeDate;
@@ -53,8 +66,9 @@ export function LogTab({
   };
 
   const cancelSession = () => {
-    if (session && hasLoggedSets(session) && !window.confirm("Discard this session?")) {
-      return;
+    if (session && hasLoggedSets(session)) {
+      const question = editingId ? "Discard your changes?" : "Discard this session?";
+      if (!window.confirm(question)) return;
     }
     onEnd();
   };
@@ -98,13 +112,15 @@ export function LogTab({
 
   return (
     <div>
-      <div className="logTabTitle">
+      <div className="logTabTitle" ref={titleRef} tabIndex={-1}>
         {editingId ? "Edit Session" : "Log Session"}
       </div>
 
-      {saved && <div className="logTabSaved">{saved}</div>}
+      <div role="status" className="logTabSaved">
+        {saved}
+      </div>
 
-      {editingId && session && (
+      {session?.editingId && (
         <div className="logTabEditing">
           <div className="logTabEditingText">
             <span>✏</span>
@@ -152,13 +168,7 @@ export function LogTab({
               <ExerciseLogger
                 key={ex.id}
                 exercise={ex}
-                onChange={(updated) =>
-                  onUpdate({
-                    exercises: session.exercises.map((e) =>
-                      e.id === updated.id ? updated : e,
-                    ),
-                  })
-                }
+                onChange={onUpdateExercise}
               />
             ))}
           </div>
@@ -207,10 +217,6 @@ export function LogTab({
                 <div
                   key={s.id}
                   className="logTabRecentItem"
-                  style={{
-                    background: "var(--color-surface)",
-                    border: "1px solid var(--color-line)",
-                  }}
                 >
                   <div className="logTabRecentHeader">
                     <div className="logTabRecentInfo">

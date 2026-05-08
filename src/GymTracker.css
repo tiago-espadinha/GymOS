@@ -18,11 +18,19 @@
 .mainContent {
   max-width: 880px;
   margin: 0 auto;
-  padding: 40px 28px calc(var(--size-tabbar) + 40px);
+  padding: 40px 28px;
+}
+
+.mainContent.withTabs {
+  padding-bottom: calc(var(--size-tabbar) + 40px);
 }
 
 @media (max-width: 600px) {
   .mainContent {
-    padding: 20px 16px calc(var(--size-tabbar) + 20px);
+    padding: 20px 16px;
+  }
+
+  .mainContent.withTabs {
+    padding-bottom: calc(var(--size-tabbar) + 20px);
   }
 }

@@ -71,3 +71,45 @@ test('session mode has no detectable WCAG A/AA violations', async ({ page }) => 
     .analyze()
   expect(results.violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([])
 })
+
+test('editing a saved session updates it in place, also after a reload', async ({ page }) => {
+  await page.addInitScript(() => {
+    if (localStorage.getItem('gym:sessions')) return
+    localStorage.setItem('gym:sessions', JSON.stringify([{
+      id: 's1', planId: 'p1', planName: 'Push day', date: '2026-11-10', notes: '',
+      exercises: [{ id: 'e1', name: 'Bench press', muscleGroup: 'Chest', sets: [{ id: 'x', weight: '50', reps: '5' }] }],
+    }]))
+  })
+  await page.goto('/')
+  await tabBar(page).getByRole('button', { name: 'Log' }).click()
+  await page.getByRole('button', { name: 'Edit' }).click()
+  await expect(tabBar(page)).toHaveCount(0)
+  await page.reload()
+  await page.getByPlaceholder('0').nth(0).fill('55')
+  await page.getByRole('button', { name: 'Update Session' }).click()
+  await expect(tabBar(page)).toBeVisible()
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('gym:sessions') ?? '[]'))
+  expect(stored).toHaveLength(1)
+  expect(stored[0].id).toBe('s1')
+  expect(stored[0].exercises[0].sets[0].weight).toBe('55')
+})
+
+test('cancelling a session with logged sets asks first', async ({ page }) => {
+  await page.goto('/')
+  await startPlan(page)
+  await page.getByPlaceholder('0').nth(0).fill('60')
+  page.once('dialog', (d) => d.dismiss())
+  await page.getByRole('button', { name: 'Cancel' }).click()
+  await expect(tabBar(page)).toHaveCount(0)
+  page.once('dialog', (d) => d.accept())
+  await page.getByRole('button', { name: 'Cancel' }).click()
+  await expect(tabBar(page)).toBeVisible()
+})
+
+test('focus moves to the title when a session starts and ends', async ({ page }) => {
+  await page.goto('/')
+  await startPlan(page)
+  await expect(page.getByText('Log Session')).toBeFocused()
+  await page.getByRole('button', { name: 'Cancel' }).click()
+  await expect(page.getByText('Log Session')).toBeFocused()
+})

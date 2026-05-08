@@ -102,7 +102,7 @@ export default function GymTracker() {
 
   return (
     <div className="gymOS">
-      <div className="mainContent">
+      <div className={`mainContent ${session ? "" : "withTabs"}`}>
         {visibleTab === "plans" && (
           <PlansTab
             plans={plans}
@@ -118,6 +118,7 @@ export default function GymTracker() {
             session={session}
             onBegin={activeSession.begin}
             onUpdate={activeSession.update}
+            onUpdateExercise={activeSession.updateExercise}
             onEnd={endSession}
           />
         )}
@@ -135,7 +136,7 @@ export default function GymTracker() {
 
       {!session && (
         <div className="shellTabs">
-          <TabBar tabs={[...TABS]} active={tab} onChange={setTab} />
+          <TabBar tabs={TABS} active={tab} onChange={setTab} />
         </div>
       )}
     </div>
