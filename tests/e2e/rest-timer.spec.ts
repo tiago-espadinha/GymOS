@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
+import { restStarted } from './rest-started'
 
 const plan = {
   id: 'p1',
@@ -28,6 +29,7 @@ const logAndRest = async (page: Page) => {
   await inputs(page).nth(0).fill('60')
   await inputs(page).nth(1).fill('8')
   await setDone(page).click()
+  await restStarted(page)
 }
 
 // Height of the lime fill as a share of the block.
