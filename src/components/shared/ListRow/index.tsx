@@ -12,11 +12,9 @@ interface ListRowProps {
   current?: boolean;
   /** Makes the whole row a button. */
   onClick?: () => void;
-  /** For a row that opens something below it. */
-  expanded?: boolean;
 }
 
-export function ListRow({ number, title, subtitle, trailing, current, onClick, expanded }: ListRowProps) {
+export function ListRow({ number, title, subtitle, trailing, current, onClick }: ListRowProps) {
   const className = `list-row${subtitle || current ? ' list-row--tall' : ''}${current ? ' list-row--current' : ''}${onClick ? ' list-row--button' : ''}`;
   const content = (
     <>
@@ -40,7 +38,6 @@ export function ListRow({ number, title, subtitle, trailing, current, onClick, e
         type="button"
         className={className}
         aria-current={current ? 'true' : undefined}
-        aria-expanded={expanded}
         onClick={onClick}
       >
         {content}

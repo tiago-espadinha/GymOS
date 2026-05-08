@@ -1,0 +1,84 @@
+.exerciseScreen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  /* Fill the viewport inside the shell's vertical padding, so the footer sits at the bottom. */
+  min-height: calc(100dvh - 80px);
+}
+
+.exerciseScreen[hidden] {
+  display: none;
+}
+
+.exerciseScreenKicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.exerciseScreenSet {
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.exerciseScreenTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-section-title-lg);
+  line-height: 0.9;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.exerciseScreenTitle:focus {
+  outline: none;
+}
+
+.exerciseScreenNav {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.exerciseScreenBack,
+.exerciseScreenNext {
+  min-height: var(--size-control);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.exerciseScreenBack {
+  color: var(--color-text-muted);
+}
+
+.exerciseScreenNext {
+  margin-left: auto;
+  color: var(--color-text);
+  text-align: right;
+}
+
+.exerciseScreenBack:focus-visible,
+.exerciseScreenNext:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .exerciseScreen {
+    min-height: calc(100dvh - 40px);
+  }
+}

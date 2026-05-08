@@ -50,8 +50,10 @@ test('Start stays off until a plan is chosen, then starts it on the chosen date'
   await page.getByLabel('Date').fill('2026-11-01')
   await start.click()
   await expect(page.getByRole('navigation', { name: 'Main' })).toHaveCount(0)
-  await expect(page.getByLabel('Session date')).toHaveValue('2026-11-01')
-  await expect(page.getByText('Push day')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Push day', level: 1 })).toBeVisible()
+  await expect(page.getByText('Sun 1 Nov · 0 sets')).toBeVisible()
+  // The date is picked before starting only.
+  await expect(page.locator('input[type="date"]')).toHaveCount(0)
 })
 
 test('the plan list offers active plans only', async ({ page }) => {
@@ -74,7 +76,7 @@ test('Edit opens the saved session and is at least 44px tall', async ({ page }) 
   const edit = page.getByRole('button', { name: /^Edit Session 0/ })
   expect((await edit.boundingBox())?.height).toBeGreaterThanOrEqual(44)
   await edit.click()
-  await expect(page.getByRole('heading', { name: 'Edit Session' })).toBeVisible()
+  await expect(page.getByText(/^Editing session · /)).toBeVisible()
   await expect(page.getByRole('button', { name: 'Finish session' })).toBeVisible()
 })
 

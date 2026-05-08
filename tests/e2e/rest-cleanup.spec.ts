@@ -23,6 +23,7 @@ const logAndRest = async (page: Page) => {
   await inputs.nth(0).fill('60')
   await inputs.nth(1).fill('8')
   await page.getByRole('button', { name: 'Set done' }).click()
+  await page.getByRole('button', { name: 'All exercises' }).click()
 }
 
 test('saving a session clears its rests, so editing it later shows none', async ({ page }) => {

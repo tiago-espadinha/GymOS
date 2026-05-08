@@ -26,6 +26,7 @@ const logBench = async (page: Page) => {
   const inputs = page.locator('input[placeholder="0"]:visible')
   await inputs.nth(0).fill('60')
   await inputs.nth(1).fill('8')
+  await page.getByRole('button', { name: 'All exercises' }).click()
 }
 
 test('Finish is disabled until a set is logged, and an empty session can be cancelled', async ({ page }) => {
@@ -48,6 +49,7 @@ test('the Done screen totals the logged sets only', async ({ page }) => {
 test('kg moved is left out when nothing was lifted', async ({ page }) => {
   await page.getByRole('button', { name: /^Bench press/ }).click()
   await page.locator('input[placeholder="0"]:visible').nth(1).fill('15')
+  await page.getByRole('button', { name: 'All exercises' }).click()
   await finishButton(page).click()
   await expect(page.getByText('kg moved')).toHaveCount(0)
   await expect(page.locator('.finishStat')).toHaveText(['exercise1', 'set1'])

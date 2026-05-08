@@ -52,11 +52,13 @@ test.describe('with plans', () => {
   })
 
   test('Start opens the session for that plan, and a reload restores it', async ({ page }) => {
+    await page.clock.setFixedTime(new Date('2026-11-23T10:00:00'))
     await page.goto('/')
     await page.getByRole('button', { name: 'Start Push day' }).click()
     await expect(tabBar(page)).toHaveCount(0)
     await expect(page.getByRole('button', { name: /^Bench press/ })).toBeVisible()
-    await expect(page.locator('input[type="date"]')).toHaveValue(new Date().toISOString().slice(0, 10))
+    // The session takes today's date.
+    await expect(page.getByText('Mon 23 Nov · 0 sets')).toBeVisible()
     await page.reload()
     await expect(tabBar(page)).toHaveCount(0)
     await expect(page.getByRole('button', { name: /^Bench press/ })).toBeVisible()

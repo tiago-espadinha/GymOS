@@ -49,14 +49,11 @@ describe('ListRow', () => {
     expect(other).not.toContain('aria-current')
   })
 
-  it('becomes a button that reports whether it is expanded when given an onClick', () => {
-    const html = renderToStaticMarkup(
-      createElement(ListRow, { title: 'A', onClick: () => {}, expanded: false }),
-    )
-    expect(html).toMatch(/^<button type="button"[^>]*aria-expanded="false"/)
+  it('becomes a button when given an onClick', () => {
+    const html = renderToStaticMarkup(createElement(ListRow, { title: 'A', onClick: () => {} }))
+    expect(html).toMatch(/^<button type="button"/)
     const plain = renderToStaticMarkup(createElement(ListRow, { title: 'A' }))
     expect(plain).toMatch(/^<div/)
-    expect(plain).not.toContain('aria-expanded')
   })
 
   it('shows a number column that stays out of the accessible name', () => {

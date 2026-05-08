@@ -12,20 +12,6 @@
   margin-bottom: 14px;
 }
 
-.exerciseLoggerTitle {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--color-text);
-  margin-bottom: 3px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.exerciseLoggerCategoryIcon {
-  font-size: 11px;
-}
-
 .exerciseLoggerStats {
   display: flex;
   gap: 12px;

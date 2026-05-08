@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Input, Label, PillButton } from "../../shared";
-import { today, formatDate } from "../../../utils/date";
+import { PillButton } from "../../shared";
+import { today, formatDate, formatDateMeta } from "../../../utils/date";
 import { ExerciseLog, TrainingPlan, WorkoutSession } from "../../../types";
 import {
   ActiveSession,
@@ -13,6 +13,7 @@ import { generateId } from "../../../utils/id";
 import { exportToCSV } from "../../../utils/csv";
 import { downloadCSV } from "../../../utils/download";
 import { clearSessionRests } from "../../../utils/restTimers";
+import { sessionTotals } from "../../../utils/sessionList";
 import FinishScreen from "../FinishScreen";
 import LogHome from "../LogHome";
 import SessionList from "../SessionList";
@@ -123,14 +124,15 @@ export function LogTab({
   };
 
   const canFinish = session ? hasLoggedSets(session) : false;
+  const loggedSets = session ? sessionTotals(session.exercises).sets : 0;
 
   // The status region stays mounted while the Done screen shows, so a save
   // message that appears on Save is announced.
   return (
     <div>
-      {!(session && finishing) && (
-        <h1 className={session ? "logTabTitle" : "logTabTitle logTabTitle--home"} ref={titleRef} tabIndex={-1}>
-          {editingId ? "Edit Session" : session ? "Log Session" : "Log"}
+      {!session && (
+        <h1 className="logTabTitle" ref={titleRef} tabIndex={-1}>
+          Log
         </h1>
       )}
 
@@ -165,45 +167,43 @@ export function LogTab({
             </div>
           )}
 
-          {session && (
-            <div className="logTabForm">
-              <div className="logTabPlanName">{session.planName}</div>
-              <div>
-                <Label>Date</Label>
-                <Input
-                  value={session.date}
-                  onChange={(d) => onUpdate({ date: d })}
-                  type="date"
-                  ariaLabel="Session date"
-                  style={{ width: "160px" }}
-                />
-              </div>
-            </div>
-          )}
-
           {session ? (
-            <>
-              <SessionList exercises={session.exercises} onChangeExercise={onUpdateExercise} />
-              <div className="logTabActions">
-                <PillButton
-                  id={FINISH_ID}
-                  variant="outline-white"
-                  onClick={() => setFinishing(true)}
-                  disabled={!canFinish}
-                  aria-label="Finish session"
-                >
-                  Finish
-                </PillButton>
-                {!canFinish && (
-                  <>
+            <SessionList
+              planName={session.planName}
+              exercises={session.exercises}
+              onChangeExercise={onUpdateExercise}
+              header={
+                <header className="logTabHeader">
+                  <div className="logTabHeading">
+                    <span className="logTabMeta">
+                      {formatDateMeta(session.date)} · {loggedSets} {loggedSets === 1 ? "set" : "sets"}
+                    </span>
+                    <h1 className="logTabSessionTitle" ref={titleRef} tabIndex={-1}>
+                      {session.planName}
+                    </h1>
+                  </div>
+                  <PillButton
+                    id={FINISH_ID}
+                    variant="outline-white"
+                    onClick={() => setFinishing(true)}
+                    disabled={!canFinish}
+                    aria-label="Finish session"
+                  >
+                    Finish
+                  </PillButton>
+                </header>
+              }
+              actions={
+                !canFinish && (
+                  <div className="logTabActions">
                     <span className="logTabHint">Log a set to finish.</span>
                     <button type="button" className="textLink" onClick={cancelSession}>
                       Cancel
                     </button>
-                  </>
-                )}
-              </div>
-            </>
+                  </div>
+                )
+              }
+            />
           ) : (
             <LogHome
               plans={plans}
