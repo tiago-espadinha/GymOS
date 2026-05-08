@@ -1,4 +1,4 @@
-.restBlock {
+.timerBlock {
   position: relative;
   box-sizing: border-box;
   height: var(--size-timer-block-fit);
@@ -9,17 +9,16 @@
   overflow: hidden;
 }
 
-.restBlockFill {
+.timerBlockFill {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   overflow: hidden;
-  background: var(--color-fill-rest);
   transition: height var(--motion-fill) var(--ease-fill);
 }
 
-.restBlockFace {
+.timerBlockFace {
   position: absolute;
   left: 0;
   right: 0;
@@ -32,15 +31,14 @@
 }
 
 /* Aligned to the bottom of the block, so it lines up with the copy underneath. */
-.restBlockFace--onFill {
+.timerBlockFace--onFill {
   top: auto;
   bottom: 0;
   height: var(--size-timer-block-fit);
   padding-bottom: calc(var(--size-action) + var(--space-6));
-  color: var(--color-on-accent);
 }
 
-.restBlockTop {
+.timerBlockTop {
   display: flex;
   justify-content: space-between;
   font-size: var(--text-small);
@@ -49,7 +47,7 @@
   text-transform: uppercase;
 }
 
-.restBlockCountdown {
+.timerBlockCountdown {
   flex: 1;
   display: flex;
   align-items: center;
@@ -61,14 +59,14 @@
   white-space: nowrap;
 }
 
-.restBlockTarget {
+.timerBlockTarget {
   font-size: var(--text-secondary);
   font-weight: 700;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
 }
 
-.restBlockControls {
+.timerBlockControls {
   position: absolute;
   z-index: 2;
   left: var(--space-4);
@@ -78,14 +76,13 @@
   gap: var(--space-2);
 }
 
-/* Black with lime text reads on both the lime fill and the dark track. */
-.restBlockButton {
+/* Black pills read on both the fill and the dark track. */
+.timerBlockButton {
   flex: 1;
   min-height: var(--size-control);
   border: 0;
   border-radius: var(--radius-pill);
   background: var(--color-bg);
-  color: var(--color-accent);
   font-family: var(--font-display);
   font-weight: var(--weight-display);
   font-size: var(--text-row-title);
@@ -94,20 +91,50 @@
   cursor: pointer;
 }
 
-.restBlockButton:active {
+.timerBlockButton:active {
   opacity: 0.8;
 }
 
-.restBlockButton:focus-visible {
+.timerBlockButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.timerBlockButton:focus-visible {
   outline: var(--border-focus);
   outline-offset: 2px;
 }
 
-.restBlockAnnounce {
+.timerBlockAnnounce {
   position: absolute;
   width: 1px;
   height: 1px;
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* Rest is lime, a hold is white; the pills take the block's own colour. */
+.timerBlock--rest .timerBlockFill {
+  background: var(--color-fill-rest);
+}
+
+.timerBlock--rest .timerBlockFace--onFill {
+  color: var(--color-on-accent);
+}
+
+.timerBlock--rest .timerBlockButton {
+  color: var(--color-accent);
+}
+
+.timerBlock--hold .timerBlockFill {
+  background: var(--color-fill-work);
+}
+
+.timerBlock--hold .timerBlockFace--onFill {
+  color: var(--color-bg);
+}
+
+.timerBlock--hold .timerBlockButton {
+  color: var(--color-inverse);
 }
