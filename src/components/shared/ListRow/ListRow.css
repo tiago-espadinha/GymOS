@@ -12,6 +12,21 @@
   min-height: var(--size-row-lg);
 }
 
+.list-row--button {
+  box-sizing: border-box;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.list-row--button:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: -2px;
+}
+
 .list-row--current {
   background: var(--color-inverse);
   color: var(--color-on-inverse);
