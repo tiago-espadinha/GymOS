@@ -1,0 +1,81 @@
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 200;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  margin: 0 auto;
+  overflow-y: auto;
+  padding: var(--space-6) var(--gutter) var(--space-7);
+  border-radius: var(--radius-surface) var(--radius-surface) 0 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+
+.sheet:focus {
+  outline: none;
+}
+
+/* The small tracked label over a sheet's title: "PLAN", "DELETE FOR GOOD". */
+.sheet__kicker {
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.sheet__kicker--danger {
+  color: var(--color-danger);
+}
+
+/* Titles wrap: long names are never cut off here. */
+.sheet__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-section-title);
+  line-height: 1;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.sheet__title--lg {
+  font-size: var(--text-section-title-lg);
+  line-height: 0.9;
+}
+
+.sheet__text {
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
+/* A text-only dismiss, centred under the sheet's actions. */
+.sheet__cancel {
+  align-self: center;
+  min-height: var(--size-control);
+  padding: 0 var(--space-4);
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sheet__cancel:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}

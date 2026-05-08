@@ -1,0 +1,43 @@
+.planActions__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.planActions__meta {
+  font-size: var(--text-secondary);
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.planActions__archive {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-height: 68px;
+  padding: var(--space-3) var(--gutter);
+  border: var(--border-control);
+  border-radius: var(--radius-surface);
+  background: none;
+  color: var(--color-text);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.planActions__archive:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+.planActions__archiveLabel {
+  font-size: var(--text-body-lg);
+  font-weight: 700;
+}
+
+.planActions__archiveHint {
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--color-text-muted);
+}

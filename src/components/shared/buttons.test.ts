@@ -27,7 +27,7 @@ describe('PrimaryButton', () => {
 })
 
 describe('PillButton', () => {
-  it.each(['lime', 'white', 'outline-white', 'outline-black'] as const)(
+  it.each(['lime', 'white', 'outline-white', 'outline-black', 'outline-danger'] as const)(
     'renders the %s variant',
     (variant) => {
       expect(render(createElement(PillButton, { variant }, 'Go'))).toContain(
@@ -35,6 +35,13 @@ describe('PillButton', () => {
       )
     },
   )
+
+  it('has a compact size in body type that keeps the 44px hit area', () => {
+    expect(render(createElement(PillButton, { size: 'compact' }, 'Go'))).toContain('pill-button--compact')
+    expect(render(createElement(PillButton, null, 'Go'))).not.toContain('pill-button--compact')
+    expect(cssOf('PillButton')).toMatch(/\.pill-button--compact\s*{[^}]*font-family: var\(--font-body\)/)
+    expect(cssOf('PillButton')).not.toMatch(/\.pill-button--compact\s*{[^}]*min-height/)
+  })
 
   it('can be a submit button when asked', () => {
     expect(render(createElement(PillButton, { type: 'submit' }, 'Save'))).toContain(

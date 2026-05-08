@@ -16,6 +16,15 @@
   transition: opacity var(--motion-press) linear;
 }
 
+.pill-button--compact {
+  padding: 0 var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-secondary);
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
 .pill-button:active:not(:disabled) {
   opacity: 0.8;
 }
@@ -45,6 +54,12 @@
   background: transparent;
   border-color: var(--color-on-accent);
   color: var(--color-on-accent);
+}
+
+.pill-button--outline-danger {
+  background: transparent;
+  border-color: var(--color-danger);
+  color: var(--color-danger);
 }
 
 .pill-button--outline-black:focus-visible {

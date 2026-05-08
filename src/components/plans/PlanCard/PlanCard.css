@@ -1,14 +1,68 @@
-.planCard {
-  border-bottom: 1px solid var(--color-line);
-  padding-bottom: var(--space-3);
+/* Shared by active and archived plan rows. */
+.planRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--size-row-lg);
+  border-bottom: var(--border-hairline);
 }
 
-.planCard.isArchived {
-  opacity: 0.7;
-}
-
-.planCardActions {
+.planRow__text {
   display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  margin-right: var(--space-2);
+}
+
+/* Long names stay on one line in rows; titles elsewhere wrap. */
+.planRow__name,
+.planRow__meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planRow__name {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-row-title-lg);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.planRow__meta {
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.planRow__more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-control);
+  height: var(--size-control);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.planRow__more:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: -2px;
+}
+
+.planRow--archived {
   gap: var(--space-2);
-  padding: 0 var(--gutter);
+  min-height: var(--size-row);
+}
+
+.planRow--archived .planRow__name {
+  font-size: var(--text-row-title);
+  color: var(--color-text-muted);
 }
