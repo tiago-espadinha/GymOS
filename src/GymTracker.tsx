@@ -28,6 +28,8 @@ export default function GymTracker() {
   const activeSession = useActiveSession();
   const [selectedExName, setSelectedExName] = useState<string>("");
   const [showData, setShowData] = useState(false);
+  // New plan is modal-like: the tab bar hides and Cancel is the exit.
+  const [creatingPlan, setCreatingPlan] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -95,13 +97,16 @@ export default function GymTracker() {
   const { session } = activeSession;
   // An active session takes over the screen: it shows the log and no tab bar.
   const visibleTab: TabId = session ? "log" : tab;
+  const showTabs = !session && !(visibleTab === "plans" && creatingPlan);
 
   const changeTab = (next: TabId) => {
     setShowData(false);
+    setCreatingPlan(false);
     setTab(next);
   };
 
   const openData = () => {
+    setCreatingPlan(false);
     setTab("progress");
     setShowData(true);
   };
@@ -113,7 +118,7 @@ export default function GymTracker() {
 
   return (
     <div className="gymOS">
-      <div className={`mainContent ${session ? "" : "withTabs"}`}>
+      <div className={`mainContent ${showTabs ? "withTabs" : ""}`}>
         {visibleTab === "plans" && (
           <PlansTab
             plans={plans}
@@ -121,6 +126,8 @@ export default function GymTracker() {
             setPlans={setPlans}
             onStartPlan={handleStartPlan}
             onImport={openData}
+            creating={creatingPlan}
+            onCreatingChange={setCreatingPlan}
           />
         )}
         {visibleTab === "log" && (
@@ -149,7 +156,7 @@ export default function GymTracker() {
         )}
       </div>
 
-      {!session && (
+      {showTabs && (
         <div className="shellTabs">
           <TabBar tabs={TABS} active={tab} onChange={changeTab} />
         </div>
