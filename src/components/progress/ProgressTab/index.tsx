@@ -35,6 +35,9 @@ interface ProgressTabProps {
   setSessions: (sessions: WorkoutSession[]) => void;
   selectedExName: string;
   setSelectedExName: (name: string) => void;
+  /** Import and export, opened from here or from the Plans empty state. */
+  showData: boolean;
+  setShowData: (open: boolean) => void;
 }
 
 /** Exercises from active plans and from logged sessions, by name. */
@@ -94,10 +97,11 @@ export function ProgressTab({
   setSessions,
   selectedExName: storedExName,
   setSelectedExName,
+  showData,
+  setShowData,
 }: ProgressTabProps) {
   const [metricChoice, setMetric] = useState<MetricKind>(DEFAULT_METRIC);
   const [rangeChoice, setRange] = useState<TimeRange>("all");
-  const [showData, setShowData] = useState(false);
   const pickerId = useId();
   const dataLink = useRef<HTMLButtonElement>(null);
   const returnFocus = useRef(false);

@@ -27,6 +27,7 @@ export default function GymTracker() {
   const [loaded, setLoaded] = useState(false);
   const activeSession = useActiveSession();
   const [selectedExName, setSelectedExName] = useState<string>("");
+  const [showData, setShowData] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -95,6 +96,11 @@ export default function GymTracker() {
   // An active session takes over the screen: it shows the log and no tab bar.
   const visibleTab: TabId = session ? "log" : tab;
 
+  const changeTab = (next: TabId) => {
+    setShowData(false);
+    setTab(next);
+  };
+
   const endSession = () => {
     activeSession.end();
     setTab("log");
@@ -130,13 +136,15 @@ export default function GymTracker() {
             setSessions={setSessions}
             selectedExName={selectedExName}
             setSelectedExName={setSelectedExName}
+            showData={showData}
+            setShowData={setShowData}
           />
         )}
       </div>
 
       {!session && (
         <div className="shellTabs">
-          <TabBar tabs={TABS} active={tab} onChange={setTab} />
+          <TabBar tabs={TABS} active={tab} onChange={changeTab} />
         </div>
       )}
     </div>
