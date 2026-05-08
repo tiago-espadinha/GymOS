@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { formatClock } from "../../../hooks/useTimer";
+import { formatRestClock } from "../../../hooks/useTimer";
 import { ExerciseLog } from "../../../types";
 import { findRunningRest } from "../../../utils/restTimers";
 import "./RestStrip.css";
@@ -23,7 +23,7 @@ export function RestStrip({ exercises, onOpen }: RestStripProps) {
   return (
     <button type="button" className="restStrip" onClick={() => onOpen(rest.exerciseId)}>
       <span className="restStripLabel">Rest</span>
-      <span className="restStripTime">{formatClock(rest.remainingMs)}</span>
+      <span className="restStripTime">{formatRestClock(rest.remainingMs, rest.overtimeMs)}</span>
       <span className="restStripName">{rest.exerciseName}</span>
     </button>
   );

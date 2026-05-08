@@ -1,6 +1,5 @@
 import { NumericInput } from "../../shared";
-import { RestTimerChip } from "../../timers";
-import { Set, ExerciseCategory } from "../../../types";
+import { Set } from "../../../types";
 import "./SetRow.css";
 
 interface SetRowProps {
@@ -8,11 +7,10 @@ interface SetRowProps {
   index: number;
   onChange: (set: Set) => void;
   onRemove: () => void;
-  category: ExerciseCategory;
   trackWeight?: boolean; // false for bodyweight-only calisthenics
 }
 
-export function SetRow({ set, index, onChange, onRemove, category, trackWeight = true }: SetRowProps) {
+export function SetRow({ set, index, onChange, onRemove, trackWeight = true }: SetRowProps) {
   return (
     <div className="setRow">
       <span className="setRowIndex">{index + 1}</span>
@@ -38,7 +36,6 @@ export function SetRow({ set, index, onChange, onRemove, category, trackWeight =
       />
       <span className="setRowReps">reps</span>
       <div className="setRowSpacer" />
-      <RestTimerChip baseId={set.id} category={category} />
       <button onClick={onRemove} className="setRowRemove">
         ×
       </button>

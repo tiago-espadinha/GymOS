@@ -74,8 +74,8 @@ test('the rest strip is absent until a rest runs, then shows it and opens that e
   await expect(strip).toHaveCount(0)
 
   await row(page, 'Cable row').click()
-  await page.getByRole('button', { name: '⏱ Rest' }).click()
-  await page.getByRole('button', { name: '▶ Start' }).click()
+  await logSet(page, '40', '10')
+  await page.getByRole('button', { name: 'Set done' }).click()
   await row(page, 'Cable row').click()
 
   await expect(strip).toBeVisible()
@@ -90,19 +90,19 @@ test('the rest strip is absent until a rest runs, then shows it and opens that e
 
 test('a running rest survives a reload and still shows on the strip', async ({ page }) => {
   await row(page, 'Bench press').click()
-  await page.getByRole('button', { name: '⏱ Rest' }).click()
-  await page.getByRole('button', { name: '▶ Start' }).click()
+  await logSet(page, '60', '8')
+  await page.getByRole('button', { name: 'Set done' }).click()
   await page.reload()
   await expect(page.getByRole('button', { name: /^Rest/ })).toContainText('Bench press')
   await page.getByRole('button', { name: /^Rest/ }).click()
-  await expect(page.getByRole('button', { name: '⏸ Pause' })).toBeVisible()
+  await expect(page.getByRole('timer', { name: /^Rest/ })).toBeVisible()
 })
 
 test('the session list has no detectable WCAG A/AA violations, with a rest running', async ({ page }) => {
   await row(page, 'Bench press').click()
   await logSet(page, '60', '8')
-  await page.getByRole('button', { name: '⏱ Rest' }).click()
-  await page.getByRole('button', { name: '▶ Start' }).click()
+  await page.getByRole('button', { name: 'Set done' }).click()
+  await expect(page.getByRole('timer', { name: /^Rest/ })).toBeVisible()
   await row(page, 'Bench press').click()
   await expect(page.getByRole('button', { name: /^Rest/ })).toBeVisible()
   const results = await new AxeBuilder({ page })
