@@ -2,7 +2,7 @@ import './ChipGroup.css';
 
 interface ChipGroupProps<T extends string> {
   label: string;
-  options: { value: T; label: string }[];
+  options: { value: T; label: string; disabled?: boolean }[];
   value: T;
   onChange: (value: T) => void;
 }
@@ -20,6 +20,7 @@ export function ChipGroup<T extends string>({
           key={option.value}
           type="button"
           aria-pressed={option.value === value}
+          disabled={option.disabled}
           className="chip-group__chip"
           onClick={() => onChange(option.value)}
         >
