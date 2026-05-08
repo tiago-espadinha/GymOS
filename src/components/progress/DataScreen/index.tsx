@@ -2,6 +2,7 @@ import { useEffect, useId, useRef } from "react";
 import { PrimaryButton } from "../../shared";
 import { TrainingPlan, WorkoutSession } from "../../../types";
 import { exportToCSV } from "../../../utils/csv";
+import { downloadCSV } from "../../../utils/download";
 import { ImportCard } from "./ImportCard";
 import "./DataScreen.css";
 
@@ -11,17 +12,6 @@ interface DataScreenProps {
   setPlans: (plans: TrainingPlan[]) => void;
   setSessions: (sessions: WorkoutSession[]) => void;
   onClose: () => void;
-}
-
-function downloadCSV(plans: TrainingPlan[], sessions: WorkoutSession[]) {
-  const blob = new Blob([exportToCSV(plans, sessions)], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `gym_data_${new Date().toISOString().split("T")[0]}.csv`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
 }
 
 function DeviceCount({ n, noun }: { n: number; noun: string }) {
@@ -57,7 +47,9 @@ export function DataScreen({ plans, sessions, setPlans, setSessions, onClose }: 
           <DeviceCount n={plans.length} noun="plan" />
           <DeviceCount n={sessions.length} noun="session" />
         </div>
-        <PrimaryButton tone="light" onClick={() => downloadCSV(plans, sessions)}>
+        <PrimaryButton tone="light" onClick={() =>
+            downloadCSV(exportToCSV(plans, sessions), `gym_data_${new Date().toISOString().split("T")[0]}.csv`)
+          }>
           Export CSV
         </PrimaryButton>
       </section>
