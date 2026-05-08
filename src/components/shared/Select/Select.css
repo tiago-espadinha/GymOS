@@ -1,12 +1,84 @@
 .select {
-  background: var(--color-bg);
-  border: 1px solid var(--color-line);
-  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.select__label {
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* Inset black inside a surface card, radius 12 (nested). */
+.select__button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--size-control);
+  min-width: var(--size-control);
+  padding: 0 var(--space-3) 0 var(--space-4);
+  border: 2px solid transparent;
+  border-radius: var(--radius-nested);
+  background: var(--color-surface-inset);
   color: var(--color-text);
-  font-size: 13px;
-  padding: 9px 12px;
-  font-family: inherit;
-  outline: none;
+  font-family: var(--font-body);
+  font-size: var(--text-secondary);
+  font-weight: 600;
+  text-align: left;
   cursor: pointer;
-  width: 100%;
+}
+
+.select__button:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.select__value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select__chevron {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+.select__list {
+  display: flex;
+  flex-direction: column;
+  border-top: var(--border-hairline);
+}
+
+.select__option {
+  display: flex;
+  align-items: center;
+  min-height: var(--size-row-summary);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-bottom: var(--border-hairline);
+  background: none;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Selected is inverted, never colour alone: the row is filled white. */
+.select__option[aria-selected='true'] {
+  background: var(--color-inverse);
+  color: var(--color-on-inverse);
+  font-weight: 700;
+}
+
+.select__option:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: -2px;
 }

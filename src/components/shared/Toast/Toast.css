@@ -19,6 +19,12 @@
   font-family: var(--font-body);
 }
 
+.toast--inline {
+  position: static;
+  width: 100%;
+  max-width: none;
+}
+
 .toast__message {
   min-width: 0;
   overflow: hidden;
