@@ -51,7 +51,7 @@ export function TimedSetBlock({ setId, setNumber, category, initialTargetSec, ch
       label={category === "cardio" ? "Cardio" : "Hold"}
       setNumber={setNumber}
       countdown={formatRestClock(Math.max(0, targetMs - elapsedMs), overtimeMs)}
-      formattedTarget={formattedTarget}
+      caption={`Target ${formattedTarget}`}
       fillPct={isComplete ? 100 : Math.round(progress * 1000) / 10}
       status={status}
     >

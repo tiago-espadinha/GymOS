@@ -72,14 +72,32 @@ test('−15s and +15s move the target; Skip ends the rest', async ({ page }) => 
   await expect(page.getByRole('button', { name: /^Rest/ })).toHaveCount(0)
 })
 
-test('a finished rest counts up as +m:ss, here and on the strip', async ({ page }) => {
+test('a finished rest reads REST OVER, fills the block and counts up as +m:ss, here and on the strip', async ({ page }) => {
   await logAndRest(page)
-  await page.clock.fastForward(75_000)
+  await page.clock.fastForward(60_000)
+  await expect(timer(page)).toContainText('+0:00')
+  await page.clock.fastForward(15_000)
   await expect(timer(page)).toContainText('+0:15')
+  await expect(page.getByRole('timer', { name: /^Rest over/ })).toBeVisible()
+  await expect(page.getByText('01:00 done').first()).toBeVisible()
   await expect.poll(() => fillShare(page)).toBeCloseTo(1, 1)
+  await expect(page.getByRole('button', { name: '−15s' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: '+15s' })).toBeVisible()
   await page.getByRole('button', { name: 'All exercises' }).click()
   await page.clock.fastForward(1_000)
-  await expect(page.getByRole('button', { name: /^Rest/ })).toContainText('+0:16')
+  const strip = page.getByRole('button', { name: /^Rest over/ })
+  await expect(strip).toContainText('+0:16')
+})
+
+test('Done resting ends a finished rest', async ({ page }) => {
+  await logAndRest(page)
+  await page.clock.fastForward(65_000)
+  await page.getByRole('button', { name: 'Done resting' }).click()
+  await expect(timer(page)).toHaveCount(0)
+  await page.getByRole('button', { name: 'All exercises' }).click()
+  // The strip polls the stored timers; let one poll run on the paused clock.
+  await page.clock.fastForward(1_000)
+  await expect(page.getByRole('button', { name: /^Rest/ })).toHaveCount(0)
 })
 
 test('the exercise view with a rest running has no detectable WCAG A/AA violations', async ({ page }) => {
@@ -95,7 +113,7 @@ test('the exercise view with a rest running has no detectable WCAG A/AA violatio
 test('−15s down to zero reads as a finished rest, not an empty one', async ({ page }) => {
   await logAndRest(page)
   for (let i = 0; i < 4; i++) await page.getByRole('button', { name: '−15s' }).click()
-  await expect(page.getByText('Target 00:00').first()).toBeVisible()
+  await expect(page.getByText('00:00 done').first()).toBeVisible()
   await expect.poll(() => fillShare(page)).toBeCloseTo(1, 1)
   await page.clock.fastForward(1_000)
   await expect(page.getByRole('status').filter({ hasText: 'Rest' })).toHaveText('Rest over')

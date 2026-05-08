@@ -24,7 +24,7 @@ export function RestStrip({ exercises, openExerciseId, onOpen }: RestStripProps)
   if (!rest || rest.exerciseId === openExerciseId) return null;
   return (
     <button type="button" className="restStrip" onClick={() => onOpen(rest.exerciseId)}>
-      <span className="restStripLabel">Rest</span>
+      <span className="restStripLabel">{rest.remainingMs === 0 ? "Rest over" : "Rest"}</span>
       <span className="restStripTime">{formatRestClock(rest.remainingMs, rest.overtimeMs)}</span>
       <span className="restStripName">{rest.exerciseName}</span>
     </button>
