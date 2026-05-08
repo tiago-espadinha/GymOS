@@ -1,0 +1,113 @@
+.restBlock {
+  position: relative;
+  box-sizing: border-box;
+  height: var(--size-timer-block-fit);
+  margin: 0 0 var(--space-4);
+  border-radius: var(--radius-surface);
+  background: var(--color-fill-track);
+  color: var(--color-text);
+  overflow: hidden;
+}
+
+.restBlockFill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  background: var(--color-fill-rest);
+  transition: height var(--motion-fill) var(--ease-fill);
+}
+
+.restBlockFace {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  box-sizing: border-box;
+  height: calc(var(--size-timer-block-fit) - var(--size-action) - var(--space-6));
+  padding: var(--space-4) var(--space-4) 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Aligned to the bottom of the block, so it lines up with the copy underneath. */
+.restBlockFace--onFill {
+  top: auto;
+  bottom: 0;
+  height: var(--size-timer-block-fit);
+  padding-bottom: calc(var(--size-action) + var(--space-6));
+  color: var(--color-on-accent);
+}
+
+.restBlockTop {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.restBlockCountdown {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: min(var(--text-timer), 34vw);
+  line-height: var(--leading-timer);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.restBlockTarget {
+  font-size: var(--text-secondary);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.restBlockControls {
+  position: absolute;
+  z-index: 2;
+  left: var(--space-4);
+  right: var(--space-4);
+  bottom: var(--space-4);
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* Black with lime text reads on both the lime fill and the dark track. */
+.restBlockButton {
+  flex: 1;
+  min-height: var(--size-control);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg);
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-row-title);
+  letter-spacing: var(--tracking-button);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.restBlockButton:active {
+  opacity: 0.8;
+}
+
+.restBlockButton:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+.restBlockAnnounce {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

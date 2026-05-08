@@ -79,6 +79,8 @@
   --size-stepper: 96px;
   --size-tabbar: 64px;
   --size-timer-block: 47vh;
+  --size-timer-block-min: 340px; /* keeps the block tall enough on short screens */
+  --size-timer-block-fit: max(var(--size-timer-block), var(--size-timer-block-min));
   --size-tick-w: 8px;
   --size-tick-h: 28px;
 
