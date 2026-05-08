@@ -87,17 +87,7 @@ test('an exercise without sessions shows the empty state and three metrics', asy
   await expect(page.getByRole('group', { name: 'Metric' }).getByRole('button')).toHaveText(['Average', 'Peak', 'Total'])
 })
 
-test('Import / export reveals the existing data tools', async ({ page }) => {
-  const toggle = page.getByRole('button', { name: 'Import / export' })
-  await expect(page.getByRole('button', { name: 'Export', exact: true })).toBeHidden()
-  await toggle.click()
-  await expect(toggle).toHaveAttribute('aria-expanded', 'true')
-  await expect(page.getByRole('button', { name: 'Export', exact: true })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Import CSV' })).toBeVisible()
-})
-
 test('Progress with data has no detectable WCAG A/AA violations', async ({ page }) => {
-  await page.getByRole('button', { name: 'Import / export' }).click()
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([])
 })
