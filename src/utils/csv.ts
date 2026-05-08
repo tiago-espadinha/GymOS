@@ -67,22 +67,26 @@ function escapeCSV(val: string): string {
   return val;
 }
 
-export function importFromCSV(csv: string): {
+export interface CSVImport {
   plans: TrainingPlan[];
   sessions: WorkoutSession[];
-} {
+  /** Rows left out because a column or a required field was missing. */
+  skippedRows: number;
+}
+
+export function importFromCSV(csv: string): CSVImport {
   const lines = csv.split("\n");
-  if (lines.length === 0) return { plans: [], sessions: [] };
 
   const header = lines[0].trim();
   const isCurrent = header === CSV_HEADER;
   const isLegacy = header === LEGACY_CSV_HEADER;
   if (!isCurrent && !isLegacy) {
-    throw new Error("Invalid CSV format: Header mismatch.");
+    throw new Error("The first line does not match a GymOS export, so nothing was read.");
   }
 
   const plansMap = new Map<string, TrainingPlan>();
   const sessionRows: string[][] = [];
+  let skippedRows = 0;
 
   // First pass: Build Plans and collect session rows
   for (let i = 1; i < lines.length; i++) {
@@ -90,8 +94,10 @@ export function importFromCSV(csv: string): {
     if (!line) continue;
 
     const parts = parseCSVLine(line);
-    const minCols = isCurrent ? 12 : 8;
-    if (parts.length < minCols) continue;
+    if (!isWellFormed(parts, isCurrent)) {
+      skippedRows++;
+      continue;
+    }
 
     const type = parts[0];
     const name = parts[2];
@@ -120,7 +126,7 @@ export function importFromCSV(csv: string): {
           trackingType,
         });
       }
-    } else if (type === "session") {
+    } else {
       sessionRows.push(parts);
     }
   }
@@ -193,7 +199,22 @@ export function importFromCSV(csv: string): {
   return {
     plans: Array.from(plansMap.values()),
     sessions: Array.from(sessionsMap.values()),
+    skippedRows,
   };
+}
+
+const CATEGORIES: readonly string[] = ["strength", "calisthenics", "cardio"] satisfies ExerciseCategory[];
+const TRACKING_TYPES: readonly string[] = ["reps", "time"] satisfies TrackingType[];
+
+// A row needs every column, a known type, a plan name and an exercise name; a session row also needs its date.
+// Category and tracking are checked because timers and presets look them up and would fail on an unknown value.
+function isWellFormed(parts: string[], isCurrent: boolean): boolean {
+  if (parts.length < (isCurrent ? 12 : 8)) return false;
+  const [type, date, name, , exercise, , category, tracking] = parts;
+  if (type !== "plan" && type !== "session") return false;
+  if (!name || !exercise) return false;
+  if (isCurrent && (!CATEGORIES.includes(category) || !TRACKING_TYPES.includes(tracking))) return false;
+  return type === "plan" || Boolean(date);
 }
 
 function parseCSVLine(line: string): string[] {

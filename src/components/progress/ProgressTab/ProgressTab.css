@@ -35,8 +35,7 @@
   cursor: pointer;
 }
 
-.progressDataLink:hover,
-.progressDataLink[aria-expanded='true'] {
+.progressDataLink:hover {
   color: var(--color-text);
 }
 

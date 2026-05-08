@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChipGroup, SegmentedControl } from "../../shared";
 import { TrainingPlan, WorkoutSession, Exercise } from "../../../types";
 import { formatClock } from "../../../hooks/useTimer";
@@ -24,7 +24,7 @@ import {
   progressSeries,
   splitLabel,
 } from "../../../utils/progress";
-import { DataTools } from "./DataTools";
+import { DataScreen } from "../DataScreen";
 import { ProgressChart } from "./ProgressChart";
 import "./ProgressTab.css";
 
@@ -99,7 +99,15 @@ export function ProgressTab({
   const [rangeChoice, setRange] = useState<TimeRange>("all");
   const [showData, setShowData] = useState(false);
   const pickerId = useId();
-  const dataId = useId();
+  const dataLink = useRef<HTMLButtonElement>(null);
+  const returnFocus = useRef(false);
+
+  // Closing Data puts focus back on the link that opened it.
+  useEffect(() => {
+    if (showData || !returnFocus.current) return;
+    returnFocus.current = false;
+    dataLink.current?.focus();
+  }, [showData]);
 
   const exercises = useMemo(() => exercisesOf(plans, sessions), [plans, sessions]);
   // Fall back to the first exercise when the stored selection no longer exists.
@@ -120,6 +128,16 @@ export function ProgressTab({
   const higherIsBetter = meta ? higherIsBetterFor(resolveBranch(meta), metric, meta.timeGoal) : true;
   const figures = lastAndBest(series, higherIsBetter);
 
+  if (showData) {
+    const closeData = () => {
+      returnFocus.current = true;
+      setShowData(false);
+    };
+    return (
+      <DataScreen plans={plans} sessions={sessions} setPlans={setPlans} setSessions={setSessions} onClose={closeData} />
+    );
+  }
+
   return (
     <div className="progressTab">
       <header className="progressHeader">
@@ -127,16 +145,12 @@ export function ProgressTab({
         <button
           type="button"
           className="progressDataLink"
-          aria-expanded={showData}
-          aria-controls={dataId}
-          onClick={() => setShowData((v) => !v)}
+          ref={dataLink}
+          onClick={() => setShowData(true)}
         >
           Import / export
         </button>
       </header>
-      <div id={dataId} hidden={!showData}>
-        <DataTools plans={plans} sessions={sessions} setPlans={setPlans} setSessions={setSessions} />
-      </div>
 
       {!selected || !meta ? (
         <p className="progressEmpty">No exercises found. Create a training plan first.</p>
