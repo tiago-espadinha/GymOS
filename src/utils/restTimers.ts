@@ -2,6 +2,7 @@ import { clearTimer, readRunningTimer } from "../hooks/useTimer";
 import { ExerciseLog } from "../types";
 
 export const restTimerId = (setId: string) => `${setId}-rest`;
+export const holdTimerId = (setId: string) => `${setId}-work`;
 
 export interface RunningRest {
   exerciseId: string;
@@ -27,10 +28,13 @@ export function findRunningRest(exercises: ExerciseLog[], now: number): RunningR
   return latest?.rest ?? null;
 }
 
-// A rest belongs to its session; once the session is saved or cancelled its
+// Rests and holds belong to their session; once it is saved or cancelled its
 // timers must not resurface when the saved session is edited again.
 export function clearSessionRests(exercises: ExerciseLog[]) {
   for (const exercise of exercises) {
-    for (const set of exercise.sets) clearTimer(restTimerId(set.id));
+    for (const set of exercise.sets) {
+      clearTimer(restTimerId(set.id));
+      clearTimer(holdTimerId(set.id));
+    }
   }
 }

@@ -47,3 +47,28 @@
   gap: 8px;
   margin-bottom: 12px;
 }
+
+.exerciseLoggerChain {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--size-control);
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.exerciseLoggerChain input {
+  accent-color: var(--color-accent);
+}
+
+.exerciseLoggerDistance {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}

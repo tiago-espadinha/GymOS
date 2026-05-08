@@ -33,8 +33,8 @@ const logAndRest = async (page: Page) => {
 // Height of the lime fill as a share of the block.
 const fillShare = (page: Page) =>
   page.evaluate(() => {
-    const block = document.querySelector('.restBlock')!.getBoundingClientRect()
-    const fill = document.querySelector('.restBlockFill')!.getBoundingClientRect()
+    const block = document.querySelector('.timerBlock')!.getBoundingClientRect()
+    const fill = document.querySelector('.timerBlockFill')!.getBoundingClientRect()
     return fill.height / block.height
   })
 

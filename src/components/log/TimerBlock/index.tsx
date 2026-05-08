@@ -1,0 +1,60 @@
+import { useEffect, useState, type ReactNode } from "react";
+import "./TimerBlock.css";
+
+interface TimerBlockProps {
+  tone: "hold" | "rest";
+  label: string;
+  setNumber: number;
+  countdown: string;
+  formattedTarget: string;
+  fillPct: number;
+  // Announced when it changes, so it names phases, never seconds.
+  status: string;
+  children: ReactNode;
+}
+
+// The block fills from the bottom as time passes. The countdown is drawn twice,
+// once on the empty part and once, inverted, on the filled part; the fill clips
+// the second copy, so the numeral stays readable without any blend mode.
+export function TimerBlock({ tone, label, setNumber, countdown, formattedTarget, fillPct, status, children }: TimerBlockProps) {
+  // A live region only announces changes, so it is filled once the block has mounted.
+  const [armed, setArmed] = useState(false);
+  useEffect(() => {
+    const id = setTimeout(() => setArmed(true), 100);
+    return () => clearTimeout(id);
+  }, []);
+
+  const face = (
+    <>
+      <div className="timerBlockTop">
+        <span>{label}</span>
+        <span>Set {setNumber}</span>
+      </div>
+      <div className="timerBlockCountdown">{countdown}</div>
+      <div className="timerBlockTarget">Target {formattedTarget}</div>
+    </>
+  );
+
+  return (
+    <section className={`timerBlock timerBlock--${tone}`} aria-label={`${label} timer`}>
+      <div className="timerBlockFace" role="timer" aria-label={`${label}, ${countdown}`}>
+        {face}
+      </div>
+      <div className="timerBlockFill" style={{ height: `${fillPct}%` }} aria-hidden="true">
+        <div className="timerBlockFace timerBlockFace--onFill">{face}</div>
+      </div>
+      <div className="timerBlockControls">{children}</div>
+      <span role="status" className="timerBlockAnnounce">
+        {armed ? status : ""}
+      </span>
+    </section>
+  );
+}
+
+export function TimerButton({ onClick, disabled, children }: { onClick: () => void; disabled?: boolean; children: ReactNode }) {
+  return (
+    <button type="button" className="timerBlockButton" onClick={onClick} disabled={disabled}>
+      {children}
+    </button>
+  );
+}
