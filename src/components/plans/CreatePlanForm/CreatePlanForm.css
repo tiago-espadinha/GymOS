@@ -198,6 +198,12 @@
   border-bottom-color: var(--color-accent);
 }
 
+.exerciseNameInput[aria-invalid='true']:focus-visible {
+  border-bottom-color: var(--color-danger);
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
 .exerciseError {
   display: flex;
   align-items: center;

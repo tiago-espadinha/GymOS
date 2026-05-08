@@ -130,4 +130,10 @@ describe('Field error', () => {
   it('uses the dim colour for placeholders', () => {
     expect(cssOf('Field')).toMatch(/::placeholder\s*{[^}]*color: var\(--color-text-dim\)/)
   })
+
+  it('keeps the danger border on a focused invalid field and rings it in lime', () => {
+    expect(cssOf('Field')).toMatch(
+      /\[aria-invalid='true'\]:focus-visible\s*{[^}]*border-color: var\(--color-danger\);[^}]*outline: var\(--border-focus\)/,
+    )
+  })
 })
