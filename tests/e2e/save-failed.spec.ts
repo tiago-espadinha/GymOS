@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
 import { importFromCSV } from '../../src/utils/csv'
+import { finishButton, logSet } from './log-set'
 
 const plan = {
   id: 'p1',
@@ -39,11 +40,9 @@ async function finishWithASet(page: Page) {
   await page.goto('/')
   await page.getByRole('button', { name: 'Start Push day' }).click()
   await page.getByRole('button', { name: /^Bench press/ }).click()
-  const inputs = page.locator('input[placeholder="0"]:visible')
-  await inputs.nth(0).fill('60')
-  await inputs.nth(1).fill('8')
+  await logSet(page, '60', '8')
   await page.getByRole('button', { name: 'All exercises' }).click()
-  await page.getByRole('button', { name: 'Finish session' }).click()
+  await finishButton(page).click()
   await page.getByLabel('Notes · optional').fill('Felt strong')
 }
 

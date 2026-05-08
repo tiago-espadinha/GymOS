@@ -53,3 +53,28 @@
   text-transform: uppercase;
   color: var(--color-text-muted);
 }
+
+.stepper-block--outlined {
+  outline: var(--border-control);
+  outline-offset: -2px;
+}
+
+.stepper-block__input {
+  width: 100%;
+  max-width: 4ch;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.stepper-block__input::placeholder {
+  color: var(--color-text-dim);
+}
+
+.stepper-block__input:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-segment);
+}

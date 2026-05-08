@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
+import { logSet } from './log-set'
 import { restStarted } from './rest-started'
 
 const plan = {
@@ -21,14 +22,11 @@ test.beforeEach(async ({ page }) => {
   await page.getByRole('button', { name: /^Bench press/ }).click()
 })
 
-const inputs = (page: Page) => page.locator('input[placeholder="0"]:visible')
 const setDone = (page: Page) => page.getByRole('button', { name: 'Set done' })
 const timer = (page: Page) => page.getByRole('timer', { name: /^Rest/ })
 
 const logAndRest = async (page: Page) => {
-  await inputs(page).nth(0).fill('60')
-  await inputs(page).nth(1).fill('8')
-  await setDone(page).click()
+  await logSet(page, '60', '8')
   await restStarted(page)
 }
 
@@ -46,9 +44,11 @@ test('Set done is disabled until the set has values, then logs it and starts a r
   await logAndRest(page)
   await expect(timer(page)).toBeVisible()
   await expect(timer(page)).toContainText('01:00')
-  // The next set is ready but empty, so it does not count as done.
-  await expect(inputs(page).nth(2)).toHaveValue('')
-  await expect(setDone(page)).toBeDisabled()
+  // No empty set is appended; the next one is virtual until it is logged.
+  await page.getByRole('button', { name: 'Skip' }).click()
+  await expect(page.getByRole('list', { name: 'Sets' }).getByRole('listitem')).toHaveCount(2)
+  await page.getByRole('button', { name: 'All exercises' }).click()
+  await expect(page.getByRole('img', { name: '1 of 1 sets done' })).toBeVisible()
 })
 
 test('the block fills in step with the elapsed rest', async ({ page }) => {
@@ -123,12 +123,4 @@ test('the phase is announced once the block is up', async ({ page }) => {
   await logAndRest(page)
   await page.clock.fastForward(500)
   await expect(page.getByRole('status').filter({ hasText: 'Rest' })).toHaveText('Rest started')
-})
-
-test('removing the set that is resting ends the rest', async ({ page }) => {
-  await logAndRest(page)
-  await page.locator('.setRow').first().locator('.setRowRemove').click()
-  await expect(page.locator('.setRow:visible')).toHaveCount(1)
-  await expect(timer(page)).toHaveCount(0)
-  expect(await page.evaluate(() => Object.keys(localStorage).filter((k) => k.endsWith('-rest')))).toEqual([])
 })

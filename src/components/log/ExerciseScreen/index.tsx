@@ -1,5 +1,4 @@
-import { ExerciseLog } from "../../../types";
-import { currentSetNumber } from "../../../utils/sessionList";
+import { ExerciseLog, Set } from "../../../types";
 import ExerciseLogger from "../ExerciseLogger";
 import "./ExerciseScreen.css";
 
@@ -11,6 +10,8 @@ interface ExerciseScreenProps {
   planName: string;
   /** The exercise after this one; none on the last. */
   next?: ExerciseLog;
+  /** This exercise's sets from last time. */
+  history: Set[];
   /** Hidden screens stay mounted so a running rest or hold keeps its timer. */
   hidden: boolean;
   titleId: string;
@@ -25,47 +26,39 @@ export function ExerciseScreen({
   count,
   planName,
   next,
+  history,
   hidden,
   titleId,
   onChange,
   onAllExercises,
   onNext,
 }: ExerciseScreenProps) {
-  const set = currentSetNumber(exercise);
-
   return (
     <section className="exerciseScreen" hidden={hidden} aria-labelledby={titleId}>
-      <div className="exerciseScreenKicker">
-        {set.total > 0 && (
-          <span className="exerciseScreenSet">
-            Set {set.number} of {set.total}
-          </span>
-        )}
-        <span className="exerciseScreenPlace">
-          {planName} · exercise {position} of {count}
-        </span>
-      </div>
-      <h1 id={titleId} className="exerciseScreenTitle" tabIndex={-1}>
-        {exercise.name}
-      </h1>
-
-      <ExerciseLogger exercise={exercise} onChange={onChange} />
-
-      <div className="exerciseScreenNav">
-        <button type="button" className="exerciseScreenBack" onClick={onAllExercises}>
-          All exercises
-        </button>
-        {next && (
-          <button
-            type="button"
-            className="exerciseScreenNext"
-            aria-label={`Next exercise: ${next.name}`}
-            onClick={onNext}
-          >
-            {next.name} <span aria-hidden="true">→</span>
-          </button>
-        )}
-      </div>
+      <ExerciseLogger
+        exercise={exercise}
+        onChange={onChange}
+        history={history}
+        place={`${planName} · exercise ${position} of ${count}`}
+        titleId={titleId}
+        footer={
+          <div className="exerciseScreenNav">
+            <button type="button" className="exerciseScreenBack" onClick={onAllExercises}>
+              All exercises
+            </button>
+            {next && (
+              <button
+                type="button"
+                className="exerciseScreenNext"
+                aria-label={`Next exercise: ${next.name}`}
+                onClick={onNext}
+              >
+                {next.name} <span aria-hidden="true">→</span>
+              </button>
+            )}
+          </div>
+        }
+      />
     </section>
   );
 }

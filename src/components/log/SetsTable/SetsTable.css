@@ -1,0 +1,103 @@
+.setsTable {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: var(--radius-surface);
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.setsTableRow {
+  display: grid;
+  grid-template-columns: var(--size-row-summary) 1fr auto;
+  align-items: center;
+  min-height: var(--size-row-summary);
+  padding: 0 var(--space-2) 0 var(--space-4);
+  border-bottom: var(--border-hairline);
+}
+
+.setsTableRow:last-child {
+  border-bottom: 0;
+}
+
+.setsTableRow--inverted {
+  background: var(--color-inverse);
+  color: var(--color-on-inverse);
+  border-bottom-color: transparent;
+}
+
+.setsTableRow--pending {
+  padding-right: 0;
+}
+
+/* 24px display type, so the dim grey keeps its contrast. */
+.setsTableLabel {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-set-label);
+  text-transform: uppercase;
+  color: var(--color-text-dim);
+}
+
+.setsTableRow--inverted .setsTableLabel {
+  color: inherit;
+}
+
+.setsTableValues {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-body);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.setsTableValues--done {
+  font-weight: 600;
+}
+
+.setsTableRow--pending .setsTableValues {
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.setsTableTag {
+  padding-right: var(--space-2);
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.setsTableEdit,
+.setsTableRemove {
+  min-height: var(--size-control);
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+.setsTableEdit {
+  padding: 0 var(--space-3);
+  color: var(--color-text);
+  font-size: var(--text-secondary);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.setsTableRemove {
+  display: grid;
+  place-items: center;
+  min-width: var(--size-control);
+  padding: 0;
+  color: var(--color-text-muted);
+}
+
+.setsTableEdit:focus-visible,
+.setsTableRemove:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: -2px;
+}

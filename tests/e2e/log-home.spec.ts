@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
+import { finishButton, logSet } from './log-set'
 
 const plans = [
   { id: 'p1', name: 'Push day', desc: '', exercises: [{ id: 'e1', name: 'Bench press', muscleGroup: 'Chest' }] },
@@ -84,7 +85,7 @@ test('editing a saved session changes its date on Finish, and only there', async
   await openLog(page)
   await page.getByRole('button', { name: /^Edit Session 0/ }).click()
   await expect(page.locator('input[type="date"]')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Finish session' }).click()
+  await finishButton(page).click()
   await expect(page.getByLabel('Session date')).toHaveValue('2026-11-16')
   await page.getByLabel('Session date').fill('')
   await expect(page.getByText('Session 0 · MON 16 NOV')).toBeVisible()
@@ -101,9 +102,9 @@ test('a new session has no date field on Finish', async ({ page }) => {
   await page.getByLabel('Training plan').selectOption({ label: 'Push day' })
   await page.getByRole('button', { name: 'Start', exact: true }).click()
   await page.getByRole('button', { name: /^Bench press/ }).click()
-  await page.locator('input[placeholder="0"]:visible').nth(1).fill('8')
+  await logSet(page, '', '8')
   await page.getByRole('button', { name: 'All exercises' }).click()
-  await page.getByRole('button', { name: 'Finish session' }).click()
+  await finishButton(page).click()
   await expect(page.getByLabel('Session date')).toHaveCount(0)
 })
 

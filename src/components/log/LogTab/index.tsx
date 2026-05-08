@@ -173,6 +173,8 @@ export function LogTab({
               planName={session.planName}
               exercises={session.exercises}
               onChangeExercise={onUpdateExercise}
+              sessions={sessions}
+              editingId={editingId}
               header={
                 <header className="logTabHeader">
                   <div className="logTabHeading">

@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
+import { finishButton, logSet } from './log-set'
 
 const plan = {
   id: 'p1',
@@ -19,13 +20,9 @@ test.beforeEach(async ({ page }) => {
   await page.getByRole('button', { name: 'Start Push day' }).click()
 })
 
-const finishButton = (page: Page) => page.getByRole('button', { name: 'Finish session' })
-
 const logBench = async (page: Page) => {
   await page.getByRole('button', { name: /^Bench press/ }).click()
-  const inputs = page.locator('input[placeholder="0"]:visible')
-  await inputs.nth(0).fill('60')
-  await inputs.nth(1).fill('8')
+  await logSet(page, '60', '8')
   await page.getByRole('button', { name: 'All exercises' }).click()
 }
 
@@ -48,7 +45,7 @@ test('the Done screen totals the logged sets only', async ({ page }) => {
 
 test('kg moved is left out when nothing was lifted', async ({ page }) => {
   await page.getByRole('button', { name: /^Bench press/ }).click()
-  await page.locator('input[placeholder="0"]:visible').nth(1).fill('15')
+  await logSet(page, '', '15')
   await page.getByRole('button', { name: 'All exercises' }).click()
   await finishButton(page).click()
   await expect(page.getByText('kg moved')).toHaveCount(0)
