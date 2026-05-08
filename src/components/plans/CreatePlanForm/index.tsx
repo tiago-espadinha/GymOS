@@ -20,8 +20,8 @@ export function CreatePlanForm({ onSave, onCancel }: CreatePlanFormProps) {
   const [desc, setDesc] = useState("");
   // Errors show after the first Save and then follow every edit.
   const [submitted, setSubmitted] = useState(false);
-  // The last valid Save was refused by the browser; the form keeps its values.
-  const [saveFailed, setSaveFailed] = useState(false);
+  // Refused Saves in a row; the form keeps its values meanwhile.
+  const [saveFailures, setSaveFailures] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
   // A fresh object per request, so a repeated Save with the same errors still moves focus.
   const [focusRequest, setFocusRequest] = useState<{ selector: string } | null>(null);
@@ -43,10 +43,10 @@ export function CreatePlanForm({ onSave, onCancel }: CreatePlanFormProps) {
   const save = () => {
     const result = buildPlan(name, desc, exercises);
     if ("plan" in result) {
-      setSaveFailed(!onSave(result.plan));
+      if (!onSave(result.plan)) setSaveFailures((n) => n + 1);
       return;
     }
-    setSaveFailed(false);
+    setSaveFailures(0);
     setSubmitted(true);
     const [firstUnnamed] = result.errors.unnamed;
     if (result.errors.name) focus(PLAN_NAME);
@@ -105,13 +105,14 @@ export function CreatePlanForm({ onSave, onCancel }: CreatePlanFormProps) {
             {count === 1 ? "1 thing to fix before saving" : `${count} things to fix before saving`}
           </p>
         )}
-        {saveFailed && (
-          <SaveFailedAlert>
+        {/* Keyed on the count, so a refused Try again is announced again. */}
+        {saveFailures > 0 && (
+          <SaveFailedAlert key={saveFailures}>
             This browser refused to store the plan: storage is full or blocked. Your plan is still on this
             screen. Try again.
           </SaveFailedAlert>
         )}
-        <PrimaryButton type="submit">{saveFailed ? "Try again" : "Save plan"}</PrimaryButton>
+        <PrimaryButton type="submit">{saveFailures > 0 ? "Try again" : "Save plan"}</PrimaryButton>
       </div>
     </form>
   );

@@ -47,8 +47,8 @@ export function LogTab({
   const [homeDate, setHomeDate] = useState(today());
   const [saved, setSaved] = useState("");
   const [finishing, setFinishing] = useState(false);
-  // The last Save on the Done screen was refused, so the session is not stored.
-  const [saveFailed, setSaveFailed] = useState(false);
+  // Refused Saves in a row on the Done screen; 0 once a save lands or Done closes.
+  const [saveFailures, setSaveFailures] = useState(0);
 
   const titleRef = useRef<HTMLHeadingElement>(null);
   const inSession = Boolean(session);
@@ -84,7 +84,7 @@ export function LogTab({
       if (!window.confirm(question)) return;
     }
     if (session) clearSessionRests(session.exercises);
-    setSaveFailed(false);
+    setSaveFailures(0);
     setFinishing(false);
     onEnd();
   };
@@ -100,10 +100,10 @@ export function LogTab({
       : [stored, ...sessions];
     // A refused write keeps the Done screen open with the notes, so nothing is lost.
     if (!commitSessions(next)) {
-      setSaveFailed(true);
+      setSaveFailures((n) => n + 1);
       return;
     }
-    setSaveFailed(false);
+    setSaveFailures(0);
     setSaved(editingId ? "✓ Session updated!" : "✓ Session saved!");
     setTimeout(() => setSaved(""), 4000);
     clearSessionRests(session.exercises);
@@ -112,7 +112,7 @@ export function LogTab({
   };
 
   const downloadSession = () => {
-    const unsaved = session && toWorkoutSession(session, editingId ?? generateId());
+    const unsaved = session && toWorkoutSession(session, editingId ?? "");
     if (unsaved) downloadCSV(exportToCSV([], [unsaved]), `gymos_session_${unsaved.date}.csv`);
   };
 
@@ -143,11 +143,11 @@ export function LogTab({
           session={session}
           onNotes={(notes) => onUpdate({ notes })}
           onSave={saveSession}
-          saveFailed={saveFailed}
+          saveFailures={saveFailures}
           onDownload={downloadSession}
           onBack={() => {
             backFromFinish.current = true;
-            setSaveFailed(false);
+            setSaveFailures(0);
             setFinishing(false);
           }}
           onCancel={cancelSession}

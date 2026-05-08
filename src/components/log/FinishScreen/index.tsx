@@ -9,18 +9,19 @@ interface FinishScreenProps {
   session: ActiveSession;
   onNotes: (notes: string) => void;
   onSave: () => void;
-  /** The last Save was refused by the browser; nothing was stored. */
-  saveFailed: boolean;
+  /** Saves refused by the browser in a row; nothing was stored while above 0. */
+  saveFailures: number;
   /** Saves the unsaved session as a CSV file, offered after a failed save. */
   onDownload: () => void;
   onBack: () => void;
   onCancel: () => void;
 }
 
-export function FinishScreen({ session, onNotes, onSave, saveFailed, onDownload, onBack, onCancel }: FinishScreenProps) {
+export function FinishScreen({ session, onNotes, onSave, saveFailures, onDownload, onBack, onCancel }: FinishScreenProps) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => titleRef.current?.focus(), []);
 
+  const saveFailed = saveFailures > 0;
   const totals = sessionTotals(session.exercises);
   const rows = session.exercises.filter((ex) => ex.sets.some(isLoggedSet));
   const stats = [
@@ -50,15 +51,6 @@ export function FinishScreen({ session, onNotes, onSave, saveFailed, onDownload,
         </dl>
       </section>
 
-      {saveFailed && (
-        <div className="finishAlert">
-          <SaveFailedAlert>
-            This browser refused to store the session: storage is full or blocked. Your sets are still on this
-            screen. Try again, or download them so nothing is lost.
-          </SaveFailedAlert>
-        </div>
-      )}
-
       <ul className="finishRows" role="list">
         {rows.map((ex) => (
           <li key={ex.id} className="finishRow">
@@ -69,6 +61,13 @@ export function FinishScreen({ session, onNotes, onSave, saveFailed, onDownload,
       </ul>
 
       <div className="finishActions">
+        {/* Keyed on the count, so a refused Try again is announced again. */}
+        {saveFailed && (
+          <SaveFailedAlert key={saveFailures}>
+            This browser refused to store the session: storage is full or blocked. Your sets are still on this
+            screen. Try again, or download them so nothing is lost.
+          </SaveFailedAlert>
+        )}
         <Field
           label="Notes · optional"
           value={session.notes}

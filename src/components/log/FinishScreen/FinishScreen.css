@@ -94,13 +94,9 @@
   padding: var(--space-4) 0 var(--space-5);
 }
 
-.finishAlert {
-  padding-top: var(--space-5);
-}
-
-/* Secondary to Try again: outlined, body type, 64 tall as drawn. */
+/* Secondary to Try again: outlined, in body type. */
 .finishDownload {
-  min-height: 64px;
+  min-height: var(--size-action);
   border: var(--border-control);
   border-radius: var(--radius-pill);
   background: none;
