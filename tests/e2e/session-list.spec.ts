@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
+import { restStarted } from './rest-started'
 
 const plan = {
   id: 'p1',
@@ -92,6 +93,7 @@ test('a running rest survives a reload and still shows on the strip', async ({ p
   await row(page, 'Bench press').click()
   await logSet(page, '60', '8')
   await page.getByRole('button', { name: 'Set done' }).click()
+  await restStarted(page)
   await page.reload()
   await expect(page.getByRole('button', { name: /^Rest/ })).toContainText('Bench press')
   await page.getByRole('button', { name: /^Rest/ }).click()

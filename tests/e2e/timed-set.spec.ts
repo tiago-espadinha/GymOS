@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
+import { restStarted } from './rest-started'
 
 const plan = {
   id: 'p1',
@@ -59,6 +60,7 @@ test('at the target the hold is logged and a lime rest starts; Skip saves the re
   await expect(rest(page)).toBeVisible()
   const fill = await page.locator('.timerBlockFill').evaluate((el) => getComputedStyle(el).backgroundColor)
   expect(fill).toBe('rgb(198, 255, 61)')
+  await restStarted(page)
   await page.clock.fastForward(10_000)
   await button(page, 'Skip').click()
   await expect(rest(page)).toHaveCount(0)
