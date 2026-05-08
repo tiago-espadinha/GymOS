@@ -27,7 +27,7 @@ describe('PrimaryButton', () => {
 })
 
 describe('PillButton', () => {
-  it.each(['lime', 'white', 'outline-white', 'outline-black'] as const)(
+  it.each(['lime', 'white', 'outline-white', 'outline-black', 'outline-danger'] as const)(
     'renders the %s variant',
     (variant) => {
       expect(render(createElement(PillButton, { variant }, 'Go'))).toContain(

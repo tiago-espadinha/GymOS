@@ -6,8 +6,9 @@ import './PillButton.css';
  * white: filled white (+ New plan)
  * outline-white: outlined white (Finish)
  * outline-black: outlined black, for use on a filled block
+ * outline-danger: outlined in the danger colour (Delete)
  */
-export type PillVariant = 'lime' | 'white' | 'outline-white' | 'outline-black';
+export type PillVariant = 'lime' | 'white' | 'outline-white' | 'outline-black' | 'outline-danger';
 
 interface PillButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'style'> {

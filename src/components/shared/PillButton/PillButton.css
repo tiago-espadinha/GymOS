@@ -47,6 +47,12 @@
   color: var(--color-on-accent);
 }
 
+.pill-button--outline-danger {
+  background: transparent;
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
 .pill-button--outline-black:focus-visible {
   outline-color: var(--color-on-accent);
 }
