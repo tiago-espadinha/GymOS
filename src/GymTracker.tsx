@@ -2,28 +2,30 @@ import { useState, useEffect } from "react";
 import { PlansTab } from "./components/plans";
 import { LogTab } from "./components/log";
 import { ProgressTab } from "./components/progress";
+import { TabBar } from "./components/shared";
+import { useActiveSession } from "./hooks/useActiveSession";
+import { fromPlan } from "./utils/activeSession";
+import { today } from "./utils/date";
 import { TrainingPlan, WorkoutSession } from "./types";
 import { getFromStorage, saveToStorage } from "./utils/storage";
 import "./GymTracker.css";
 
-interface TabConfig {
-  id: string;
-  label: string;
-  icon?: string;
-}
+const TABS = [
+  { id: "plans", label: "Plans" },
+  { id: "log", label: "Log" },
+  { id: "progress", label: "Progress" },
+] as const;
 
-const TABS: TabConfig[] = [
-  { id: "plans", label: "Plans", icon: "📋​" },
-  { id: "log", label: "Log", icon: "✏️​" },
-  { id: "progress", label: "Progress", icon: "📈" },
-];
+type TabId = (typeof TABS)[number]["id"];
+
+const isTabId = (v: unknown): v is TabId => TABS.some((t) => t.id === v);
 
 export default function GymTracker() {
-  const [tab, setTab] = useState<string>("plans");
+  const [tab, setTab] = useState<TabId>("plans");
   const [plans, setPlans] = useState<TrainingPlan[]>([]);
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const [logPlan, setLogPlan] = useState<TrainingPlan | null>(null);
+  const activeSession = useActiveSession();
   const [selectedExName, setSelectedExName] = useState<string>("");
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export default function GymTracker() {
       const ex = await getFromStorage<string>("gym:selectedExName");
       setPlans(p || []);
       setSessions(s || []);
-      if (t) setTab(t);
+      if (isTabId(t)) setTab(t);
       if (ex) setSelectedExName(ex);
       setLoaded(true);
     })();
@@ -65,8 +67,7 @@ export default function GymTracker() {
   }, [selectedExName, loaded]);
 
   const handleLogPlan = (plan: TrainingPlan) => {
-    setLogPlan(plan);
-    setTab("log");
+    activeSession.begin(fromPlan(plan, today()));
   };
 
   if (!loaded) {
@@ -90,50 +91,38 @@ export default function GymTracker() {
     );
   }
 
+  const { session } = activeSession;
+  // An active session takes over the screen: it shows the log and no tab bar.
+  const visibleTab: TabId = session ? "log" : tab;
+
+  const endSession = () => {
+    activeSession.end();
+    setTab("log");
+  };
+
   return (
     <div className="gymOS">
-      {/* Navigation */}
-      <div className="navBar">
-        <div className="logoArea">◈ GymOS</div>
-
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`tabButton ${tab === t.id ? "active" : ""}`}
-          >
-            <span className="tabIcon" style={{ display: "none" }}>
-              {t.icon}
-            </span>
-            <span className="tabLabel">{t.label}</span>
-          </button>
-        ))}
-
-        <div className="navSpacer" />
-        <div className="navStats">
-          <span>{plans.length} plans</span>
-          <span>{sessions.length} sessions</span>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="mainContent">
-        {tab === "plans" && (
+      <div className={`mainContent ${session ? "" : "withTabs"}`}>
+        {visibleTab === "plans" && (
           <PlansTab
             plans={plans}
             setPlans={setPlans}
             onLogPlan={handleLogPlan}
           />
         )}
-        {tab === "log" && (
+        {visibleTab === "log" && (
           <LogTab
             plans={plans}
             sessions={sessions}
             setSessions={setSessions}
-            initialPlan={logPlan || undefined}
+            session={session}
+            onBegin={activeSession.begin}
+            onUpdate={activeSession.update}
+            onUpdateExercise={activeSession.updateExercise}
+            onEnd={endSession}
           />
         )}
-        {tab === "progress" && (
+        {visibleTab === "progress" && (
           <ProgressTab
             plans={plans}
             sessions={sessions}
@@ -144,6 +133,12 @@ export default function GymTracker() {
           />
         )}
       </div>
+
+      {!session && (
+        <div className="shellTabs">
+          <TabBar tabs={TABS} active={tab} onChange={setTab} />
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import './TabBar.css';
 
 interface TabBarProps<T extends string> {
-  tabs: { id: T; label: string }[];
+  tabs: readonly { id: T; label: string }[];
   active: T;
   onChange: (id: T) => void;
 }
