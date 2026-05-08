@@ -23,17 +23,21 @@ export const formatDateKicker = (d: string): string => {
     .toUpperCase();
 };
 
-// "4 MAY", or "27 NOV 2023" outside the current year: the Progress last/best labels.
-export const formatDateStat = (d: string, todayStr: string): string => {
+// "4 May", or "27 Nov 2023" outside the current year.
+export const formatDayMonth = (d: string, todayStr: string): string => {
   const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' };
   if (d.slice(0, 4) !== todayStr.slice(0, 4)) options.year = 'numeric';
-  return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', options).toUpperCase();
+  return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', options);
 };
+
+// "4 MAY": the Progress last/best labels.
+export const formatDateStat = (d: string, todayStr: string): string => formatDayMonth(d, todayStr).toUpperCase();
 
 export default {
   today,
   formatDate,
   formatDateShort,
   formatDateKicker,
+  formatDayMonth,
   formatDateStat,
 };

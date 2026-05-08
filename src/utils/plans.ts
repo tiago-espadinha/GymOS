@@ -1,4 +1,5 @@
 import { TrainingPlan, WorkoutSession } from "../types";
+import { formatDayMonth } from "./date";
 
 // Distinct muscle groups of a plan, in the order they first appear.
 export function muscleGroupsOf(plan: TrainingPlan): string[] {
@@ -47,21 +48,12 @@ export function lastTrained(planId: string, sessions: WorkoutSession[]): string 
   return latest;
 }
 
-// "2 May", or "27 Nov 2023" outside the current year.
-export function formatDayMonth(d: string, todayStr: string): string {
-  const options: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" };
-  if (d.slice(0, 4) !== todayStr.slice(0, 4)) options.year = "numeric";
-  return new Date(d + "T12:00:00").toLocaleDateString("en-GB", options);
-}
-
 // "Archived today · 7 exercises", "Archived 12 Oct · 6 exercises", or "Archived · 5 exercises" with no date.
 export function archivedSummary(plan: TrainingPlan, todayStr: string): string {
-  const when = !plan.archivedAt
-    ? "Archived"
-    : plan.archivedAt === todayStr
-      ? "Archived today"
-      : `Archived ${formatDayMonth(plan.archivedAt, todayStr)}`;
-  return `${when} · ${exerciseCount(plan)}`;
+  const count = exerciseCount(plan);
+  if (!plan.archivedAt) return `Archived · ${count}`;
+  if (plan.archivedAt === todayStr) return `Archived today · ${count}`;
+  return `Archived ${formatDayMonth(plan.archivedAt, todayStr)} · ${count}`;
 }
 
 // "7 exercises · last trained 2 May", or just the count when it was never trained.
