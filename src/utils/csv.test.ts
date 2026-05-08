@@ -106,12 +106,14 @@ describe("importFromCSV", () => {
       "plan,,,,Bench Press,Chest,strength,reps,,,,", // no plan name
       "session,2026-11-16,Push,,,Chest,strength,reps,60,10,,", // no exercise
       "session,,Push,,Bench Press,Chest,strength,reps,60,10,,", // no date
+      "plan,,Push,,Dips,Chest,yoga,reps,,,,", // unknown category
+      "session,2026-11-16,Push,,Bench Press,Chest,strength,laps,60,10,,", // unknown tracking
       "session,2026-11-16,Push,,Bench Press,Chest,strength,reps,60,10,,",
       "",
     ].join("\r\n");
     const result = importFromCSV(csv);
 
-    expect(result.skippedRows).toBe(5);
+    expect(result.skippedRows).toBe(7);
     expect(result.plans).toHaveLength(1);
     expect(result.sessions).toHaveLength(1);
   });

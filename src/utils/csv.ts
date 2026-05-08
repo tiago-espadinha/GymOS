@@ -94,8 +94,7 @@ export function importFromCSV(csv: string): CSVImport {
     if (!line) continue;
 
     const parts = parseCSVLine(line);
-    const minCols = isCurrent ? 12 : 8;
-    if (!isWellFormed(parts, minCols)) {
+    if (!isWellFormed(parts, isCurrent)) {
       skippedRows++;
       continue;
     }
@@ -204,12 +203,17 @@ export function importFromCSV(csv: string): CSVImport {
   };
 }
 
+const CATEGORIES: readonly string[] = ["strength", "calisthenics", "cardio"] satisfies ExerciseCategory[];
+const TRACKING_TYPES: readonly string[] = ["reps", "time"] satisfies TrackingType[];
+
 // A row needs every column, a known type, a plan name and an exercise name; a session row also needs its date.
-function isWellFormed(parts: string[], minCols: number): boolean {
-  if (parts.length < minCols) return false;
-  const [type, date, name, , exercise] = parts;
+// Category and tracking are checked because timers and presets look them up and would fail on an unknown value.
+function isWellFormed(parts: string[], isCurrent: boolean): boolean {
+  if (parts.length < (isCurrent ? 12 : 8)) return false;
+  const [type, date, name, , exercise, , category, tracking] = parts;
   if (type !== "plan" && type !== "session") return false;
   if (!name || !exercise) return false;
+  if (isCurrent && (!CATEGORIES.includes(category) || !TRACKING_TYPES.includes(tracking))) return false;
   return type === "plan" || Boolean(date);
 }
 
