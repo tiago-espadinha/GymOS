@@ -51,6 +51,22 @@ describe('ChipGroup', () => {
   })
 })
 
+describe('ChipGroup with an unavailable option', () => {
+  it('disables that chip and dims it', () => {
+    const html = renderToStaticMarkup(
+      createElement(ChipGroup, {
+        label: 'Unit',
+        options: [options[0], { ...options[1], disabled: true }],
+        value: 'kg',
+        onChange: noop,
+      }),
+    )
+    expect(html.match(/disabled=""/g)).toHaveLength(1)
+    expect(html).toMatch(/disabled=""[^>]*>LB/)
+    expect(cssOf('ChipGroup')).toContain('.chip-group__chip:disabled')
+  })
+})
+
 describe('SegmentedControl', () => {
   it('marks only the selected segment as pressed', () => {
     const html = renderToStaticMarkup(

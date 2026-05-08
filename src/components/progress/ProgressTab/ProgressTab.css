@@ -1,416 +1,232 @@
-.customTooltip {
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
-  border-radius: 8px;
-  padding: 12px 16px;
-  font-size: 12px;
-  min-width: 140px;
-}
-
-.tooltipDate {
-  color: var(--color-text-muted);
-  margin-bottom: 6px;
-  font-size: 11px;
-}
-
-.tooltipValue {
-  color: var(--color-text);
-  font-weight: 800;
-  font-size: 18px;
-  margin-bottom: 4px;
-  letter-spacing: -0.02em;
-}
-
-.tooltipStatus {
-  color: var(--color-accent);
-  font-weight: 600;
-  font-size: 11px;
-}
-.progressHeader {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--color-text);
-  letter-spacing: -0.02em;
-  margin-bottom: 28px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.noExercises {
-  text-align: center;
-  padding: 80px;
-  color: var(--color-text-muted);
-  font-size: 13px;
-  background: var(--color-surface);
-  border-radius: 12px;
-  border: 1px dashed var(--color-line);
-}
-
-.progressFilters {
-  display: flex;
-  gap: 14px;
-  margin-bottom: 28px;
-  flex-wrap: wrap;
-  align-items: end;
-}
-.planFilter {
-  flex: 0.5;
-  min-width: 200px;
-}
-.progressFilter,
-.exerciseFilter {
-  flex: 1;
-  min-width: 200px;
-}
-
-.timeRangeFilter {
-  display: flex;
-}
-
-.timeRangeFilter > .label {
-  margin: auto;
-  flex: 0.2;
-}
-
-.timeRangeFilter > .progressMetric,
-.timeRangeFilter > .progressMetric > .metricButton {
-  flex: 1;
-}
-
-@media (max-width: 600px) {
-  .progressHeader {
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  .progressFilters {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .planFilter,
-  .exerciseFilter,
-  .metricFilter,
-  .timeRangeFilter {
-    flex: none;
-    width: 100%;
-    min-width: 0;
-    display: flex;
-  }
-
-  .planFilter > .label,
-  .exerciseFilter > .label,
-  .metricFilter > .label {
-    margin: auto;
-    flex: 0.5;
-  }
-
-  .timeRangeFilter > .label {
-    display: none;
-  }
-
-  .planFilter > select {
-    margin-left: 12px;
-    flex: 1;
-  }
-
-  .exerciseFilter > .searchableSelect {
-    flex: 1;
-  }
-
-  .metricFilter > .progressMetric,
-  .timeRangeFilter > .progressMetric,
-  .progressMetric > .metricButton {
-    flex: 1;
-  }
-
-  .legend {
-    gap: 6px !important;
-  }
-}
-
-.progressMetric {
-  display: flex;
-  gap: 6px;
-}
-
-.metricButton {
-  padding: 9px 16px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  border: 1px solid var(--color-line);
-  background: transparent;
-  color: var(--color-text-muted);
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s;
-}
-
-.metricButton.active {
-  border: 1px solid var(--color-accent);
-  background: var(--color-surface);
-  color: var(--color-accent);
-}
-
-.noSessions {
-  text-align: center;
-  padding: 60px;
-  color: var(--color-text-muted);
-  font-size: 13px;
-  background: var(--color-surface);
-  border-radius: 10px;
-  border: 1px dashed var(--color-line);
-}
-
-.exerciseName {
-  color: var(--color-text);
-  font-weight: 700;
-}
-
-.statsGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-@media (max-width: 768px) {
-  .statsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .statsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .statCard {
-    padding: 12px !important;
-  }
-}
-
-.statCard {
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.statLabel {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--color-text-muted);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-bottom: 10px;
-}
-
-.statValue {
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--color-text);
-  letter-spacing: -0.02em;
-}
-
-.chartContainer {
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
-  border-radius: 10px;
-  padding: 24px;
-}
-
-.chartWrapper {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 8px;
-}
-
-.chartWrapper::-webkit-scrollbar {
-  height: 4px;
-}
-
-.chartWrapper::-webkit-scrollbar-track {
-  background: var(--color-surface);
-  border-radius: 4px;
-}
-
-.chartWrapper::-webkit-scrollbar-thumb {
-  background: var(--color-line-strong);
-  border-radius: 4px;
-}
-
-.chartWrapper::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
-}
-
-.legend {
-  display: flex;
-  gap: 18px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.legendItem {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 11px;
-  color: var(--color-text-muted);
-}
-
-.legendColor {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.chartArea {
-  height: 280px;
-  width: 100%;
-}
-
-@media (max-width: 600px) {
-  .chartArea {
-    /* No fixed min-width here, we will control it or let it be flexible */
-  }
-}
-
-.analysisSummary {
-  margin-top: 14px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
-  border-radius: 8px;
-  padding: 16px;
-  font-size: 12px;
-  line-height: 1.7;
-  color: var(--color-text-muted);
+.progressTab {
   display: flex;
   flex-direction: column;
+  gap: var(--space-4);
+  max-width: 480px; /* the phone column, centred until wider screens are designed */
+  margin: 0 auto;
 }
 
-.analysisLabel {
+.progressHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.progressKicker {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.progressDataLink {
+  min-height: var(--size-control);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-secondary);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.progressDataLink:hover,
+.progressDataLink[aria-expanded='true'] {
   color: var(--color-text);
+}
+
+.progressDataLink:focus-visible,
+.progressPicker select:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+.progressVisuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.progressPicker {
+  position: relative;
+}
+
+.progressPicker select {
+  appearance: none;
+  width: 100%;
+  min-height: var(--size-chip);
+  padding: 0 calc(var(--space-7) + var(--space-2)) 0 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-section-title-lg);
+  line-height: 1;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.progressPicker option {
+  background: var(--color-surface);
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  text-transform: none;
+}
+
+.progressPickerChevron {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: var(--space-5);
+  height: var(--space-5);
+  transform: translateY(-50%);
+  fill: none;
+  stroke: var(--color-text-muted);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.progressMetric .segmented {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--color-surface);
+  border-radius: var(--radius-pill);
+}
+
+.progressMetric .segmented__segment {
+  padding: 0;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-small);
+}
+
+.progressMetric .segmented__segment:not([aria-pressed='true']) {
+  color: var(--color-text-muted);
+}
+
+.progressMetric .segmented__segment[aria-pressed='true'] {
   font-weight: 700;
 }
 
-.improvementStat {
-  color: var(--color-accent);
-}
-.stagnationStat {
-  color: var(--color-text);
-}
-
-.gainStat {
-  color: var(--color-accent);
+.progressStats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
 }
 
-.declineStat {
-  color: var(--color-danger);
-}
-
-.modalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--color-bg);
+.progressStat {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
+  flex-direction: column;
+  gap: var(--space-1);
+  container-type: inline-size;
 }
 
-.importModal {
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
-  border-radius: 12px;
-  padding: 32px;
-  width: 90%;
-  max-width: 480px;
-  box-shadow: var(--shadow-none);
-}
-
-@media (max-width: 480px) {
-  .importModal {
-    padding: 24px 16px;
-  }
-
-  .modalActions {
-    flex-direction: column-reverse;
-    gap: 16px;
-  }
-
-  .modalActions > div {
-    flex-direction: column;
-    width: 100%;
-  }
-}
-
-.importModal h3 {
-  margin: 0 0 16px 0;
+.progressStatKicker {
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
   color: var(--color-accent);
-  font-size: 18px;
-  letter-spacing: -0.01em;
 }
 
-.importModal p {
+.progressStat--best .progressStatKicker {
   color: var(--color-text-muted);
-  font-size: 13px;
-  line-height: 1.6;
-  margin-bottom: 12px;
 }
 
-.modalQuestion {
-  color: var(--color-text) !important;
+.progressStatValue {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-2);
+}
+
+.progressStatFigure {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  line-height: var(--leading-stat);
+  font-variant-numeric: tabular-nums;
+}
+
+.progressStat--best .progressStatFigure {
+  color: var(--color-text-dim);
+}
+
+.progressStatUnit {
+  font-size: var(--text-body);
   font-weight: 600;
-  margin-top: 24px;
-  margin-bottom: 24px !important;
+  color: var(--color-text-muted);
 }
 
-.modalActions {
+.progressFigure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.progressChart {
+  height: 170px; /* the board's chart height */
+}
+
+.progressCaption {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-top: 32px;
-}
-
-.importModeToggle {
-  display: flex;
-  background: var(--color-surface);
-  padding: 3px;
-  border-radius: 8px;
-  border: 1px solid var(--color-line);
-}
-
-.modeButton {
-  padding: 6px 12px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  border: none;
-  background: transparent;
+  gap: var(--space-2);
+  font-size: var(--text-small);
+  font-weight: 500;
   color: var(--color-text-muted);
-  border-radius: 5px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.2s;
 }
 
-.modeButton.active {
+.progressRanges .chip-group {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.progressRanges .chip-group__chip {
+  min-height: var(--size-control);
+  padding: 0;
+  font-size: var(--text-small);
+}
+
+.progressAnalysis,
+.progressEmpty {
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+}
+
+.progressEmpty {
+  color: var(--color-text-muted);
+}
+
+.progressTooltip {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-nested);
   background: var(--color-surface);
-  color: var(--color-accent);
-  box-shadow: var(--shadow-none);
 }
 
-.modeButton:hover:not(.active) {
+.progressTooltipDate {
+  font-size: var(--text-small);
+  color: var(--color-text-muted);
+}
+
+.progressTooltipValue {
+  font-size: var(--text-body);
+  font-weight: 700;
   color: var(--color-text);
-  background: var(--color-surface);
 }

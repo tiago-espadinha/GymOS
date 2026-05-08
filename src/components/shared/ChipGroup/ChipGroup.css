@@ -24,6 +24,11 @@
   color: var(--color-on-inverse);
 }
 
+.chip-group__chip:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 .chip-group__chip:focus-visible {
   outline: var(--border-focus);
   outline-offset: 2px;
