@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ExerciseLog, Set } from "../types";
-import { NO_VALUES, currentExerciseId, exerciseProgress, lastValues } from "./sessionList";
+import { NO_VALUES, currentExerciseId, exerciseProgress, exerciseSummary, lastValues, sessionTotals } from "./sessionList";
 
 const set = (over: Partial<Set> = {}): Set => ({ id: Math.random().toString(), weight: "", reps: "", ...over });
 
@@ -56,5 +56,36 @@ describe("lastValues", () => {
 
   it("is a dash when nothing is logged", () => {
     expect(lastValues(exercise([set()]))).toBe(NO_VALUES);
+  });
+});
+
+describe("sessionTotals", () => {
+  it("counts only logged sets and exercises, and sums weight times reps", () => {
+    const totals = sessionTotals([
+      exercise([set({ weight: "40", reps: "12" }), set({ weight: "40", reps: "10" }), set()], { id: "a" }),
+      exercise([set({ duration: "30" })], { id: "b" }),
+      exercise([set()], { id: "c" }),
+    ]);
+    expect(totals).toEqual({ exercises: 2, sets: 3, volume: 880 });
+  });
+
+  it("is all zeros when nothing is logged", () => {
+    expect(sessionTotals([exercise([set()])])).toEqual({ exercises: 0, sets: 0, volume: 0 });
+  });
+});
+
+describe("exerciseSummary", () => {
+  it("shows count × values when every logged set matches", () => {
+    const ex = exercise([set({ weight: "40", reps: "12" }), set({ weight: "40", reps: "12" }), set()]);
+    expect(exerciseSummary(ex)).toBe("2 × 40 kg × 12");
+  });
+
+  it("falls back to the set count when sets differ", () => {
+    const ex = exercise([set({ weight: "40", reps: "12" }), set({ weight: "42.5", reps: "10" })]);
+    expect(exerciseSummary(ex)).toBe("2 sets");
+  });
+
+  it("shows a dash when nothing is logged", () => {
+    expect(exerciseSummary(exercise([set()]))).toBe(NO_VALUES);
   });
 });

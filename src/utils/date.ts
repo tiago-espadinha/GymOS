@@ -15,8 +15,17 @@ export const formatDateShort = (d: string): string => {
   return `${date.getMonth() + 1}/${date.getDate()}`;
 };
 
+// "SUN 15 NOV", the kicker on the Finish screen.
+export const formatDateKicker = (d: string): string => {
+  return new Date(d + 'T12:00:00')
+    .toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+    .replace(',', '')
+    .toUpperCase();
+};
+
 export default {
   today,
   formatDate,
   formatDateShort,
+  formatDateKicker,
 };
