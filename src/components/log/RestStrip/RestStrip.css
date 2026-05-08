@@ -1,0 +1,51 @@
+.restStrip {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--size-row-summary);
+  padding: 0 var(--gutter);
+  border: 0;
+  background: var(--color-fill-rest);
+  color: var(--color-on-accent);
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-row-title);
+  line-height: 1;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.restStrip:focus-visible {
+  outline: 2px solid var(--color-on-accent);
+  outline-offset: -4px;
+}
+
+.restStrip:active {
+  opacity: 0.8;
+}
+
+.restStripLabel {
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+}
+
+.restStripTime {
+  font-variant-numeric: tabular-nums;
+}
+
+.restStripName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+}

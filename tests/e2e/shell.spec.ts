@@ -17,6 +17,10 @@ test.beforeEach(async ({ page }) => {
 const startPlan = (page: import('@playwright/test').Page) =>
   page.getByRole('button', { name: 'Start Push day' }).click()
 
+// Exercises start collapsed on the session list; open the first one to log into it.
+const openBench = (page: import('@playwright/test').Page) =>
+  page.getByRole('button', { name: /^Bench press/ }).click()
+
 const tabBar = (page: import('@playwright/test').Page) => page.getByRole('navigation', { name: 'Main' })
 
 test('browse mode shows the tab bar with Plans, Log and Progress', async ({ page }) => {
@@ -30,6 +34,7 @@ test('starting a plan hides the tabs; saving brings them back on Log', async ({ 
   await page.goto('/')
   await startPlan(page)
   await expect(tabBar(page)).toHaveCount(0)
+  await openBench(page)
   await page.getByPlaceholder('0').nth(0).fill('60')
   await page.getByPlaceholder('0').nth(1).fill('8')
   await page.getByRole('button', { name: 'Save Session' }).click()
@@ -49,10 +54,12 @@ test('cancelling an empty session brings the tabs back', async ({ page }) => {
 test('reloading mid-session restores the session and its logged set', async ({ page }) => {
   await page.goto('/')
   await startPlan(page)
+  await openBench(page)
   await page.getByPlaceholder('0').nth(0).fill('62.5')
   await page.reload()
   await expect(tabBar(page)).toHaveCount(0)
   await expect(page.getByText('Push day')).toBeVisible()
+  await openBench(page)
   await expect(page.getByPlaceholder('0').nth(0)).toHaveValue('62.5')
 })
 
@@ -85,6 +92,7 @@ test('editing a saved session updates it in place, also after a reload', async (
   await page.getByRole('button', { name: 'Edit' }).click()
   await expect(tabBar(page)).toHaveCount(0)
   await page.reload()
+  await openBench(page)
   await page.getByPlaceholder('0').nth(0).fill('55')
   await page.getByRole('button', { name: 'Update Session' }).click()
   await expect(tabBar(page)).toBeVisible()
@@ -97,6 +105,7 @@ test('editing a saved session updates it in place, also after a reload', async (
 test('cancelling a session with logged sets asks first', async ({ page }) => {
   await page.goto('/')
   await startPlan(page)
+  await openBench(page)
   await page.getByPlaceholder('0').nth(0).fill('60')
   page.once('dialog', (d) => d.dismiss())
   await page.getByRole('button', { name: 'Cancel' }).click()

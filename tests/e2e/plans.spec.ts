@@ -34,11 +34,11 @@ test('Start opens the session for that plan, and a reload restores it', async ({
   await page.goto('/')
   await page.getByRole('button', { name: 'Start Push day' }).click()
   await expect(tabBar(page)).toHaveCount(0)
-  await expect(page.getByText('Bench press')).toBeVisible()
+  await expect(page.getByRole('button', { name: /^Bench press/ })).toBeVisible()
   await expect(page.locator('input[type="date"]')).toHaveValue(new Date().toISOString().slice(0, 10))
   await page.reload()
   await expect(tabBar(page)).toHaveCount(0)
-  await expect(page.getByText('Bench press')).toBeVisible()
+  await expect(page.getByRole('button', { name: /^Bench press/ })).toBeVisible()
 })
 
 test('archived plans have no Start; Restore returns them to the active list', async ({ page }) => {

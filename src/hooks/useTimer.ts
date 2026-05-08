@@ -55,6 +55,18 @@ function clearPersisted(timerId: string) {
   }
 }
 
+// Read-only view of a timer another component owns, so a display elsewhere can
+// show it without running a second timer.
+export function readRunningTimer(
+  timerId: string,
+  now: number,
+): { startedAt: number; remainingMs: number } | null {
+  const state = loadPersisted(timerId);
+  if (!state?.isRunning || state.startedAt === null) return null;
+  const elapsedMs = state.accumulatedMs + Math.max(0, now - state.startedAt);
+  return { startedAt: state.startedAt, remainingMs: Math.max(0, state.targetMs - elapsedMs) };
+}
+
 export function formatClock(ms: number): string {
   const totalSeconds = Math.max(0, Math.round(ms / 1000));
   const hours = Math.floor(totalSeconds / 3600);

@@ -1,5 +1,6 @@
 .set-ticks {
   display: inline-flex;
+  flex-shrink: 0;
   gap: var(--space-1);
 }
 

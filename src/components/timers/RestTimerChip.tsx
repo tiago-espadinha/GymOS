@@ -3,6 +3,7 @@ import { useTimer } from "../../hooks/useTimer";
 import { PhaseTimer } from "./PhaseTimer";
 import { ExerciseCategory } from "../../types";
 import { DEFAULT_PRESETS } from "../../constants/timerPresets";
+import { restTimerId } from "../../utils/restTimers";
 import "./timers.css";
 
 interface RestTimerChipProps {
@@ -13,8 +14,9 @@ interface RestTimerChipProps {
 const REST_COLOR = "var(--color-fill-rest)";
 
 export function RestTimerChip({ baseId, category }: RestTimerChipProps) {
-  const [expanded, setExpanded] = useState(false);
-  const controls = useTimer(`${baseId}-rest`, DEFAULT_PRESETS[category].rest[0]);
+  const controls = useTimer(restTimerId(baseId), DEFAULT_PRESETS[category].rest[0]);
+  // A rest restored from storage shows as running instead of a collapsed chip.
+  const [expanded, setExpanded] = useState(controls.isRunning);
 
   if (!expanded) {
     return (
