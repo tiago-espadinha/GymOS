@@ -54,7 +54,7 @@ There are no environment variables (`.env.example` declares none) and no runtime
 ## Testing
 
 - Unit: Vitest, colocated as `src/**/*.test.ts`. Today it covers the storage helpers and the progress metrics. Run `npm test`.
-- End to end: Playwright in `tests/e2e/`, against the built app on port 4173 in a Pixel 7 mobile profile. `smoke.spec.ts` checks the three tabs load; `accessibility.spec.ts` runs axe (WCAG 2.1 A and AA) on the Plans, Log and Progress tabs. Run `npm run test:e2e`.
+- End to end: Playwright in `tests/e2e/`, against the built app on port 4173 (set `E2E_PORT` to use another) in a Pixel 7 mobile profile. `smoke.spec.ts` checks the three tabs load; `accessibility.spec.ts` runs axe (WCAG 2.1 A and AA) on the Plans, Log and Progress tabs. Run `npm run test:e2e`.
 - Lint and types: `npm run lint` and `npx tsc -b`.
 - Continuous integration: none configured.
 - Not automated: timers and the log flow beyond a page load, CSV import and export, desktop and other browsers, and any real-device check.
