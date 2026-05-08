@@ -97,3 +97,11 @@ describe('SegmentedControl', () => {
     expect(segments).toContain(':focus-visible')
   })
 })
+
+describe('SegmentedControl radii', () => {
+  it('nests radius 8 segments in a radius 12 track', () => {
+    const css = cssOf('SegmentedControl')
+    expect(css).toMatch(/\.segmented\s*{[^}]*border-radius: var\(--radius-nested\)/)
+    expect(css).toMatch(/\.segmented__segment\s*{[^}]*border-radius: var\(--radius-segment\)/)
+  })
+})

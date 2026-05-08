@@ -91,6 +91,7 @@
   --radius-pill: 999px;
   --radius-surface: 16px;
   --radius-nested: 12px;
+  --radius-segment: 8px; /* a segment in a 12 track with 4 padding */
 
   /* Borders */
   --border-hairline: 1px solid var(--color-line);
