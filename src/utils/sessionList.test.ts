@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ExerciseLog, Set } from "../types";
-import { NO_VALUES, currentExerciseId, currentSetNumber, exerciseProgress, exerciseSummary, lastValues, sessionTotals } from "./sessionList";
+import { NO_VALUES, currentExerciseId, currentSetNumber, exerciseProgress, exerciseSummary, lastTimeLabel, lastValues, rowSubtitle, sessionTotals } from "./sessionList";
 
 const set = (over: Partial<Set> = {}): Set => ({ id: Math.random().toString(), weight: "", reps: "", ...over });
 
@@ -95,12 +95,49 @@ describe("currentSetNumber", () => {
     expect(currentSetNumber(exercise([set({ weight: "60", reps: "8" }), set(), set()]))).toEqual({ number: 2, total: 3 });
   });
 
-  it("is the last set once every set is logged", () => {
-    expect(currentSetNumber(exercise([set({ reps: "8" }), set({ reps: "8" })]))).toEqual({ number: 2, total: 2 });
+  it("is a virtual next set once every set is logged", () => {
+    expect(currentSetNumber(exercise([set({ reps: "8" }), set({ reps: "8" })]))).toEqual({ number: 3, total: 3 });
   });
 
   it("counts a timed set with a held duration as logged", () => {
     const plank = exercise([set({ duration: "30", completed: true }), set()], { trackingType: "time" });
     expect(currentSetNumber(plank)).toEqual({ number: 2, total: 2 });
+  });
+});
+
+describe("rowSubtitle", () => {
+  const history = [set({ weight: "8", reps: "12" }), set({ weight: "8", reps: "10" })];
+
+  it("shows the first set of last time before anything is logged", () => {
+    expect(rowSubtitle(exercise([set()]), history)).toBe("Last 8 kg × 12");
+  });
+
+  it("says so when there is no history", () => {
+    expect(rowSubtitle(exercise([set()]), [])).toBe("Not logged recently");
+  });
+
+  it("shows the last set and progress while added sets are pending", () => {
+    const ex = exercise([set({ weight: "35", reps: "12" }), set(), set()]);
+    expect(rowSubtitle(ex, history)).toBe("35 kg × 12 · 1 of 3 done");
+  });
+
+  it("reads done once no set is pending", () => {
+    expect(rowSubtitle(exercise([set({ weight: "40", reps: "12" })]), [])).toBe("40 kg × 12 · done");
+  });
+});
+
+describe("lastTimeLabel", () => {
+  it("names a shared weight once", () => {
+    const history = ["12", "12", "10"].map((reps) => set({ weight: "35", reps }));
+    expect(lastTimeLabel(exercise([]), history)).toBe("Last time 35 kg × 12, 12, 10");
+  });
+
+  it("lists each set when weights differ", () => {
+    const history = [set({ weight: "35", reps: "12" }), set({ weight: "37.5", reps: "10" })];
+    expect(lastTimeLabel(exercise([]), history)).toBe("Last time 35 kg × 12, 37.5 kg × 10");
+  });
+
+  it("is empty without history", () => {
+    expect(lastTimeLabel(exercise([]), [])).toBe("");
   });
 });

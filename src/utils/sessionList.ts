@@ -2,6 +2,7 @@ import { formatClock } from "../hooks/useTimer";
 import { ExerciseLog, Set } from "../types";
 import { isLoggedSet } from "./activeSession";
 import { getExerciseMeta } from "./metrics";
+import { currentSetIndex } from "./setModel";
 
 export const NO_VALUES = "—";
 
@@ -14,15 +15,13 @@ export function currentExerciseId(exercises: ExerciseLog[]): string | null {
   return exercises.find((ex) => !ex.sets.some(isLoggedSet))?.id ?? null;
 }
 
-// The set being entered, counted from 1: the first one with nothing logged,
-// or the last set once all are logged.
+// The set being entered, counted from 1; the virtual next set counts in the total.
 export function currentSetNumber(exercise: ExerciseLog): { number: number; total: number } {
-  const total = exercise.sets.length;
-  const pending = exercise.sets.findIndex((s) => !isLoggedSet(s));
-  return { number: pending === -1 ? total : pending + 1, total };
+  const number = currentSetIndex(exercise) + 1;
+  return { number, total: Math.max(exercise.sets.length, number) };
 }
 
-function formatSet(set: Set, exercise: ExerciseLog): string {
+export function formatSet(set: Set, exercise: ExerciseLog): string {
   const meta = getExerciseMeta(exercise);
   if (meta.trackingType === "time") {
     const parts = [];
@@ -62,4 +61,25 @@ export function exerciseSummary(exercise: ExerciseLog): string {
   const values = logged.map((s) => formatSet(s, exercise));
   if (values.every((v) => v === values[0]) && values[0]) return `${logged.length} × ${values[0]}`;
   return `${logged.length} set${logged.length === 1 ? "" : "s"}`;
+}
+
+// A row's second line: this session's last set and progress once one is logged,
+// otherwise the first set of last time.
+export function rowSubtitle(exercise: ExerciseLog, history: Set[]): string {
+  const { done, total } = exerciseProgress(exercise);
+  if (done > 0) return `${lastValues(exercise)} · ${done < total ? `${done} of ${total} done` : "done"}`;
+  return history.length > 0 ? `Last ${formatSet(history[0], exercise)}` : "Not logged recently";
+}
+
+// "Last time 35 kg × 12, 12, 10", naming the weight once when every set shares it.
+export function lastTimeLabel(exercise: ExerciseLog, history: Set[]): string {
+  if (history.length === 0) return "";
+  const meta = getExerciseMeta(exercise);
+  const weight = history[0].weight;
+  const shared =
+    meta.trackingType === "reps" && parseFloat(weight) > 0 && history.every((s) => s.weight === weight && parseInt(s.reps) > 0);
+  const values = shared
+    ? `${weight} kg × ${history.map((s) => s.reps).join(", ")}`
+    : history.map((s) => formatSet(s, exercise)).join(", ");
+  return `Last time ${values}`;
 }
