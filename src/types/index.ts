@@ -44,6 +44,8 @@ export interface TrainingPlan {
   desc: string;
   exercises: Exercise[];
   isArchived?: boolean;
+  /** YYYY-MM-DD the plan was archived; absent on active plans and older data. */
+  archivedAt?: string;
 }
 
 export interface WorkoutSession {
