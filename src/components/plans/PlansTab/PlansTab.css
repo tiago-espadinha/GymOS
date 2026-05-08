@@ -3,6 +3,11 @@
   flex-direction: column;
 }
 
+/* Room under the list so the Undo toast never covers the last row. */
+.plansTab--toast {
+  padding-bottom: calc(var(--size-row-summary) + var(--space-4));
+}
+
 .plansTabHeader {
   display: flex;
   flex-wrap: wrap;

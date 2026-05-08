@@ -71,7 +71,7 @@ export function PlansTab({ plans, sessions, setPlans, onStartPlan, onImport }: P
   const showEmpty = activePlans.length === 0 && !creating;
 
   return (
-    <div className="plansTab" ref={root}>
+    <div className={`plansTab${archived ? ' plansTab--toast' : ''}`} ref={root}>
       <header className="plansTabHeader">
         <div className="plansTabHeading">
           <span className="plansTabCount">{plansCountLabel(activePlans.length, archivedPlans.length)}</span>

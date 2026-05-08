@@ -1,7 +1,7 @@
 .toast {
   position: fixed;
-  left: var(--space-3);
-  right: var(--space-3);
+  left: var(--space-4);
+  right: var(--space-4);
   bottom: calc(var(--size-tabbar) + var(--space-4));
   z-index: 150;
   box-sizing: border-box;
