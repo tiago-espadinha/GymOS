@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Button, Input, Label, Select, Divider } from "../../shared";
+import { Button, Input, Label } from "../../shared";
 import { today, formatDate } from "../../../utils/date";
 import { ExerciseLog, TrainingPlan, WorkoutSession } from "../../../types";
-import { computeMetric, getExerciseMeta } from "../../../utils/metrics";
 import {
   ActiveSession,
   fromPlan,
@@ -12,6 +11,7 @@ import {
 } from "../../../utils/activeSession";
 import { generateId } from "../../../utils/id";
 import ExerciseLogger from "../ExerciseLogger";
+import LogHome from "../LogHome";
 import "./LogTab.css";
 
 interface LogTabProps {
@@ -38,7 +38,7 @@ export function LogTab({
   const [homeDate, setHomeDate] = useState(today());
   const [saved, setSaved] = useState("");
 
-  const titleRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const inSession = Boolean(session);
 
   // Starting or ending a session removes the button that was focused, so move
@@ -50,11 +50,8 @@ export function LogTab({
   }, [inSession]);
 
   const editingId = session?.editingId;
-  const date = session ? session.date : homeDate;
 
-  const handlePlanChange = (id: string) => {
-    const plan = plans.find((p) => p.id === id);
-    if (!plan) return;
+  const startPlan = (plan: TrainingPlan) => {
     setSaved("");
     onBegin(fromPlan(plan, homeDate));
   };
@@ -108,13 +105,11 @@ export function LogTab({
     }
   };
 
-  const recent = sessions.slice(0, 6);
-
   return (
     <div>
-      <div className="logTabTitle" ref={titleRef} tabIndex={-1}>
-        {editingId ? "Edit Session" : "Log Session"}
-      </div>
+      <h1 className={session ? "logTabTitle" : "logTabTitle logTabTitle--home"} ref={titleRef} tabIndex={-1}>
+        {editingId ? "Edit Session" : session ? "Log Session" : "Log"}
+      </h1>
 
       <div role="status" className="logTabSaved">
         {saved}
@@ -125,41 +120,27 @@ export function LogTab({
           <div className="logTabEditingText">
             <span>✏</span>
             <span>
-              Editing session · {session.planName} · {formatDate(date)}
+              Editing session · {session.planName} · {formatDate(session.date)}
             </span>
           </div>
         </div>
       )}
 
-      <div className="logTabForm">
-        {session ? (
+      {session && (
+        <div className="logTabForm">
           <div className="logTabPlanName">{session.planName}</div>
-        ) : (
           <div>
-            <Label>Training Plan</Label>
-            <Select value="" onChange={handlePlanChange} ariaLabel="Training plan">
-              <option value="">Select a plan...</option>
-              {plans
-                .filter((p) => !p.isArchived)
-                .map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-            </Select>
+            <Label>Date</Label>
+            <Input
+              value={session.date}
+              onChange={(d) => onUpdate({ date: d })}
+              type="date"
+              ariaLabel="Session date"
+              style={{ width: "160px" }}
+            />
           </div>
-        )}
-        <div>
-          <Label>Date</Label>
-          <Input
-            value={date}
-            onChange={(d) => (session ? onUpdate({ date: d }) : setHomeDate(d))}
-            type="date"
-            ariaLabel="Session date"
-            style={{ width: "160px" }}
-          />
         </div>
-      </div>
+      )}
 
       {session ? (
         <>
@@ -191,84 +172,15 @@ export function LogTab({
           </div>
         </>
       ) : (
-        <div className="logTabEmpty">
-          Select a training plan to begin logging
-        </div>
-      )}
-
-      {!session && recent.length > 0 && (
-        <>
-          <Divider />
-          <div className="logTabRecentTitle">Recent Sessions</div>
-          <div className="logTabRecentList">
-            {recent.map((s) => {
-              const totalVol = s.exercises.reduce(
-                (sum, ex) =>
-                  sum +
-                  ex.sets.reduce(
-                    (sv, st) =>
-                      sv +
-                      (parseFloat(st.weight) || 0) * (parseInt(st.reps) || 0),
-                    0,
-                  ),
-                0,
-              );
-              return (
-                <div
-                  key={s.id}
-                  className="logTabRecentItem"
-                >
-                  <div className="logTabRecentHeader">
-                    <div className="logTabRecentInfo">
-                      <span className="logTabRecentPlanName">{s.planName}</span>
-                      {s.notes && (
-                        <span className="logTabRecentNotes">{s.notes}</span>
-                      )}
-                    </div>
-                    <div className="logTabRecentData">
-                      {totalVol > 0 && (
-                        <span className="logTabRecentVolume">
-                          {totalVol.toFixed(0)} kg
-                        </span>
-                      )}
-                      <span className="logTabRecentDate">
-                        {formatDate(s.date)}
-                      </span>
-                    </div>
-                    <div className="logTabRecentActions">
-                      <Button onClick={() => startEdit(s)} variant="ghost" small>
-                        Edit
-                      </Button>
-                      <button
-                        onClick={() => deleteSession(s.id)}
-                        className="logTabDeleteButton"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  </div>
-                  <div className="logTabRecentExercises">
-                    {s.exercises.map((ex) => {
-                      const avg = computeMetric(ex.sets, getExerciseMeta(ex), "average");
-                      return (
-                        <div key={ex.id} className="logTabRecentExercise">
-                          {ex.name}:{" "}
-                          <span className="logTabRecentExerciseWeight">
-                            {avg ? avg.label : "—"}
-                          </span>
-                          <span className="logTabRecentExerciseSets">
-                            {" "}
-                            ×{ex.sets.length}s
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </>
+        <LogHome
+          plans={plans}
+          sessions={sessions}
+          date={homeDate}
+          onDateChange={setHomeDate}
+          onStart={startPlan}
+          onEdit={startEdit}
+          onDelete={deleteSession}
+        />
       )}
     </div>
   );
