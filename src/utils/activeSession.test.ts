@@ -8,6 +8,7 @@ import {
   loadActiveSession,
   parseActiveSession,
   saveActiveSession,
+  toWorkoutSession,
 } from "./activeSession";
 
 const plan: TrainingPlan = {
@@ -88,5 +89,28 @@ describe("active session", () => {
   it("rejects non-objects", () => {
     expect(parseActiveSession(null)).toBeNull();
     expect(parseActiveSession([])).toBeNull();
+  });
+});
+
+describe("toWorkoutSession", () => {
+  it("keeps only logged sets and exercises, with notes trimmed", () => {
+    const active = fromPlan(plan, "2024-03-06");
+    active.notes = "  felt strong \n";
+    active.exercises[0].sets = [
+      { id: "s1", weight: "60", reps: "8" },
+      { id: "s2", weight: "", reps: "" },
+    ];
+    expect(toWorkoutSession(active, "w1")).toEqual({
+      id: "w1",
+      planId: "p1",
+      planName: "Push",
+      date: "2024-03-06",
+      notes: "felt strong",
+      exercises: [{ ...plan.exercises[0], sets: [{ id: "s1", weight: "60", reps: "8" }] }],
+    });
+  });
+
+  it("is null when nothing was logged", () => {
+    expect(toWorkoutSession(fromPlan(plan, "2024-03-06"), "w1")).toBeNull();
   });
 });

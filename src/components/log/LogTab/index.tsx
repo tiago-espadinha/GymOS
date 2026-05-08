@@ -7,7 +7,7 @@ import {
   fromPlan,
   fromSaved,
   hasLoggedSets,
-  isLoggedSet,
+  toWorkoutSession,
 } from "../../../utils/activeSession";
 import { generateId } from "../../../utils/id";
 import { clearSessionRests } from "../../../utils/restTimers";
@@ -84,26 +84,13 @@ export function LogTab({
   const saveSession = () => {
     if (!session) return;
 
-    const validEx = session.exercises
-      .map((ex) => ({ ...ex, sets: ex.sets.filter(isLoggedSet) }))
-      .filter((ex) => ex.sets.length > 0);
-
-    if (validEx.length === 0) return;
-
-    const payload = {
-      planId: session.planId,
-      planName: session.planName,
-      date: session.date,
-      notes: session.notes.trim(),
-      exercises: validEx,
-    };
+    const saved = toWorkoutSession(session, editingId ?? generateId());
+    if (!saved) return;
 
     if (editingId) {
-      setSessions(
-        sessions.map((s) => (s.id === editingId ? { ...s, ...payload } : s)),
-      );
+      setSessions(sessions.map((s) => (s.id === editingId ? { ...s, ...saved } : s)));
     } else {
-      setSessions([{ id: generateId(), ...payload }, ...sessions]);
+      setSessions([saved, ...sessions]);
     }
     setSaved(editingId ? "✓ Session updated!" : "✓ Session saved!");
     setTimeout(() => setSaved(""), 4000);
