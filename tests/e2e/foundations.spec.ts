@@ -1,15 +1,16 @@
 import { expect, test } from '@playwright/test'
 
-test('fonts are bundled and nothing is fetched from another origin', async ({ page }) => {
+test('fonts are bundled and nothing is fetched from another origin', async ({ page, baseURL }) => {
+  const origin = new URL(baseURL!).origin
   const external: string[] = []
   const fonts: string[] = []
   page.on('request', (req) => {
     const url = new URL(req.url())
-    if (url.origin !== 'http://localhost:4173') external.push(req.url())
+    if (url.origin !== origin) external.push(req.url())
     if (req.resourceType() === 'font') fonts.push(url.pathname)
   })
   // Block anything that is not the app's own origin, as an offline device would.
-  await page.route((url) => url.origin !== 'http://localhost:4173', (route) => route.abort())
+  await page.route((url) => url.origin !== origin, (route) => route.abort())
 
   await page.goto('/')
   await page.evaluate(() => document.fonts.load('900 1em "Big Shoulders Display"'))

@@ -1,0 +1,85 @@
+.logHomeForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-7);
+}
+
+.logHomeForm .pill-button {
+  align-self: flex-start;
+}
+
+.logHomeSelectField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.logHomeLabel {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.logHomeSelectField .logHomeLabel {
+  margin: 0;
+}
+
+.logHomeSelect {
+  min-height: var(--size-field);
+  padding: 0 var(--space-4);
+  border: 2px solid transparent;
+  border-radius: var(--radius-surface);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+}
+
+.logHomeSelect:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.logHomeEmpty {
+  margin: 0 0 var(--space-7);
+  padding: var(--space-7) var(--space-5);
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: var(--text-secondary);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border-radius: var(--radius-surface);
+}
+
+.logHomeList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.logHomeItem {
+  border-bottom: var(--border-hairline);
+  padding-bottom: var(--space-3);
+}
+
+.logHomeNotes {
+  margin: 0;
+  padding: 0 var(--gutter) var(--space-2);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-body);
+  font-size: var(--text-secondary);
+  color: var(--color-text-muted);
+}
+
+.logHomeActions {
+  display: flex;
+  gap: var(--space-2);
+  padding: 0 var(--gutter);
+}

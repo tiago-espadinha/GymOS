@@ -109,7 +109,7 @@ test('cancelling a session with logged sets asks first', async ({ page }) => {
 test('focus moves to the title when a session starts and ends', async ({ page }) => {
   await page.goto('/')
   await startPlan(page)
-  await expect(page.getByText('Log Session')).toBeFocused()
+  await expect(page.getByRole('heading', { name: 'Log Session' })).toBeFocused()
   await page.getByRole('button', { name: 'Cancel' }).click()
-  await expect(page.getByText('Log Session')).toBeFocused()
+  await expect(page.getByRole('heading', { name: 'Log', exact: true })).toBeFocused()
 })
