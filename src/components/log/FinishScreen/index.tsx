@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Field, PrimaryButton } from "../../shared";
+import { Field, PrimaryButton, SaveFailedAlert } from "../../shared";
 import { formatDateKicker } from "../../../utils/date";
 import { exerciseSummary, sessionTotals } from "../../../utils/sessionList";
 import { isLoggedSet, ActiveSession } from "../../../utils/activeSession";
@@ -9,11 +9,15 @@ interface FinishScreenProps {
   session: ActiveSession;
   onNotes: (notes: string) => void;
   onSave: () => void;
+  /** The last Save was refused by the browser; nothing was stored. */
+  saveFailed: boolean;
+  /** Saves the unsaved session as a CSV file, offered after a failed save. */
+  onDownload: () => void;
   onBack: () => void;
   onCancel: () => void;
 }
 
-export function FinishScreen({ session, onNotes, onSave, onBack, onCancel }: FinishScreenProps) {
+export function FinishScreen({ session, onNotes, onSave, saveFailed, onDownload, onBack, onCancel }: FinishScreenProps) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => titleRef.current?.focus(), []);
 
@@ -46,6 +50,15 @@ export function FinishScreen({ session, onNotes, onSave, onBack, onCancel }: Fin
         </dl>
       </section>
 
+      {saveFailed && (
+        <div className="finishAlert">
+          <SaveFailedAlert>
+            This browser refused to store the session: storage is full or blocked. Your sets are still on this
+            screen. Try again, or download them so nothing is lost.
+          </SaveFailedAlert>
+        </div>
+      )}
+
       <ul className="finishRows" role="list">
         {rows.map((ex) => (
           <li key={ex.id} className="finishRow">
@@ -62,7 +75,14 @@ export function FinishScreen({ session, onNotes, onSave, onBack, onCancel }: Fin
           onChange={(e) => onNotes(e.target.value)}
           placeholder="How did it go? Any PRs or setbacks?"
         />
-        <PrimaryButton onClick={onSave}>{session.editingId ? "Update session" : "Save session"}</PrimaryButton>
+        <PrimaryButton onClick={onSave}>
+          {saveFailed ? "Try again" : session.editingId ? "Update session" : "Save session"}
+        </PrimaryButton>
+        {saveFailed && (
+          <button type="button" className="finishDownload" onClick={onDownload}>
+            Download this session (CSV)
+          </button>
+        )}
         <button type="button" className="textLink" onClick={onBack}>
           Back to logging
         </button>

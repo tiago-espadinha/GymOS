@@ -93,3 +93,25 @@
   gap: var(--space-3);
   padding: var(--space-4) 0 var(--space-5);
 }
+
+.finishAlert {
+  padding-top: var(--space-5);
+}
+
+/* Secondary to Try again: outlined, body type, 64 tall as drawn. */
+.finishDownload {
+  min-height: 64px;
+  border: var(--border-control);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.finishDownload:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}

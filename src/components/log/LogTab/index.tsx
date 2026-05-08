@@ -10,6 +10,8 @@ import {
   toWorkoutSession,
 } from "../../../utils/activeSession";
 import { generateId } from "../../../utils/id";
+import { exportToCSV } from "../../../utils/csv";
+import { downloadCSV } from "../../../utils/download";
 import { clearSessionRests } from "../../../utils/restTimers";
 import FinishScreen from "../FinishScreen";
 import LogHome from "../LogHome";
@@ -22,6 +24,8 @@ interface LogTabProps {
   plans: TrainingPlan[];
   sessions: WorkoutSession[];
   setSessions: (sessions: WorkoutSession[]) => void;
+  /** Stores sessions and reports whether the browser kept them. */
+  commitSessions: (sessions: WorkoutSession[]) => boolean;
   session: ActiveSession | null;
   onBegin: (session: ActiveSession) => void;
   onUpdate: (patch: Partial<ActiveSession>) => void;
@@ -33,6 +37,7 @@ export function LogTab({
   plans,
   sessions,
   setSessions,
+  commitSessions,
   session,
   onBegin,
   onUpdate,
@@ -42,6 +47,8 @@ export function LogTab({
   const [homeDate, setHomeDate] = useState(today());
   const [saved, setSaved] = useState("");
   const [finishing, setFinishing] = useState(false);
+  // The last Save on the Done screen was refused, so the session is not stored.
+  const [saveFailed, setSaveFailed] = useState(false);
 
   const titleRef = useRef<HTMLHeadingElement>(null);
   const inSession = Boolean(session);
@@ -77,6 +84,7 @@ export function LogTab({
       if (!window.confirm(question)) return;
     }
     if (session) clearSessionRests(session.exercises);
+    setSaveFailed(false);
     setFinishing(false);
     onEnd();
   };
@@ -84,19 +92,28 @@ export function LogTab({
   const saveSession = () => {
     if (!session) return;
 
-    const saved = toWorkoutSession(session, editingId ?? generateId());
-    if (!saved) return;
+    const stored = toWorkoutSession(session, editingId ?? generateId());
+    if (!stored) return;
 
-    if (editingId) {
-      setSessions(sessions.map((s) => (s.id === editingId ? { ...s, ...saved } : s)));
-    } else {
-      setSessions([saved, ...sessions]);
+    const next = editingId
+      ? sessions.map((s) => (s.id === editingId ? { ...s, ...stored } : s))
+      : [stored, ...sessions];
+    // A refused write keeps the Done screen open with the notes, so nothing is lost.
+    if (!commitSessions(next)) {
+      setSaveFailed(true);
+      return;
     }
+    setSaveFailed(false);
     setSaved(editingId ? "✓ Session updated!" : "✓ Session saved!");
     setTimeout(() => setSaved(""), 4000);
     clearSessionRests(session.exercises);
     setFinishing(false);
     onEnd();
+  };
+
+  const downloadSession = () => {
+    const unsaved = session && toWorkoutSession(session, editingId ?? generateId());
+    if (unsaved) downloadCSV(exportToCSV([], [unsaved]), `gymos_session_${unsaved.date}.csv`);
   };
 
   const deleteSession = (id: string) => {
@@ -126,8 +143,11 @@ export function LogTab({
           session={session}
           onNotes={(notes) => onUpdate({ notes })}
           onSave={saveSession}
+          saveFailed={saveFailed}
+          onDownload={downloadSession}
           onBack={() => {
             backFromFinish.current = true;
+            setSaveFailed(false);
             setFinishing(false);
           }}
           onCancel={cancelSession}

@@ -47,18 +47,6 @@ export default function GymTracker() {
 
   useEffect(() => {
     if (loaded) {
-      saveToStorage("gym:plans", plans);
-    }
-  }, [plans, loaded]);
-
-  useEffect(() => {
-    if (loaded) {
-      saveToStorage("gym:sessions", sessions);
-    }
-  }, [sessions, loaded]);
-
-  useEffect(() => {
-    if (loaded) {
       saveToStorage("gym:tab", tab);
     }
   }, [tab, loaded]);
@@ -68,6 +56,27 @@ export default function GymTracker() {
       saveToStorage("gym:selectedExName", selectedExName);
     }
   }, [selectedExName, loaded]);
+
+  // Plans and sessions are written as they change, not after render, so a
+  // save can tell whether the browser kept it. storePlans/storeSessions keep
+  // the earlier behaviour: the screen updates even if the write is refused.
+  const storePlans = (next: TrainingPlan[]) => {
+    saveToStorage("gym:plans", next);
+    setPlans(next);
+  };
+
+  const storeSessions = (next: WorkoutSession[]) => {
+    saveToStorage("gym:sessions", next);
+    setSessions(next);
+  };
+
+  // A save the user waits on: nothing changes unless the write is kept, so a
+  // refused write leaves the Done screen open and storage as it was.
+  const commitSessions = (next: WorkoutSession[]) => {
+    if (!saveToStorage("gym:sessions", next)) return false;
+    setSessions(next);
+    return true;
+  };
 
   const handleStartPlan = (plan: TrainingPlan) => {
     activeSession.begin(fromPlan(plan, today()));
@@ -122,7 +131,7 @@ export default function GymTracker() {
           <PlansTab
             plans={plans}
             sessions={sessions}
-            setPlans={setPlans}
+            setPlans={storePlans}
             onStartPlan={handleStartPlan}
             onImport={openData}
             creating={creatingPlan}
@@ -133,7 +142,8 @@ export default function GymTracker() {
           <LogTab
             plans={plans}
             sessions={sessions}
-            setSessions={setSessions}
+            setSessions={storeSessions}
+            commitSessions={commitSessions}
             session={session}
             onBegin={activeSession.begin}
             onUpdate={activeSession.update}
@@ -145,8 +155,8 @@ export default function GymTracker() {
           <ProgressTab
             plans={plans}
             sessions={sessions}
-            setPlans={setPlans}
-            setSessions={setSessions}
+            setPlans={storePlans}
+            setSessions={storeSessions}
             selectedExName={selectedExName}
             setSelectedExName={setSelectedExName}
             showData={showData}
