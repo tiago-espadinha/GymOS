@@ -85,6 +85,45 @@ describe("importFromCSV", () => {
     ]);
   });
 
+  it("round-trips notes and names with line breaks, quotes and commas", () => {
+    const notes = ['line one\nline two', '\nstarts and ends\n', 'said "go", then\r\nwent', ""];
+    const multiline: WorkoutSession[] = notes.map((note, i) => ({
+      ...sessions[0],
+      id: `s${i}`,
+      date: `2026-11-1${i}`,
+      notes: note,
+    }));
+    const plan: TrainingPlan = { ...plans[0], desc: "warm up\nthen bench" };
+    const csv = exportToCSV([plan], multiline);
+    const imported = importFromCSV(csv);
+
+    expect(imported.skippedRows).toBe(0);
+    expect(imported.plans[0].desc).toBe("warm up\nthen bench");
+    expect(imported.sessions.map((s) => s.notes)).toEqual(notes);
+    expect(imported.sessions.flatMap((s) => s.exercises.flatMap((e) => e.sets))).toHaveLength(12);
+    expect(exportToCSV(imported.plans, imported.sessions)).toBe(csv);
+  });
+
+  it("rejects a file with a quoted value that is never closed", () => {
+    const csv = [HEADER, 'session,2026-11-16,Push,"open note,Bench Press,Chest,strength,reps,60,10,,'].join("\n");
+
+    expect(() => importFromCSV(csv)).toThrow(/never closed/);
+  });
+
+  it("keeps a quote inside an unquoted value and padding around a row from merging or skipping rows", () => {
+    const csv = [
+      HEADER,
+      'plan,,Push,5\'10" lifter,Bench Press,Chest,strength,reps,,,,',
+      "  session,2026-11-16,Push,,Bench Press,Chest,strength,reps,60,10,,  ",
+      "session,2026-11-17,Push,,Bench Press,Chest,strength,reps,62.5,8,,",
+    ].join("\n");
+    const result = importFromCSV(csv);
+
+    expect(result.skippedRows).toBe(0);
+    expect(result.plans[0].desc).toBe('5\'10" lifter');
+    expect(result.sessions).toHaveLength(2);
+  });
+
   it("reads the older eight-column export as strength sets", () => {
     const csv = [
       "type,date,name,desc_notes,exercise,muscle,weight,reps",

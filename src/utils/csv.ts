@@ -75,9 +75,9 @@ export interface CSVImport {
 }
 
 export function importFromCSV(csv: string): CSVImport {
-  const lines = csv.split("\n");
+  const records = parseCSV(csv);
 
-  const header = lines[0].trim();
+  const header = records[0].join(",").trim();
   const isCurrent = header === CSV_HEADER;
   const isLegacy = header === LEGACY_CSV_HEADER;
   if (!isCurrent && !isLegacy) {
@@ -89,11 +89,10 @@ export function importFromCSV(csv: string): CSVImport {
   let skippedRows = 0;
 
   // First pass: Build Plans and collect session rows
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
+  for (let i = 1; i < records.length; i++) {
+    const parts = records[i];
+    if (isBlank(parts)) continue;
 
-    const parts = parseCSVLine(line);
     if (!isWellFormed(parts, isCurrent)) {
       skippedRows++;
       continue;
@@ -217,27 +216,53 @@ function isWellFormed(parts: string[], isCurrent: boolean): boolean {
   return type === "plan" || Boolean(date);
 }
 
-function parseCSVLine(line: string): string[] {
-  const result = [];
-  let current = "";
+// Splits the file into records. A line break inside a quoted field belongs to the field,
+// so notes written with several lines survive the round trip. CRLF and LF both end a record.
+function parseCSV(text: string): string[][] {
+  const records: string[][] = [];
+  let record: string[] = [];
+  let field = "";
   let inQuotes = false;
 
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    if (char === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        current += '"';
+  // Whitespace around a row is dropped, as a hand-edited file may indent or pad it.
+  const endRecord = () => {
+    record.push(field);
+    record[0] = record[0].trimStart();
+    record[record.length - 1] = record[record.length - 1].trimEnd();
+    records.push(record);
+    record = [];
+    field = "";
+  };
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    // A quote opens a quoted value only at the start of a field; elsewhere it is a literal character.
+    if (char === '"' && (inQuotes || field === "")) {
+      if (inQuotes && text[i + 1] === '"') {
+        field += '"';
         i++;
       } else {
         inQuotes = !inQuotes;
       }
-    } else if (char === "," && !inQuotes) {
-      result.push(current);
-      current = "";
-    } else {
-      current += char;
+    } else if (inQuotes) {
+      field += char;
+    } else if (char === ",") {
+      record.push(field);
+      field = "";
+    } else if (char === "\n") {
+      endRecord();
+    } else if (char !== "\r") {
+      field += char;
     }
   }
-  result.push(current);
-  return result;
+  // An open quote at the end means the rest of the file would collapse into one field.
+  if (inQuotes) {
+    throw new Error("A quoted value is never closed, so nothing was read.");
+  }
+  endRecord();
+  return records;
+}
+
+function isBlank(record: string[]): boolean {
+  return record.length === 1 && record[0].trim() === "";
 }
