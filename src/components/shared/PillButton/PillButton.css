@@ -16,6 +16,15 @@
   transition: opacity var(--motion-press) linear;
 }
 
+.pill-button--compact {
+  padding: 0 var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-secondary);
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
 .pill-button:active:not(:disabled) {
   opacity: 0.8;
 }
