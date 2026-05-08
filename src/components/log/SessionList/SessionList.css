@@ -1,0 +1,19 @@
+.sessionList {
+  margin-bottom: var(--space-5);
+}
+
+.sessionListRows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sessionListRows > li {
+  /* Keep the opened exercise clear of the sticky rest strip. */
+  scroll-margin-top: var(--size-row-summary);
+  border-bottom: var(--border-hairline);
+}
+
+.sessionListLogger {
+  padding: var(--space-3) 0 var(--space-5);
+}

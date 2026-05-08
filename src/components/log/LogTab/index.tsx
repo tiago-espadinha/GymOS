@@ -10,8 +10,8 @@ import {
   isLoggedSet,
 } from "../../../utils/activeSession";
 import { generateId } from "../../../utils/id";
-import ExerciseLogger from "../ExerciseLogger";
 import LogHome from "../LogHome";
+import SessionList from "../SessionList";
 import "./LogTab.css";
 
 interface LogTabProps {
@@ -144,15 +144,7 @@ export function LogTab({
 
       {session ? (
         <>
-          <div className="logTabExercises">
-            {session.exercises.map((ex) => (
-              <ExerciseLogger
-                key={ex.id}
-                exercise={ex}
-                onChange={onUpdateExercise}
-              />
-            ))}
-          </div>
+          <SessionList exercises={session.exercises} onChangeExercise={onUpdateExercise} />
           <div className="logTabNotes">
             <Label>Session Notes (optional)</Label>
             <Input

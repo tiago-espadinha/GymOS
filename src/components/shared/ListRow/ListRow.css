@@ -27,6 +27,14 @@
   outline-offset: -2px;
 }
 
+.list-row--button:active {
+  opacity: 0.8;
+}
+
+.list-row--current.list-row--button:focus-visible {
+  outline-color: var(--color-on-inverse);
+}
+
 .list-row--current {
   background: var(--color-inverse);
   color: var(--color-on-inverse);
