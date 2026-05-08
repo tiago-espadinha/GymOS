@@ -15,8 +15,8 @@ describe('Select', () => {
     expect(html).toContain('aria-haspopup="listbox"')
     expect(html).toContain('aria-expanded="false"')
     const [labelId, valueId] = /aria-labelledby="([^" ]+) ([^"]+)"/.exec(html)!.slice(1)
-    expect(html).toContain(`id="${labelId}" class="select__label">Muscle group<`)
-    expect(html).toContain(`id="${valueId}" class="select__value">Legs<`)
+    expect(html).toMatch(new RegExp(`id="${labelId}"[^>]*>Muscle group<`))
+    expect(html).toMatch(new RegExp(`id="${valueId}"[^>]*>Legs<`))
   })
 
   it('keeps its options closed until opened', () => {

@@ -10,7 +10,7 @@ interface SelectProps {
   onChange: (value: string) => void;
 }
 
-/** Up/Down/Home/End move between the options; Enter or Space picks one (they are buttons). */
+/** One Tab stop (the selected option); Up/Down/Home/End move between options, Enter or Space picks one. */
 function moveFocus(e: KeyboardEvent<HTMLDivElement>) {
   const options = Array.from(e.currentTarget.querySelectorAll<HTMLElement>('[role="option"]'));
   const at = options.indexOf(document.activeElement as HTMLElement);
@@ -61,11 +61,18 @@ export function Select({ label, value, options, onChange }: SelectProps) {
                 type="button"
                 role="option"
                 aria-selected={option === value}
+                tabIndex={option === value ? 0 : -1}
                 data-autofocus={option === value || undefined}
                 className="select__option"
                 onClick={() => pick(option)}
               >
                 {option}
+                {option === value && (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"
+                    strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M4 12l5 5L20 6" />
+                  </svg>
+                )}
               </button>
             ))}
           </div>

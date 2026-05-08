@@ -172,6 +172,7 @@ test('muscle group opens a listbox sheet that works from the keyboard', async ({
   const listbox = page.getByRole('listbox', { name: 'Muscle group' })
   await expect(listbox.getByRole('option', { name: 'Chest' })).toBeFocused()
   await expect(listbox.getByRole('option', { name: 'Chest' })).toHaveAttribute('aria-selected', 'true')
+  await expect(listbox.getByRole('option', { name: 'Back' })).toHaveAttribute('tabindex', '-1')
   await page.keyboard.press('ArrowDown')
   await page.keyboard.press('Enter')
   await expect(listbox).toHaveCount(0)
