@@ -59,6 +59,12 @@ describe('ListRow', () => {
     expect(plain).not.toContain('aria-expanded')
   })
 
+  it('shows a number column that stays out of the accessible name', () => {
+    const html = renderToStaticMarkup(createElement(ListRow, { number: 2, title: 'Row', onClick: () => {} }))
+    expect(html).toContain('<span class="list-row__number" aria-hidden="true">2</span>')
+    expect(renderToStaticMarkup(createElement(ListRow, { title: 'Row' }))).not.toContain('list-row__number')
+  })
+
   it('is taller when it has a subtitle or is the current row', () => {
     const tall = (props: object) =>
       renderToStaticMarkup(createElement(ListRow, { title: 'A', ...props })).includes(
