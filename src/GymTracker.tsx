@@ -101,6 +101,11 @@ export default function GymTracker() {
     setTab(next);
   };
 
+  const openData = () => {
+    setTab("progress");
+    setShowData(true);
+  };
+
   const endSession = () => {
     activeSession.end();
     setTab("log");
@@ -112,8 +117,10 @@ export default function GymTracker() {
         {visibleTab === "plans" && (
           <PlansTab
             plans={plans}
+            sessions={sessions}
             setPlans={setPlans}
             onStartPlan={handleStartPlan}
+            onImport={openData}
           />
         )}
         {visibleTab === "log" && (

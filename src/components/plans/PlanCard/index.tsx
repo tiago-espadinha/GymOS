@@ -1,45 +1,39 @@
-import { ListRow, PillButton } from "../../shared";
+import { PillButton } from "../../shared";
 import { planSummary } from "../../../utils/plans";
 import { TrainingPlan } from "../../../types";
 import "./PlanCard.css";
 
 interface PlanCardProps {
   plan: TrainingPlan;
-  onDelete: (id: string) => void;
   onStart: (plan: TrainingPlan) => void;
-  onToggleArchive: (id: string) => void;
+  onMore: (plan: TrainingPlan) => void;
 }
 
-export function PlanCard({ plan, onDelete, onStart, onToggleArchive }: PlanCardProps) {
-  const subtitle = [plan.isArchived ? "Archived" : "", plan.desc, planSummary(plan)]
-    .filter(Boolean)
-    .join(" · ");
-
+/** An active plan: name and mix on one line each, Start, and ⋯ for the plan's actions. */
+export function PlanCard({ plan, onStart, onMore }: PlanCardProps) {
   return (
-    <li className={`planCard${plan.isArchived ? " isArchived" : ""}`}>
-      <ListRow
-        title={plan.name}
-        subtitle={subtitle}
-        trailing={
-          !plan.isArchived && (
-            <PillButton variant="lime" onClick={() => onStart(plan)} aria-label={`Start ${plan.name}`}>
-              Start
-            </PillButton>
-          )
-        }
-      />
-      <div className="planCardActions">
-        <PillButton
-          variant="outline-white"
-          onClick={() => onToggleArchive(plan.id)}
-          aria-label={`${plan.isArchived ? "Restore" : "Archive"} ${plan.name}`}
-        >
-          {plan.isArchived ? "Restore" : "Archive"}
-        </PillButton>
-        <PillButton variant="outline-white" onClick={() => onDelete(plan.id)} aria-label={`Delete ${plan.name}`}>
-          Delete
-        </PillButton>
-      </div>
+    <li className="planRow">
+      <span className="planRow__text">
+        <span className="planRow__name">{plan.name}</span>
+        <span className="planRow__meta">{planSummary(plan)}</span>
+      </span>
+      <PillButton variant="lime" onClick={() => onStart(plan)} aria-label={`Start ${plan.name}`}>
+        Start
+      </PillButton>
+      <button
+        type="button"
+        className="planRow__more"
+        data-plan-actions={plan.id}
+        aria-label={`More actions for ${plan.name}`}
+        aria-haspopup="dialog"
+        onClick={() => onMore(plan)}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <circle cx="5" cy="12" r="2" />
+          <circle cx="12" cy="12" r="2" />
+          <circle cx="19" cy="12" r="2" />
+        </svg>
+      </button>
     </li>
   );
 }
