@@ -7,12 +7,13 @@ interface ToastProps {
   onAction: () => void;
   /** Called when the time runs out. */
   onDismiss: () => void;
-  /** ms before the toast goes; paused while it has focus or the pointer. */
-  duration?: number;
 }
 
-/** The white pill above the tab bar, with one action (Undo). */
-export function Toast({ message, actionLabel, onAction, onDismiss, duration = 6000 }: ToastProps) {
+// How long Undo stays offered; paused while the toast has focus or the pointer.
+const UNDO_MS = 6000;
+
+/** The white pill above the tab bar, with one action (Undo). Key it per item so the time restarts. */
+export function Toast({ message, actionLabel, onAction, onDismiss }: ToastProps) {
   const [paused, setPaused] = useState(false);
   const dismiss = useRef(onDismiss);
   useEffect(() => {
@@ -21,9 +22,9 @@ export function Toast({ message, actionLabel, onAction, onDismiss, duration = 60
 
   useEffect(() => {
     if (paused) return;
-    const t = window.setTimeout(() => dismiss.current(), duration);
+    const t = window.setTimeout(() => dismiss.current(), UNDO_MS);
     return () => window.clearTimeout(t);
-  }, [paused, duration, message]);
+  }, [paused]);
 
   return (
     <div

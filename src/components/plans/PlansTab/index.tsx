@@ -52,7 +52,7 @@ export function PlansTab({ plans, sessions, setPlans, onStartPlan, onImport }: P
     setPlans(archivePlan(plans, plan.id, todayStr));
     setOverlay(null);
     setArchived(plan);
-    focusNext.current = '.toast__action';
+    focusNext.current = '.plansTabTitle';
   };
 
   const restore = (plan: TrainingPlan) => {
@@ -136,7 +136,7 @@ export function PlansTab({ plans, sessions, setPlans, onStartPlan, onImport }: P
       )}
 
       {archived && (
-        <Toast message={`${archived.name} archived`} actionLabel="Undo" onAction={() => restore(archived)}
+        <Toast key={archived.id} message={`${archived.name} archived`} actionLabel="Undo" onAction={() => restore(archived)}
           onDismiss={() => setArchived(null)} />
       )}
     </div>
