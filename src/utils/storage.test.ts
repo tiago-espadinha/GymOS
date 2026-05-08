@@ -16,7 +16,7 @@ describe('storage', () => {
   })
 
   it('round-trips JSON values', async () => {
-    await saveToStorage('k', { a: [1, 2] })
+    expect(saveToStorage('k', { a: [1, 2] })).toBe(true)
     expect(await getFromStorage('k')).toEqual({ a: [1, 2] })
   })
 
@@ -29,13 +29,13 @@ describe('storage', () => {
     expect(await getFromStorage('bad')).toBeNull()
   })
 
-  it('swallows write errors such as a full quota', async () => {
+  it('reports a write error such as a full quota instead of throwing', () => {
     vi.stubGlobal('localStorage', {
       getItem: () => null,
       setItem: () => {
-        throw new Error('QuotaExceededError')
+        throw new DOMException('quota', 'QuotaExceededError')
       },
     })
-    await expect(saveToStorage('k', 1)).resolves.toBeUndefined()
+    expect(saveToStorage('k', 1)).toBe(false)
   })
 })

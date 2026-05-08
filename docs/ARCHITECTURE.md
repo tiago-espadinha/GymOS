@@ -30,7 +30,7 @@ Logic that has no UI lives outside the components: `src/utils` (storage, CSV, me
 - Store: `localStorage` in the user's browser, accessed through `src/utils/storage.ts`.
 - Keys: `gym:plans`, `gym:sessions`, `gym:tab`, `gym:selectedExName` (written by `GymTracker`) and `gym:timerPrefs` (written by `src/utils/timerPrefs.ts`).
 - Key entities, defined in `src/types/index.ts`: `TrainingPlan` holds `Exercise` definitions; a `WorkoutSession` holds `ExerciseLog` entries, each with its `Set` values. Exercises carry an optional category (`strength`, `calisthenics`, `cardio`) and tracking type (`reps` or `time`); data saved before these fields existed is read as strength and reps.
-- Loading: the app reads storage on start and shows a loading screen until it has finished. It writes each key back whenever its state changes.
+- Loading and saving: the app reads storage on start and shows a loading screen until it has finished. Plans and sessions are written as they change, before the screen updates. Saving a session on Finish and saving a new plan update the screen only if the browser kept the write. Other changes (archive, restore, delete, import) update the screen either way. The tab and the selected Progress exercise are written after each change.
 - Ownership: all data belongs to the one browser profile. There is no sharing, no authorization layer and no migrations; a missing field is handled by a default at read time.
 
 ## Import and export
@@ -41,7 +41,7 @@ Export builds one CSV from plans and sessions (`exportToCSV`). Import (`importFr
 
 The only untrusted input is a CSV file the user selects. Today it is checked by header match and a minimum column count; rows with too few columns are skipped. Field values are not validated beyond that, and category and tracking type are cast to their types without checking them against the allowed values. A hand-edited file can therefore store values the app does not expect.
 
-Storage reads and writes are wrapped in `try`/`catch`. A read failure returns no data and a write failure is ignored, so the app starts empty or loses the write without telling the user.
+Storage reads and writes are wrapped in `try`/`catch`. A read failure returns no data, so the app starts empty. A write failure is reported to the caller. Finish and New plan then stay open with a Not saved alert and Try again, and Finish also offers the unsaved session as a CSV download. A refused write from archive, restore, delete, import, the active session or the preferences is still not reported.
 
 ## Offline and install
 

@@ -53,6 +53,23 @@ export function hasLoggedSets(session: ActiveSession): boolean {
   return session.exercises.some((ex) => ex.sets.some(isLoggedSet));
 }
 
+// The session as it is stored: only logged sets, only exercises that have one,
+// notes trimmed. Null when nothing was logged, since there is nothing to save.
+export function toWorkoutSession(session: ActiveSession, id: string): WorkoutSession | null {
+  const exercises = session.exercises
+    .map((ex) => ({ ...ex, sets: ex.sets.filter(isLoggedSet) }))
+    .filter((ex) => ex.sets.length > 0);
+  if (exercises.length === 0) return null;
+  return {
+    id,
+    planId: session.planId,
+    planName: session.planName,
+    date: session.date,
+    notes: session.notes.trim(),
+    exercises,
+  };
+}
+
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 

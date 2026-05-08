@@ -19,3 +19,4 @@ export { Sheet } from './Sheet';
 export { Toast } from './Toast';
 export { Switch } from './Switch';
 export { WarningIcon } from './WarningIcon';
+export { SaveFailedAlert } from './SaveFailedAlert';

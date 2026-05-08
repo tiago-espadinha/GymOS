@@ -14,6 +14,8 @@ interface PlansTabProps {
   plans: TrainingPlan[];
   sessions: WorkoutSession[];
   setPlans: (plans: TrainingPlan[]) => void;
+  /** Stores plans and reports whether the browser kept them. */
+  commitPlans: (plans: TrainingPlan[]) => boolean;
   onStartPlan: (plan: TrainingPlan) => void;
   /** Opens Import and export. */
   onImport: () => void;
@@ -24,7 +26,7 @@ interface PlansTabProps {
 
 type Overlay = { kind: 'actions' | 'delete'; plan: TrainingPlan } | null;
 
-export function PlansTab({ plans, sessions, setPlans, onStartPlan, onImport, creating, onCreatingChange }: PlansTabProps) {
+export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, onImport, creating, onCreatingChange }: PlansTabProps) {
   const [archivedOpen, setArchivedOpen] = useState(false);
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [archived, setArchived] = useState<TrainingPlan | null>(null);
@@ -45,9 +47,11 @@ export function PlansTab({ plans, sessions, setPlans, onStartPlan, onImport, cre
   const activePlans = plans.filter((p) => !p.isArchived);
   const archivedPlans = plans.filter((p) => p.isArchived);
 
+  // A refused write keeps the form open with what was entered.
   const savePlan = (p: TrainingPlan) => {
-    setPlans([...plans, p]);
+    if (!commitPlans([...plans, p])) return false;
     closeForm();
+    return true;
   };
 
   // The form is gone after this render, so focus lands on the Plans heading.

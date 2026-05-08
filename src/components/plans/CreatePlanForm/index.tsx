@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Field, PrimaryButton, Toast, WarningIcon } from "../../shared";
+import { Field, PrimaryButton, SaveFailedAlert, Toast, WarningIcon } from "../../shared";
 import { TrainingPlan } from "../../../types";
 import { buildPlan, errorCount, validatePlan } from "./buildPlan";
 import { ExerciseFields } from "./ExerciseFields";
@@ -8,7 +8,8 @@ import { ADD_BUTTON, useExerciseList } from "./useExerciseList";
 import "./CreatePlanForm.css";
 
 interface CreatePlanFormProps {
-  onSave: (plan: TrainingPlan) => void;
+  /** Returns false when the browser refused to store the plan. */
+  onSave: (plan: TrainingPlan) => boolean;
   onCancel: () => void;
 }
 
@@ -19,6 +20,8 @@ export function CreatePlanForm({ onSave, onCancel }: CreatePlanFormProps) {
   const [desc, setDesc] = useState("");
   // Errors show after the first Save and then follow every edit.
   const [submitted, setSubmitted] = useState(false);
+  // Refused Saves in a row; the form keeps its values meanwhile.
+  const [saveFailures, setSaveFailures] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
   // A fresh object per request, so a repeated Save with the same errors still moves focus.
   const [focusRequest, setFocusRequest] = useState<{ selector: string } | null>(null);
@@ -39,7 +42,11 @@ export function CreatePlanForm({ onSave, onCancel }: CreatePlanFormProps) {
 
   const save = () => {
     const result = buildPlan(name, desc, exercises);
-    if ("plan" in result) return onSave(result.plan);
+    if ("plan" in result) {
+      if (!onSave(result.plan)) setSaveFailures((n) => n + 1);
+      return;
+    }
+    setSaveFailures(0);
     setSubmitted(true);
     const [firstUnnamed] = result.errors.unnamed;
     if (result.errors.name) focus(PLAN_NAME);
@@ -98,7 +105,14 @@ export function CreatePlanForm({ onSave, onCancel }: CreatePlanFormProps) {
             {count === 1 ? "1 thing to fix before saving" : `${count} things to fix before saving`}
           </p>
         )}
-        <PrimaryButton type="submit">Save plan</PrimaryButton>
+        {/* Keyed on the count, so a refused Try again is announced again. */}
+        {saveFailures > 0 && (
+          <SaveFailedAlert key={saveFailures}>
+            This browser refused to store the plan: storage is full or blocked. Your plan is still on this
+            screen. Try again.
+          </SaveFailedAlert>
+        )}
+        <PrimaryButton type="submit">{saveFailures > 0 ? "Try again" : "Save plan"}</PrimaryButton>
       </div>
     </form>
   );

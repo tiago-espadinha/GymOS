@@ -7,9 +7,11 @@ import {
   fromPlan,
   fromSaved,
   hasLoggedSets,
-  isLoggedSet,
+  toWorkoutSession,
 } from "../../../utils/activeSession";
 import { generateId } from "../../../utils/id";
+import { exportToCSV } from "../../../utils/csv";
+import { downloadCSV } from "../../../utils/download";
 import { clearSessionRests } from "../../../utils/restTimers";
 import FinishScreen from "../FinishScreen";
 import LogHome from "../LogHome";
@@ -22,6 +24,8 @@ interface LogTabProps {
   plans: TrainingPlan[];
   sessions: WorkoutSession[];
   setSessions: (sessions: WorkoutSession[]) => void;
+  /** Stores sessions and reports whether the browser kept them. */
+  commitSessions: (sessions: WorkoutSession[]) => boolean;
   session: ActiveSession | null;
   onBegin: (session: ActiveSession) => void;
   onUpdate: (patch: Partial<ActiveSession>) => void;
@@ -33,6 +37,7 @@ export function LogTab({
   plans,
   sessions,
   setSessions,
+  commitSessions,
   session,
   onBegin,
   onUpdate,
@@ -42,6 +47,8 @@ export function LogTab({
   const [homeDate, setHomeDate] = useState(today());
   const [saved, setSaved] = useState("");
   const [finishing, setFinishing] = useState(false);
+  // Refused Saves in a row on the Done screen; 0 once a save lands or Done closes.
+  const [saveFailures, setSaveFailures] = useState(0);
 
   const titleRef = useRef<HTMLHeadingElement>(null);
   const inSession = Boolean(session);
@@ -77,6 +84,7 @@ export function LogTab({
       if (!window.confirm(question)) return;
     }
     if (session) clearSessionRests(session.exercises);
+    setSaveFailures(0);
     setFinishing(false);
     onEnd();
   };
@@ -84,32 +92,28 @@ export function LogTab({
   const saveSession = () => {
     if (!session) return;
 
-    const validEx = session.exercises
-      .map((ex) => ({ ...ex, sets: ex.sets.filter(isLoggedSet) }))
-      .filter((ex) => ex.sets.length > 0);
+    const stored = toWorkoutSession(session, editingId ?? generateId());
+    if (!stored) return;
 
-    if (validEx.length === 0) return;
-
-    const payload = {
-      planId: session.planId,
-      planName: session.planName,
-      date: session.date,
-      notes: session.notes.trim(),
-      exercises: validEx,
-    };
-
-    if (editingId) {
-      setSessions(
-        sessions.map((s) => (s.id === editingId ? { ...s, ...payload } : s)),
-      );
-    } else {
-      setSessions([{ id: generateId(), ...payload }, ...sessions]);
+    const next = editingId
+      ? sessions.map((s) => (s.id === editingId ? { ...s, ...stored } : s))
+      : [stored, ...sessions];
+    // A refused write keeps the Done screen open with the notes, so nothing is lost.
+    if (!commitSessions(next)) {
+      setSaveFailures((n) => n + 1);
+      return;
     }
+    setSaveFailures(0);
     setSaved(editingId ? "✓ Session updated!" : "✓ Session saved!");
     setTimeout(() => setSaved(""), 4000);
     clearSessionRests(session.exercises);
     setFinishing(false);
     onEnd();
+  };
+
+  const downloadSession = () => {
+    const unsaved = session && toWorkoutSession(session, editingId ?? "");
+    if (unsaved) downloadCSV(exportToCSV([], [unsaved]), `gymos_session_${unsaved.date}.csv`);
   };
 
   const deleteSession = (id: string) => {
@@ -139,8 +143,11 @@ export function LogTab({
           session={session}
           onNotes={(notes) => onUpdate({ notes })}
           onSave={saveSession}
+          saveFailures={saveFailures}
+          onDownload={downloadSession}
           onBack={() => {
             backFromFinish.current = true;
+            setSaveFailures(0);
             setFinishing(false);
           }}
           onCancel={cancelSession}
