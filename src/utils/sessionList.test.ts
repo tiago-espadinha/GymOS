@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ExerciseLog, Set } from "../types";
-import { NO_VALUES, currentExerciseId, exerciseProgress, exerciseSummary, lastValues, sessionTotals } from "./sessionList";
+import { NO_VALUES, currentExerciseId, currentSetNumber, exerciseProgress, exerciseSummary, lastValues, sessionTotals } from "./sessionList";
 
 const set = (over: Partial<Set> = {}): Set => ({ id: Math.random().toString(), weight: "", reps: "", ...over });
 
@@ -87,5 +87,20 @@ describe("exerciseSummary", () => {
 
   it("shows a dash when nothing is logged", () => {
     expect(exerciseSummary(exercise([set()]))).toBe(NO_VALUES);
+  });
+});
+
+describe("currentSetNumber", () => {
+  it("is the first set with nothing logged", () => {
+    expect(currentSetNumber(exercise([set({ weight: "60", reps: "8" }), set(), set()]))).toEqual({ number: 2, total: 3 });
+  });
+
+  it("is the last set once every set is logged", () => {
+    expect(currentSetNumber(exercise([set({ reps: "8" }), set({ reps: "8" })]))).toEqual({ number: 2, total: 2 });
+  });
+
+  it("counts a timed set with a held duration as logged", () => {
+    const plank = exercise([set({ duration: "30", completed: true }), set()], { trackingType: "time" });
+    expect(currentSetNumber(plank)).toEqual({ number: 2, total: 2 });
   });
 });

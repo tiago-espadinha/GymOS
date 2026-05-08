@@ -23,6 +23,13 @@ export const formatDateKicker = (d: string): string => {
     .toUpperCase();
 };
 
+// "Sun 15 Nov", the meta line above the session list.
+export const formatDateMeta = (d: string): string => {
+  return new Date(d + 'T12:00:00')
+    .toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+    .replace(',', '');
+};
+
 // "4 May", or "27 Nov 2023" outside the current year.
 export const formatDayMonth = (d: string, todayStr: string): string => {
   const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' };
@@ -38,6 +45,7 @@ export default {
   formatDate,
   formatDateShort,
   formatDateKicker,
+  formatDateMeta,
   formatDayMonth,
   formatDateStat,
 };
