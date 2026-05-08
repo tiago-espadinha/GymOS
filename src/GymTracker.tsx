@@ -66,7 +66,7 @@ export default function GymTracker() {
     }
   }, [selectedExName, loaded]);
 
-  const handleLogPlan = (plan: TrainingPlan) => {
+  const handleStartPlan = (plan: TrainingPlan) => {
     activeSession.begin(fromPlan(plan, today()));
   };
 
@@ -107,7 +107,7 @@ export default function GymTracker() {
           <PlansTab
             plans={plans}
             setPlans={setPlans}
-            onLogPlan={handleLogPlan}
+            onStartPlan={handleStartPlan}
           />
         )}
         {visibleTab === "log" && (

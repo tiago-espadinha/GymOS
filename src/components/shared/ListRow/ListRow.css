@@ -29,6 +29,7 @@
   font-size: var(--text-row-title);
   line-height: 1;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .list-row__subtitle {

@@ -1,67 +1,46 @@
-import { Button, Badge } from "../../shared";
-import { MUSCLE_GROUP_COLORS } from "../../../constants/muscleGroups";
-import { CATEGORY_ICONS } from "../../../constants/exerciseTypes";
+import { ListRow, PillButton } from "../../shared";
+import { planSummary } from "../../../utils/plans";
 import { TrainingPlan } from "../../../types";
 import "./PlanCard.css";
 
 interface PlanCardProps {
   plan: TrainingPlan;
   onDelete: (id: string) => void;
-  onLog: (plan: TrainingPlan) => void;
+  onStart: (plan: TrainingPlan) => void;
   onToggleArchive: (id: string) => void;
 }
 
-export function PlanCard({
-  plan,
-  onDelete,
-  onLog,
-  onToggleArchive,
-}: PlanCardProps) {
+export function PlanCard({ plan, onDelete, onStart, onToggleArchive }: PlanCardProps) {
+  const subtitle = [plan.isArchived ? "Archived" : "", plan.desc, planSummary(plan)]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
-    <div className={`planCard ${plan.isArchived ? "isArchived" : ""}`}>
-      <div className="planCardHeader">
-        <div>
-          <div className="planCardName">
-            {plan.name}
-            {plan.isArchived && <span className="archivedBadge">Archived</span>}
-          </div>
-          {plan.desc && <div className="planCardDesc">{plan.desc}</div>}
-        </div>
-        <div className="planCardActions">
-          {!plan.isArchived && (
-            <Button onClick={() => onLog(plan)} small>
-              Log
-            </Button>
-          )}
-          <Button
-            onClick={() => onToggleArchive(plan.id)}
-            small
-            variant={plan.isArchived ? "success" : "ghost"}
-          >
-            {plan.isArchived ? "Restore" : "Archive"}
-          </Button>
-          <button
-            onClick={() => onDelete(plan.id)}
-            className="planCardDelete"
-            title="Delete Plan"
-          >
-            ×
-          </button>
-        </div>
+    <li className={`planCard${plan.isArchived ? " isArchived" : ""}`}>
+      <ListRow
+        title={plan.name}
+        subtitle={subtitle}
+        trailing={
+          !plan.isArchived && (
+            <PillButton variant="lime" onClick={() => onStart(plan)} aria-label={`Start ${plan.name}`}>
+              Start
+            </PillButton>
+          )
+        }
+      />
+      <div className="planCardActions">
+        <PillButton
+          variant="outline-white"
+          onClick={() => onToggleArchive(plan.id)}
+          aria-label={`${plan.isArchived ? "Restore" : "Archive"} ${plan.name}`}
+        >
+          {plan.isArchived ? "Restore" : "Archive"}
+        </PillButton>
+        <PillButton variant="outline-white" onClick={() => onDelete(plan.id)} aria-label={`Delete ${plan.name}`}>
+          Delete
+        </PillButton>
       </div>
-
-      <div className="planCardBadgeRow">
-        {plan.exercises.map((ex) => (
-          <Badge key={ex.id} color={MUSCLE_GROUP_COLORS[ex.muscleGroup]}>
-            {CATEGORY_ICONS[ex.category || "strength"]} {ex.name}
-          </Badge>
-        ))}
-      </div>
-
-      <div className="planCardFooter">
-        {plan.exercises.length} exercise{plan.exercises.length !== 1 ? "s" : ""}
-      </div>
-    </div>
+    </li>
   );
 }
 
