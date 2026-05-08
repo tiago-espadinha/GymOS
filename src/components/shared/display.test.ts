@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { ListRow } from './ListRow'
 import { SetTicks } from './SetTicks'
+import { SaveFailedAlert } from './SaveFailedAlert'
 import { TabBar } from './TabBar'
 import { cssOf } from './testCss'
 
@@ -96,5 +97,20 @@ describe('TabBar', () => {
     expect(bar).toMatch(/\.tab-bar\s*{[^}]*border-top: var\(--border-hairline\)/)
     expect(bar).toMatch(/aria-current='page'\]\s*{[^}]*border-top: var\(--border-tab-active\)/)
     expect(bar).toContain(':focus-visible')
+  })
+})
+
+describe('SaveFailedAlert', () => {
+  const html = renderToStaticMarkup(createElement(SaveFailedAlert, null, 'Your sets are still on this screen.'))
+
+  it('is announced as an alert with a title and the explanation', () => {
+    expect(html).toContain('role="alert"')
+    expect(html).toContain('Not saved')
+    expect(html).toContain('Your sets are still on this screen.')
+  })
+
+  it('marks the danger with an icon and an outline, never colour alone', () => {
+    expect(html).toContain('<svg')
+    expect(cssOf('SaveFailedAlert')).toMatch(/\.save-failed\s*{[^}]*border: 2px solid var\(--color-danger\)/)
   })
 })
