@@ -17,12 +17,14 @@ interface PlansTabProps {
   onStartPlan: (plan: TrainingPlan) => void;
   /** Opens Import and export. */
   onImport: () => void;
+  /** New plan is open; the shell hides the tab bar meanwhile. */
+  creating: boolean;
+  onCreatingChange: (creating: boolean) => void;
 }
 
 type Overlay = { kind: 'actions' | 'delete'; plan: TrainingPlan } | null;
 
-export function PlansTab({ plans, sessions, setPlans, onStartPlan, onImport }: PlansTabProps) {
-  const [creating, setCreating] = useState(false);
+export function PlansTab({ plans, sessions, setPlans, onStartPlan, onImport, creating, onCreatingChange }: PlansTabProps) {
   const [archivedOpen, setArchivedOpen] = useState(false);
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [archived, setArchived] = useState<TrainingPlan | null>(null);
@@ -45,7 +47,13 @@ export function PlansTab({ plans, sessions, setPlans, onStartPlan, onImport }: P
 
   const savePlan = (p: TrainingPlan) => {
     setPlans([...plans, p]);
-    setCreating(false);
+    closeForm();
+  };
+
+  // The form is gone after this render, so focus lands on the Plans heading.
+  const closeForm = () => {
+    onCreatingChange(false);
+    focusNext.current = '.plansTabTitle';
   };
 
   const archive = (plan: TrainingPlan) => {
@@ -68,7 +76,10 @@ export function PlansTab({ plans, sessions, setPlans, onStartPlan, onImport }: P
     focusNext.current = archivedPlans.length > 1 ? '.archivedToggle' : '.plansTabTitle';
   };
 
-  const showEmpty = activePlans.length === 0 && !creating;
+  const showEmpty = activePlans.length === 0;
+
+  // New plan replaces the whole screen, "Plans" heading included.
+  if (creating) return <CreatePlanForm onSave={savePlan} onCancel={closeForm} />;
 
   return (
     <div className={`plansTab${archived ? ' plansTab--toast' : ''}`} ref={root}>
@@ -77,12 +88,10 @@ export function PlansTab({ plans, sessions, setPlans, onStartPlan, onImport }: P
           <span className="plansTabCount">{plansCountLabel(activePlans.length, archivedPlans.length)}</span>
           <h1 className="plansTabTitle" tabIndex={-1}>Plans</h1>
         </div>
-        {!creating && !showEmpty && (
-          <PillButton variant="white" onClick={() => setCreating(true)}>+ New plan</PillButton>
+        {!showEmpty && (
+          <PillButton variant="white" onClick={() => onCreatingChange(true)}>+ New plan</PillButton>
         )}
       </header>
-
-      {creating && <CreatePlanForm onSave={savePlan} onCancel={() => setCreating(false)} />}
 
       {showEmpty ? (
         <section className="plansEmpty" aria-labelledby={emptyTitleId}>
@@ -90,7 +99,7 @@ export function PlansTab({ plans, sessions, setPlans, onStartPlan, onImport }: P
           <p className="plansEmptyText">
             A plan is the list of exercises you repeat. Make one, then start it from here or from Log.
           </p>
-          <PrimaryButton tone="lime" onClick={() => setCreating(true)}>+ New plan</PrimaryButton>
+          <PrimaryButton tone="lime" onClick={() => onCreatingChange(true)}>+ New plan</PrimaryButton>
           <button type="button" className="textLink plansEmptyImport" onClick={onImport}>
             Have a CSV backup? Import it
           </button>

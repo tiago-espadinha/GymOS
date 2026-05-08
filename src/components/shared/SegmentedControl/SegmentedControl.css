@@ -3,7 +3,7 @@
   gap: var(--space-1);
   padding: var(--space-1);
   background: var(--color-surface-inset);
-  border-radius: var(--radius-surface);
+  border-radius: var(--radius-nested);
 }
 
 .segmented__segment {
@@ -11,7 +11,7 @@
   min-width: var(--size-control);
   padding: 0 var(--space-4);
   border: 0;
-  border-radius: var(--radius-nested);
+  border-radius: var(--radius-segment);
   background: transparent;
   color: var(--color-text);
   font-family: var(--font-body);

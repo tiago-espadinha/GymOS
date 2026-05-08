@@ -17,3 +17,5 @@ export { ListRow } from './ListRow';
 export { TabBar } from './TabBar';
 export { Sheet } from './Sheet';
 export { Toast } from './Toast';
+export { Switch } from './Switch';
+export { WarningIcon } from './WarningIcon';

@@ -62,10 +62,15 @@ test.describe('with plans', () => {
     await expect(page.getByRole('button', { name: /^Bench press/ })).toBeVisible()
   })
 
-  test('+ New plan opens the form', async ({ page }) => {
+  test('+ New plan replaces the list and hides the tab bar until Cancel', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: '+ New plan' }).click()
     await expect(page.getByPlaceholder('e.g. Push Day')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Plans', level: 1 })).toHaveCount(0)
+    await expect(tabBar(page)).toHaveCount(0)
+    await page.getByRole('button', { name: 'Cancel' }).click()
+    await expect(tabBar(page)).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Plans', level: 1 })).toBeFocused()
   })
 
   test('⋯ opens a modal sheet with Archive only; Escape closes it and returns focus', async ({ page }) => {

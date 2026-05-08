@@ -120,3 +120,20 @@ describe('Field', () => {
     expect(field).toMatch(/:focus-visible\s*{[^}]*border-color: var\(--color-accent\)/)
   })
 })
+
+describe('Field error', () => {
+  it('pairs the text with a warning icon, never colour alone', () => {
+    const html = renderToStaticMarkup(createElement(Field, { label: 'Name', error: 'Give the plan a name' }))
+    expect(html).toMatch(/class="field__error"><svg[^>]*aria-hidden="true"/)
+  })
+
+  it('uses the dim colour for placeholders', () => {
+    expect(cssOf('Field')).toMatch(/::placeholder\s*{[^}]*color: var\(--color-text-dim\)/)
+  })
+
+  it('keeps the danger border on a focused invalid field and rings it in lime', () => {
+    expect(cssOf('Field')).toMatch(
+      /\[aria-invalid='true'\]:focus-visible\s*{[^}]*border-color: var\(--color-danger\);[^}]*outline: var\(--border-focus\)/,
+    )
+  })
+})

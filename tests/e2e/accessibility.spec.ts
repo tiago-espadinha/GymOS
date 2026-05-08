@@ -19,16 +19,26 @@ const sessions = [
 
 const tabs = ['Plans', 'Log', 'Progress']
 
-test('New plan form has no detectable WCAG A/AA violations', async ({ page }) => {
+test('New plan form, with errors, a removed exercise and the muscle group sheet, has no detectable WCAG A/AA violations', async ({ page }) => {
+  const axe = async () => {
+    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+    expect(results.violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([])
+  }
   await page.goto('/')
   await page.getByRole('button', { name: '+ New plan' }).click()
-  await page.getByRole('group', { name: 'Exercise 1 category' }).getByRole('button', { name: 'Cardio' }).click()
+  await page.getByRole('group', { name: 'Category', exact: true }).getByRole('button', { name: 'Cardio' }).click()
   await page.getByRole('button', { name: '+ Add exercise' }).click()
+  await page.getByRole('button', { name: '+ Add exercise' }).click()
+  await page.getByRole('button', { name: 'Remove exercise 3' }).click()
   await page.getByRole('button', { name: 'Save plan' }).click()
-  const results = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-    .analyze()
-  expect(results.violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([])
+  await expect(page.getByRole('alert')).toBeVisible()
+  await expect(page.getByRole('status')).toBeVisible()
+  await axe()
+
+  await page.getByRole('button', { name: /^Exercise 1/, expanded: false }).click()
+  await page.getByRole('button', { name: /^Muscle group/ }).click()
+  await expect(page.getByRole('listbox', { name: 'Muscle group' })).toBeVisible()
+  await axe()
 })
 
 for (const tab of tabs) {

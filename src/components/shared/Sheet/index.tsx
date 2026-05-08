@@ -18,8 +18,9 @@ const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select
 /**
  * A modal bottom sheet. There is no scrim (the direction forbids translucency);
  * the rest of the page is made inert while it is open, and focus returns to the
- * control that opened it when that control is still on the page. The first
- * control gets focus on open, so put the safe choice first.
+ * control that opened it when that control is still on the page. The control
+ * marked data-autofocus, else the first control, gets focus on open, so put the
+ * safe choice first.
  */
 export function Sheet({ labelledBy, describedBy, role = 'dialog', onClose, children }: SheetProps) {
   const ref = useRef<HTMLElement>(null);
@@ -41,7 +42,7 @@ export function Sheet({ labelledBy, describedBy, role = 'dialog', onClose, child
       }
     }
 
-    (sheet.querySelector<HTMLElement>(FOCUSABLE) ?? sheet).focus();
+    (sheet.querySelector<HTMLElement>('[data-autofocus]') ?? sheet.querySelector<HTMLElement>(FOCUSABLE) ?? sheet).focus();
 
     const onPointerDown = (e: PointerEvent) => {
       if (!sheet.contains(e.target as Node)) close.current();

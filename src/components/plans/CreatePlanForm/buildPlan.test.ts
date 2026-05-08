@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPlan } from "./buildPlan";
+import { buildPlan, errorCount, validatePlan, NAME_ERROR, NO_EXERCISES_ERROR } from "./buildPlan";
 import { Exercise, TrainingPlan } from "../../../types";
 
 const bench: Exercise = {
@@ -35,25 +35,27 @@ describe("buildPlan", () => {
     });
   });
 
-  it("drops exercises without a name", () => {
-    const result = buildPlan("Push day", "", [blank, run]);
-    if (!("plan" in result)) throw new Error("expected a plan");
-    expect(result.plan.exercises).toEqual([run]);
+  it("flags exercises without a name instead of dropping them", () => {
+    expect(buildPlan("Push day", "", [blank, run])).toEqual({
+      errors: { name: undefined, exercises: undefined, unnamed: ["e3"] },
+    });
   });
 
   it("requires a plan name", () => {
-    expect(buildPlan("  ", "", [run])).toEqual({ errors: { name: "Plan name is required" } });
-  });
-
-  it("requires at least one named exercise", () => {
-    expect(buildPlan("Push day", "", [blank])).toEqual({
-      errors: { exercises: "Add at least one exercise" },
+    expect(buildPlan("  ", "", [run])).toEqual({
+      errors: { name: NAME_ERROR, exercises: undefined, unnamed: [] },
     });
   });
 
-  it("reports both errors together", () => {
-    expect(buildPlan("", "", [blank])).toEqual({
-      errors: { name: "Plan name is required", exercises: "Add at least one exercise" },
+  it("requires at least one exercise", () => {
+    expect(buildPlan("Push day", "", [])).toEqual({
+      errors: { name: undefined, exercises: NO_EXERCISES_ERROR, unnamed: [] },
     });
+  });
+
+  it("counts every thing to fix for the summary", () => {
+    expect(errorCount(validatePlan("", [blank, { ...blank, id: "e4" }]))).toBe(3);
+    expect(errorCount(validatePlan("", []))).toBe(2);
+    expect(errorCount(validatePlan("Push day", [run]))).toBe(0);
   });
 });

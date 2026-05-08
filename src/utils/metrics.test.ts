@@ -18,6 +18,10 @@ describe('resolveBranch', () => {
     expect(resolveBranch(strength)).toBe('strength')
   })
 
+  it('treats strength without weight as reps, so its sets never chart as 0 kg', () => {
+    expect(resolveBranch({ ...strength, trackWeight: false })).toBe('reps')
+  })
+
   it('treats a time-tracked strength exercise as time', () => {
     expect(resolveBranch({ ...strength, trackingType: 'time' })).toBe('time')
   })

@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
-import { Field, PillButton, PrimaryButton } from "../../shared";
-import { generateId } from "../../../utils/id";
-import { TrainingPlan, Exercise } from "../../../types";
-import { buildPlan, PlanErrors } from "./buildPlan";
+import { useEffect, useRef, useState } from "react";
+import { Field, PrimaryButton, Toast, WarningIcon } from "../../shared";
+import { TrainingPlan } from "../../../types";
+import { buildPlan, errorCount, validatePlan } from "./buildPlan";
 import { ExerciseFields } from "./ExerciseFields";
+import { ExerciseSummary } from "./ExerciseSummary";
+import { ADD_BUTTON, useExerciseList } from "./useExerciseList";
 import "./CreatePlanForm.css";
 
 interface CreatePlanFormProps {
@@ -11,94 +12,93 @@ interface CreatePlanFormProps {
   onCancel: () => void;
 }
 
-function makeExercise(): Exercise {
-  return { id: generateId(), name: "", muscleGroup: "Chest", category: "strength" };
-}
+const PLAN_NAME = 'input[name="planName"]';
 
 export function CreatePlanForm({ onSave, onCancel }: CreatePlanFormProps) {
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
-  const [exercises, setExercises] = useState<Exercise[]>([makeExercise()]);
-  const [errors, setErrors] = useState<PlanErrors>({});
+  // Errors show after the first Save and then follow every edit.
+  const [submitted, setSubmitted] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  // A fresh object per request, so a repeated Save with the same errors still moves focus.
+  const [focusRequest, setFocusRequest] = useState<{ selector: string } | null>(null);
+  const focus = (selector: string) => setFocusRequest({ selector });
+  const list = useExerciseList(focus);
+  const { exercises, openId, removed } = list;
 
-  const updateExercise = (updated: Exercise) =>
-    setExercises((all) => all.map((e) => (e.id === updated.id ? updated : e)));
+  // Centre the control so the sticky Save bar never covers it.
+  useEffect(() => {
+    const el = focusRequest && formRef.current?.querySelector<HTMLElement>(focusRequest.selector);
+    if (!el) return;
+    el.focus({ preventScroll: true });
+    el.scrollIntoView({ block: "center" });
+  }, [focusRequest]);
 
-  const removeExercise = (id: string) => setExercises((all) => all.filter((e) => e.id !== id));
+  const errors = submitted ? validatePlan(name, exercises) : null;
+  const count = errors ? errorCount(errors) : 0;
 
   const save = () => {
     const result = buildPlan(name, desc, exercises);
-    if ("errors" in result) {
-      setErrors(result.errors);
-      // The exercises error is announced as an alert; the name error needs focus to be heard.
-      if (result.errors.name) formRef.current?.querySelector<HTMLInputElement>('input[name="planName"]')?.focus();
-      return;
-    }
-    onSave(result.plan);
+    if ("plan" in result) return onSave(result.plan);
+    setSubmitted(true);
+    const [firstUnnamed] = result.errors.unnamed;
+    if (result.errors.name) focus(PLAN_NAME);
+    else if (firstUnnamed) list.open(firstUnnamed);
+    else focus(ADD_BUTTON);
   };
 
   return (
-    <form
-      ref={formRef}
-      className="createPlanForm"
-      aria-labelledby="createPlanFormTitle"
-      noValidate
+    <form ref={formRef} className="createPlanForm" aria-labelledby="createPlanFormTitle" noValidate
       onSubmit={(e) => {
         e.preventDefault();
         save();
       }}
     >
-      <h2 id="createPlanFormTitle" className="createPlanFormTitle">
-        New plan
-      </h2>
+      <header className="createPlanFormHeader">
+        <h1 id="createPlanFormTitle" className="createPlanFormTitle">New plan</h1>
+        <button type="button" className="createPlanFormCancel" onClick={onCancel}>Cancel</button>
+      </header>
 
-      <Field
-        label="Plan name"
-        name="planName"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="e.g. Push Day"
-        error={errors.name}
-      />
-      <Field
-        label="Description (optional)"
-        value={desc}
-        onChange={(e) => setDesc(e.target.value)}
-        placeholder="e.g. Chest, shoulders, triceps"
-      />
+      <div className="createPlanFormName">
+        <Field label="Name" name="planName" value={name} onChange={(e) => setName(e.target.value)}
+          placeholder="e.g. Push Day" error={errors?.name} />
+      </div>
+      <Field label="Description · optional" value={desc} onChange={(e) => setDesc(e.target.value)}
+        placeholder="e.g. Chest, shoulders, triceps" />
 
-      <h3 className="createPlanFormSection">Exercises</h3>
-      <ul className="createPlanFormExercises" role="list">
-        {exercises.map((ex, i) => (
-          <ExerciseFields
-            key={ex.id}
-            exercise={ex}
-            index={i}
-            canRemove={exercises.length > 1}
-            onChange={updateExercise}
-            onRemove={() => removeExercise(ex.id)}
-          />
-        ))}
-      </ul>
+      <section className="createPlanFormExercises" aria-labelledby="createPlanFormExercisesTitle">
+        <h2 id="createPlanFormExercisesTitle" className="createPlanFormSection">Exercises · {exercises.length}</h2>
+        <ul className="createPlanFormList" role="list">
+          {exercises.map((ex, i) => {
+            const invalid = !!errors?.unnamed.includes(ex.id);
+            return (
+              <li key={ex.id}>
+                {ex.id === openId ? (
+                  <ExerciseFields exercise={ex} number={i + 1} invalid={invalid} onChange={list.update}
+                    onRemove={() => list.remove(ex.id)} />
+                ) : (
+                  <ExerciseSummary exercise={ex} number={i + 1} invalid={invalid} onExpand={() => list.open(ex.id)} />
+                )}
+              </li>
+            );
+          })}
+        </ul>
+        {errors?.exercises && <p className="exerciseError"><WarningIcon />{errors.exercises}</p>}
+        <button type="button" className="createPlanFormAdd" data-add-exercise onClick={list.add}>+ Add exercise</button>
+      </section>
 
-      {errors.exercises && (
-        <p role="alert" className="createPlanFormError">
-          {errors.exercises}
-        </p>
-      )}
-
-      <PillButton variant="outline-white" onClick={() => setExercises((all) => [...all, makeExercise()])}>
-        + Add exercise
-      </PillButton>
-
-      <div className="createPlanFormActions">
-        <PrimaryButton type="submit" tone="lime">
-          Save plan
-        </PrimaryButton>
-        <PillButton variant="outline-white" onClick={onCancel}>
-          Cancel
-        </PillButton>
+      <div className="createPlanFormBar">
+        {removed && (
+          <Toast key={removed.exercise.id} inline message={`Exercise ${removed.index + 1} removed`} actionLabel="Undo"
+            onAction={list.undo} onDismiss={list.clearRemoved} />
+        )}
+        {count > 0 && (
+          <p role="alert" className="createPlanFormSummary">
+            <WarningIcon />
+            {count === 1 ? "1 thing to fix before saving" : `${count} things to fix before saving`}
+          </p>
+        )}
+        <PrimaryButton type="submit">Save plan</PrimaryButton>
       </div>
     </form>
   );
