@@ -15,7 +15,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 const startPlan = (page: import('@playwright/test').Page) =>
-  page.getByRole('button', { name: 'Log', exact: true }).first().click() // the plan card's button precedes the tab bar
+  page.getByRole('button', { name: 'Start Push day' }).click()
 
 const tabBar = (page: import('@playwright/test').Page) => page.getByRole('navigation', { name: 'Main' })
 

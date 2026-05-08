@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button } from '../../shared';
+import { PillButton } from '../../shared';
 import CreatePlanForm from '../CreatePlanForm';
 import PlanCard from '../PlanCard';
 import { TrainingPlan } from '../../../types';
@@ -8,10 +8,10 @@ import './PlansTab.css';
 interface PlansTabProps {
   plans: TrainingPlan[];
   setPlans: (plans: TrainingPlan[]) => void;
-  onLogPlan: (plan: TrainingPlan) => void;
+  onStartPlan: (plan: TrainingPlan) => void;
 }
 
-export function PlansTab({ plans, setPlans, onLogPlan }: PlansTabProps) {
+export function PlansTab({ plans, setPlans, onStartPlan }: PlansTabProps) {
   const [creating, setCreating] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
 
@@ -38,19 +38,14 @@ export function PlansTab({ plans, setPlans, onLogPlan }: PlansTabProps) {
   return (
     <div className="plansTab">
       <div className="plansTabHeader">
-        <div>
-          <div className="plansTabTitle">Training Plans</div>
-          <div className="plansTabSubtitle">
-            {activePlans.length} active plan{activePlans.length !== 1 ? 's' : ''}
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <h1 className="plansTabTitle">Plans</h1>
+        <div className="plansTabActions">
           {archivedPlans.length > 0 && (
-            <Button variant="ghost" small onClick={() => setShowArchived(!showArchived)}>
-              {showArchived ? 'Hide' : 'Show'} Archived ({archivedPlans.length})
-            </Button>
+            <PillButton variant="outline-white" onClick={() => setShowArchived(!showArchived)}>
+              {showArchived ? 'Hide' : 'Show'} archived ({archivedPlans.length})
+            </PillButton>
           )}
-          {!creating && <Button onClick={() => setCreating(true)}>+ New Plan</Button>}
+          {!creating && <PillButton variant="white" onClick={() => setCreating(true)}>+ New plan</PillButton>}
         </div>
       </div>
 
@@ -66,32 +61,32 @@ export function PlansTab({ plans, setPlans, onLogPlan }: PlansTabProps) {
         </div>
       ) : (
         <>
-          <div className="plansTabGrid">
+          <ul className="plansTabList" role="list">
             {activePlans.map((p) => (
               <PlanCard
                 key={p.id}
                 plan={p}
                 onDelete={deletePlan}
-                onLog={onLogPlan}
+                onStart={onStartPlan}
                 onToggleArchive={toggleArchive}
               />
             ))}
-          </div>
+          </ul>
 
           {showArchived && archivedPlans.length > 0 && (
             <div className="archivedSection">
-              <div className="archivedHeader">Archived Plans</div>
-              <div className="plansTabGrid">
+              <h2 className="archivedHeader">Archived plans</h2>
+              <ul className="plansTabList" role="list">
                 {archivedPlans.map((p) => (
                   <PlanCard
                     key={p.id}
                     plan={p}
                     onDelete={deletePlan}
-                    onLog={onLogPlan}
+                    onStart={onStartPlan}
                     onToggleArchive={toggleArchive}
                   />
                 ))}
-              </div>
+              </ul>
             </div>
           )}
         </>
