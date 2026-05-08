@@ -10,6 +10,7 @@ import {
   isLoggedSet,
 } from "../../../utils/activeSession";
 import { generateId } from "../../../utils/id";
+import { clearSessionRests } from "../../../utils/restTimers";
 import LogHome from "../LogHome";
 import SessionList from "../SessionList";
 import "./LogTab.css";
@@ -67,6 +68,7 @@ export function LogTab({
       const question = editingId ? "Discard your changes?" : "Discard this session?";
       if (!window.confirm(question)) return;
     }
+    if (session) clearSessionRests(session.exercises);
     onEnd();
   };
 
@@ -96,6 +98,7 @@ export function LogTab({
     }
     setSaved(editingId ? "✓ Session updated!" : "✓ Session saved!");
     setTimeout(() => setSaved(""), 4000);
+    clearSessionRests(session.exercises);
     onEnd();
   };
 
