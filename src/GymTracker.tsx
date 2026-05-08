@@ -97,16 +97,15 @@ export default function GymTracker() {
   const { session } = activeSession;
   // An active session takes over the screen: it shows the log and no tab bar.
   const visibleTab: TabId = session ? "log" : tab;
-  const showTabs = !session && !(visibleTab === "plans" && creatingPlan);
+  // New plan hides the tab bar, so no tab change can happen while it is open.
+  const showTabs = !session && !creatingPlan;
 
   const changeTab = (next: TabId) => {
     setShowData(false);
-    setCreatingPlan(false);
     setTab(next);
   };
 
   const openData = () => {
-    setCreatingPlan(false);
     setTab("progress");
     setShowData(true);
   };
