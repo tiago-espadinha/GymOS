@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import type { InputHTMLAttributes } from 'react';
+import { WarningIcon } from '../WarningIcon';
 import './Field.css';
 
 interface FieldProps
@@ -27,6 +28,7 @@ export function Field({ label, error, ...rest }: FieldProps) {
       />
       {error && (
         <p id={errorId} className="field__error">
+          <WarningIcon />
           {error}
         </p>
       )}
