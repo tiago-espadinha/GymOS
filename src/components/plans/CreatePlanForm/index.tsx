@@ -19,7 +19,7 @@ export function CreatePlanForm({ onSave, onCancel }: CreatePlanFormProps) {
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([makeExercise()]);
-  const [errors, setErrors] = useState<PlanErrors>({});
+  const [errors, setErrors] = useState<PlanErrors>({ unnamed: [] });
   const formRef = useRef<HTMLFormElement>(null);
 
   const updateExercise = (updated: Exercise) =>

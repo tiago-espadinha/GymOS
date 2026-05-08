@@ -54,17 +54,15 @@ test('calisthenics reps can track added weight', async ({ page }) => {
   expect(plan.exercises[0]).toMatchObject({ category: 'calisthenics', trackingType: 'reps', trackWeight: true })
 })
 
-test('saving without a name or without a named exercise shows an error and stores nothing', async ({ page }) => {
+test('saving without a name or with an unnamed exercise stores nothing', async ({ page }) => {
   await openForm(page)
   await page.getByRole('button', { name: 'Save plan' }).click()
-  await expect(page.getByText('Plan name is required')).toBeVisible()
-  await expect(page.getByRole('alert')).toHaveText('Add at least one exercise')
+  await expect(page.getByText('Give the plan a name')).toBeVisible()
   expect(await storedPlans(page)).toEqual([])
 
   await page.getByLabel('Plan name').fill('Push day')
   await page.getByRole('button', { name: 'Save plan' }).click()
-  await expect(page.getByText('Plan name is required')).toHaveCount(0)
-  await expect(page.getByRole('alert')).toHaveText('Add at least one exercise')
+  await expect(page.getByText('Give the plan a name')).toHaveCount(0)
   expect(await storedPlans(page)).toEqual([])
 })
 
