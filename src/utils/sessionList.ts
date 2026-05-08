@@ -14,6 +14,14 @@ export function currentExerciseId(exercises: ExerciseLog[]): string | null {
   return exercises.find((ex) => !ex.sets.some(isLoggedSet))?.id ?? null;
 }
 
+// The set being entered, counted from 1: the first one with nothing logged,
+// or the last set once all are logged.
+export function currentSetNumber(exercise: ExerciseLog): { number: number; total: number } {
+  const total = exercise.sets.length;
+  const pending = exercise.sets.findIndex((s) => !isLoggedSet(s));
+  return { number: pending === -1 ? total : pending + 1, total };
+}
+
 function formatSet(set: Set, exercise: ExerciseLog): string {
   const meta = getExerciseMeta(exercise);
   if (meta.trackingType === "time") {

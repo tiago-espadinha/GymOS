@@ -139,6 +139,7 @@ test('editing a saved timed session keeps its last set; "+ Set" then adds a hold
   await page.clock.fastForward(7_000)
   await button(page, 'Finish').click()
   await button(page, 'Skip').click()
+  await button(page, 'All exercises').click()
   await page.getByRole('button', { name: 'Finish session' }).click()
   await page.getByRole('button', { name: 'Save session' }).click()
   // Imported or older sets carry no "completed" flag.
@@ -159,6 +160,7 @@ test('editing a saved timed session keeps its last set; "+ Set" then adds a hold
 test('cancelling a session forgets a hold in progress', async ({ page }) => {
   await button(page, 'Start').click()
   await page.clock.fastForward(3_000)
+  await button(page, 'All exercises').click()
   page.once('dialog', (d) => d.accept())
   await page.getByRole('button', { name: 'Cancel' }).click()
   const keys = await page.evaluate(() => Object.keys(localStorage).filter((k) => k.endsWith('-work')))

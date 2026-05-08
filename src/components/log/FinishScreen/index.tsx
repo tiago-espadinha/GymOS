@@ -8,6 +8,8 @@ import "./FinishScreen.css";
 interface FinishScreenProps {
   session: ActiveSession;
   onNotes: (notes: string) => void;
+  /** Changes the date of a saved session being edited; a new one picks its date before starting. */
+  onDate: (date: string) => void;
   onSave: () => void;
   /** Saves refused by the browser in a row; nothing was stored while above 0. */
   saveFailures: number;
@@ -17,7 +19,7 @@ interface FinishScreenProps {
   onCancel: () => void;
 }
 
-export function FinishScreen({ session, onNotes, onSave, saveFailures, onDownload, onBack, onCancel }: FinishScreenProps) {
+export function FinishScreen({ session, onNotes, onDate, onSave, saveFailures, onDownload, onBack, onCancel }: FinishScreenProps) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => titleRef.current?.focus(), []);
 
@@ -67,6 +69,17 @@ export function FinishScreen({ session, onNotes, onSave, saveFailures, onDownloa
             This browser refused to store the session: storage is full or blocked. Your sets are still on this
             screen. Try again, or download them so nothing is lost.
           </SaveFailedAlert>
+        )}
+        {session.editingId && (
+          <Field
+            label="Session date"
+            type="date"
+            defaultValue={session.date}
+            required
+            // Uncontrolled, so clearing a segment to retype it does not snap back;
+            // an empty field never blanks the stored date.
+            onChange={(e) => e.target.value && onDate(e.target.value)}
+          />
         )}
         <Field
           label="Notes · optional"

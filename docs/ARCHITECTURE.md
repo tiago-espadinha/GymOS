@@ -23,6 +23,8 @@ GymOS is a frontend-only single-page app. A React tree holds plans and logged se
 | `timers` | Rest and hold timers used by the log screens |
 | `shared` | Small form and layout primitives |
 
+During a session the log shows either the exercise list or one exercise as a full screen. Every exercise screen stays mounted, hidden when not shown, so a running rest or hold keeps its timer and sound cue while the person looks at another exercise.
+
 Logic that has no UI lives outside the components: `src/utils` (storage, CSV, metrics, dates, ids, timer preferences), `src/hooks/useTimer.ts`, `src/constants` and `src/types`.
 
 ## Data and state

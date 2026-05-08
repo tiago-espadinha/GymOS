@@ -1,22 +1,50 @@
-.logTabTitle:focus {
+.logTabTitle:focus,
+.logTabSessionTitle:focus {
   outline: none;
 }
 
-.logTabTitle {
-  margin: 0 0 24px;
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--color-text);
-  letter-spacing: -0.02em;
-}
-
-.logTabTitle--home {
+.logTabTitle,
+.logTabSessionTitle {
+  margin: 0;
   font-family: var(--font-display);
   font-weight: var(--weight-display);
   font-size: var(--text-screen-title);
   line-height: var(--leading-screen-title);
-  letter-spacing: normal;
+  color: var(--color-text);
   text-transform: uppercase;
+}
+
+.logTabTitle {
+  margin-bottom: 24px;
+}
+
+.logTabSessionTitle {
+  overflow-wrap: anywhere;
+}
+
+.logTabHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-6) 0 var(--space-4);
+}
+
+.logTabHeader > .pill-button {
+  flex-shrink: 0;
+}
+
+.logTabHeading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.logTabMeta {
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--color-text-muted);
 }
 
 .logTabEditing {
@@ -37,14 +65,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.logTabForm {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 14px;
-  margin-bottom: 24px;
-  align-items: end;
 }
 
 @media (max-width: 600px) {
@@ -75,10 +95,4 @@
   font-size: 12px;
   color: var(--color-accent);
   font-weight: 600;
-}
-
-.logTabPlanName {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--color-text);
 }

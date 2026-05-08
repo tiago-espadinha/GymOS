@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDateKicker, formatDateStat } from "./date";
+import { formatDateKicker, formatDateMeta, formatDateStat } from "./date";
 
 describe("formatDateKicker", () => {
   it("reads as weekday, day and month in capitals", () => {
@@ -14,5 +14,11 @@ describe("formatDateStat", () => {
 
   it("adds the year for an earlier year", () => {
     expect(formatDateStat("2023-11-27", "2026-11-22")).toBe("27 NOV 2023");
+  });
+});
+
+describe("formatDateMeta", () => {
+  it("reads as weekday, day and month without a comma", () => {
+    expect(formatDateMeta("2026-11-15")).toBe("Sun 15 Nov");
   });
 });

@@ -17,7 +17,7 @@ test.beforeEach(async ({ page }) => {
 const startPlan = (page: import('@playwright/test').Page) =>
   page.getByRole('button', { name: 'Start Push day' }).click()
 
-// Exercises start collapsed on the session list; open the first one to log into it.
+// The session opens on the exercise list; open the first exercise to log into it.
 const openBench = (page: import('@playwright/test').Page) =>
   page.getByRole('button', { name: /^Bench press/ }).click()
 
@@ -37,6 +37,7 @@ test('starting a plan hides the tabs; saving brings them back on Log', async ({ 
   await openBench(page)
   await page.getByPlaceholder('0').nth(0).fill('60')
   await page.getByPlaceholder('0').nth(1).fill('8')
+  await page.getByRole('button', { name: 'All exercises' }).click()
   await page.getByRole('button', { name: 'Finish session' }).click()
   await page.getByRole('button', { name: 'Save session' }).click()
   await expect(tabBar(page)).toBeVisible()
@@ -59,7 +60,7 @@ test('reloading mid-session restores the session and its logged set', async ({ p
   await page.getByPlaceholder('0').nth(0).fill('62.5')
   await page.reload()
   await expect(tabBar(page)).toHaveCount(0)
-  await expect(page.getByText('Push day')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Push day' })).toBeVisible()
   await openBench(page)
   await expect(page.getByPlaceholder('0').nth(0)).toHaveValue('62.5')
 })
@@ -95,6 +96,7 @@ test('editing a saved session updates it in place, also after a reload', async (
   await page.reload()
   await openBench(page)
   await page.getByPlaceholder('0').nth(0).fill('55')
+  await page.getByRole('button', { name: 'All exercises' }).click()
   await page.getByRole('button', { name: 'Finish session' }).click()
   await page.getByRole('button', { name: 'Update session' }).click()
   await expect(tabBar(page)).toBeVisible()
@@ -109,6 +111,7 @@ test('cancelling a session with logged sets asks first', async ({ page }) => {
   await startPlan(page)
   await openBench(page)
   await page.getByPlaceholder('0').nth(0).fill('60')
+  await page.getByRole('button', { name: 'All exercises' }).click()
   await page.getByRole('button', { name: 'Finish session' }).click()
   page.once('dialog', (d) => d.dismiss())
   await page.getByRole('button', { name: 'Cancel' }).click()
@@ -121,7 +124,7 @@ test('cancelling a session with logged sets asks first', async ({ page }) => {
 test('focus moves to the title when a session starts and ends', async ({ page }) => {
   await page.goto('/')
   await startPlan(page)
-  await expect(page.getByRole('heading', { name: 'Log Session' })).toBeFocused()
+  await expect(page.getByRole('heading', { name: 'Push day' })).toBeFocused()
   await page.getByRole('button', { name: 'Cancel' }).click()
   await expect(page.getByRole('heading', { name: 'Log', exact: true })).toBeFocused()
 })

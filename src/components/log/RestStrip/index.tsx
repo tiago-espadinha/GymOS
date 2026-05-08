@@ -6,12 +6,14 @@ import "./RestStrip.css";
 
 interface RestStripProps {
   exercises: ExerciseLog[];
+  /** The exercise on screen, whose own rest block already shows its rest. */
+  openExerciseId: string | null;
   onOpen: (exerciseId: string) => void;
 }
 
 // Read-only: the rest itself is run by the exercise's own timer, this only
 // mirrors it so it stays visible from the list.
-export function RestStrip({ exercises, onOpen }: RestStripProps) {
+export function RestStrip({ exercises, openExerciseId, onOpen }: RestStripProps) {
   const [rest, setRest] = useState(() => findRunningRest(exercises, Date.now()));
 
   useEffect(() => {
@@ -19,7 +21,7 @@ export function RestStrip({ exercises, onOpen }: RestStripProps) {
     return () => clearInterval(id);
   }, [exercises]);
 
-  if (!rest) return null;
+  if (!rest || rest.exerciseId === openExerciseId) return null;
   return (
     <button type="button" className="restStrip" onClick={() => onOpen(rest.exerciseId)}>
       <span className="restStripLabel">Rest</span>

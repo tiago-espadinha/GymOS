@@ -42,6 +42,7 @@ async function finishWithASet(page: Page) {
   const inputs = page.locator('input[placeholder="0"]:visible')
   await inputs.nth(0).fill('60')
   await inputs.nth(1).fill('8')
+  await page.getByRole('button', { name: 'All exercises' }).click()
   await page.getByRole('button', { name: 'Finish session' }).click()
   await page.getByLabel('Notes · optional').fill('Felt strong')
 }

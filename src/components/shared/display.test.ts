@@ -49,14 +49,17 @@ describe('ListRow', () => {
     expect(other).not.toContain('aria-current')
   })
 
-  it('becomes a button that reports whether it is expanded when given an onClick', () => {
-    const html = renderToStaticMarkup(
-      createElement(ListRow, { title: 'A', onClick: () => {}, expanded: false }),
-    )
-    expect(html).toMatch(/^<button type="button"[^>]*aria-expanded="false"/)
+  it('becomes a button when given an onClick', () => {
+    const html = renderToStaticMarkup(createElement(ListRow, { title: 'A', onClick: () => {} }))
+    expect(html).toMatch(/^<button type="button"/)
     const plain = renderToStaticMarkup(createElement(ListRow, { title: 'A' }))
     expect(plain).toMatch(/^<div/)
-    expect(plain).not.toContain('aria-expanded')
+  })
+
+  it('shows a number column that stays out of the accessible name', () => {
+    const html = renderToStaticMarkup(createElement(ListRow, { number: 2, title: 'Row', onClick: () => {} }))
+    expect(html).toContain('<span class="list-row__number" aria-hidden="true">2</span>')
+    expect(renderToStaticMarkup(createElement(ListRow, { title: 'Row' }))).not.toContain('list-row__number')
   })
 
   it('is taller when it has a subtitle or is the current row', () => {

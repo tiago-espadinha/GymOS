@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Badge, Button, NumericInput, PrimaryButton } from "../../shared";
 import { MUSCLE_GROUP_COLORS } from "../../../constants/muscleGroups";
-import { CATEGORY_ICONS, CATEGORY_COLORS } from "../../../constants/exerciseTypes";
 import { generateId } from "../../../utils/id";
 import { ExerciseLog, Set } from "../../../types";
 import { getExerciseMeta, computeMetric } from "../../../utils/metrics";
@@ -112,12 +111,6 @@ export function ExerciseLogger({ exercise, onChange }: ExerciseLoggerProps) {
     <div className="exerciseLogger">
       <div className="exerciseLoggerHeader">
         <div>
-          <div className="exerciseLoggerTitle">
-            <span className="exerciseLoggerCategoryIcon" style={{ color: CATEGORY_COLORS[category] }}>
-              {CATEGORY_ICONS[category]}
-            </span>
-            {exercise.name}
-          </div>
           {(average || peak) && (
             <div className="exerciseLoggerStats">
               {average && <span className="exerciseLoggerAvg">Avg: {average.label}</span>}

@@ -77,7 +77,7 @@ test('a finished rest counts up as +m:ss, here and on the strip', async ({ page 
   await page.clock.fastForward(75_000)
   await expect(timer(page)).toContainText('+0:15')
   await expect.poll(() => fillShare(page)).toBeCloseTo(1, 1)
-  await page.getByRole('button', { name: /^Bench press/ }).click()
+  await page.getByRole('button', { name: 'All exercises' }).click()
   await page.clock.fastForward(1_000)
   await expect(page.getByRole('button', { name: /^Rest/ })).toContainText('+0:16')
 })
