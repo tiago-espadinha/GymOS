@@ -60,11 +60,20 @@ function clearPersisted(timerId: string) {
 export function readRunningTimer(
   timerId: string,
   now: number,
-): { startedAt: number; remainingMs: number } | null {
+): { startedAt: number; remainingMs: number; overtimeMs: number } | null {
   const state = loadPersisted(timerId);
   if (!state?.isRunning || state.startedAt === null) return null;
   const elapsedMs = state.accumulatedMs + Math.max(0, now - state.startedAt);
-  return { startedAt: state.startedAt, remainingMs: Math.max(0, state.targetMs - elapsedMs) };
+  return {
+    startedAt: state.startedAt,
+    remainingMs: Math.max(0, state.targetMs - elapsedMs),
+    overtimeMs: Math.max(0, elapsedMs - state.targetMs),
+  };
+}
+
+// Forgets a timer another component owned, e.g. when its session has ended.
+export function clearTimer(timerId: string) {
+  clearPersisted(timerId);
 }
 
 export function formatClock(ms: number): string {
@@ -76,6 +85,12 @@ export function formatClock(ms: number): string {
     return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   }
   return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+}
+
+// A rest clock: the time left, then "+m:ss" once the rest is over.
+export function formatRestClock(remainingMs: number, overtimeMs: number): string {
+  if (overtimeMs <= 0) return formatClock(remainingMs);
+  return `+${formatClock(overtimeMs).replace(/^0(?=\d:)/, "")}`;
 }
 
 function playBeep() {

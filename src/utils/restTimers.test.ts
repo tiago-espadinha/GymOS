@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ExerciseLog } from "../types";
-import { findRunningRest, restTimerId } from "./restTimers";
+import { clearSessionRests, findRunningRest, restTimerId } from "./restTimers";
 
 const NOW = 1_000_000_000_000;
 
@@ -19,7 +19,7 @@ beforeEach(() => {
   store = new Map();
   vi.useFakeTimers();
   vi.setSystemTime(NOW);
-  vi.stubGlobal("localStorage", { getItem: (k: string) => store.get(k) ?? null });
+  vi.stubGlobal("localStorage", { getItem: (k: string) => store.get(k) ?? null, removeItem: (k: string) => store.delete(k) });
 });
 
 afterEach(() => {
@@ -39,12 +39,18 @@ describe("findRunningRest", () => {
       exerciseId: "e2",
       exerciseName: "Row",
       remainingMs: 60_000,
+      overtimeMs: 0,
     });
   });
 
   it("counts time banked before a pause and never goes below zero", () => {
     putTimer("s1", { isRunning: true, startedAt: NOW - 10_000, accumulatedMs: 100_000, targetMs: 90_000 });
     expect(findRunningRest(exercises, NOW)?.remainingMs).toBe(0);
+  });
+
+  it("reports overtime once the target has passed", () => {
+    putTimer("s1", { isRunning: true, startedAt: NOW - 105_000, accumulatedMs: 0, targetMs: 90_000 });
+    expect(findRunningRest(exercises, NOW)).toMatchObject({ remainingMs: 0, overtimeMs: 15_000 });
   });
 
   it("picks the rest that started last when two are running", () => {
@@ -57,5 +63,15 @@ describe("findRunningRest", () => {
     store.set(`gym:timer:${restTimerId("other")}`, JSON.stringify({ isRunning: true, startedAt: NOW, accumulatedMs: 0, targetMs: 1, savedAt: NOW }));
     putTimer("s1", { isRunning: true, startedAt: NOW, accumulatedMs: 0, targetMs: 90_000, savedAt: 0 });
     expect(findRunningRest(exercises, NOW)).toBeNull();
+  });
+});
+
+describe("clearSessionRests", () => {
+  it("removes every rest timer of the session and leaves others alone", () => {
+    putTimer("s1", { isRunning: true, startedAt: NOW, accumulatedMs: 0, targetMs: 90_000 });
+    putTimer("s2", { isRunning: false, startedAt: null, accumulatedMs: 0, targetMs: 90_000 });
+    store.set("gym:timer:other-rest", "{}");
+    clearSessionRests(exercises);
+    expect([...store.keys()]).toEqual(["gym:timer:other-rest"]);
   });
 });
