@@ -27,7 +27,8 @@ const logAndRest = async (page: Page) => {
 
 test('saving a session clears its rests, so editing it later shows none', async ({ page }) => {
   await logAndRest(page)
-  await page.getByRole('button', { name: 'Save Session' }).click()
+  await page.getByRole('button', { name: 'Finish session' }).click()
+  await page.getByRole('button', { name: 'Save session' }).click()
   await page.getByRole('button', { name: /^Edit/ }).first().click()
   await expect(page.getByRole('button', { name: /^Rest/ })).toHaveCount(0)
   await page.getByRole('button', { name: /^Bench press/ }).click()
@@ -36,6 +37,7 @@ test('saving a session clears its rests, so editing it later shows none', async 
 
 test('cancelling a session clears its rests', async ({ page }) => {
   await logAndRest(page)
+  await page.getByRole('button', { name: 'Finish session' }).click()
   page.once('dialog', (d) => d.accept())
   await page.getByRole('button', { name: 'Cancel' }).click()
   const keys = await page.evaluate(() => Object.keys(localStorage).filter((k) => k.endsWith('-rest')))

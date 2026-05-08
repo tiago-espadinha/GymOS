@@ -32,3 +32,26 @@ export function lastValues(exercise: ExerciseLog): string {
   const last = exercise.sets.findLast(isLoggedSet);
   return (last && formatSet(last, exercise)) || NO_VALUES;
 }
+
+// Exercises with a logged set, logged sets, and weight x reps over those sets.
+export function sessionTotals(exercises: ExerciseLog[]): { exercises: number; sets: number; volume: number } {
+  let sets = 0;
+  let volume = 0;
+  let worked = 0;
+  for (const exercise of exercises) {
+    const logged = exercise.sets.filter(isLoggedSet);
+    if (logged.length > 0) worked += 1;
+    sets += logged.length;
+    for (const set of logged) volume += (parseFloat(set.weight) || 0) * (parseInt(set.reps) || 0);
+  }
+  return { exercises: worked, sets, volume };
+}
+
+// "3 × 40 kg × 12" when every logged set matches, otherwise just "3 sets".
+export function exerciseSummary(exercise: ExerciseLog): string {
+  const logged = exercise.sets.filter(isLoggedSet);
+  if (logged.length === 0) return NO_VALUES;
+  const values = logged.map((s) => formatSet(s, exercise));
+  if (values.every((v) => v === values[0]) && values[0]) return `${logged.length} × ${values[0]}`;
+  return `${logged.length} set${logged.length === 1 ? "" : "s"}`;
+}

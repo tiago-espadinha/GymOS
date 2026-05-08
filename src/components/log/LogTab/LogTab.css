@@ -53,14 +53,17 @@
   }
 }
 
-.logTabNotes {
-  margin-bottom: 16px;
-}
-
 .logTabActions {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: var(--space-3);
   align-items: center;
+  margin-top: var(--space-5);
+}
+
+.logTabHint {
+  font-size: var(--text-secondary);
+  color: var(--color-text-muted);
 }
 
 .logTabSaved:empty {
