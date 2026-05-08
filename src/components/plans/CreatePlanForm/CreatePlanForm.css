@@ -1,8 +1,23 @@
+/* Fills the screen so the sticky Save bar sits at the bottom even on a short form.
+   80px and 40px are .mainContent's top plus bottom padding (GymTracker.css). */
 .createPlanForm {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  margin-bottom: var(--space-6);
+  min-height: calc(100dvh - 80px);
+}
+
+@media (max-width: 600px) {
+  .createPlanForm {
+    min-height: calc(100dvh - 40px);
+  }
+}
+
+.createPlanFormHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
 }
 
 .createPlanFormTitle {
@@ -10,13 +25,45 @@
   font-family: var(--font-display);
   font-weight: var(--weight-display);
   font-size: var(--text-section-title-lg);
-  line-height: 1;
+  line-height: 0.9;
   text-transform: uppercase;
-  overflow-wrap: anywhere;
 }
 
-.createPlanFormSection,
-.createPlanFormLabel {
+.createPlanFormCancel {
+  flex: none;
+  min-height: var(--size-control);
+  min-width: var(--size-control);
+  padding: 0 var(--space-2);
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.createPlanFormCancel:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* The plan name is the key field: display type, 56 tall. */
+.createPlanFormName .field__input {
+  min-height: var(--size-field-lg);
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-row-title);
+  text-transform: uppercase;
+}
+
+.createPlanFormExercises {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.createPlanFormSection {
   margin: 0;
   font-family: var(--font-body);
   font-size: var(--text-small);
@@ -26,121 +73,252 @@
   color: var(--color-text-muted);
 }
 
-.createPlanFormExercises {
+.createPlanFormList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.createPlanFormExercise {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  background: var(--color-surface);
-  border-radius: var(--radius-surface);
-}
-
-.createPlanFormExercise > .field {
-  align-self: stretch;
-}
-
-/* A field on a surface needs the inset colour to stay visible. */
-.createPlanFormExercise .field__input {
-  background: var(--color-bg);
-  border-radius: var(--radius-nested);
-}
-
-.createPlanFormExerciseHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  align-self: stretch;
-}
-
-.createPlanFormExerciseTitle {
-  margin: 0;
+.exerciseNumber {
   font-family: var(--font-display);
   font-weight: var(--weight-display);
   font-size: var(--text-row-title);
   line-height: 1;
-  text-transform: uppercase;
+  color: var(--color-text-dim);
 }
 
-.createPlanFormRemove {
+/* Collapsed exercise */
+.exerciseSummary {
   display: grid;
-  place-items: center;
-  min-width: var(--size-control);
-  min-height: var(--size-control);
-  padding: 0;
-  border: var(--border-chip);
-  border-radius: var(--radius-pill);
-  background: transparent;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  width: 100%;
+  min-height: var(--size-action);
+  padding: var(--space-2) var(--space-4);
+  border: 2px solid transparent;
+  border-radius: var(--radius-surface);
+  background: var(--color-surface);
   color: var(--color-text);
-  font-size: var(--text-row-title);
-  line-height: 1;
+  font-family: var(--font-body);
+  text-align: left;
   cursor: pointer;
 }
 
-.createPlanFormRemove:focus-visible {
-  outline: var(--border-focus);
-  outline-offset: 2px;
-}
-
-.createPlanFormSelectField {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  align-self: stretch;
-}
-
-.createPlanFormSelect {
-  min-height: var(--size-field);
-  padding: 0 var(--space-4);
-  border: 2px solid transparent;
-  border-radius: var(--radius-nested);
-  background: var(--color-bg);
-  color: var(--color-text);
-  color-scheme: dark;
-  font-family: var(--font-body);
-  font-size: var(--text-body-lg);
-}
-
-.createPlanFormSelect:focus-visible {
+.exerciseSummary:focus-visible {
   outline: none;
   border-color: var(--color-accent);
 }
 
-.createPlanFormCheckbox {
+.exerciseSummaryText {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  min-height: var(--size-control);
-  font-family: var(--font-body);
-  font-size: var(--text-body-lg);
-  font-weight: 600;
-  cursor: pointer;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
-.createPlanFormCheckbox input {
-  width: 24px;
-  height: 24px;
-  accent-color: var(--color-accent);
+.exerciseSummaryName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-body);
+  font-weight: 700;
 }
 
-.createPlanFormError {
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: var(--text-secondary);
-  color: var(--color-danger);
+.exerciseSummaryName--empty {
+  color: var(--color-text-muted);
 }
 
-.createPlanFormActions {
+.exerciseSummaryMeta {
+  font-size: var(--text-small);
+  color: var(--color-text-muted);
+}
+
+.exerciseSummaryChevron {
+  color: var(--color-text-muted);
+}
+
+/* Expanded exercise: a surface card; controls inside it are inset black, radius 12. */
+.exerciseCard {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  padding: var(--space-4);
+  border: 2px solid transparent;
+  border-radius: var(--radius-surface);
+  background: var(--color-surface);
+}
+
+.exerciseCard .exerciseNumber {
+  color: var(--color-accent);
+}
+
+.exerciseSummary--error,
+.exerciseCard--error {
+  border-color: var(--color-danger);
+}
+
+.exerciseCard--error .exerciseNumber,
+.exerciseSummary--error .exerciseNumber {
+  color: var(--color-danger);
+}
+
+.exerciseCardHead {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: center;
+}
+
+.exerciseNameInput {
+  min-width: 0;
+  min-height: var(--size-control);
+  padding: 0;
+  border: 0;
+  border-bottom: var(--border-control);
+  border-radius: 0;
+  background: none;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  font-weight: 700;
+}
+
+.exerciseNameInput::placeholder {
+  color: var(--color-text-dim);
+}
+
+.exerciseNameInput[aria-invalid='true'] {
+  border-bottom-color: var(--color-danger);
+}
+
+.exerciseNameInput:focus-visible {
+  outline: none;
+  border-bottom-color: var(--color-accent);
+}
+
+.exerciseError {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 700;
+  color: var(--color-danger);
+}
+
+.exerciseCardError {
+  padding-left: 32px;
+}
+
+.exerciseGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.exerciseGroupLabel {
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.exercisePair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+/* Segments share the width equally, so three fit a 375 screen. */
+.exerciseCard .segmented {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+}
+
+.exerciseCard .segmented__segment {
+  padding: 0 var(--space-2);
+  font-size: var(--text-secondary);
+}
+
+/* Label and control side by side, wrapping to two lines when there is no room. */
+.exerciseRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+}
+
+.exerciseRow .segmented {
+  flex: 1 1 180px;
+}
+
+.exerciseRemove {
+  align-self: flex-start;
+  min-height: var(--size-control);
+  min-width: var(--size-control);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-danger);
+  font-family: var(--font-body);
+  font-size: var(--text-secondary);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.exerciseRemove:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+.createPlanFormAdd {
+  min-height: var(--size-field);
+  border: 2px dashed var(--color-line-empty);
+  border-radius: var(--radius-surface);
+  background: none;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-secondary);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.createPlanFormAdd:focus-visible {
+  outline: none;
+  border: var(--border-focus);
+}
+
+/* Sticky Save: black bar with a 1px line on top; the toast and error summary stack over the button. */
+.createPlanFormBar {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: auto;
+  padding: var(--space-3) 0 var(--space-4);
+  border-top: var(--border-hairline);
+  background: var(--color-bg);
+}
+
+.createPlanFormSummary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--size-control);
+  margin: 0;
+  padding: 0 var(--space-4);
+  border: 2px solid var(--color-danger);
+  border-radius: var(--radius-nested);
+  font-family: var(--font-body);
+  font-size: var(--text-secondary);
+  font-weight: 700;
+  color: var(--color-danger);
 }

@@ -10,6 +10,8 @@ const primitives = {
   Field: '.field__input',
   ListRow: '.list-row--button',
   TabBar: '.tab-bar__tab',
+  Select: '.select__button',
+  Switch: '.switch',
 } as const
 
 type Name = keyof typeof primitives
