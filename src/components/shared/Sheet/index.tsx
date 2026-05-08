@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode, type RefObject } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import './Sheet.css';
 
@@ -10,8 +10,6 @@ interface SheetProps {
   role?: 'dialog' | 'alertdialog';
   /** Escape, Cancel or a tap outside the sheet. */
   onClose: () => void;
-  /** Gets focus when the sheet opens; the first control otherwise. */
-  initialFocus?: RefObject<HTMLElement | null>;
   children: ReactNode;
 }
 
@@ -20,9 +18,10 @@ const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select
 /**
  * A modal bottom sheet. There is no scrim (the direction forbids translucency);
  * the rest of the page is made inert while it is open, and focus returns to the
- * control that opened it when that control is still on the page.
+ * control that opened it when that control is still on the page. The first
+ * control gets focus on open, so put the safe choice first.
  */
-export function Sheet({ labelledBy, describedBy, role = 'dialog', onClose, initialFocus, children }: SheetProps) {
+export function Sheet({ labelledBy, describedBy, role = 'dialog', onClose, children }: SheetProps) {
   const ref = useRef<HTMLElement>(null);
   const close = useRef(onClose);
   useEffect(() => {
@@ -42,7 +41,7 @@ export function Sheet({ labelledBy, describedBy, role = 'dialog', onClose, initi
       }
     }
 
-    (initialFocus?.current ?? sheet.querySelector<HTMLElement>(FOCUSABLE) ?? sheet).focus();
+    (sheet.querySelector<HTMLElement>(FOCUSABLE) ?? sheet).focus();
 
     const onPointerDown = (e: PointerEvent) => {
       if (!sheet.contains(e.target as Node)) close.current();
@@ -54,7 +53,7 @@ export function Sheet({ labelledBy, describedBy, role = 'dialog', onClose, initi
       madeInert.forEach((el) => (el.inert = false));
       if (opener?.isConnected) opener.focus();
     };
-  }, [initialFocus]);
+  }, []);
 
   return createPortal(
     <section
