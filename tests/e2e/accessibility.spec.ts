@@ -6,6 +6,17 @@ const plans = [
   { id: 'p2', name: 'Old block', desc: '', isArchived: true, exercises: [{ id: 'e2', name: 'Curl', muscleGroup: 'Biceps' }] },
 ]
 
+const sessions = [
+  {
+    id: 's1',
+    planId: 'p1',
+    planName: 'Push day',
+    date: '2026-01-05',
+    notes: '',
+    exercises: [{ id: 'e1', name: 'Bench press', muscleGroup: 'Chest', sets: [{ id: 'x', weight: '60', reps: '8' }] }],
+  },
+]
+
 const tabs = ['Plans', 'Log', 'Progress']
 
 test('New plan form has no detectable WCAG A/AA violations', async ({ page }) => {
@@ -22,8 +33,9 @@ test('New plan form has no detectable WCAG A/AA violations', async ({ page }) =>
 
 for (const tab of tabs) {
   test(`${tab} tab has no detectable WCAG A/AA violations`, async ({ page }) => {
-    // Only the Plans scan needs data; the other tabs keep their original empty-state scan.
-    if (tab === 'Plans') await page.addInitScript((p) => localStorage.setItem('gym:plans', JSON.stringify(p)), plans)
+    // Plans and Progress are scanned with data; Log keeps its empty-state scan.
+    if (tab !== 'Log') await page.addInitScript((p) => localStorage.setItem('gym:plans', JSON.stringify(p)), plans)
+    if (tab === 'Progress') await page.addInitScript((s) => localStorage.setItem('gym:sessions', JSON.stringify(s)), sessions)
     await page.goto('/')
     await page.getByText(tab, { exact: true }).first().click()
     if (tab === 'Plans') await page.getByRole('button', { name: /Show archived/ }).click()
