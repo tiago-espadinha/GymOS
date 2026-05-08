@@ -71,7 +71,13 @@ export default function GymTracker() {
   };
 
   // A save the user waits on: nothing changes unless the write is kept, so a
-  // refused write leaves the Done screen open and storage as it was.
+  // refused write leaves the screen open and storage as it was.
+  const commitPlans = (next: TrainingPlan[]) => {
+    if (!saveToStorage("gym:plans", next)) return false;
+    setPlans(next);
+    return true;
+  };
+
   const commitSessions = (next: WorkoutSession[]) => {
     if (!saveToStorage("gym:sessions", next)) return false;
     setSessions(next);
@@ -132,6 +138,7 @@ export default function GymTracker() {
             plans={plans}
             sessions={sessions}
             setPlans={storePlans}
+            commitPlans={commitPlans}
             onStartPlan={handleStartPlan}
             onImport={openData}
             creating={creatingPlan}

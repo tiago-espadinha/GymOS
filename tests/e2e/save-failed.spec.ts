@@ -46,6 +46,15 @@ async function finishWithASet(page: Page) {
   await page.getByLabel('Notes · optional').fill('Felt strong')
 }
 
+async function failNewPlan(page: Page) {
+  await page.goto('/')
+  await page.getByRole('button', { name: '+ New plan' }).click()
+  await page.getByLabel('Name', { exact: true }).fill('Pull day')
+  await page.getByLabel('Exercise 1 name').fill('Row')
+  await refuseSaves(page)
+  await page.getByRole('button', { name: 'Save plan' }).click()
+}
+
 test.describe('Finish', () => {
   test('a refused save keeps the Done screen and notes, and Try again saves once storage works', async ({ page }) => {
     await finishWithASet(page)
@@ -105,6 +114,34 @@ test.describe('Finish', () => {
       expect(overflow, `horizontal overflow at ${width}`).toBe(0)
       const download = await page.getByRole('button', { name: 'Download this session (CSV)' }).boundingBox()
       expect(download!.height).toBeGreaterThanOrEqual(44)
+    }
+  })
+})
+
+test.describe('New plan', () => {
+  test('a refused save keeps the form and its values, and Try again saves once storage works', async ({ page }) => {
+    await failNewPlan(page)
+
+    await expect(page.getByRole('alert')).toContainText('Not saved')
+    await expect(page.getByRole('heading', { name: 'New plan' })).toBeVisible()
+    await expect(page.getByLabel('Name', { exact: true })).toHaveValue('Pull day')
+    expect((await stored(page, 'gym:plans')).map((p: { name: string }) => p.name)).toEqual(['Push day'])
+
+    await refuseSaves(page, false)
+    await page.getByRole('button', { name: 'Try again' }).click()
+    await expect(page.getByRole('button', { name: 'Start Pull day' })).toBeVisible()
+    await page.reload()
+    await expect(page.getByRole('button', { name: 'Start Pull day' })).toBeVisible()
+  })
+
+  test('the save-failed form passes axe and fits 375, 768 and 1280', async ({ page }) => {
+    await failNewPlan(page)
+    await expect(page.getByRole('alert')).toBeVisible()
+    await axe(page)
+    for (const width of [375, 768, 1280]) {
+      await page.setViewportSize({ width, height: 800 })
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+      expect(overflow, `horizontal overflow at ${width}`).toBe(0)
     }
   })
 })
