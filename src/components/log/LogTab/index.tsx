@@ -144,6 +144,7 @@ export function LogTab({
         <FinishScreen
           session={session}
           onNotes={(notes) => onUpdate({ notes })}
+          onDate={(date) => onUpdate({ date })}
           onSave={saveSession}
           saveFailures={saveFailures}
           onDownload={downloadSession}

@@ -80,6 +80,33 @@ test('Edit opens the saved session and is at least 44px tall', async ({ page }) 
   await expect(page.getByRole('button', { name: 'Finish session' })).toBeVisible()
 })
 
+test('editing a saved session changes its date on Finish, and only there', async ({ page }) => {
+  await openLog(page)
+  await page.getByRole('button', { name: /^Edit Session 0/ }).click()
+  await expect(page.locator('input[type="date"]')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Finish session' }).click()
+  await expect(page.getByLabel('Session date')).toHaveValue('2026-11-16')
+  await page.getByLabel('Session date').fill('')
+  await expect(page.getByText('Session 0 · MON 16 NOV')).toBeVisible()
+  await page.getByLabel('Session date').fill('2026-11-10')
+  await expect(page.getByText('Session 0 · TUE 10 NOV')).toBeVisible()
+  await page.getByRole('button', { name: 'Update session' }).click()
+  await page.reload()
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('gym:sessions') ?? '[]'))
+  expect(stored.find((s: { id: string }) => s.id === 's0').date).toBe('2026-11-10')
+})
+
+test('a new session has no date field on Finish', async ({ page }) => {
+  await openLog(page)
+  await page.getByLabel('Training plan').selectOption({ label: 'Push day' })
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  await page.getByRole('button', { name: /^Bench press/ }).click()
+  await page.locator('input[placeholder="0"]:visible').nth(1).fill('8')
+  await page.getByRole('button', { name: 'All exercises' }).click()
+  await page.getByRole('button', { name: 'Finish session' }).click()
+  await expect(page.getByLabel('Session date')).toHaveCount(0)
+})
+
 test('Delete removes a session after confirming and the next one fills the list', async ({ page }) => {
   await openLog(page)
   const rows = page.getByRole('region', { name: 'Recent sessions' }).getByRole('listitem')
