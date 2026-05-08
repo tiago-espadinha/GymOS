@@ -1,7 +1,8 @@
 import { useRef, useState } from "react";
 import { Button } from "../../shared";
 import { TrainingPlan, WorkoutSession } from "../../../types";
-import { exportToCSV, importFromCSV } from "../../../utils/csv";
+import { CSVImport, exportToCSV, importFromCSV } from "../../../utils/csv";
+import { mergeImport } from "../../../utils/importData";
 import "./DataTools.css";
 
 // Export and CSV import as they were before the Progress restyle, until they get their own screen.
@@ -17,12 +18,12 @@ function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-function readCsvFile(file: File): Promise<{ plans: TrainingPlan[]; sessions: WorkoutSession[] }> {
+function readCsvFile(file: File): Promise<CSVImport> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (event) => {
       const csv = event.target?.result as string;
-      if (!csv) return resolve({ plans: [], sessions: [] });
+      if (!csv) return resolve({ plans: [], sessions: [], skippedRows: 0 });
       try {
         resolve(importFromCSV(csv));
       } catch (err) {
@@ -31,30 +32,6 @@ function readCsvFile(file: File): Promise<{ plans: TrainingPlan[]; sessions: Wor
     };
     reader.readAsText(file);
   });
-}
-
-function mergePlans(plans: TrainingPlan[], imported: TrainingPlan[]): TrainingPlan[] {
-  const merged = [...plans];
-  imported.forEach((imp) => {
-    const existing = merged.find((p) => p.name === imp.name);
-    if (!existing) return void merged.push(imp);
-    imp.exercises.forEach((impEx) => {
-      if (!existing.exercises.find((e) => e.name === impEx.name)) existing.exercises.push(impEx);
-    });
-  });
-  return merged;
-}
-
-function mergeSessions(sessions: WorkoutSession[], imported: WorkoutSession[]): WorkoutSession[] {
-  const merged = [...sessions];
-  imported.forEach((imp) => {
-    // Same date, plan and notes counts as the same session.
-    const isDuplicate = merged.some(
-      (s) => s.date === imp.date && s.planName === imp.planName && s.notes === imp.notes,
-    );
-    if (!isDuplicate) merged.push(imp);
-  });
-  return merged;
 }
 
 export function DataTools({ plans, sessions, setPlans, setSessions }: DataToolsProps) {
@@ -105,8 +82,9 @@ export function DataTools({ plans, sessions, setPlans, setSessions }: DataToolsP
       setPlans(importState.plans);
       setSessions(importState.sessions);
     } else {
-      setPlans(mergePlans(plans, importState.plans));
-      setSessions(mergeSessions(sessions, importState.sessions));
+      const merged = mergeImport(plans, sessions, importState);
+      setPlans(merged.plans);
+      setSessions(merged.sessions);
     }
     resetImport();
   };
