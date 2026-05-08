@@ -137,7 +137,8 @@ test('editing a saved timed session keeps its last set; "+ Set" then adds a hold
   await page.clock.fastForward(7_000)
   await button(page, 'Finish').click()
   await button(page, 'Skip').click()
-  await page.getByRole('button', { name: 'Save Session' }).click()
+  await page.getByRole('button', { name: 'Finish session' }).click()
+  await page.getByRole('button', { name: 'Save session' }).click()
   // Imported or older sets carry no "completed" flag.
   await page.evaluate(() => {
     const sessions = JSON.parse(localStorage.getItem('gym:sessions')!)

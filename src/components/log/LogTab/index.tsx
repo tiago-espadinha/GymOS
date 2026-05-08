@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Button, Input, Label } from "../../shared";
+import { Input, Label, PillButton } from "../../shared";
 import { today, formatDate } from "../../../utils/date";
 import { ExerciseLog, TrainingPlan, WorkoutSession } from "../../../types";
 import {
@@ -11,9 +11,12 @@ import {
 } from "../../../utils/activeSession";
 import { generateId } from "../../../utils/id";
 import { clearSessionRests } from "../../../utils/restTimers";
+import FinishScreen from "../FinishScreen";
 import LogHome from "../LogHome";
 import SessionList from "../SessionList";
 import "./LogTab.css";
+
+const FINISH_ID = "logTabFinish";
 
 interface LogTabProps {
   plans: TrainingPlan[];
@@ -38,17 +41,22 @@ export function LogTab({
 }: LogTabProps) {
   const [homeDate, setHomeDate] = useState(today());
   const [saved, setSaved] = useState("");
+  const [finishing, setFinishing] = useState(false);
 
   const titleRef = useRef<HTMLHeadingElement>(null);
   const inSession = Boolean(session);
 
   // Starting or ending a session removes the button that was focused, so move
   // focus to the title instead of letting it fall back to the top of the page.
+  // Back to logging returns to the Finish pill that opened the Done screen.
   const mounted = useRef(false);
+  const backFromFinish = useRef(false);
   useEffect(() => {
-    if (mounted.current || inSession) titleRef.current?.focus();
+    if (backFromFinish.current) document.getElementById(FINISH_ID)?.focus();
+    else if (mounted.current || inSession) titleRef.current?.focus();
+    backFromFinish.current = false;
     mounted.current = true;
-  }, [inSession]);
+  }, [inSession, finishing]);
 
   const editingId = session?.editingId;
 
@@ -69,6 +77,7 @@ export function LogTab({
       if (!window.confirm(question)) return;
     }
     if (session) clearSessionRests(session.exercises);
+    setFinishing(false);
     onEnd();
   };
 
@@ -99,6 +108,7 @@ export function LogTab({
     setSaved(editingId ? "✓ Session updated!" : "✓ Session saved!");
     setTimeout(() => setSaved(""), 4000);
     clearSessionRests(session.exercises);
+    setFinishing(false);
     onEnd();
   };
 
@@ -108,74 +118,97 @@ export function LogTab({
     }
   };
 
+  const canFinish = session ? hasLoggedSets(session) : false;
+
+  // The status region stays mounted while the Done screen shows, so a save
+  // message that appears on Save is announced.
   return (
     <div>
-      <h1 className={session ? "logTabTitle" : "logTabTitle logTabTitle--home"} ref={titleRef} tabIndex={-1}>
-        {editingId ? "Edit Session" : session ? "Log Session" : "Log"}
-      </h1>
+      {!(session && finishing) && (
+        <h1 className={session ? "logTabTitle" : "logTabTitle logTabTitle--home"} ref={titleRef} tabIndex={-1}>
+          {editingId ? "Edit Session" : session ? "Log Session" : "Log"}
+        </h1>
+      )}
 
       <div role="status" className="logTabSaved">
         {saved}
       </div>
 
-      {session?.editingId && (
-        <div className="logTabEditing">
-          <div className="logTabEditingText">
-            <span>✏</span>
-            <span>
-              Editing session · {session.planName} · {formatDate(session.date)}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {session && (
-        <div className="logTabForm">
-          <div className="logTabPlanName">{session.planName}</div>
-          <div>
-            <Label>Date</Label>
-            <Input
-              value={session.date}
-              onChange={(d) => onUpdate({ date: d })}
-              type="date"
-              ariaLabel="Session date"
-              style={{ width: "160px" }}
-            />
-          </div>
-        </div>
-      )}
-
-      {session ? (
-        <>
-          <SessionList exercises={session.exercises} onChangeExercise={onUpdateExercise} />
-          <div className="logTabNotes">
-            <Label>Session Notes (optional)</Label>
-            <Input
-              value={session.notes}
-              onChange={(notes) => onUpdate({ notes })}
-              placeholder="How did it go? Any PRs or setbacks?"
-              ariaLabel="Session notes"
-            />
-          </div>
-          <div className="logTabActions">
-            <Button onClick={saveSession}>
-              {editingId ? "Update Session" : "Save Session"}
-            </Button>
-            <Button onClick={cancelSession} variant="ghost">
-              Cancel
-            </Button>
-          </div>
-        </>
-      ) : (
-        <LogHome
-          plans={plans}
-          sessions={sessions}
-          date={homeDate}
-          onDateChange={setHomeDate}
-          onStart={startPlan}
-          onEdit={startEdit}
-          onDelete={deleteSession}
+      {session && finishing ? (
+        <FinishScreen
+          session={session}
+          onNotes={(notes) => onUpdate({ notes })}
+          onSave={saveSession}
+          onBack={() => {
+            backFromFinish.current = true;
+            setFinishing(false);
+          }}
+          onCancel={cancelSession}
         />
+      ) : (
+        <>
+          {session?.editingId && (
+            <div className="logTabEditing">
+              <div className="logTabEditingText">
+                <span>✏</span>
+                <span>
+                  Editing session · {session.planName} · {formatDate(session.date)}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {session && (
+            <div className="logTabForm">
+              <div className="logTabPlanName">{session.planName}</div>
+              <div>
+                <Label>Date</Label>
+                <Input
+                  value={session.date}
+                  onChange={(d) => onUpdate({ date: d })}
+                  type="date"
+                  ariaLabel="Session date"
+                  style={{ width: "160px" }}
+                />
+              </div>
+            </div>
+          )}
+
+          {session ? (
+            <>
+              <SessionList exercises={session.exercises} onChangeExercise={onUpdateExercise} />
+              <div className="logTabActions">
+                <PillButton
+                  id={FINISH_ID}
+                  variant="outline-white"
+                  onClick={() => setFinishing(true)}
+                  disabled={!canFinish}
+                  aria-label="Finish session"
+                >
+                  Finish
+                </PillButton>
+                {!canFinish && (
+                  <>
+                    <span className="logTabHint">Log a set to finish.</span>
+                    <button type="button" className="textLink" onClick={cancelSession}>
+                      Cancel
+                    </button>
+                  </>
+                )}
+              </div>
+            </>
+          ) : (
+            <LogHome
+              plans={plans}
+              sessions={sessions}
+              date={homeDate}
+              onDateChange={setHomeDate}
+              onStart={startPlan}
+              onEdit={startEdit}
+              onDelete={deleteSession}
+            />
+          )}
+        </>
       )}
     </div>
   );

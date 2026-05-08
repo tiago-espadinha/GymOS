@@ -1,0 +1,21 @@
+/* A quiet underlined text button, for secondary exits such as Cancel. */
+.textLink {
+  min-height: var(--size-control);
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--text-secondary);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.textLink:hover {
+  color: var(--color-text);
+}
+
+.textLink:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
