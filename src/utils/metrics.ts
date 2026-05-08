@@ -47,7 +47,8 @@ export function getExerciseMeta(ex: MinimalExercise): ExerciseMeta {
 
 export function resolveBranch(meta: ExerciseMeta): MetricBranch {
   if (meta.trackingType === "reps") {
-    return meta.category === "strength" ? "strength" : "reps";
+    // Weight × reps and e1RM need a weight; strength logged without one charts as reps.
+    return meta.category === "strength" && meta.trackWeight ? "strength" : "reps";
   }
   return meta.trackDistance ? "distance" : "time";
 }
