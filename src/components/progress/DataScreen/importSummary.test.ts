@@ -26,4 +26,11 @@ describe("import summary text", () => {
     expect(addedText(0, 0)).toMatch(/Nothing new/);
     expect(addedText(0, 2)).toBe("Added 0 plans and 2 sessions.");
   });
+
+  it("counts the sessions an add skipped because they were already here", () => {
+    expect(addedText(3, 41, 0)).toBe("Added 3 plans and 41 sessions.");
+    expect(addedText(1, 1, 1)).toBe("Added 1 plan and 1 session. 1 session already here was skipped.");
+    expect(addedText(3, 41, 127)).toBe("Added 3 plans and 41 sessions. 127 sessions already here were skipped.");
+    expect(addedText(0, 0, 5)).toMatch(/Nothing new/);
+  });
 });

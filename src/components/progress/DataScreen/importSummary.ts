@@ -17,7 +17,11 @@ export function nothingFoundText(skippedRows: number): string {
   return `No plans or sessions found: ${count(skippedRows, "row")} skipped because a column or field was missing.`;
 }
 
-export function addedText(addedPlans: number, addedSessions: number): string {
+/** "Added 3 plans and 41 sessions. 127 sessions already here were skipped." */
+export function addedText(addedPlans: number, addedSessions: number, sessionsAlreadyHere = 0): string {
   if (!addedPlans && !addedSessions) return "Nothing new: every plan and session was already here.";
-  return `Added ${plansAndSessions(addedPlans, addedSessions)}.`;
+  const added = `Added ${plansAndSessions(addedPlans, addedSessions)}.`;
+  if (!sessionsAlreadyHere) return added;
+  const verb = sessionsAlreadyHere === 1 ? "was" : "were";
+  return `${added} ${count(sessionsAlreadyHere, "session")} already here ${verb} skipped.`;
 }
