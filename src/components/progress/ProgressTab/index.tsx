@@ -21,6 +21,7 @@ import {
   analyseProgress,
   filterRange,
   lastAndBest,
+  markPRs,
   progressSeries,
   splitLabel,
 } from "../../../utils/progress";
@@ -121,15 +122,15 @@ export function ProgressTab({
   // Fall back to the default when the chosen metric doesn't apply to this exercise.
   const metric = metricOptions.includes(metricChoice) ? metricChoice : DEFAULT_METRIC;
 
+  const higherIsBetter = meta ? higherIsBetterFor(resolveBranch(meta), metric, meta.timeGoal) : true;
   const series = useMemo(
-    () => (selected && meta ? progressSeries(sessions, selected.name, meta, metric) : []),
-    [sessions, selected, meta, metric],
+    () => (selected && meta ? markPRs(progressSeries(sessions, selected.name, meta, metric), higherIsBetter) : []),
+    [sessions, selected, meta, metric, higherIsBetter],
   );
   const todayStr = today();
   const ranges = TIME_RANGES.map((r) => ({ ...r, disabled: filterRange(series, r.value, todayStr).length === 0 }));
   const range = ranges.find((r) => r.value === rangeChoice)?.disabled ? "all" : rangeChoice;
   const points = filterRange(series, range, todayStr);
-  const higherIsBetter = meta ? higherIsBetterFor(resolveBranch(meta), metric, meta.timeGoal) : true;
   const figures = lastAndBest(series, higherIsBetter);
 
   if (showData) {
