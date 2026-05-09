@@ -61,7 +61,7 @@ test.beforeEach(async ({ page }) => {
 test('opens from Progress with the device counts, and Close returns to the link', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Data', level: 1 })).toBeFocused()
   await expect(page.locator('.dataCount')).toHaveText(['1 plan', '2 sessions'])
-  await expect(page.getByText('Choose a CSV exported from GymOS')).toBeVisible()
+  await expect(page.getByText('Bring in a CSV exported from GymOS')).toBeVisible()
   await expect(page.getByRole('button', { name: /Add to my data|Replace my data/ })).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Close' }).click()
@@ -92,8 +92,9 @@ test('a chosen file shows what was found, and Add keeps existing data', async ({
 
   await page.getByRole('button', { name: /Add to my data/ }).click()
 
-  await expect(page.getByText('Added 1 plan and 1 session.')).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Import · done' })).toBeFocused()
+  await expect(page.getByText('Added 1 plan and 1 session. 1 session already here was skipped.')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Imported' })).toBeFocused()
+  await expect(page.getByText('gym_data_2026-02-01.csv')).toBeVisible()
   await expect(page.locator('.dataCount')).toHaveText(['2 plans', '3 sessions'])
   const after = await stored(page)
   expect(after.plans.map((p) => p.name)).toEqual(['Pull day', 'Legs'])
@@ -106,7 +107,7 @@ test('a chosen file shows what was found, and Add keeps existing data', async ({
 })
 
 test('choosing a file with the button moves focus to the import heading', async ({ page }) => {
-  const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('button', { name: 'Choose CSV file' }).click()])
+  const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('button', { name: 'Choose a CSV file' }).click()])
   await chooser.setFiles(csvFile('gym.csv', importCsv))
 
   await expect(page.getByRole('heading', { name: 'Import · file ready' })).toBeFocused()
@@ -117,6 +118,7 @@ test('Replace swaps the device data for the file', async ({ page }) => {
   await page.getByRole('button', { name: /Replace my data/ }).click()
 
   await expect(page.getByText('Replaced with 1 plan and 2 sessions.')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Imported' })).toBeFocused()
   const after = await stored(page)
   expect(after.plans.map((p) => p.name)).toEqual(['Legs'])
   expect(after.sessions.map((s) => s.date)).toEqual(['2026-01-01', '2026-02-01'])
@@ -135,8 +137,10 @@ test('a file that is not an export shows the error and changes no data', async (
   const before = await stored(page)
   await chooseFile(page, 'notes.csv', 'name,weight\nRow,60')
 
-  await expect(page.getByRole('heading', { name: 'Import · could not read' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: "Can't import this file" })).toBeFocused()
+  await expect(page.getByText('notes.csv')).toBeVisible()
   await expect(page.getByText('The first line does not match a GymOS export, so nothing was read.')).toBeVisible()
+  await expect(page.getByText('Nothing on this device was changed.')).toBeVisible()
   await expect(page.getByRole('button', { name: /Add to my data|Replace my data/ })).toHaveCount(0)
   expect(await stored(page)).toEqual(before)
 
@@ -145,7 +149,22 @@ test('a file that is not an export shows the error and changes no data', async (
   await expect(page.getByRole('button', { name: 'Choose another file' })).toBeVisible()
 })
 
-test('the Data screen has no detectable WCAG A/AA violations, idle and with a file ready', async ({ page }) => {
+test('after an import, See progress closes Data and Import another file opens the chooser', async ({ page }) => {
+  await chooseFile(page, 'gym.csv', importCsv)
+  await page.getByRole('button', { name: /Add to my data/ }).click()
+
+  const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('button', { name: 'Import another file' }).click()])
+  await chooser.setFiles(csvFile('again.csv', importCsv))
+  await expect(page.getByRole('heading', { name: 'Import · file ready' })).toBeFocused()
+  await page.getByRole('button', { name: /Add to my data/ }).click()
+  await expect(page.getByText('Nothing new: every plan and session was already here.')).toBeVisible()
+
+  await page.getByRole('button', { name: 'See progress' }).click()
+  await expect(page.getByRole('heading', { name: 'Data' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Import / export' })).toBeFocused()
+})
+
+test('the Data screen has no detectable WCAG A/AA violations in each import state', async ({ page }) => {
   const scan = async () =>
     (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()).violations.map(
       (v) => `${v.id} (${v.nodes.length})`,
@@ -153,5 +172,11 @@ test('the Data screen has no detectable WCAG A/AA violations, idle and with a fi
   expect(await scan()).toEqual([])
   await chooseFile(page, 'gym.csv', importCsv)
   await expect(page.getByRole('button', { name: /Add to my data/ })).toBeVisible()
+  expect(await scan()).toEqual([])
+  await page.getByRole('button', { name: /Add to my data/ }).click()
+  await expect(page.getByRole('button', { name: 'See progress' })).toBeVisible()
+  expect(await scan()).toEqual([])
+  await chooseFile(page, 'notes.csv', 'name,weight\nRow,60')
+  await expect(page.getByRole('heading', { name: "Can't import this file" })).toBeVisible()
   expect(await scan()).toEqual([])
 })
