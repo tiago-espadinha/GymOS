@@ -1,0 +1,45 @@
+/* Wide Plans only (board "B · Two panes · Plans"): an active plan in the left pane. */
+@media (min-width: 1024px) {
+  .planSelect {
+    border-bottom: var(--border-hairline);
+  }
+
+  .planSelect__button {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    min-height: var(--size-row);
+    padding: var(--space-3) var(--space-4);
+    border: 0;
+    background: none;
+    color: var(--color-text);
+    font-family: var(--font-body);
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .planSelect__button .planRow__text {
+    flex: 1;
+  }
+
+  /* Selected is inverted with a check mark, never colour alone. */
+  .planSelect__button[aria-current='true'] {
+    border-radius: var(--radius-nested);
+    background: var(--color-inverse);
+    color: var(--color-on-inverse);
+  }
+
+  .planSelect__button[aria-current='true'] .planRow__meta {
+    color: var(--color-on-inverse);
+  }
+
+  .planSelect__button:focus-visible {
+    outline: var(--border-focus);
+    outline-offset: -2px;
+  }
+
+  .planSelect__button[aria-current='true']:focus-visible {
+    outline-color: var(--color-on-inverse);
+  }
+}

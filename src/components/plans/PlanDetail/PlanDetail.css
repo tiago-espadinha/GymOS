@@ -1,0 +1,110 @@
+/* Wide Plans only (board "B · Two panes · Plans"): the selected plan on the right. */
+.planDetail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.planDetail__kicker,
+.planDetail__label {
+  margin: 0;
+  padding-top: var(--space-1);
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.planDetail__name {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-screen-title);
+  line-height: var(--leading-screen-title);
+  text-transform: uppercase;
+}
+
+.planDetail__meta {
+  margin: 0;
+  font-size: var(--text-body-lg);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.planDetail__actions {
+  display: flex;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.planDetail__actions .primary-button {
+  width: var(--width-start-wide);
+}
+
+.planDetail__more {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-action-primary);
+  height: var(--size-action-primary);
+  padding: 0;
+  border: var(--border-chip);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.planDetail__more:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+.planDetail__label {
+  padding-top: var(--space-6);
+}
+
+.planDetail__exercises {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--border-hairline);
+}
+
+.planDetail__exercise {
+  display: grid;
+  grid-template-columns: var(--size-control) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--size-action);
+  border-bottom: var(--border-hairline);
+}
+
+.planDetail__number,
+.planDetail__exerciseName {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.planDetail__number {
+  font-size: var(--text-set-label);
+  color: var(--color-text-muted);
+}
+
+.planDetail__exerciseName {
+  overflow-wrap: anywhere;
+  font-size: var(--text-row-title);
+}
+
+.planDetail__exerciseMeta {
+  font-size: var(--text-secondary);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-align: right;
+}

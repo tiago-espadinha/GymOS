@@ -116,3 +116,68 @@
 .archivedToggle[aria-expanded='true'] .archivedChevron {
   transform: rotate(180deg);
 }
+
+/*
+ * Wide (--breakpoint-wide): the plans in the fixed left pane, the selected one in
+ * full on the right (boards "B · Two panes · Plans" and "…, archived open and Undo").
+ */
+@media (min-width: 1024px) {
+  .plansTab--wide {
+    display: grid;
+    grid-template-columns: var(--width-pane) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--gutter-wide);
+  }
+
+  /* The pane stays in view and scrolls on its own when the plans outgrow it. */
+  .plansPane {
+    position: sticky;
+    top: calc(var(--size-topbar) + var(--gutter-wide));
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - var(--size-topbar) - 2 * var(--gutter-wide));
+    overflow-y: auto;
+    /* Room for focus rings, which a scroll box would otherwise clip at its edges. */
+    margin-inline: calc(-1 * var(--space-1));
+    padding-inline: var(--space-1);
+  }
+
+  /* The last rows can scroll clear of the Undo toast, which sits over the pane. */
+  .plansTab--wide.plansTab--toast .plansPane {
+    padding-bottom: var(--size-row-summary);
+  }
+
+  .plansTab--wide .plansTabHeader {
+    flex-wrap: nowrap;
+    align-items: center;
+    padding-bottom: var(--space-3);
+  }
+
+  /* The screen title shrinks to the pane's label, with the count under it. */
+  .plansTab--wide .plansTabHeading {
+    flex-direction: column-reverse;
+    gap: var(--space-1);
+  }
+
+  .plansTab--wide .plansTabTitle {
+    font-family: var(--font-body);
+    font-size: var(--text-small);
+    font-weight: 700;
+    line-height: var(--leading-body);
+    letter-spacing: var(--tracking-label);
+    color: var(--color-text-muted);
+  }
+
+  .plansTab--wide .plansTabCount {
+    font-size: var(--text-secondary);
+  }
+
+  /* Undo sits under the pane rather than centred in the window. */
+  .plansTab--wide .toast {
+    left: max(var(--gutter-wide), calc((100% - var(--width-wide)) / 2));
+    right: auto;
+    width: var(--width-pane);
+    max-width: none;
+    margin: 0;
+  }
+}

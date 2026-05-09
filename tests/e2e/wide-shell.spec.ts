@@ -70,8 +70,6 @@ test.describe('wide, 1280', () => {
 
   test('screens without a wide layout keep the 600 column; sheets stay 560', async ({ page }) => {
     await page.goto('/')
-    await nav(page).getByRole('button', { name: 'Plans' }).click()
-    expect(await box(page, '.mainContent')).toMatchObject({ x: 340, width: 600 })
     await nav(page).getByRole('button', { name: 'Progress' }).click()
     await page.getByRole('button', { name: 'Import / export' }).click()
     await expect(page.getByRole('heading', { name: 'Data', level: 1 })).toBeVisible()
@@ -93,6 +91,13 @@ test.describe('wide, 1280', () => {
     await nav(page).getByRole('button', { name: 'Progress' }).click()
     expect(await box(page, '.mainContent')).toMatchObject({ x: 0, width: 1280 })
     expect(await box(page, '.progressTab')).toMatchObject({ x: 40, width: 1200 })
+  })
+
+  test('Plans has its own two panes in the 1200 frame', async ({ page }) => {
+    await page.goto('/')
+    await nav(page).getByRole('button', { name: 'Plans' }).click()
+    expect(await box(page, '.mainContent')).toMatchObject({ x: 0, width: 1280 })
+    expect(await box(page, '.plansTab')).toMatchObject({ x: 40, width: 1200 })
   })
 
   test('a session hides all navigation and keeps the column', async ({ page }) => {
