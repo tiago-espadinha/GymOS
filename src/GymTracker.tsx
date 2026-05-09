@@ -132,6 +132,13 @@ export default function GymTracker() {
 
   return (
     <div className="gymOS">
+      {/* Bottom tab bar below 1024; the wordmark and top bar at wide widths. */}
+      {showTabs && (
+        <header className="shellBar">
+          <p className="shellBar__wordmark">GymOS</p>
+          <TabBar tabs={TABS} active={tab} onChange={changeTab} />
+        </header>
+      )}
       <div className={`mainContent ${showTabs ? "withTabs" : ""}`}>
         {visibleTab === "plans" && (
           <PlansTab
@@ -178,11 +185,6 @@ export default function GymTracker() {
         )}
       </div>
 
-      {showTabs && (
-        <div className="shellTabs">
-          <TabBar tabs={TABS} active={tab} onChange={changeTab} />
-        </div>
-      )}
     </div>
   );
 }

@@ -5,13 +5,19 @@
   font-family: var(--font-body);
 }
 
-/* Tab bar: bottom of the screen, absent while a session is active */
-.shellTabs {
+/* Tab bar: bottom of the screen, inside the column, absent in a session */
+.shellBar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 100;
+  max-width: var(--width-column);
+  margin: 0 auto;
+}
+
+.shellBar__wordmark {
+  display: none;
 }
 
 /* Content Area */
@@ -32,5 +38,47 @@
 
   .mainContent.withTabs {
     padding-bottom: calc(var(--size-tabbar) + 20px);
+  }
+}
+
+/*
+ * Wide (--breakpoint-wide): a top bar across the window, its content in the
+ * 1200 frame; screens without a wide layout keep the phone column.
+ */
+@media (min-width: 1024px) {
+  #root {
+    width: 100%;
+  }
+
+  .shellBar {
+    position: sticky;
+    top: 0;
+    max-width: none;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    box-sizing: border-box;
+    height: var(--size-topbar);
+    padding: 0 max(var(--gutter-wide), calc((100% - var(--width-wide)) / 2));
+    border-bottom: var(--border-hairline);
+    background: var(--color-bg);
+  }
+
+  .shellBar__wordmark {
+    display: block;
+    align-self: center;
+    font-family: var(--font-display);
+    font-weight: var(--weight-display);
+    font-size: var(--text-wordmark);
+    text-transform: uppercase;
+  }
+
+  .mainContent {
+    box-sizing: border-box;
+    max-width: var(--width-column);
+  }
+
+  .mainContent.withTabs {
+    padding-bottom: 40px;
   }
 }

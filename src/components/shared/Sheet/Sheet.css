@@ -9,7 +9,7 @@
   flex-direction: column;
   gap: var(--space-3);
   width: 100%;
-  max-width: 560px;
+  max-width: var(--width-sheet);
   max-height: 90vh;
   margin: 0 auto;
   overflow-y: auto;
@@ -25,8 +25,8 @@
   max-width: none;
   max-height: none;
   gap: 0;
-  /* Full width so nothing shows beside it; the content keeps the app's 600px column. */
-  padding: var(--space-5) max(0px, calc((100% - 600px) / 2)) var(--space-7);
+  /* Full width so nothing shows beside it; the content keeps the app's column. */
+  padding: var(--space-5) max(0px, calc((100% - var(--width-column)) / 2)) var(--space-7);
   border-radius: 0;
   background: var(--color-bg);
 }

@@ -52,3 +52,10 @@
   outline: 2px solid var(--color-on-inverse);
   outline-offset: 2px;
 }
+
+/* Wide (--breakpoint-wide): no bottom tab bar to clear. */
+@media (min-width: 1024px) {
+  .toast {
+    bottom: var(--space-4);
+  }
+}

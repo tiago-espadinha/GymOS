@@ -9,9 +9,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Phone column, centred until the wider layouts are designed. */
+/* Phone column, centred; GymTracker.css widens it at --breakpoint-wide. */
 #root {
-  width: 600px;
+  width: var(--width-column);
   max-width: 100%;
   margin: 0 auto;
   min-height: 100svh;

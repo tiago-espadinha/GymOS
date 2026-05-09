@@ -28,3 +28,24 @@
   outline: var(--border-focus);
   outline-offset: -4px;
 }
+
+/* Wide (--breakpoint-wide): the tabs sit in the top bar, marked from below. */
+@media (min-width: 1024px) {
+  .tab-bar {
+    gap: var(--space-2);
+    border-top: 0;
+  }
+
+  .tab-bar__tab {
+    flex: none;
+    min-height: 0; /* fills the top bar's height */
+    padding: 0 var(--space-5);
+    border-top: 0;
+    border-bottom: 4px solid transparent;
+  }
+
+  .tab-bar__tab[aria-current='page'] {
+    border-top: 0;
+    border-bottom: var(--border-tab-active);
+  }
+}
