@@ -1,5 +1,6 @@
 import { StepperBlock } from "../../shared";
 import { decimal } from "../../../utils/typedNumber";
+import "./TimedSetBlock.css";
 
 interface DistanceFieldProps {
   setNumber: number;
