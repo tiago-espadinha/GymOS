@@ -92,6 +92,7 @@ span.logHomeLead {
 
 .logHomeChoice:focus-visible,
 .logHomePlan:focus-visible,
+.logHomeChangePlan:focus-visible,
 .logHomeImport:focus-visible {
   outline: var(--border-focus);
   outline-offset: 2px;
@@ -134,7 +135,7 @@ span.logHomeLead {
 }
 
 /* Label and empty text line up with the row text. */
-.logHomeRecent > .logHomeLabel,
+.logHomeRecentHead > .logHomeLabel,
 .logHomeRecent > p,
 .logHomeRecent > button {
   margin-left: var(--space-4);
@@ -245,4 +246,199 @@ span.logHomeLead {
 .logHomeEdit:focus-visible {
   outline: var(--border-focus);
   outline-offset: -2px;
+}
+
+/* Below wide, the wide-only parts stay out of the layout and the wrappers add no box. */
+.logHomeExercises,
+.logHomeMore,
+.logHomeChangePlan,
+.logHomeRecentCount,
+.logHomeItemCell {
+  display: none;
+}
+
+.logHomeActions,
+.logHomeRecentHead {
+  display: contents;
+}
+
+/*
+ * Wide (--breakpoint-wide): New session in the fixed left pane, Recent sessions as a
+ * table on the right (board "B · Two panes · Log home").
+ */
+@media (min-width: 1024px) {
+  .logHome {
+    display: grid;
+    grid-template-columns: var(--width-pane) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--gutter-wide);
+  }
+
+  .logHomeBlock {
+    gap: var(--space-2);
+    margin-bottom: 0;
+    padding: var(--space-7) var(--space-6) var(--space-6);
+  }
+
+  .logHomeBlock .logHomeLead {
+    margin-top: var(--space-2);
+  }
+
+  /* Change plan sits beside Start instead. */
+  .logHomePlan .logHomeChoice {
+    display: none;
+  }
+
+  .logHomeExercises {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--text-body);
+    font-weight: 600;
+  }
+
+  .logHomeMore {
+    display: block;
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-body);
+    font-weight: 600;
+  }
+
+  .logHomeActions {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .logHomeActions .primary-button {
+    flex-grow: 1;
+    width: auto;
+  }
+
+  .logHomeChangePlan {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--size-action-primary);
+    padding: 0 var(--space-6);
+    border: 2px solid currentColor;
+    border-radius: var(--radius-pill);
+    background: none;
+    color: inherit;
+    font-family: var(--font-body);
+    font-size: var(--text-secondary);
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .logHomeRecentHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-bottom: var(--space-4);
+  }
+
+  .logHomeRecentHead > .logHomeLabel {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: var(--weight-display);
+    font-size: var(--text-section-title);
+    line-height: 1;
+    letter-spacing: 0;
+    color: var(--color-text);
+  }
+
+  .logHomeRecentCount {
+    display: block;
+    font-size: var(--text-secondary);
+    color: var(--color-text-muted);
+  }
+
+  .logHomeRecent > p,
+  .logHomeRecent > button {
+    margin-left: 0;
+  }
+
+  .logHomeList {
+    border-bottom: var(--border-hairline);
+  }
+
+  /*
+   * A row is one grid: name, date, sets, volume, notes, Edit. The row's text wrappers
+   * add no box, so their spans are the cells; the "Just saved" kicker sits over the name.
+   */
+  .logHomeItem {
+    /* Board widths at 1280; narrower windows shrink the cells, notes first. */
+    grid-template-columns: minmax(0, 160px) minmax(0, 120px) minmax(0, 90px) minmax(0, 110px) minmax(0, 1fr) 60px;
+    align-content: center;
+    gap: 0 var(--space-3);
+    min-height: var(--size-row);
+    padding: 0;
+  }
+
+  /* The inverted row reaches past the column edge so its text stays aligned. */
+  .logHomeItem--saved {
+    margin-inline: calc(-1 * var(--space-4));
+    padding: var(--space-2) var(--space-4);
+  }
+
+  .logHomeItemText,
+  .logHomeItemHead {
+    display: contents;
+  }
+
+  /* The kicker row is otherwise empty, so it may run over the date column. */
+  .logHomeItemKicker {
+    grid-column: 1 / 3;
+    grid-row: 1;
+    margin-bottom: var(--space-1);
+  }
+
+  .logHomeItemTitle {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  /* Every cell sits on the second row; the first holds only the kicker. */
+  .logHomeItemHead > .logHomeItemMeta,
+  .logHomeItemCell,
+  .logHomeEdit {
+    grid-row: 2;
+  }
+
+  .logHomeItemHead > .logHomeItemMeta {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: var(--text-secondary);
+  }
+
+  .logHomeItemSummary {
+    display: none;
+  }
+
+  .logHomeItemCell {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: var(--text-secondary);
+  }
+
+  .logHomeItemNotes {
+    color: var(--color-text-muted);
+  }
+
+  .logHomeItem--saved .logHomeItemNotes {
+    color: var(--color-on-inverse);
+  }
+
+  .logHomeEdit {
+    justify-self: end;
+    min-width: var(--size-control);
+    padding: 0;
+    text-align: right;
+  }
 }

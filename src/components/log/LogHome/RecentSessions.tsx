@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { formatDateFull } from "../../../utils/date";
-import { newestFirst, sessionStats, sessionSummary } from "../../../utils/sessions";
+import { newestFirst, sessionCells, sessionStats, sessionSummary } from "../../../utils/sessions";
 import { WorkoutSession } from "../../../types";
 
 const RECENT_COUNT = 6;
@@ -17,9 +17,17 @@ export function RecentSessions({ sessions, onEdit, justSaved, empty }: RecentSes
   const recent = newestFirst(sessions).slice(0, RECENT_COUNT);
   return (
     <section aria-labelledby="logHomeRecentTitle" className={recent.length ? "logHomeRecent" : "logHomeRecent logHomeRecent--empty"}>
-      <h2 id="logHomeRecentTitle" className="logHomeLabel">
-        Recent sessions
-      </h2>
+      <div className="logHomeRecentHead">
+        <h2 id="logHomeRecentTitle" className="logHomeLabel">
+          Recent sessions
+        </h2>
+        {sessions.length > recent.length && (
+          <span className="logHomeRecentCount">
+            {recent.length} of {sessions.length}
+            <span className="visuallyHidden"> shown</span>
+          </span>
+        )}
+      </div>
       {recent.length === 0 ? (
         empty
       ) : (
@@ -27,6 +35,8 @@ export function RecentSessions({ sessions, onEdit, justSaved, empty }: RecentSes
           {recent.map((s) => {
             const when = formatDateFull(s.date);
             const saved = s.id === justSaved?.id;
+            const stats = sessionStats(s);
+            const cells = sessionCells(stats, s.notes);
             return (
               <li key={s.id} className={saved ? "logHomeItem logHomeItem--saved" : "logHomeItem"}>
                 <div className="logHomeItemText">
@@ -35,7 +45,11 @@ export function RecentSessions({ sessions, onEdit, justSaved, empty }: RecentSes
                     <span className="logHomeItemTitle">{s.planName}</span>
                     <span className="logHomeItemMeta">{when}</span>
                   </span>
-                  <span className="logHomeItemMeta logHomeItemSummary">{sessionSummary(sessionStats(s), s.notes)}</span>
+                  <span className="logHomeItemMeta logHomeItemSummary">{sessionSummary(stats, s.notes)}</span>
+                  {/* Wide only: the summary as table cells. */}
+                  <span className="logHomeItemCell">{cells.sets}</span>
+                  <span className="logHomeItemCell">{cells.volume}</span>
+                  <span className="logHomeItemCell logHomeItemNotes">{cells.notes}</span>
                 </div>
                 <button type="button" className="logHomeEdit" onClick={() => onEdit(s)} aria-label={`Edit ${s.planName}, ${when}`}>
                   Edit

@@ -101,6 +101,7 @@
   --width-column: 600px;
   --width-sheet: 560px;
   --width-wide: 1200px;
+  --width-pane: 440px; /* the fixed left pane of a wide two-pane screen */
   --gutter-wide: 40px;
   --text-wordmark: 30px;
 

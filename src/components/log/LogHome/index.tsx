@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronIcon, PrimaryButton } from "../../shared";
 import { formatDateMeta, today } from "../../../utils/date";
-import { defaultPlan, planTrainedSummary } from "../../../utils/plans";
+import { defaultPlan, planPreview, planTrainedSummary } from "../../../utils/plans";
 import { TrainingPlan, WorkoutSession } from "../../../types";
 import DateSheet from "../DateSheet";
 import PlanPicker from "../PlanPicker";
@@ -36,6 +36,22 @@ function NoPlans({ onNewPlan }: { onNewPlan: () => void }) {
   );
 }
 
+// Wide only: the plan's first exercises and how many more follow.
+function PlanPreview({ plan }: { plan: TrainingPlan }) {
+  const { names, more } = planPreview(plan);
+  if (names.length === 0) return null;
+  return (
+    <>
+      <ol className="logHomeExercises" role="list" aria-label={`${plan.name} exercises`}>
+        {names.map((name, i) => (
+          <li key={i}>{name}</li>
+        ))}
+      </ol>
+      <p className="logHomeMore">{more > 0 && `+ ${more} more`}</p>
+    </>
+  );
+}
+
 export function LogHome({ plans, sessions, date, onDateChange, onStart, onEdit, justSaved, onNewPlan, onImport }: LogHomeProps) {
   const [planId, setPlanId] = useState("");
   const [open, setOpen] = useState<"plan" | "date" | null>(null);
@@ -55,7 +71,7 @@ export function LogHome({ plans, sessions, date, onDateChange, onStart, onEdit, 
   );
 
   return (
-    <>
+    <div className="logHome">
       {plan ? (
         <section className="logHomeBlock" aria-label="New session">
           <div className="logHomeBlockTop">
@@ -77,9 +93,16 @@ export function LogHome({ plans, sessions, date, onDateChange, onStart, onEdit, 
             </span>
           </button>
           <span className="logHomeLead">{planTrainedSummary(plan, sessions, today())}</span>
-          <PrimaryButton tone="dark" onClick={() => onStart(plan)}>
-            Start
-          </PrimaryButton>
+          {/* Wide only: Change plan beside Start. */}
+          <PlanPreview plan={plan} />
+          <div className="logHomeActions">
+            <PrimaryButton tone="dark" onClick={() => onStart(plan)}>
+              Start
+            </PrimaryButton>
+            <button type="button" className="logHomeChangePlan" aria-haspopup="dialog" onClick={() => setOpen("plan")}>
+              Change plan
+            </button>
+          </div>
         </section>
       ) : (
         <NoPlans onNewPlan={onNewPlan} />
@@ -101,7 +124,7 @@ export function LogHome({ plans, sessions, date, onDateChange, onStart, onEdit, 
         />
       )}
       {open === "date" && <DateSheet value={date} onChange={onDateChange} onClose={() => setOpen(null)} />}
-    </>
+    </div>
   );
 }
 
