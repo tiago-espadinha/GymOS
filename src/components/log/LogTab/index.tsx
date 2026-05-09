@@ -53,6 +53,7 @@ export function LogTab({
   const [homeDate, setHomeDate] = useState(today());
   // The session saved or updated since Log home was last shown; its row is marked in Recent.
   const [justSaved, setJustSaved] = useState<{ id: string; planName: string; updated: boolean } | null>(null);
+  const [deleted, setDeleted] = useState("");
   const [finishing, setFinishing] = useState(false);
   // Refused Saves in a row on the Done screen; 0 once a save lands or Done closes.
   const [saveFailures, setSaveFailures] = useState(0);
@@ -76,11 +77,13 @@ export function LogTab({
 
   const startPlan = (plan: TrainingPlan) => {
     setJustSaved(null);
+    setDeleted("");
     onBegin(fromPlan(plan, homeDate));
   };
 
   const startEdit = (previous: WorkoutSession) => {
     setJustSaved(null);
+    setDeleted("");
     onBegin(fromSaved(previous));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -123,10 +126,16 @@ export function LogTab({
     if (unsaved) downloadCSV(exportToCSV([], [unsaved]), `gymos_session_${unsaved.date}.csv`);
   };
 
-  const deleteSession = (id: string) => {
-    if (window.confirm("Delete this session?")) {
-      setSessions(sessions.filter((s) => s.id !== id));
-    }
+  // Only a saved session being edited can be deleted; the confirm sheet has asked already.
+  const deleteSession = () => {
+    if (!session || !editingId) return;
+    setSessions(sessions.filter((s) => s.id !== editingId));
+    clearSessionRests(session.exercises);
+    setJustSaved(null);
+    setDeleted(`${session.planName} session deleted`);
+    setSaveFailures(0);
+    setFinishing(false);
+    onEnd();
   };
 
   const canFinish = session ? hasLoggedSets(session) : false;
@@ -144,7 +153,7 @@ export function LogTab({
       )}
 
       <div role="status" className="visuallyHidden">
-        {justSaved && `${justSaved.planName} session ${justSaved.updated ? "updated" : "saved"}`}
+        {justSaved ? `${justSaved.planName} session ${justSaved.updated ? "updated" : "saved"}` : deleted}
       </div>
 
       {session && finishing ? (
@@ -161,6 +170,7 @@ export function LogTab({
             setFinishing(false);
           }}
           onCancel={cancelSession}
+          onDelete={deleteSession}
         />
       ) : (
         <>
@@ -238,7 +248,6 @@ export function LogTab({
               onDateChange={setHomeDate}
               onStart={startPlan}
               onEdit={startEdit}
-              onDelete={deleteSession}
               justSaved={justSaved && { id: justSaved.id, label: justSaved.updated ? "Just updated" : "Just saved" }}
               onNewPlan={onNewPlan}
               onImport={onImport}

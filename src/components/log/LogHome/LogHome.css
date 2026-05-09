@@ -158,7 +158,7 @@ span.logHomeLead {
 
 .logHomeItem {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-1);
   min-height: var(--size-row-lg);

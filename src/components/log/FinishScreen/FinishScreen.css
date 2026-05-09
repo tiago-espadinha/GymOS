@@ -16,6 +16,27 @@
   text-transform: uppercase;
 }
 
+.finishDate {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--size-control);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.finishDate:focus-visible {
+  outline: var(--border-focus);
+  outline-color: var(--color-on-accent);
+  outline-offset: 2px;
+}
+
 .finishTitle {
   margin: 0;
   font-family: var(--font-display);
@@ -24,6 +45,7 @@
   line-height: var(--leading-hero);
   color: inherit;
   text-transform: uppercase;
+  overflow-wrap: break-word;
 }
 
 .finishTitle:focus {
@@ -108,6 +130,35 @@
 }
 
 .finishDownload:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* Multi-line: notes keep their line breaks. */
+.finishNotes {
+  min-height: var(--size-stepper);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-body);
+  line-height: 1.4;
+  resize: vertical;
+}
+
+/* Destructive: danger label only, apart from the other exits. */
+.finishDelete {
+  align-self: center;
+  min-height: var(--size-control);
+  margin-top: var(--space-3);
+  padding: 0 var(--space-4);
+  border: 0;
+  background: none;
+  color: var(--color-danger);
+  font-family: inherit;
+  font-size: var(--text-secondary);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.finishDelete:focus-visible {
   outline: var(--border-focus);
   outline-offset: 2px;
 }

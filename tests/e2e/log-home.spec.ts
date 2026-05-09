@@ -132,20 +132,32 @@ test('Edit opens the saved session and is at least 44px tall', async ({ page }) 
   await expect(finishButton(page)).toBeVisible()
 })
 
-test('editing a saved session changes its date on Finish, and only there', async ({ page }) => {
+test('editing a saved session: plan title, date sheet, multi-line notes and Update session', async ({ page }) => {
   await openLog(page)
   await page.getByRole('button', { name: /^Edit Session 0/ }).click()
   await expect(page.locator('input[type="date"]')).toHaveCount(0)
   await finishButton(page).click()
-  await expect(page.getByLabel('Session date')).toHaveValue('2026-11-16')
-  await page.getByLabel('Session date').fill('')
-  await expect(page.getByText('Session 0 · MON 16 NOV')).toBeVisible()
-  await page.getByLabel('Session date').fill('2026-11-10')
-  await expect(page.getByText('Session 0 · TUE 10 NOV')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Session 0', level: 1 })).toBeFocused()
+  const date = page.getByRole('button', { name: /^Session date: / })
+  await expect(date).toHaveText(/Saved 16 Nov 2026/)
+  await expect(page.getByRole('button', { name: 'Back to logging' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Discard changes' })).toBeVisible()
+  await date.click()
+  const sheet = page.getByRole('dialog', { name: 'Session date' })
+  await sheet.getByLabel('Another day').fill('2026-11-10')
+  await sheet.getByRole('button', { name: 'Close' }).click()
+  await expect(date).toHaveText(/Saved 10 Nov 2026/)
+  await expect(date).toBeFocused()
+  await page.getByLabel('Notes · optional').fill('Felt strong\nGrip gave out on the last set.')
   await page.getByRole('button', { name: 'Update session' }).click()
+  await expect(page.getByRole('region', { name: 'Recent sessions' }).getByRole('listitem').first()).toContainText(
+    'Just updatedSession 010 Nov 2026',
+  )
   await page.reload()
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('gym:sessions') ?? '[]'))
-  expect(stored.find((s: { id: string }) => s.id === 's0').date).toBe('2026-11-10')
+  const s0 = stored.find((s: { id: string }) => s.id === 's0')
+  expect(s0.date).toBe('2026-11-10')
+  expect(s0.notes).toBe('Felt strong\nGrip gave out on the last set.')
 })
 
 test('a new session has no date field on Finish', async ({ page }) => {
@@ -158,19 +170,40 @@ test('a new session has no date field on Finish', async ({ page }) => {
   await expect(page.getByLabel('Session date')).toHaveCount(0)
 })
 
-test('Delete removes a session after confirming and the next one fills the list', async ({ page }) => {
+test('Recent rows offer Edit only; Delete session on the editing Finish confirms in a danger sheet', async ({ page }) => {
   await openLog(page)
   const rows = page.getByRole('region', { name: 'Recent sessions' }).getByRole('listitem')
-  const del = page.getByRole('button', { name: /^Delete Session 0/ })
-  expect((await del.boundingBox())?.height).toBeGreaterThanOrEqual(44)
-  page.once('dialog', (d) => d.dismiss())
-  await del.click()
-  await expect(rows.first()).toContainText('Session 0')
-  page.once('dialog', (d) => d.accept())
-  await del.click()
+  await expect(rows.first().getByRole('button')).toHaveText(['Edit'])
+  await page.getByRole('button', { name: /^Edit Session 0/ }).click()
+  await finishButton(page).click()
+  await expect(page.getByRole('button', { name: 'Delete session' })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Delete session' }).click()
+  const confirm = page.getByRole('alertdialog', { name: 'Delete Session 0, 16 Nov 2026?' })
+  await expect(confirm.getByRole('button', { name: 'Keep it' })).toBeFocused()
+  await axe(page)
+  await confirm.getByRole('button', { name: 'Keep it' }).click()
+  await expect(confirm).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'Session 0', level: 1 })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Delete session' }).click()
+  await confirm.getByRole('button', { name: 'Delete session' }).click()
+  await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible()
+  await expect(page.getByRole('status').filter({ hasText: 'Session 0 session deleted' })).toHaveCount(1)
   await expect(rows).toHaveCount(6)
   await expect(rows.first()).toContainText('Session 1')
   await expect(rows.last()).toContainText('Session 6')
+  await page.reload()
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('gym:sessions') ?? '[]'))
+  expect(stored.map((s: { id: string }) => s.id)).not.toContain('s0')
+})
+
+test('the editing Finish passes axe', async ({ page }) => {
+  await openLog(page)
+  await page.getByRole('button', { name: /^Edit Session 0/ }).click()
+  await finishButton(page).click()
+  await expect(page.getByRole('heading', { name: 'Session 0', level: 1 })).toBeVisible()
+  await axe(page)
 })
 
 const axe = async (page: Page) => {

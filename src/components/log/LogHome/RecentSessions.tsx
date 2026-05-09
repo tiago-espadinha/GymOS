@@ -8,13 +8,12 @@ const RECENT_COUNT = 6;
 interface RecentSessionsProps {
   sessions: WorkoutSession[];
   onEdit: (session: WorkoutSession) => void;
-  onDelete: (id: string) => void;
   justSaved: { id: string; label: string } | null;
   /** Shown under the label while nothing has been saved. */
   empty: ReactNode;
 }
 
-export function RecentSessions({ sessions, onEdit, onDelete, justSaved, empty }: RecentSessionsProps) {
+export function RecentSessions({ sessions, onEdit, justSaved, empty }: RecentSessionsProps) {
   const recent = sessions.slice(0, RECENT_COUNT);
   if (recent.length === 0) {
     return (
@@ -47,9 +46,6 @@ export function RecentSessions({ sessions, onEdit, onDelete, justSaved, empty }:
               </div>
               <button type="button" className="logHomeEdit" onClick={() => onEdit(s)} aria-label={`Edit ${s.planName}, ${when}`}>
                 Edit
-              </button>
-              <button type="button" className="logHomeEdit" onClick={() => onDelete(s.id)} aria-label={`Delete ${s.planName}, ${when}`}>
-                Delete
               </button>
             </li>
           );
