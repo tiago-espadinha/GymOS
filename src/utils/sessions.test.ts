@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { newestFirst, sessionStats, sessionSummary } from "./sessions";
+import { newestFirst, sessionCells, sessionStats, sessionSummary } from "./sessions";
 import { WorkoutSession } from "../types";
 
 const session = (sets: { weight: string; reps: string }[][]): WorkoutSession => ({
@@ -35,6 +35,13 @@ describe("sessionStats", () => {
       sets: 2,
       volume: 0,
     });
+  });
+});
+
+describe("sessionCells", () => {
+  it("splits a row into sets, volume and notes", () => {
+    expect(sessionCells({ sets: 9, volume: 2988.4 }, "Grip\ngave out.")).toEqual({ sets: "9 sets", volume: "2,988 kg", notes: "Grip gave out." });
+    expect(sessionCells({ sets: 1, volume: 0 })).toEqual({ sets: "1 set", volume: "", notes: "" });
   });
 });
 
