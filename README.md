@@ -1,40 +1,59 @@
-# GymOS: Minimalist Gym Tracker
+# GymOS
 
-A minimalist gym tracker built with React and Vite, designed for speed and mobile ergonomics. Track your progress with flexibility and without the clutter of traditional apps.
+A phone-first gym tracker for logging a set and running a rest timer in a few taps, one-handed, between sets. No account, no server: your training data stays in the browser and moves in and out as CSV.
+
+## Screenshots
+
+| Plans | Log | Rest timer | Progress |
+| --- | --- | --- | --- |
+| ![Plans list with Push, Pull and Legs, each with a Start button](docs/images/plans.png) | ![Log home with the Push plan ready to start and recent sessions below](docs/images/log-home.png) | ![Rest timer counting down from one minute, with the next bench press set below](docs/images/rest.png) | ![Bench press progress chart with last and best figures and personal records marked](docs/images/progress.png) |
 
 ## Features
 
-- **Plan Management**: Create, edit, and archive custom training routines to keep your workspace organized.
-- **Efficient Logging**: Fast session logging optimized for the gym floor, supporting sets, reps, and RPE-equivalent tracking.
-- **Progress Analytics**: Detailed visualization of strength gains (1RM estimates) and volume trends using Recharts.
-- **Mobile web app**: Phone-first layout with tab navigation and a web manifest. Fonts are bundled with the app, so no request leaves the origin. There is no service worker yet, so a full offline reload is not supported.
-- **Data Portability**: Complete control over your data with CSV export and import capabilities.
+- **Training plans**: create plans of strength, calisthenics and cardio exercises each with a muscle group and how it is tracked (reps, optional weight, time, optional distance); archive, restore and delete them.
+- **Session logging**: start a plan, log weight and reps with large steppers, or time a hold or a cardio effort with optional distance. Edit or delete a logged set, back-date a session, and edit or delete a saved one.
+- **Rest and hold timers**: a rest starts when a set is logged and fills its timer block as it runs, with buttons to add or take off time and to skip. A sound and vibration cue plays at the end. Timers survive switching exercises and reloading the page.
+- **Finish screen**: totals for the session, notes, then save. A newly saved session is first in Recent on the Log home.
+- **Progress**: per-exercise chart of average, peak, total or estimated one-rep max (e1RM), over the last 5 or 10 sessions, 1 or 3 months, or all time, with last and best figures and personal records marked.
+- **CSV import and export**: export everything to one file; import a file, review what was found, then add it to your data or replace your data. A file that can't be read changes nothing.
+- **Installable**: a web manifest lets the app be added to a home screen, and the two typefaces are bundled, so no request leaves the app's origin. There is no service worker yet, so the app needs the network to load.
 
-## Learning Objectives
+## Stack
 
-- Architect a scalable React application using TypeScript for strict type safety.
-- Implement a responsive and installable Progressive Web App (PWA) with specialized mobile layouts.
-- Manage local data persistence using browser storage with robust error handling.
-- Build interactive data visualizations and performance analysis logic from scratch.
+React 19 and TypeScript, built with Vite. Recharts draws the progress chart. Data lives in `localStorage`. Vitest covers the logic, and Playwright drives the built app in a mobile Chromium profile, with axe checking accessibility.
 
-## Project Structure
+## Engineering highlights
 
-- `src/components/`: Feature-sliced UI components (Log, Plans, Progress, Shared).
-- `src/utils/`: Core logic for storage, CSV processing, and utility functions.
-- `src/types/`: Domain-specific TypeScript interfaces.
-- `public/`: PWA configuration, manifest, and static assets.
-- `GymTracker.tsx`: Main application container and navigation logic.
+- **Timers that survive reloads.** A running timer is stored as a start time and a target rather than a counter, so it shows the right time after a reload or a backgrounded tab (`src/hooks/useTimer.ts`; reload tests in `tests/e2e/session-list.spec.ts` and `tests/e2e/timed-set.spec.ts`).
+- **Unfinished work never leaks.** An in-progress session is kept under its own storage key and only joins the saved sessions on Save, so Progress and the CSV export see finished sessions only (`src/utils/activeSession.ts`).
+- **A refused save on Finish or New plan is not silent.** If the browser refuses the write, the screen stays open with a Not saved alert and Try again, and Finish offers the session as a CSV download (`tests/e2e/save-failed.spec.ts`).
+- **Import is reviewed before it writes.** The file is parsed and summarised first; nothing is stored until the user picks Add to my data or Replace my data, and a bad file leaves the data untouched (`src/utils/csv.ts`, `src/utils/importData.ts`, `tests/e2e/data.spec.ts`).
+- **Accessibility is tested, not assumed.** axe (WCAG 2.1 A and AA) runs on each screen and its main states in the end-to-end suite, and the shared controls have a 44 px minimum hit area.
 
-## Requirements
+## Run it
 
-- Node.js 18+
-- npm or yarn
-
-## How to Run
-
-Clone the repository and start the development server:
+Requires Node.js 22.13+ (22.x) or 24+, and npm.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
+
+| Command | What it does |
+| --- | --- |
+| `npm run build` | Type-check and build static files into `dist/` |
+| `npm run preview` | Serve the built app |
+| `npm run lint` | ESLint |
+| `npx tsc -b` | Type-check only |
+| `npm test` | Unit tests (Vitest) |
+| `npx playwright install chromium` | One-time browser install for the end-to-end tests |
+| `npm run test:e2e` | End-to-end and accessibility tests against the built app on port 4173 (set `E2E_PORT` to change it) |
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md): how the app is put together, where data lives, trust boundaries, failure behaviour and testing.
+- [Third-party notices](THIRD_PARTY_NOTICES.md): bundled fonts and their licences.
+
+## Licence and credits
+
+No licence has been chosen yet, so all rights are reserved. Inter and Big Shoulders Display are used under the SIL Open Font License 1.1; see the notices.
