@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sessionStats, sessionSummary } from "./sessions";
+import { newestFirst, sessionStats, sessionSummary } from "./sessions";
 import { WorkoutSession } from "../types";
 
 const session = (sets: { weight: string; reps: string }[][]): WorkoutSession => ({
@@ -50,5 +50,25 @@ describe("sessionSummary", () => {
 
   it("folds multi-line notes onto one line", () => {
     expect(sessionSummary({ sets: 2, volume: 0 }, "Bonito\nGrip gave out.")).toBe("2 sets · Bonito Grip gave out.");
+  });
+});
+
+describe("newestFirst", () => {
+  const dated = (id: string, date: string): WorkoutSession => ({ ...session([]), id, date });
+
+  it("puts import-appended sessions in date order", () => {
+    const stored = [dated("saved", "2026-05-01"), dated("imp-old", "2026-04-20"), dated("imp-new", "2026-05-10")];
+    expect(newestFirst(stored).map((s) => s.id)).toEqual(["imp-new", "saved", "imp-old"]);
+  });
+
+  it("moves a prepended backdated session below newer ones", () => {
+    const stored = [dated("backdated", "2026-05-03"), dated("newer", "2026-05-08"), dated("older", "2026-05-01")];
+    expect(newestFirst(stored).map((s) => s.id)).toEqual(["newer", "backdated", "older"]);
+  });
+
+  it("keeps save order on the same date and leaves the stored array alone", () => {
+    const stored = [dated("second", "2026-05-08"), dated("first", "2026-05-08"), dated("older", "2026-05-01")];
+    expect(newestFirst(stored).map((s) => s.id)).toEqual(["second", "first", "older"]);
+    expect(stored.map((s) => s.id)).toEqual(["second", "first", "older"]);
   });
 });

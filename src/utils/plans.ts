@@ -1,5 +1,6 @@
 import { TrainingPlan, WorkoutSession } from "../types";
 import { formatDayMonth } from "./date";
+import { newestFirst } from "./sessions";
 
 // Distinct muscle groups of a plan, in the order they first appear.
 export function muscleGroupsOf(plan: TrainingPlan): string[] {
@@ -76,7 +77,7 @@ export function planTrainedSummary(
 
 // Log home starts on the plan of the newest session when it is still active, else the first active plan.
 export function defaultPlan(active: TrainingPlan[], sessions: WorkoutSession[]): TrainingPlan | undefined {
-  const newest = sessions[0];
+  const newest = newestFirst(sessions)[0];
   return (newest && active.find((p) => p.id === newest.planId)) || active[0];
 }
 

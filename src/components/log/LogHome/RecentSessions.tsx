@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { formatDateFull } from "../../../utils/date";
-import { sessionStats, sessionSummary } from "../../../utils/sessions";
+import { newestFirst, sessionStats, sessionSummary } from "../../../utils/sessions";
 import { WorkoutSession } from "../../../types";
 
 const RECENT_COUNT = 6;
@@ -14,7 +14,7 @@ interface RecentSessionsProps {
 }
 
 export function RecentSessions({ sessions, onEdit, justSaved, empty }: RecentSessionsProps) {
-  const recent = sessions.slice(0, RECENT_COUNT);
+  const recent = newestFirst(sessions).slice(0, RECENT_COUNT);
   return (
     <section aria-labelledby="logHomeRecentTitle" className={recent.length ? "logHomeRecent" : "logHomeRecent logHomeRecent--empty"}>
       <h2 id="logHomeRecentTitle" className="logHomeLabel">
