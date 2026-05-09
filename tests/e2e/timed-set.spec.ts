@@ -216,14 +216,72 @@ test('phase changes are announced once the block is up', async ({ page }) => {
   await expect(page.getByRole('status').filter({ hasText: 'Hold' })).toHaveText('Hold running')
 })
 
-test('the timed set view has no detectable WCAG A/AA violations', async ({ page }) => {
-  await button(page, 'Start hold').click()
-  await page.clock.fastForward(5_000)
-  await page.clock.resume() // axe needs the page's timers
+const axeViolations = async (page: Page) => {
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze()
-  expect(results.violations.map((v) => `${v.id} ${v.nodes.map((n) => n.html + n.any.map((a) => a.message).join())}`)).toEqual([])
+  return results.violations.map((v) => `${v.id} ${v.nodes.map((n) => n.html + n.any.map((a) => a.message).join())}`)
+}
+
+// Each state is reached on the paused clock, then the clock resumes because axe needs the page's timers.
+const axeStates: Record<string, (page: Page) => Promise<void>> = {
+  ready: async () => {},
+  running: async (page) => {
+    await button(page, 'Start hold').click()
+    await page.clock.fastForward(5_000)
+  },
+  paused: async (page) => {
+    await button(page, 'Start hold').click()
+    await page.clock.fastForward(5_000)
+    await button(page, 'Pause').click()
+  },
+  'chained rest': async (page) => {
+    await button(page, 'Start hold').click()
+    await page.clock.fastForward(15_000)
+    await restStarted(page)
+  },
+  'past target': async (page) => {
+    await restSwitch(page).click()
+    await button(page, 'Start hold').click()
+    await page.clock.fastForward(20_000)
+  },
+  cardio: async (page) => {
+    await button(page, 'All exercises').click()
+    await page.getByRole('button', { name: /^Rowing/ }).click()
+    await button(page, 'Start effort').click()
+    await page.clock.fastForward(5_000)
+  },
+  'editing a set': async (page) => {
+    await button(page, 'Start hold').click()
+    await page.clock.fastForward(7_000)
+    await button(page, 'Stop and log').click()
+    await button(page, 'Skip').click()
+    await button(page, 'Edit set 1').click()
+  },
+}
+
+for (const [state, reach] of Object.entries(axeStates)) {
+  test(`the timed set view, ${state}, has no detectable WCAG A/AA violations`, async ({ page }) => {
+    await reach(page)
+    await page.clock.resume()
+    expect(await axeViolations(page)).toEqual([])
+  })
+}
+
+test('a hold that ends while a set is edited leaves the table and focus in place', async ({ page }) => {
+  await button(page, 'Start hold').click()
+  await page.clock.fastForward(7_000)
+  await button(page, 'Stop and log').click()
+  await button(page, 'Skip').click()
+  await button(page, 'Start hold').click()
+  await button(page, 'Edit set 1').click()
+  await page.clock.fastForward(8_000)
+  await restStarted(page)
+  await expect(page.getByRole('list', { name: 'Sets' })).toBeVisible()
+  await button(page, 'Save set 1').click()
+  // The rest that started meanwhile hides the table, so focus lands on the title.
+  await expect(rest(page)).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Plank' })).toBeFocused()
 })
 
 test('a logged hold is followed by the next hold, with no "+ Set"', async ({ page }) => {

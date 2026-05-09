@@ -68,7 +68,8 @@ export function TimedSets(props: TimedSetsProps) {
         onHoldDone={holdDone}
         onEndRest={props.onEndRest}
       />
-      {!resting && exercise.sets.length > 0 && (
+      {/* Kept while editing: a hold that ends meanwhile starts a rest under the edit panel. */}
+      {(!resting || editing) && exercise.sets.length > 0 && (
         <SetsTable
           sets={exercise.sets}
           // The hold block is the current set, so the table has no NOW row.

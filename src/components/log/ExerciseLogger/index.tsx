@@ -93,7 +93,7 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, fo
 
   const saveEdit = () => {
     if (!editing) return;
-    onChange({ ...exercise, sets: exercise.sets.map((s, i) => (i === editing.index ? editing.draft : s)) });
+    onChange({ ...exercise, sets: exercise.sets.map((s, i) => (i === editing.index ? { ...s, ...editing.draft } : s)) });
     setEditing(null);
   };
 
@@ -114,10 +114,11 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, fo
     if (editingIndex !== null) root?.querySelector<HTMLInputElement>(".setSteppers input")?.focus();
     else if (editedIndex.current !== null) {
       const edit = root?.querySelector<HTMLElement>(`[aria-label="Edit set ${editedIndex.current + 1}"]`);
-      (edit ?? root?.querySelector<HTMLElement>(".setsTable"))?.focus();
+      // With a rest running the table steps aside, so the title takes focus.
+      (edit ?? root?.querySelector<HTMLElement>(".setsTable") ?? document.getElementById(titleId))?.focus();
     }
     editedIndex.current = editingIndex;
-  }, [editingIndex]);
+  }, [editingIndex, titleId]);
 
   const kicker = editing
     ? `Edit set ${editing.index + 1}`
