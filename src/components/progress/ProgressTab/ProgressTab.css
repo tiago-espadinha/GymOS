@@ -265,3 +265,129 @@
   font-size: var(--text-small);
   font-weight: 700;
 }
+
+/*
+ * Wide (--breakpoint-wide): the exercise search and list in the fixed left pane,
+ * the chosen exercise's figures and chart on the right (board "B · Two panes · Progress").
+ */
+@media (min-width: 1024px) {
+  .progressTab--wide {
+    display: grid;
+    grid-template-columns: var(--width-pane) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--gutter-wide);
+    max-width: none;
+  }
+
+  /* The pane stays in view; its list scrolls in its own box. */
+  .progressPane {
+    position: sticky;
+    top: calc(var(--size-topbar) + var(--gutter-wide));
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - var(--size-topbar) - 2 * var(--gutter-wide));
+  }
+
+  .progressPane .progressHeader {
+    margin-bottom: var(--space-3);
+  }
+
+  .progressPane .exercisePicker__head,
+  .progressPane .exercisePicker__count,
+  .progressPane .exercisePicker__none {
+    padding-inline: 0;
+  }
+
+  .progressPane .exercisePicker__list {
+    position: relative;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .progressPane .exercisePicker__option {
+    padding-inline: var(--space-4);
+  }
+
+  .progressPane .exercisePicker__option[aria-selected='true'] {
+    border-radius: var(--radius-nested);
+  }
+
+  .progressDetail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    min-width: 0;
+  }
+
+  .progressName {
+    margin: 0;
+    padding-top: var(--space-1);
+    overflow-wrap: anywhere;
+    font-family: var(--font-display);
+    font-weight: var(--weight-display);
+    font-size: var(--text-screen-title);
+    line-height: var(--leading-screen-title);
+    text-transform: uppercase;
+  }
+
+  /* The e1RM note sits beside the control, under it when the pane is narrow. */
+  .progressDetail .progressMetric {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-5);
+  }
+
+  .progressDetail .progressMetric .segmented {
+    width: 480px;
+    max-width: 100%;
+  }
+
+  .progressDetail .progressMetricNote {
+    flex: 1 1 200px;
+    max-width: 240px;
+  }
+
+  .progressDetail .progressStats {
+    gap: var(--gutter-wide);
+    padding-top: var(--space-2);
+  }
+
+  .progressDetail .progressNewPR {
+    font-size: var(--text-body-lg);
+  }
+
+  .progressDetail .progressFigure {
+    gap: var(--space-4);
+  }
+
+  .progressDetail .progressChart {
+    height: var(--size-chart-wide);
+  }
+
+  .progressDetail .progressRanges .chip-group {
+    display: flex;
+    gap: var(--space-3);
+  }
+
+  .progressDetail .progressRanges .chip-group__chip {
+    min-width: 88px;
+    min-height: var(--size-chip);
+    padding: 0 var(--space-5);
+  }
+
+  .progressDetail .progressNoSessions {
+    align-items: flex-start;
+    max-width: 560px;
+  }
+
+  .progressDetail .progressNoSessions .primary-button {
+    width: auto;
+    padding-inline: var(--gutter-wide);
+  }
+
+  .progressDetail .progressAnalysis {
+    max-width: 65ch;
+    font-size: var(--text-body-lg);
+  }
+}

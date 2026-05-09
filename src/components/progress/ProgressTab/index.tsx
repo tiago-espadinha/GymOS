@@ -26,8 +26,9 @@ import {
   progressSeries,
   splitLabel,
 } from "../../../utils/progress";
+import { useMediaQuery, WIDE_QUERY } from "../../../hooks/useMediaQuery";
 import { DataScreen } from "../DataScreen";
-import { ExercisePicker } from "../ExercisePicker";
+import { ExercisePicker, ExerciseSearch } from "../ExercisePicker";
 import { ProgressChart } from "./ProgressChart";
 import "./ProgressTab.css";
 
@@ -92,15 +93,27 @@ function NewPRStat({ gain, previous, todayStr }: { gain: string; previous: Progr
   );
 }
 
-function EmptyExercise({ name, planCount, onGoToLog }: { name: string; planCount: number; onGoToLog: () => void }) {
+function EmptyExercise({
+  name,
+  planCount,
+  onGoToLog,
+  subheading,
+}: {
+  name: string;
+  planCount: number;
+  onGoToLog: () => void;
+  /** Under the wide layout's exercise heading it is one level down. */
+  subheading?: boolean;
+}) {
   const titleId = useId();
+  const Heading = subheading ? "h3" : "h2";
   const where =
     planCount > 0 ? `${name} is in ${planCount} plan${planCount === 1 ? "" : "s"} but has no saved sets.` : `${name} has no saved sets.`;
   return (
     <section className="progressNoSessions" aria-labelledby={titleId}>
-      <h2 id={titleId} className="progressNoSessionsTitle">
+      <Heading id={titleId} className="progressNoSessionsTitle">
         Nothing logged yet
-      </h2>
+      </Heading>
       <p className="progressNoSessionsText">{where} Log it in a session and your last, best and trend show up here.</p>
       <PrimaryButton tone="lime" onClick={onGoToLog}>
         Go to Log
@@ -147,6 +160,8 @@ export function ProgressTab({
   const [picking, setPicking] = useState(false);
   const dataLink = useRef<HTMLButtonElement>(null);
   const returnFocus = useRef(false);
+  const detailId = useId();
+  const wide = useMediaQuery(WIDE_QUERY);
 
   // Closing Data puts focus back on the link that opened it.
   useEffect(() => {
@@ -175,6 +190,8 @@ export function ProgressTab({
   const figures = lastAndBest(series, higherIsBetter);
   const latestPR = newPR(series, higherIsBetter);
   const prCount = points.filter((p) => p.pr).length;
+  // The sheet is phone-only: a window that turns wide closes it, so it does not reopen when it narrows again.
+  if (wide && picking) setPicking(false);
 
   if (showData) {
     const closeData = () => {
@@ -186,120 +203,152 @@ export function ProgressTab({
     );
   }
 
-  return (
-    <div className="progressTab">
-      <header className="progressHeader">
-        <h1 className="progressKicker">Progress</h1>
-        <button
-          type="button"
-          className="progressDataLink"
-          ref={dataLink}
-          onClick={() => setShowData(true)}
-        >
-          Import / export
-        </button>
-      </header>
+  const header = (
+    <header className="progressHeader">
+      <h1 className="progressKicker">Progress</h1>
+      <button type="button" className="progressDataLink" ref={dataLink} onClick={() => setShowData(true)}>
+        Import / export
+      </button>
+    </header>
+  );
 
-      {!selected || !meta ? (
+  if (!selected || !meta) {
+    return (
+      <div className="progressTab">
+        {header}
         <p className="progressEmpty">No exercises found. Create a training plan first.</p>
+      </div>
+    );
+  }
+
+  const detail = (
+    <>
+      {figures && (
+        <div className="progressMetric">
+          <SegmentedControl
+            label="Metric"
+            options={metricOptions.map((m) => ({ value: m, label: METRIC_LABELS[m] }))}
+            value={metric}
+            onChange={setMetric}
+          />
+          {metric === "e1rm" && (
+            <p className="progressMetricNote">Estimated one-rep max from your best set each session (Epley).</p>
+          )}
+        </div>
+      )}
+
+      {!figures ? (
+        <EmptyExercise
+          name={selected.name}
+          planCount={plans.filter((p) => !p.isArchived && p.exercises.some((ex) => ex.name === selected.name)).length}
+          onGoToLog={onGoToLog}
+          subheading={wide}
+        />
       ) : (
         <>
-          <button
-            type="button"
-            className="progressPicker"
-            aria-haspopup="dialog"
-            aria-label={`Exercise: ${selected.name}. Change`}
-            onClick={() => setPicking(true)}
-          >
-            <span className="progressPickerName">{selected.name}</span>
-            <ChevronIcon className="progressPickerChevron" />
-          </button>
-          {picking && (
-            <ExercisePicker
-              exercises={exercises}
-              sessions={sessions}
-              selected={selected.name}
-              onPick={(name) => {
-                setSelectedExName(name);
-                setPicking(false);
-              }}
-              onClose={() => setPicking(false)}
-            />
-          )}
-
-          {figures && (
-            <div className="progressMetric">
-              <SegmentedControl
-                label="Metric"
-                options={metricOptions.map((m) => ({ value: m, label: METRIC_LABELS[m] }))}
-                value={metric}
-                onChange={setMetric}
+          <div className="progressStats">
+            <Stat kicker="Last" point={figures.last} todayStr={todayStr} />
+            {latestPR ? (
+              <NewPRStat
+                gain={`${higherIsBetter ? "Up" : "Down"} ${formatMetricNumber(Math.abs(latestPR.last.value - latestPR.previous.value), meta, metric)}`}
+                previous={latestPR.previous}
+                todayStr={todayStr}
               />
-              {metric === "e1rm" && (
-                <p className="progressMetricNote">Estimated one-rep max from your best set each session (Epley).</p>
-              )}
-            </div>
-          )}
+            ) : (
+              <Stat kicker="Best" point={figures.best} todayStr={todayStr} best />
+            )}
+          </div>
 
-          {!figures ? (
-            <EmptyExercise
-              name={selected.name}
-              planCount={plans.filter((p) => !p.isArchived && p.exercises.some((ex) => ex.name === selected.name)).length}
-              onGoToLog={onGoToLog}
+          <figure className="progressFigure">
+            <ProgressChart
+              points={points}
+              formatTick={tickFormatter(meta)}
+              description={chartDescription(METRIC_LABELS[metric], selected.name, points, prCount)}
             />
-          ) : (
-            <>
-              <div className="progressStats">
-                <Stat kicker="Last" point={figures.last} todayStr={todayStr} />
-                {latestPR ? (
-                  <NewPRStat
-                    gain={`${higherIsBetter ? "Up" : "Down"} ${formatMetricNumber(Math.abs(latestPR.last.value - latestPR.previous.value), meta, metric)}`}
-                    previous={latestPR.previous}
-                    todayStr={todayStr}
-                  />
-                ) : (
-                  <Stat kicker="Best" point={figures.best} todayStr={todayStr} best />
-                )}
-              </div>
-
-              <figure className="progressFigure">
-                <ProgressChart
-                  points={points}
-                  formatTick={tickFormatter(meta)}
-                  description={chartDescription(METRIC_LABELS[metric], selected.name, points, prCount)}
-                />
-                <figcaption className="progressCaption">
-                  <span>{monthYear(points[0].date)}</span>
-                  {prCount > 0 && (
-                    <span className="progressLegend">
-                      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
-                        <circle cx="7" cy="7" r="5" fill="var(--color-bg)" stroke="var(--color-accent)" strokeWidth="3" />
-                      </svg>
-                      PR
-                    </span>
-                  )}
-                  <span>
-                    {points.length === series.length
-                      ? `${series.length} session${series.length === 1 ? "" : "s"}`
-                      : `last ${points.length} of ${series.length} sessions`}
-                  </span>
-                  <span>{monthYear(points[points.length - 1].date)}</span>
-                </figcaption>
-              </figure>
-
-              <div className="progressRanges">
-                <ChipGroup label="Time range" options={ranges} value={range} onChange={setRange} />
-              </div>
-
-              {points.length > 1 && (
-                <p className="progressAnalysis">
-                  {analysisText(selected.name, points, higherIsBetter, (n) => formatMetricNumber(n, meta, metric))}
-                </p>
+            <figcaption className="progressCaption">
+              <span>{monthYear(points[0].date)}</span>
+              {prCount > 0 && (
+                <span className="progressLegend">
+                  <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+                    <circle cx="7" cy="7" r="5" fill="var(--color-bg)" stroke="var(--color-accent)" strokeWidth="3" />
+                  </svg>
+                  PR
+                </span>
               )}
-            </>
+              <span>
+                {points.length === series.length
+                  ? `${series.length} session${series.length === 1 ? "" : "s"}`
+                  : `last ${points.length} of ${series.length} sessions`}
+              </span>
+              <span>{monthYear(points[points.length - 1].date)}</span>
+            </figcaption>
+          </figure>
+
+          <div className="progressRanges">
+            <ChipGroup label="Time range" options={ranges} value={range} onChange={setRange} />
+          </div>
+
+          {points.length > 1 && (
+            <p className="progressAnalysis">
+              {analysisText(selected.name, points, higherIsBetter, (n) => formatMetricNumber(n, meta, metric))}
+            </p>
           )}
         </>
       )}
+    </>
+  );
+
+  // Wide: the search and list sit in a left pane beside the chart, instead of a sheet.
+  if (wide) {
+    return (
+      <div className="progressTab progressTab--wide">
+        <div className="progressPane">
+          {header}
+          <ExerciseSearch
+            exercises={exercises}
+            sessions={sessions}
+            selected={selected.name}
+            onPick={setSelectedExName}
+            listLabel="Exercises"
+            placeholder="Search exercises"
+          />
+        </div>
+        <section className="progressDetail" aria-labelledby={detailId}>
+          <h2 id={detailId} className="progressName">
+            {selected.name}
+          </h2>
+          {detail}
+        </section>
+      </div>
+    );
+  }
+
+  return (
+    <div className="progressTab">
+      {header}
+      <button
+        type="button"
+        className="progressPicker"
+        aria-haspopup="dialog"
+        aria-label={`Exercise: ${selected.name}. Change`}
+        onClick={() => setPicking(true)}
+      >
+        <span className="progressPickerName">{selected.name}</span>
+        <ChevronIcon className="progressPickerChevron" />
+      </button>
+      {picking && (
+        <ExercisePicker
+          exercises={exercises}
+          sessions={sessions}
+          selected={selected.name}
+          onPick={(name) => {
+            setSelectedExName(name);
+            setPicking(false);
+          }}
+          onClose={() => setPicking(false)}
+        />
+      )}
+      {detail}
     </div>
   );
 }
