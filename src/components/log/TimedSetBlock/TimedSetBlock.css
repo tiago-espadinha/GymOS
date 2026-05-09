@@ -30,3 +30,13 @@
   min-width: 0;
   padding: 0;
 }
+
+.timedSetWideOnly {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .timedSetWideOnly {
+    display: contents;
+  }
+}

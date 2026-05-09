@@ -300,7 +300,9 @@ test('a logged hold can be edited, cancelled and deleted', async ({ page }) => {
   await button(page, 'Stop and log').click()
   await button(page, 'Skip').click()
   await button(page, 'Edit set 1').click()
-  await expect(hold(page)).toHaveCount(0)
+  // A phone hides the hold while editing; the wide split keeps it in the timer half.
+  const wide = page.viewportSize()!.width >= 1024
+  await expect(hold(page)).toHaveCount(wide ? 1 : 0)
   await page.getByRole('textbox', { name: 'Time', exact: true }).fill('12')
   await expect(shown(page, '.setsTableRow--inverted')).toContainText('00:07 · rest 00:00 → 00:12 · rest 00:00')
   await button(page, 'Cancel').click()

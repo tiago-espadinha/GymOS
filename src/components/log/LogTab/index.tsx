@@ -13,7 +13,7 @@ import { generateId } from "../../../utils/id";
 import { exportToCSV } from "../../../utils/csv";
 import { downloadCSV } from "../../../utils/download";
 import { clearSessionRests } from "../../../utils/restTimers";
-import { sessionTotals } from "../../../utils/sessionList";
+import { exerciseFinishId, sessionTotals } from "../../../utils/sessionList";
 import { allExercisesDone } from "../../../utils/setModel";
 import FinishScreen from "../FinishScreen";
 import LogHome from "../LogHome";
@@ -55,6 +55,8 @@ export function LogTab({
   const [justSaved, setJustSaved] = useState<{ id: string; planName: string; updated: boolean } | null>(null);
   const [deleted, setDeleted] = useState("");
   const [finishing, setFinishing] = useState(false);
+  // The exercise open in the session, kept here so the Done screen's Back returns to it.
+  const [openId, setOpenId] = useState<string | null>(null);
   // Refused Saves in a row on the Done screen; 0 once a save lands or Done closes.
   const [saveFailures, setSaveFailures] = useState(0);
 
@@ -65,23 +67,31 @@ export function LogTab({
   // focus to the title instead of letting it fall back to the top of the page.
   // Back to logging returns to the Finish pill that opened the Done screen.
   const mounted = useRef(false);
-  const backFromFinish = useRef(false);
+  // The id of the Finish that opened the Done screen, while going back to it.
+  const backFromFinish = useRef<string | null>(null);
   useEffect(() => {
-    if (backFromFinish.current) document.getElementById(FINISH_ID)?.focus();
+    if (backFromFinish.current) {
+      const pressed = document.getElementById(backFromFinish.current);
+      pressed?.focus();
+      // An exercise's Finish is hidden below the wide breakpoint, so fall back to the list's.
+      if (document.activeElement !== pressed) document.getElementById(FINISH_ID)?.focus();
+    }
     else if (mounted.current || inSession) titleRef.current?.focus();
-    backFromFinish.current = false;
+    backFromFinish.current = null;
     mounted.current = true;
   }, [inSession, finishing]);
 
   const editingId = session?.editingId;
 
   const startPlan = (plan: TrainingPlan) => {
+    setOpenId(null);
     setJustSaved(null);
     setDeleted("");
     onBegin(fromPlan(plan, homeDate));
   };
 
   const startEdit = (previous: WorkoutSession) => {
+    setOpenId(null);
     setJustSaved(null);
     setDeleted("");
     onBegin(fromSaved(previous));
@@ -165,7 +175,8 @@ export function LogTab({
           saveFailures={saveFailures}
           onDownload={downloadSession}
           onBack={() => {
-            backFromFinish.current = true;
+            // An exercise's Finish at wide widths, else the list's.
+            backFromFinish.current = openId ? exerciseFinishId(openId) : FINISH_ID;
             setSaveFailures(0);
             setFinishing(false);
           }}
@@ -192,6 +203,9 @@ export function LogTab({
               onChangeExercise={onUpdateExercise}
               sessions={sessions}
               editingId={editingId}
+              finish={{ disabled: !canFinish, allDone, onClick: () => setFinishing(true) }}
+              openId={openId}
+              onOpen={setOpenId}
               header={
                 <header className="logTabHeader">
                   <div className="logTabHeading">

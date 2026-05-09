@@ -103,6 +103,9 @@
   --width-wide: 1200px;
   --width-pane: 440px; /* the fixed left pane of a wide two-pane screen */
   --gutter-wide: 40px;
+  --width-timer-split: 60vw; /* a wide session's timer, full height on the left */
+  --gutter-timer: 48px; /* side padding inside that timer */
+  --text-timer-wide: 400px; /* its numeral at most; it shrinks to fit the timer */
   --text-wordmark: 30px;
 
   /* Radius */

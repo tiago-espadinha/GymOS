@@ -83,3 +83,6 @@ export function lastTimeLabel(exercise: ExerciseLog, history: Set[]): string {
     : history.map((s) => formatSet(s, exercise)).join(", ");
   return `Last time ${values}`;
 }
+
+/** The id of an exercise screen's own Finish (wide widths), so focus can return to it. */
+export const exerciseFinishId = (exerciseId: string) => `exerciseFinish-${exerciseId}`;

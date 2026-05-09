@@ -143,3 +143,61 @@
 .timerBlock--hold .timerBlockButton {
   color: var(--color-inverse);
 }
+
+/* Wide only: the rest to come, in place of the rest block before a set is done. */
+.timerBlock--idle {
+  display: none;
+}
+
+/*
+ * Wide (--breakpoint-wide): on an exercise screen the block is the left of the
+ * window at full height, beside the entry column. Its faces are sized from --size-timer-block-fit, so
+ * setting it keeps the fill's copy of the numeral in line with the plain one.
+ */
+@media (min-width: 1024px) {
+  .exerciseScreen .timerBlock {
+    --size-timer-block-fit: 100dvh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--width-timer-split);
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .exerciseScreen .timerBlock--idle {
+    display: block;
+  }
+
+  .exerciseScreen .timerBlockFace {
+    height: calc(var(--size-timer-block-fit) - var(--size-action) - var(--gutter-wide) - var(--space-4));
+    padding: var(--gutter-wide) var(--gutter-timer) 0;
+  }
+
+  .exerciseScreen .timerBlockFace--onFill {
+    height: var(--size-timer-block-fit);
+    padding-bottom: calc(var(--size-action) + var(--gutter-wide) + var(--space-4));
+  }
+
+  .exerciseScreen .timerBlockTop,
+  .exerciseScreen .timerBlockTarget {
+    font-size: var(--text-body-lg);
+  }
+
+  /* "00:42" is 2.3 times its font size wide; the numeral shrinks to fit the timer. */
+  .exerciseScreen .timerBlockCountdown {
+    font-size: min(var(--text-timer-wide), calc((var(--width-timer-split) - 2 * var(--gutter-timer)) / 2.3));
+  }
+
+  .exerciseScreen .timerBlockControls {
+    left: var(--gutter-timer);
+    right: var(--gutter-timer);
+    bottom: var(--gutter-wide);
+    gap: var(--space-3);
+  }
+
+  .exerciseScreen .timerBlockButton {
+    min-height: var(--size-action);
+    font-size: var(--text-button);
+  }
+}

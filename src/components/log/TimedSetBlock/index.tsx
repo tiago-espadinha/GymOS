@@ -55,10 +55,12 @@ export function TimedSetBlock(props: TimedSetBlockProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chainRest, timer.isComplete]);
 
-  if (props.hidden) return null;
+  const name = category === "cardio" ? "Effort" : "Hold";
+  const holdTimer = <HoldTimer timer={timer} name={name} setNumber={setNumber} setTotal={setTotal} onDiscard={timer.reset} />;
+  // While a set is edited the phone hides the hold; the wide split keeps it in its timer half.
+  if (props.hidden) return resting ? null : <div className="timedSetWideOnly">{holdTimer}</div>;
 
   const phase = holdPhase(timer);
-  const name = category === "cardio" ? "Effort" : "Hold";
   const targetSec = Math.round(timer.targetMs / 1000);
   // Past the target there is nothing left to choose; a running effort makes room for its distance.
   const choosing = !timer.isComplete && !(distanceUnit && phase !== "ready");
@@ -69,7 +71,7 @@ export function TimedSetBlock(props: TimedSetBlockProps) {
 
   return (
     <>
-      {!resting && <HoldTimer timer={timer} name={name} setNumber={setNumber} setTotal={setTotal} onDiscard={timer.reset} />}
+      {!resting && holdTimer}
       {props.heading}
       {timer.isComplete && <p className="timedSetHelp">Target reached. Keep going: the extra time counts.</p>}
       {choosing && (
