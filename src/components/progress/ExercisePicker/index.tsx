@@ -1,17 +1,23 @@
-import { useId, useMemo, useState, type KeyboardEvent } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { CheckIcon, Sheet, moveListboxFocus } from "../../shared";
 import { Exercise, WorkoutSession } from "../../../types";
 import { exerciseHistory } from "../../../utils/progress";
 import { formatDayMonth, today } from "../../../utils/date";
 import "./ExercisePicker.css";
 
-interface ExercisePickerProps {
+interface ExerciseSearchProps {
   /** Already sorted by name. */
   exercises: Exercise[];
   sessions: WorkoutSession[];
   selected: string;
   onPick: (name: string) => void;
-  onClose: () => void;
+  listLabel: string;
+  /** In the sheet the field takes focus on open; in the wide pane it waits for a tap and the list opens at the chosen exercise. */
+  autoFocus?: boolean;
+  /** Beside the field, such as the sheet's Close. */
+  action?: ReactNode;
+  /** The wide pane's field says what it is before it is tapped. */
+  placeholder?: string;
 }
 
 function historyText({ count, lastDate }: ReturnType<typeof exerciseHistory>, todayStr: string) {
@@ -20,24 +26,32 @@ function historyText({ count, lastDate }: ReturnType<typeof exerciseHistory>, to
 }
 
 /**
- * A full-screen search over the exercises. Typing filters by name; Down moves
- * from the field into the list, where arrows move and Enter or Space picks.
+ * A search over the exercises. Typing filters by name; Down moves from the
+ * field into the list, where arrows move and Enter or Space picks.
  */
-export function ExercisePicker({ exercises, sessions, selected, onPick, onClose }: ExercisePickerProps) {
+export function ExerciseSearch({ exercises, sessions, selected, onPick, listLabel, autoFocus, action, placeholder }: ExerciseSearchProps) {
   const names = exercises.map((ex) => ex.name);
   const history = useMemo(
     () => new Map(exercises.map((ex) => [ex.name, exerciseHistory(sessions, ex)])),
     [exercises, sessions],
   );
-  const titleId = useId();
   const listId = useId();
   const countId = useId();
+  const list = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
   const todayStr = today();
   const needle = query.trim().toLowerCase();
   const matches = needle ? names.filter((n) => n.toLowerCase().includes(needle)) : names;
   // One Tab stop in the list: the chosen exercise when it is shown, else the first match.
   const tabStop = matches.includes(selected) ? selected : matches[0];
+
+  useEffect(() => {
+    const chosen = list.current?.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (autoFocus || !list.current || !chosen) return;
+    list.current.scrollTop = chosen.offsetTop - list.current.clientHeight / 2 + chosen.offsetHeight / 2;
+    // Once, when the list appears; picking keeps the list where the person left it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const intoList = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== "ArrowDown") return;
@@ -46,10 +60,7 @@ export function ExercisePicker({ exercises, sessions, selected, onPick, onClose 
   };
 
   return (
-    <Sheet full labelledBy={titleId} onClose={onClose}>
-      <h2 id={titleId} className="visuallyHidden">
-        Pick an exercise
-      </h2>
+    <>
       <div className="exercisePicker__head">
         <label className="exercisePicker__field">
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="exercisePicker__icon">
@@ -63,15 +74,14 @@ export function ExercisePicker({ exercises, sessions, selected, onPick, onClose 
             aria-describedby={countId}
             autoComplete="off"
             spellCheck={false}
-            data-autofocus
+            placeholder={placeholder}
+            data-autofocus={autoFocus || undefined}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={intoList}
           />
         </label>
-        <button type="button" className="sheet__cancel exercisePicker__close" onClick={onClose}>
-          Close
-        </button>
+        {action}
       </div>
       <p id={countId} className="exercisePicker__count" aria-live="polite">
         {matches.length === names.length
@@ -83,8 +93,9 @@ export function ExercisePicker({ exercises, sessions, selected, onPick, onClose 
       ) : (
         <div
           id={listId}
+          ref={list}
           role="listbox"
-          aria-labelledby={titleId}
+          aria-label={listLabel}
           className="exercisePicker__list"
           onKeyDown={moveListboxFocus}
         >
@@ -110,6 +121,32 @@ export function ExercisePicker({ exercises, sessions, selected, onPick, onClose 
           })}
         </div>
       )}
+    </>
+  );
+}
+
+interface ExercisePickerProps extends Omit<ExerciseSearchProps, "listLabel" | "autoFocus" | "action" | "placeholder"> {
+  onClose: () => void;
+}
+
+/** The search as a full-screen sheet, opened from the exercise name below the wide breakpoint. */
+export function ExercisePicker({ onClose, ...search }: ExercisePickerProps) {
+  const titleId = useId();
+  return (
+    <Sheet full labelledBy={titleId} onClose={onClose}>
+      <h2 id={titleId} className="visuallyHidden">
+        Pick an exercise
+      </h2>
+      <ExerciseSearch
+        {...search}
+        listLabel="Pick an exercise"
+        autoFocus
+        action={
+          <button type="button" className="sheet__cancel exercisePicker__close" onClick={onClose}>
+            Close
+          </button>
+        }
+      />
     </Sheet>
   );
 }
