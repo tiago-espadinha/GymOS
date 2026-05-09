@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { WIDE_QUERY } from '../hooks/useMediaQuery'
 
 const sheets = import.meta.glob<string>('/src/**/*.css', {
   query: '?raw',
@@ -26,5 +27,9 @@ describe('breakpoints', () => {
     )
     expect(used.length).toBeGreaterThan(0)
     expect(used.filter((u) => !allowed.has(u.width))).toEqual([])
+  })
+
+  it('match the query components use to switch to the wide layout', () => {
+    expect(WIDE_QUERY).toBe(`(min-width: ${token('--breakpoint-wide')})`)
   })
 })
