@@ -22,3 +22,9 @@ export function sessionSummary(stats: { sets: number; volume: number }, notes = 
   if (note) parts.push(note);
   return parts.join(" · ");
 }
+
+// Sessions by date, newest first. Storage order is not date order: import appends and a
+// backdated save is prepended. The sort is stable, so a same-day tie keeps save order.
+export function newestFirst(sessions: WorkoutSession[]): WorkoutSession[] {
+  return sessions.toSorted((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+}

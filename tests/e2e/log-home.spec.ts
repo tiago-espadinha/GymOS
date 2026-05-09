@@ -151,7 +151,9 @@ test('editing a saved session: plan title, date sheet, multi-line notes and Upda
   await expect(date).toBeFocused()
   await page.getByLabel('Notes · optional').fill('Felt strong\nGrip gave out on the last set.')
   await page.getByRole('button', { name: 'Update session' }).click()
-  await expect(page.getByRole('region', { name: 'Recent sessions' }).getByRole('listitem').first()).toContainText(
+  // Recent is in date order, so the backdated session moves below 11-15 Nov. It stays above
+  // Session 6, which has the same date, because it comes first in storage (the more recent save).
+  await expect(page.getByRole('region', { name: 'Recent sessions' }).getByRole('listitem').last()).toContainText(
     'Just updatedSession 010 Nov 2026',
   )
   // The inverted row is new colour work: scan it while it shows.
@@ -252,6 +254,15 @@ test.describe('empty', () => {
     await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Log' }).click()
     await page.getByRole('button', { name: 'Have a CSV backup? Import it' }).click()
     await expect(page.getByRole('heading', { name: 'Data', level: 1 })).toBeVisible()
+  })
+
+  test('Recent orders by session date when storage is oldest first, as after an import', async ({ page }) => {
+    await seed(page, plans, sessions.toReversed())
+    await openLog(page)
+    const rows = page.getByRole('region', { name: 'Recent sessions' }).getByRole('listitem')
+    await expect(rows).toHaveCount(6)
+    await expect(rows.first()).toContainText('Session 0')
+    await expect(rows.last()).toContainText('Session 5')
   })
 
   test('with plans but no sessions, Recent says where the first one lands', async ({ page }) => {

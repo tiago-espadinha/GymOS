@@ -120,4 +120,11 @@ describe("Log home plan choice", () => {
     expect(defaultPlan([q, p], [])).toBe(q);
     expect(defaultPlan([], sessions)).toBeUndefined();
   });
+
+  it("takes the newest session by date, not storage order", () => {
+    const p = plan(["A"]);
+    const q = plan(["B"], { id: "q" });
+    // An imported newer session appended after a saved older one.
+    expect(defaultPlan([p, q], [session("p", "2026-05-01"), session("q", "2026-05-10")])).toBe(q);
+  });
 });
