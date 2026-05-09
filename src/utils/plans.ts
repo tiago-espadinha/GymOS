@@ -89,6 +89,19 @@ export function defaultPlan(active: TrainingPlan[], sessions: WorkoutSession[]):
   return (newest && active.find((p) => p.id === newest.planId)) || active[0];
 }
 
+// The kicker over a plan's detail on wide Plans: "Plan · last trained 4 May" or "Plan · not trained yet".
+export function planDetailKicker(plan: TrainingPlan, sessions: WorkoutSession[], todayStr: string): string {
+  const last = lastTrained(plan.id, sessions);
+  return `Plan · ${last ? `last trained ${formatDayMonth(last, todayStr)}` : "not trained yet"}`;
+}
+
+// The plan to show once `id` leaves the list: the one after it, else the one before, else none.
+export function neighbourOf(plans: TrainingPlan[], id: string): TrainingPlan | undefined {
+  const i = plans.findIndex((p) => p.id === id);
+  if (i < 0) return undefined;
+  return plans[i + 1] ?? plans[i - 1];
+}
+
 // The kicker over the Plans title: "17 plans", "16 plans · 3 archived", "No plans".
 export function plansCountLabel(active: number, archived: number): string {
   const lead = active === 0 ? "No plans" : `${active} plan${active === 1 ? "" : "s"}`;

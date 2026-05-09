@@ -6,6 +6,8 @@ import {
   deletePlan,
   lastTrained,
   muscleGroupsOf,
+  neighbourOf,
+  planDetailKicker,
   planActionsSummary,
   planPreview,
   planTrainedSummary,
@@ -125,6 +127,20 @@ describe("Log home plan choice", () => {
     expect(planTrainedSummary(plan(["A", "B"]), sessions, "2026-06-10")).toBe("2 exercises · last trained 2 May");
     expect(planTrainedSummary(plan(["A"]), sessions, "2026-06-10", "last")).toBe("1 exercise · last 2 May");
     expect(planTrainedSummary(plan(["A"], { id: "x" }), sessions, "2026-06-10")).toBe("1 exercise · not trained yet");
+  });
+
+  it("heads a plan's detail with when it was last trained", () => {
+    expect(planDetailKicker(plan(["A"]), sessions, "2026-06-10")).toBe("Plan · last trained 2 May");
+    expect(planDetailKicker(plan(["A"], { id: "x" }), sessions, "2026-06-10")).toBe("Plan · not trained yet");
+  });
+
+  it("picks the next plan when one leaves the list, the previous one when it was last", () => {
+    const [a, b, c] = ["a", "b", "c"].map((id) => plan(["A"], { id }));
+    expect(neighbourOf([a, b, c], "a")).toBe(b);
+    expect(neighbourOf([a, b, c], "b")).toBe(c);
+    expect(neighbourOf([a, b, c], "c")).toBe(b);
+    expect(neighbourOf([a], "a")).toBeUndefined();
+    expect(neighbourOf([a, b], "x")).toBeUndefined();
   });
 
   it("starts on the newest session's plan while it is active, else the first active plan", () => {
