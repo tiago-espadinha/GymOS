@@ -1,8 +1,8 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { ChipGroup, SegmentedControl } from "../../shared";
+import { ChevronIcon, ChipGroup, PrimaryButton, SegmentedControl } from "../../shared";
 import { TrainingPlan, WorkoutSession, Exercise } from "../../../types";
 import { formatClock } from "../../../hooks/useTimer";
-import { formatDateStat, today } from "../../../utils/date";
+import { formatDateStat, formatDayMonth, today } from "../../../utils/date";
 import {
   MetricKind,
   DEFAULT_METRIC,
@@ -21,10 +21,13 @@ import {
   analyseProgress,
   filterRange,
   lastAndBest,
+  markPRs,
+  newPR,
   progressSeries,
   splitLabel,
 } from "../../../utils/progress";
 import { DataScreen } from "../DataScreen";
+import { ExercisePicker } from "../ExercisePicker";
 import { ProgressChart } from "./ProgressChart";
 import "./ProgressTab.css";
 
@@ -38,6 +41,8 @@ interface ProgressTabProps {
   /** Import and export, opened from here or from the Plans empty state. */
   showData: boolean;
   setShowData: (open: boolean) => void;
+  /** The empty state's way to log the exercise. */
+  onGoToLog: () => void;
 }
 
 /** Exercises from active plans and from logged sessions, by name. */
@@ -75,6 +80,35 @@ function Stat({ kicker, point, todayStr, best }: { kicker: string; point: Progre
   );
 }
 
+/** Replaces Best when the latest session is a PR: what it beat, and by how much. */
+function NewPRStat({ gain, previous, todayStr }: { gain: string; previous: ProgressPoint; todayStr: string }) {
+  return (
+    <div className="progressStat">
+      <span className="progressStatKicker">New PR</span>
+      <span className="progressNewPR">
+        {gain} on your previous best ({splitLabel(previous.label).figure}, {formatDayMonth(previous.date, todayStr)}).
+      </span>
+    </div>
+  );
+}
+
+function EmptyExercise({ name, planCount, onGoToLog }: { name: string; planCount: number; onGoToLog: () => void }) {
+  const titleId = useId();
+  const where =
+    planCount > 0 ? `${name} is in ${planCount} plan${planCount === 1 ? "" : "s"} but has no saved sets.` : `${name} has no saved sets.`;
+  return (
+    <section className="progressNoSessions" aria-labelledby={titleId}>
+      <h2 id={titleId} className="progressNoSessionsTitle">
+        Nothing logged yet
+      </h2>
+      <p className="progressNoSessionsText">{where} Log it in a session and your last, best and trend show up here.</p>
+      <PrimaryButton tone="lime" onClick={onGoToLog}>
+        Go to Log
+      </PrimaryButton>
+    </section>
+  );
+}
+
 function analysisText(name: string, points: ProgressPoint[], higherIsBetter: boolean, describe: (n: number) => string) {
   const { total, improvements, stagnations, delta } = analyseProgress(points, higherIsBetter);
   const parts = [`${name} tracked across ${total} sessions.`];
@@ -85,6 +119,13 @@ function analysisText(name: string, points: ProgressPoint[], higherIsBetter: boo
   else if (gained) parts.push(`Overall gain: ${describe(Math.abs(delta))}.`);
   else parts.push(`Overall decline of ${describe(Math.abs(delta))} from first session.`);
   return parts.join(" ");
+}
+
+function chartDescription(metricLabel: string, name: string, points: ProgressPoint[], prCount: number) {
+  const first = points[0].label;
+  const last = points[points.length - 1];
+  const prs = prCount === 0 ? "" : `, ${prCount} personal record${prCount === 1 ? "" : "s"}${last.pr ? ", the latest one a PR" : ""}`;
+  return `${metricLabel} for ${name} over ${points.length} sessions, from ${first} to ${last.label}${prs}`;
 }
 
 const tickFormatter = (meta: ExerciseMeta) => (v: number) =>
@@ -99,10 +140,11 @@ export function ProgressTab({
   setSelectedExName,
   showData,
   setShowData,
+  onGoToLog,
 }: ProgressTabProps) {
   const [metricChoice, setMetric] = useState<MetricKind>(DEFAULT_METRIC);
   const [rangeChoice, setRange] = useState<TimeRange>("all");
-  const pickerId = useId();
+  const [picking, setPicking] = useState(false);
   const dataLink = useRef<HTMLButtonElement>(null);
   const returnFocus = useRef(false);
 
@@ -121,16 +163,18 @@ export function ProgressTab({
   // Fall back to the default when the chosen metric doesn't apply to this exercise.
   const metric = metricOptions.includes(metricChoice) ? metricChoice : DEFAULT_METRIC;
 
+  const higherIsBetter = meta ? higherIsBetterFor(resolveBranch(meta), metric, meta.timeGoal) : true;
   const series = useMemo(
-    () => (selected && meta ? progressSeries(sessions, selected.name, meta, metric) : []),
-    [sessions, selected, meta, metric],
+    () => (selected && meta ? markPRs(progressSeries(sessions, selected.name, meta, metric), higherIsBetter) : []),
+    [sessions, selected, meta, metric, higherIsBetter],
   );
   const todayStr = today();
   const ranges = TIME_RANGES.map((r) => ({ ...r, disabled: filterRange(series, r.value, todayStr).length === 0 }));
   const range = ranges.find((r) => r.value === rangeChoice)?.disabled ? "all" : rangeChoice;
   const points = filterRange(series, range, todayStr);
-  const higherIsBetter = meta ? higherIsBetterFor(resolveBranch(meta), metric, meta.timeGoal) : true;
   const figures = lastAndBest(series, higherIsBetter);
+  const latestPR = newPR(series, higherIsBetter);
+  const prCount = points.filter((p) => p.pr).length;
 
   if (showData) {
     const closeData = () => {
@@ -160,48 +204,80 @@ export function ProgressTab({
         <p className="progressEmpty">No exercises found. Create a training plan first.</p>
       ) : (
         <>
-          <div className="progressPicker">
-            <label htmlFor={pickerId} className="progressVisuallyHidden">
-              Exercise
-            </label>
-            <select id={pickerId} value={selected.name} onChange={(e) => setSelectedExName(e.target.value)}>
-              {exercises.map((ex) => (
-                <option key={ex.name} value={ex.name}>
-                  {ex.name}
-                </option>
-              ))}
-            </select>
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="progressPickerChevron">
-              <path d="M6 9l6 6 6-6" />
-            </svg>
-          </div>
-
-          <div className="progressMetric">
-            <SegmentedControl
-              label="Metric"
-              options={metricOptions.map((m) => ({ value: m, label: METRIC_LABELS[m] }))}
-              value={metric}
-              onChange={setMetric}
+          <button
+            type="button"
+            className="progressPicker"
+            aria-haspopup="dialog"
+            aria-label={`Exercise: ${selected.name}. Change`}
+            onClick={() => setPicking(true)}
+          >
+            <span className="progressPickerName">{selected.name}</span>
+            <ChevronIcon className="progressPickerChevron" />
+          </button>
+          {picking && (
+            <ExercisePicker
+              exercises={exercises}
+              sessions={sessions}
+              selected={selected.name}
+              onPick={(name) => {
+                setSelectedExName(name);
+                setPicking(false);
+              }}
+              onClose={() => setPicking(false)}
             />
-          </div>
+          )}
+
+          {figures && (
+            <div className="progressMetric">
+              <SegmentedControl
+                label="Metric"
+                options={metricOptions.map((m) => ({ value: m, label: METRIC_LABELS[m] }))}
+                value={metric}
+                onChange={setMetric}
+              />
+              {metric === "e1rm" && (
+                <p className="progressMetricNote">Estimated one-rep max from your best set each session (Epley).</p>
+              )}
+            </div>
+          )}
 
           {!figures ? (
-            <p className="progressEmpty">No sessions yet for this exercise</p>
+            <EmptyExercise
+              name={selected.name}
+              planCount={plans.filter((p) => !p.isArchived && p.exercises.some((ex) => ex.name === selected.name)).length}
+              onGoToLog={onGoToLog}
+            />
           ) : (
             <>
               <div className="progressStats">
                 <Stat kicker="Last" point={figures.last} todayStr={todayStr} />
-                <Stat kicker="Best" point={figures.best} todayStr={todayStr} best />
+                {latestPR ? (
+                  <NewPRStat
+                    gain={`${higherIsBetter ? "Up" : "Down"} ${formatMetricNumber(Math.abs(latestPR.last.value - latestPR.previous.value), meta, metric)}`}
+                    previous={latestPR.previous}
+                    todayStr={todayStr}
+                  />
+                ) : (
+                  <Stat kicker="Best" point={figures.best} todayStr={todayStr} best />
+                )}
               </div>
 
               <figure className="progressFigure">
                 <ProgressChart
                   points={points}
                   formatTick={tickFormatter(meta)}
-                  description={`${METRIC_LABELS[metric]} for ${selected.name} over ${points.length} sessions, from ${points[0].label} to ${points[points.length - 1].label}`}
+                  description={chartDescription(METRIC_LABELS[metric], selected.name, points, prCount)}
                 />
                 <figcaption className="progressCaption">
                   <span>{monthYear(points[0].date)}</span>
+                  {prCount > 0 && (
+                    <span className="progressLegend">
+                      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+                        <circle cx="7" cy="7" r="5" fill="var(--color-bg)" stroke="var(--color-accent)" strokeWidth="3" />
+                      </svg>
+                      PR
+                    </span>
+                  )}
                   <span>
                     {points.length === series.length
                       ? `${series.length} session${series.length === 1 ? "" : "s"}`

@@ -40,61 +40,53 @@
 }
 
 .progressDataLink:focus-visible,
-.progressPicker select:focus-visible {
+.progressPicker:focus-visible {
   outline: var(--border-focus);
   outline-offset: 2px;
 }
 
-.progressVisuallyHidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
+/* The exercise name is the control: tapping it opens the search. */
 .progressPicker {
-  position: relative;
-}
-
-.progressPicker select {
-  appearance: none;
-  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
   min-height: var(--size-chip);
-  padding: 0 calc(var(--space-7) + var(--space-2)) 0 0;
+  padding: 0;
   border: 0;
   background: none;
   color: var(--color-text);
-  font-family: var(--font-display);
-  font-weight: var(--weight-display);
-  font-size: var(--text-section-title-lg);
-  line-height: 1;
-  text-transform: uppercase;
-  text-overflow: ellipsis;
+  font-family: var(--font-body);
+  text-align: left;
   cursor: pointer;
 }
 
-.progressPicker option {
-  background: var(--color-surface);
-  font-family: var(--font-body);
-  font-size: var(--text-body-lg);
-  text-transform: none;
+.progressPickerName {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-section-title-lg);
+  line-height: var(--leading-count);
+  text-transform: uppercase;
 }
 
 .progressPickerChevron {
-  position: absolute;
-  top: 50%;
-  right: 0;
-  width: var(--space-5);
-  height: var(--space-5);
-  transform: translateY(-50%);
-  fill: none;
-  stroke: var(--color-text-muted);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  pointer-events: none;
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+.progressMetric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.progressMetricNote {
+  margin: 0;
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--color-text-muted);
 }
 
 .progressMetric .segmented {
@@ -164,6 +156,12 @@
   color: var(--color-text-dim);
 }
 
+.progressNewPR {
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: var(--leading-body);
+}
+
 .progressStatUnit {
   font-size: var(--text-body);
   font-weight: 600;
@@ -228,4 +226,42 @@
   font-size: var(--text-body);
   font-weight: 700;
   color: var(--color-text);
+}
+
+.progressNoSessions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6) 0;
+  border-top: var(--border-hairline);
+}
+
+.progressNoSessionsTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-section-title);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.progressNoSessionsText {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  color: var(--color-text-muted);
+}
+
+.progressLegend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.progressChartPR {
+  fill: var(--color-accent);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 700;
 }

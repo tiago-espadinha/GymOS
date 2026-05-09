@@ -1,5 +1,5 @@
-import type { WorkoutSession } from "../types";
-import { computeMetric, type ExerciseMeta, type MetricKind } from "./metrics";
+import type { Exercise, WorkoutSession } from "../types";
+import { DEFAULT_METRIC, computeMetric, getExerciseMeta, type ExerciseMeta, type MetricKind } from "./metrics";
 
 export type TimeRange = "all" | "5" | "10" | "1m" | "3m";
 
@@ -15,10 +15,13 @@ export interface ProgressPoint {
   date: string; // YYYY-MM-DD
   value: number;
   label: string;
+  /** Strictly better than every earlier session, set by markPRs. */
+  pr?: boolean;
 }
 
 export interface ProgressAnalysis {
   total: number;
+  /** Points marked as PRs by markPRs. */
   improvements: number;
   stagnations: number;
   delta: number; // last minus first
@@ -76,25 +79,60 @@ export function lastAndBest(
 }
 
 /**
- * Counts sessions that beat the one before (improvements) and sessions that
- * matched neither of the two before them (stagnations).
+ * Marks each point that is strictly better than every point before it. The
+ * first point has nothing to beat, so it is never a PR. Mark the whole series
+ * before filtering a range, so a range never turns an old result into a PR.
+ */
+export function markPRs(points: ProgressPoint[], higherIsBetter: boolean): ProgressPoint[] {
+  let best: number | undefined;
+  return points.map((p) => {
+    const pr = best !== undefined && (higherIsBetter ? p.value > best : p.value < best);
+    if (best === undefined || pr) best = p.value;
+    return { ...p, pr };
+  });
+}
+
+/** The latest point and the best one before it, when the latest is a PR. */
+export function newPR(
+  points: ProgressPoint[],
+  higherIsBetter: boolean,
+): { last: ProgressPoint; previous: ProgressPoint } | null {
+  const last = points[points.length - 1];
+  if (!last?.pr) return null;
+  const before = lastAndBest(points.slice(0, -1), higherIsBetter);
+  return before && { last, previous: before.best };
+}
+
+/**
+ * Counts PRs (points marked by markPRs) and sessions that matched neither of
+ * the two before them (stagnations).
  */
 export function analyseProgress(points: ProgressPoint[], higherIsBetter: boolean): ProgressAnalysis {
   const isBetter = (a: number, b: number) => (higherIsBetter ? a > b : a < b);
-  let improvements = 0;
   let stagnations = 0;
-  for (let i = 1; i < points.length; i++) {
+  for (let i = 2; i < points.length; i++) {
     const val = points[i].value;
     const prev = points[i - 1].value;
-    if (isBetter(val, prev)) improvements++;
-    else if (i >= 2 && !isBetter(prev, points[i - 2].value)) stagnations++;
+    if (!isBetter(val, prev) && !isBetter(prev, points[i - 2].value)) stagnations++;
   }
   return {
     total: points.length,
-    improvements,
+    improvements: points.filter((p) => p.pr).length,
     stagnations,
     delta: points.length ? points[points.length - 1].value - points[0].value : 0,
   };
+}
+
+/**
+ * How many sessions chart a value for the exercise, and the latest one's date.
+ * Every metric of a branch needs the same sets, so the default metric decides.
+ */
+export function exerciseHistory(
+  sessions: WorkoutSession[],
+  exercise: Exercise,
+): { count: number; lastDate: string | null } {
+  const series = progressSeries(sessions, exercise.name, getExerciseMeta(exercise), DEFAULT_METRIC);
+  return { count: series.length, lastDate: series[series.length - 1]?.date ?? null };
 }
 
 /** Splits a metric label such as "100kg × 10" into the big figure and the rest. */

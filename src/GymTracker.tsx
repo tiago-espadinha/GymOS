@@ -173,6 +173,7 @@ export default function GymTracker() {
             setSelectedExName={setSelectedExName}
             showData={showData}
             setShowData={setShowData}
+            onGoToLog={() => changeTab("log")}
           />
         )}
       </div>

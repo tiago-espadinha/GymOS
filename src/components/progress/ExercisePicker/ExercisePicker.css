@@ -1,0 +1,142 @@
+.exercisePicker__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--gutter) var(--space-3);
+}
+
+.exercisePicker__field {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--size-field-lg);
+  padding: 0 var(--space-4);
+  box-sizing: border-box;
+  border: 2px solid transparent;
+  border-radius: var(--radius-surface);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+
+/* The field's own outline is the focus ring: lime, as on the board. */
+.exercisePicker__field:focus-within {
+  border-color: var(--color-accent);
+}
+
+.exercisePicker__icon {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.exercisePicker__field input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg); /* 16px or more stops iOS zooming in on focus */
+  font-weight: 600;
+  outline: none;
+}
+
+.exercisePicker__field input::placeholder {
+  color: var(--color-text-dim);
+}
+
+.exercisePicker__close {
+  padding-right: 0;
+}
+
+.exercisePicker__count {
+  margin: 0;
+  padding: var(--space-1) var(--gutter) var(--space-2);
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.exercisePicker__none {
+  margin: 0;
+  padding: var(--space-4) var(--gutter);
+  border-top: var(--border-hairline);
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.exercisePicker__list {
+  display: flex;
+  flex-direction: column;
+  border-top: var(--border-hairline);
+}
+
+.exercisePicker__option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--size-action);
+  padding: var(--space-2) var(--gutter);
+  border: 0;
+  border-bottom: var(--border-hairline);
+  background: none;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Selected is inverted with a check mark, never colour alone. */
+.exercisePicker__option[aria-selected='true'] {
+  background: var(--color-inverse);
+  color: var(--color-on-inverse);
+}
+
+.exercisePicker__option:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: -2px;
+}
+
+.exercisePicker__option[aria-selected='true']:focus-visible {
+  outline-color: var(--color-on-inverse);
+}
+
+.exercisePicker__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.exercisePicker__name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-row-title);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.exercisePicker__meta {
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.exercisePicker__option[aria-selected='true'] .exercisePicker__meta {
+  font-weight: 600;
+  color: var(--color-on-inverse);
+}
