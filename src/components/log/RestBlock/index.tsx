@@ -40,16 +40,17 @@ export function RestBlock({ setId, setNumber, category, autoStart, onSkip }: Res
   return (
     <TimerBlock
       tone="rest"
-      label="Rest"
+      label={over ? "Rest over" : "Rest"}
       setNumber={setNumber}
       countdown={formatRestClock(Math.max(0, targetMs - elapsedMs), overtimeMs)}
-      formattedTarget={formattedTarget}
+      caption={over ? `${formattedTarget} done` : `Target ${formattedTarget}`}
       fillPct={over ? 100 : Math.round(progress * 1000) / 10}
       status={over ? "Rest over" : "Rest started"}
     >
-      <TimerButton onClick={() => adjustTargetSec(-STEP_SEC)}>−{STEP_SEC}s</TimerButton>
+      {/* Past the target a shorter rest means nothing, so −15s goes. */}
+      {!over && <TimerButton onClick={() => adjustTargetSec(-STEP_SEC)}>−{STEP_SEC}s</TimerButton>}
       <TimerButton onClick={() => adjustTargetSec(STEP_SEC)}>+{STEP_SEC}s</TimerButton>
-      <TimerButton onClick={skip}>Skip</TimerButton>
+      <TimerButton onClick={skip} wide={over}>{over ? "Done resting" : "Skip"}</TimerButton>
     </TimerBlock>
   );
 }

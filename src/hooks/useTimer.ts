@@ -87,9 +87,9 @@ export function formatClock(ms: number): string {
   return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 }
 
-// A rest clock: the time left, then "+m:ss" once the rest is over.
+// A rest clock: the time left, then "+m:ss" from the moment the rest is over.
 export function formatRestClock(remainingMs: number, overtimeMs: number): string {
-  if (overtimeMs <= 0) return formatClock(remainingMs);
+  if (remainingMs > 0) return formatClock(remainingMs);
   return `+${formatClock(overtimeMs).replace(/^0(?=\d:)/, "")}`;
 }
 

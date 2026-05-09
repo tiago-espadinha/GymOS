@@ -1,81 +1,58 @@
-import { useState } from "react";
-import { Badge, Button, NumericInput, PrimaryButton } from "../../shared";
-import { MUSCLE_GROUP_COLORS } from "../../../constants/muscleGroups";
-import { generateId } from "../../../utils/id";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import { PrimaryButton } from "../../shared";
 import { ExerciseLog, Set } from "../../../types";
-import { getExerciseMeta, computeMetric } from "../../../utils/metrics";
+import { getExerciseMeta } from "../../../utils/metrics";
 import { isLoggedSet } from "../../../utils/activeSession";
 import { restTimerId } from "../../../utils/restTimers";
+import { NO_VALUES, currentSetNumber, formatSet, lastTimeLabel } from "../../../utils/sessionList";
+import { SetDraft, addPendingSet, currentSetIndex, logDraft, seedDraft } from "../../../utils/setModel";
 import { clearTimer, readRunningTimer } from "../../../hooks/useTimer";
-import SetRow from "../SetRow";
-import TimedSetRow from "../TimedSetRow";
 import RestBlock from "../RestBlock";
-import TimedSetBlock from "../TimedSetBlock";
-import { DEFAULT_PRESETS } from "../../../constants/timerPresets";
+import SetsTable from "../SetsTable";
+import SetSteppers from "../SetSteppers";
+import TimedSets from "./TimedSets";
 import "./ExerciseLogger.css";
 
 interface ExerciseLoggerProps {
   exercise: ExerciseLog;
   onChange: (exercise: ExerciseLog) => void;
+  /** This exercise's logged sets from the most recent saved session that has it. */
+  history: Set[];
+  /** e.g. "Back · exercise 2 of 7". */
+  place: string;
+  titleId: string;
+  /** Navigation, hidden while a set is being edited. */
+  footer: ReactNode;
 }
 
-export function ExerciseLogger({ exercise, onChange }: ExerciseLoggerProps) {
+export function ExerciseLogger({ exercise, onChange, history, place, titleId, footer }: ExerciseLoggerProps) {
   const meta = getExerciseMeta(exercise);
-  const { category, trackingType, trackDistance } = meta;
+  const timed = meta.trackingType === "time";
+  const rootRef = useRef<HTMLDivElement>(null);
 
   // The set whose rest is on screen; restored from storage so a reload keeps it.
   const [rest, setRest] = useState<{ setId: string; fresh: boolean } | null>(() => {
     const set = exercise.sets.find((s) => readRunningTimer(restTimerId(s.id), Date.now()));
     return set ? { setId: set.id, fresh: false } : null;
   });
+  // Unsaved stepper values; lost on reload by design.
+  const [draft, setDraft] = useState<SetDraft>(() => seedDraft(exercise, history));
+  const [editing, setEditing] = useState<{ index: number; draft: SetDraft } | null>(null);
 
-  // Isometric holds and loaded carries chain into a rest before the next set;
-  // steady-state cardio usually doesn't. The toggle lets the person override it.
-  const [chainRest, setChainRest] = useState(category !== "cardio");
+  const index = currentSetIndex(exercise);
+  const { number, total } = currentSetNumber(exercise);
+  const format = (s: Set) => formatSet(s, exercise) || NO_VALUES;
+  const draftSet = (d: SetDraft): Set => ({ id: "", ...d });
 
-  const addSet = () => {
-    const last = exercise.sets[exercise.sets.length - 1];
-    // A timed set starts empty: a seeded duration would count as a hold done.
-    const seed: Partial<Set> =
-      trackingType === "time" ? {} : { weight: last?.weight || "", reps: last?.reps || "" };
-    onChange({
-      ...exercise,
-      sets: [...exercise.sets, { id: generateId(), weight: "", reps: "", ...seed }],
-    });
-  };
-
-  // The set being entered is always the last one.
-  const currentSet = exercise.sets[exercise.sets.length - 1];
-  // For a timed exercise the hold block stands in for the last set until it has a time;
-  // a saved or imported set with a duration is a logged one.
-  const pendingHold =
-    trackingType === "time" && currentSet && !currentSet.completed && !(Number(currentSet.duration) > 0)
-      ? currentSet
-      : null;
-
-  // Starts the rest for the set being entered and readies an empty one after it.
-  // The next set is left empty on purpose: seeded values would count as a set done.
-  const setDone = () => {
-    if (!currentSet || !isLoggedSet(currentSet)) return;
-    // Only one rest at a time: end the previous one so it cannot linger on the strip.
+  // Only one rest at a time: end the previous one so it cannot linger on the strip.
+  const startRest = (setId: string) => {
     if (rest) clearTimer(restTimerId(rest.setId));
-    onChange({ ...exercise, sets: [...exercise.sets, { id: generateId(), weight: "", reps: "" }] });
-    setRest({ setId: currentSet.id, fresh: true });
-  };
-
-  // A hold is over: log its time, ready an empty next set and, if chained, start the rest.
-  const holdDone = (hold: Set, seconds: number) => {
-    const done: Set = { ...hold, duration: String(seconds), completed: true };
-    onChange({
-      ...exercise,
-      sets: [...exercise.sets.slice(0, -1), done, { id: generateId(), weight: "", reps: "" }],
-    });
-    if (chainRest) setRest({ setId: hold.id, fresh: true });
+    setRest({ setId, fresh: true });
   };
 
   // A rest after a timed set is saved on that set; the seconds are the rest actually taken.
-  const restEnded = (setId: string, restSeconds: number) => {
-    if (trackingType === "time") {
+  const endRest = (setId: string, restSeconds: number) => {
+    if (timed) {
       onChange({
         ...exercise,
         sets: exercise.sets.map((s) => (s.id === setId ? { ...s, restTaken: String(restSeconds) } : s)),
@@ -84,119 +61,129 @@ export function ExerciseLogger({ exercise, onChange }: ExerciseLoggerProps) {
     setRest(null);
   };
 
-  const updateSet = (id: string, s: Set) => {
-    onChange({
-      ...exercise,
-      sets: exercise.sets.map((set) => (set.id === id ? s : set)),
-    });
+  const setDone = () => {
+    const logged = logDraft(exercise, draft);
+    onChange(logged.exercise);
+    startRest(logged.setId);
   };
 
-  const removeSet = (id: string) => {
+  const removeSet = (i: number) => {
+    const id = exercise.sets[i].id;
     if (id === rest?.setId) {
       clearTimer(restTimerId(id));
       setRest(null);
     }
-    onChange({
-      ...exercise,
-      sets: exercise.sets.filter((s) => s.id !== id),
-    });
+    onChange({ ...exercise, sets: exercise.sets.filter((_, j) => j !== i) });
   };
 
-  const lastHeldSec = Number([...exercise.sets].reverse().find((s) => s.completed)?.duration) || 0;
+  const saveEdit = () => {
+    if (!editing) return;
+    onChange({ ...exercise, sets: exercise.sets.map((s, i) => (i === editing.index ? { ...s, ...editing.draft } : s)) });
+    setEditing(null);
+  };
 
-  const average = computeMetric(exercise.sets, meta, "average");
-  const peak = computeMetric(exercise.sets, meta, "peak");
+  const deleteEdit = () => {
+    if (!editing) return;
+    removeSet(editing.index);
+    // Another set now has this number; focus goes to the table instead.
+    editedIndex.current = -1;
+    setEditing(null);
+  };
+
+  // Editing moves focus to the first field; leaving it returns focus to that
+  // set's Edit button, or to the table once the set is deleted.
+  const editedIndex = useRef<number | null>(null);
+  const editingIndex = editing?.index ?? null;
+  useEffect(() => {
+    const root = rootRef.current;
+    if (editingIndex !== null) root?.querySelector<HTMLInputElement>(".setSteppers input")?.focus();
+    else if (editedIndex.current !== null) {
+      const edit = root?.querySelector<HTMLElement>(`[aria-label="Edit set ${editedIndex.current + 1}"]`);
+      (edit ?? root?.querySelector<HTMLElement>(".setsTable"))?.focus();
+    }
+    editedIndex.current = editingIndex;
+  }, [editingIndex]);
+
+  const kicker = editing
+    ? `Edit set ${editing.index + 1}`
+    : rest
+      ? `Next · Set ${number} of ${total}`
+      : `Set ${number} of ${total}`;
+  const lastTime = !editing && !rest && lastTimeLabel(exercise, history);
 
   return (
-    <div className="exerciseLogger">
-      <div className="exerciseLoggerHeader">
-        <div>
-          {(average || peak) && (
-            <div className="exerciseLoggerStats">
-              {average && <span className="exerciseLoggerAvg">Avg: {average.label}</span>}
-              {peak && <span className="exerciseLoggerMax">Peak: {peak.label}</span>}
-            </div>
-          )}
-        </div>
-        <Badge color={MUSCLE_GROUP_COLORS[exercise.muscleGroup] || "var(--color-text-muted)"}>
-          {exercise.muscleGroup}
-        </Badge>
-      </div>
-
+    <div className="exerciseLogger" ref={rootRef}>
       {rest && (
         <RestBlock
           key={rest.setId}
           setId={rest.setId}
           setNumber={exercise.sets.findIndex((s) => s.id === rest.setId) + 1}
-          category={category}
+          category={meta.category}
           autoStart={rest.fresh}
-          onSkip={(seconds) => restEnded(rest.setId, seconds)}
+          onSkip={(seconds) => endRest(rest.setId, seconds)}
         />
       )}
 
-      <div className="exerciseLoggerSets">
-        {exercise.sets.map((set, i) =>
-          trackingType === "time" ? (
-            set !== pendingHold ? (
-              <TimedSetRow
-                key={set.id}
-                set={set}
-                index={i}
-                onRemove={() => removeSet(set.id)}
-                distanceUnit={exercise.distanceUnit}
-              />
-            ) : null
-          ) : (
-            <SetRow
-              key={set.id}
-              set={set}
-              index={i}
-              onChange={(newSet) => updateSet(set.id, { ...newSet, id: set.id })}
-              onRemove={() => removeSet(set.id)}
-              trackWeight={meta.trackWeight}
-            />
-          ),
-        )}
+      <div className={`exerciseLoggerKicker${rest ? " exerciseLoggerKicker--next" : ""}`}>
+        <span className="exerciseLoggerSet">{kicker}</span>
+        {!rest && <span>{place}</span>}
       </div>
-      {pendingHold && !rest && (
+      <div className="exerciseLoggerHeading">
+        <h1 id={titleId} className={`exerciseLoggerTitle${rest ? " exerciseLoggerTitle--resting" : ""}`} tabIndex={-1}>
+          {exercise.name}
+        </h1>
+        {lastTime && <span className="exerciseLoggerLastTime">{lastTime}</span>}
+      </div>
+
+      {timed ? (
+        <TimedSets exercise={exercise} onChange={onChange} resting={Boolean(rest)} onRest={startRest} onRemove={removeSet} />
+      ) : (
         <>
-          <TimedSetBlock
-            key={pendingHold.id}
-            setId={pendingHold.id}
-            setNumber={exercise.sets.length}
-            category={category}
-            initialTargetSec={lastHeldSec || DEFAULT_PRESETS[category].work[0]}
-            chainRest={chainRest}
-            onHoldDone={(seconds) => holdDone(pendingHold, seconds)}
+          {!rest && (
+            <SetsTable
+              sets={exercise.sets}
+              currentIndex={index}
+              draftLabel={format(draftSet(draft))}
+              editing={editing && { index: editing.index, label: format(draftSet(editing.draft)) }}
+              format={format}
+              onEdit={(i) => setEditing({ index: i, draft: { weight: exercise.sets[i].weight, reps: exercise.sets[i].reps } })}
+              onRemove={removeSet}
+            />
+          )}
+          {!rest && !editing && (
+            <button type="button" className="exerciseLoggerAdd" onClick={() => onChange(addPendingSet(exercise))}>
+              + Add set
+            </button>
+          )}
+          <SetSteppers
+            draft={editing?.draft ?? draft}
+            onChange={(d) => (editing ? setEditing({ ...editing, draft: d }) : setDraft(d))}
+            trackWeight={meta.trackWeight}
+            outlined={Boolean(editing)}
           />
-          <label className="exerciseLoggerChain">
-            <input type="checkbox" checked={chainRest} onChange={(e) => setChainRest(e.target.checked)} />
-            Chain rest timer
-          </label>
-          {trackDistance && (
-            <div className="exerciseLoggerDistance">
-              <NumericInput
-                value={pendingHold.distance || ""}
-                onChange={(v) => updateSet(pendingHold.id, { ...pendingHold, distance: v })}
-                placeholder="0"
-                step={0.1}
-                style={{ width: "90px" }}
-              />
-              <span>{exercise.distanceUnit ?? "km"}</span>
-            </div>
+          {editing ? (
+            <>
+              <PrimaryButton onClick={saveEdit} disabled={!isLoggedSet(draftSet(editing.draft))}>
+                Save set {editing.index + 1}
+              </PrimaryButton>
+              <div className="exerciseLoggerEditActions">
+                <button type="button" className="exerciseLoggerDelete" onClick={deleteEdit}>
+                  Delete set {editing.index + 1}
+                </button>
+                <button type="button" className="exerciseLoggerCancel" onClick={() => setEditing(null)}>
+                  Cancel
+                </button>
+              </div>
+            </>
+          ) : (
+            <PrimaryButton onClick={setDone} disabled={!isLoggedSet(draftSet(draft))}>
+              Set done
+            </PrimaryButton>
           )}
         </>
       )}
-      {trackingType !== "time" && (
-        <PrimaryButton onClick={setDone} disabled={!currentSet || !isLoggedSet(currentSet)}>
-          Set done
-        </PrimaryButton>
-      )}
-      {!pendingHold && (
-        <Button onClick={addSet} variant="ghost" small>
-          + Set
-        </Button>
-      )}
+
+      {!editing && footer}
     </div>
   );
 }

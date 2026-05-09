@@ -1,5 +1,6 @@
 import { clearTimer, readRunningTimer } from "../hooks/useTimer";
 import { ExerciseLog } from "../types";
+import { virtualSetId } from "./setModel";
 
 export const restTimerId = (setId: string) => `${setId}-rest`;
 export const holdTimerId = (setId: string) => `${setId}-work`;
@@ -36,5 +37,7 @@ export function clearSessionRests(exercises: ExerciseLog[]) {
       clearTimer(restTimerId(set.id));
       clearTimer(holdTimerId(set.id));
     }
+    // A hold started on the virtual next set has no set yet.
+    clearTimer(holdTimerId(virtualSetId(exercise)));
   }
 }

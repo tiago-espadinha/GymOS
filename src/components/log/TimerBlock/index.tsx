@@ -6,7 +6,8 @@ interface TimerBlockProps {
   label: string;
   setNumber: number;
   countdown: string;
-  formattedTarget: string;
+  /** The line under the countdown, e.g. "Target 01:30". */
+  caption: string;
   fillPct: number;
   // Announced when it changes, so it names phases, never seconds.
   status: string;
@@ -16,7 +17,7 @@ interface TimerBlockProps {
 // The block fills from the bottom as time passes. The countdown is drawn twice,
 // once on the empty part and once, inverted, on the filled part; the fill clips
 // the second copy, so the numeral stays readable without any blend mode.
-export function TimerBlock({ tone, label, setNumber, countdown, formattedTarget, fillPct, status, children }: TimerBlockProps) {
+export function TimerBlock({ tone, label, setNumber, countdown, caption, fillPct, status, children }: TimerBlockProps) {
   // A live region only announces changes, so it is filled once the block has mounted.
   const [armed, setArmed] = useState(false);
   useEffect(() => {
@@ -31,7 +32,7 @@ export function TimerBlock({ tone, label, setNumber, countdown, formattedTarget,
         <span>Set {setNumber}</span>
       </div>
       <div className="timerBlockCountdown">{countdown}</div>
-      <div className="timerBlockTarget">Target {formattedTarget}</div>
+      <div className="timerBlockTarget">{caption}</div>
     </>
   );
 
@@ -51,9 +52,10 @@ export function TimerBlock({ tone, label, setNumber, countdown, formattedTarget,
   );
 }
 
-export function TimerButton({ onClick, disabled, children }: { onClick: () => void; disabled?: boolean; children: ReactNode }) {
+// wide: takes twice the room, for a label that would wrap ("Done resting").
+export function TimerButton({ onClick, disabled, wide, children }: { onClick: () => void; disabled?: boolean; wide?: boolean; children: ReactNode }) {
   return (
-    <button type="button" className="timerBlockButton" onClick={onClick} disabled={disabled}>
+    <button type="button" className={`timerBlockButton${wide ? " timerBlockButton--wide" : ""}`} onClick={onClick} disabled={disabled}>
       {children}
     </button>
   );

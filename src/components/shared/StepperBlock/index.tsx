@@ -8,6 +8,11 @@ interface StepperBlockProps {
   onChange: (value: number) => void;
   step?: number;
   min?: number;
+  /** Makes the value a typeable field holding this text; onType receives what is typed. */
+  text?: string;
+  onType?: (text: string) => void;
+  /** Outlined in white, e.g. while editing a logged set. */
+  outlined?: boolean;
 }
 
 export function StepperBlock({
@@ -17,9 +22,12 @@ export function StepperBlock({
   onChange,
   step = 1,
   min = 0,
+  text,
+  onType,
+  outlined = false,
 }: StepperBlockProps) {
   return (
-    <div role="group" aria-label={label} className="stepper-block">
+    <div role="group" aria-label={label} className={`stepper-block${outlined ? ' stepper-block--outlined' : ''}`}>
       <button
         type="button"
         aria-label={`Decrease ${label}`}
@@ -29,8 +37,20 @@ export function StepperBlock({
       >
         −
       </button>
-      <div className="stepper-block__reading" aria-live="polite">
-        <span className="stepper-block__value">{value}</span>
+      {/* A typed field announces itself; only a read-only reading needs the live region. */}
+      <div className="stepper-block__reading" aria-live={onType ? undefined : 'polite'}>
+        {onType ? (
+          <input
+            className={`stepper-block__value stepper-block__input${(text ?? "").length > 3 ? " stepper-block__input--long" : ""}`}
+            aria-label={label}
+            inputMode="decimal"
+            placeholder="0"
+            value={text ?? ''}
+            onChange={(e) => onType(e.target.value)}
+          />
+        ) : (
+          <span className="stepper-block__value">{value}</span>
+        )}
         <span className="stepper-block__unit">{unit}</span>
       </div>
       <button

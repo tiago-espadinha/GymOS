@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { finishButton, logSet } from './log-set'
 
 // Every shared primitive, measured where the app mounts it: a hit area of at least
 // 44px in both dimensions and a visible indicator when reached with the keyboard.
@@ -12,6 +13,7 @@ const primitives = {
   TabBar: '.tab-bar__tab',
   Select: '.select__button',
   Switch: '.switch',
+  StepperBlock: '.stepper-block__button',
 } as const
 
 type Name = keyof typeof primitives
@@ -121,13 +123,12 @@ test('every shared primitive has a 44px hit area and a visible focus state', asy
   await check(page, 'Session list')
 
   await page.getByRole('button', { name: /^Bench press/ }).click()
-  await page.locator('input[placeholder="0"]:visible').nth(0).fill('60')
-  await page.locator('input[placeholder="0"]:visible').nth(1).fill('8')
+  await check(page, 'Exercise')
+  await logSet(page, '60', '8')
   await page.getByRole('button', { name: 'All exercises' }).click()
-  await page.getByRole('button', { name: 'Finish session' }).click()
+  await finishButton(page).click()
   await check(page, 'Finish')
 
-  // StepperBlock is not mounted on any screen yet; its sizing is pinned in inputs.test.ts.
   const all = Object.keys(primitives).sort()
   expect([...sized].sort(), 'primitives measured').toEqual(all)
   expect([...focused].sort(), 'primitives reached by keyboard').toEqual(all)

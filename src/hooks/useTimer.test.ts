@@ -11,7 +11,7 @@ describe("formatRestClock", () => {
     expect(formatRestClock(0, 72_000)).toBe("+1:12");
   });
 
-  it("shows zero at the exact end, not overtime", () => {
-    expect(formatRestClock(0, 0)).toBe("00:00");
+  it("reads as overtime from the exact end", () => {
+    expect(formatRestClock(0, 0)).toBe("+0:00");
   });
 });

@@ -124,23 +124,33 @@ test('the timed set view has no detectable WCAG A/AA violations', async ({ page 
   expect(results.violations.map((v) => `${v.id} ${v.nodes.map((n) => n.html + n.any.map((a) => a.message).join())}`)).toEqual([])
 })
 
-test('"+ Set" is not offered while a hold is pending', async ({ page }) => {
-  await expect(button(page, '+ Set')).toHaveCount(0)
+test('a logged hold is followed by the next hold, with no "+ Set"', async ({ page }) => {
   await button(page, 'Start').click()
   await page.clock.fastForward(7_000)
   await button(page, 'Finish').click()
   await button(page, 'Skip').click()
   await expect(page.locator('.timedSetRowLogged')).toHaveCount(1)
+  await expect(hold(page)).toBeVisible()
   await expect(button(page, '+ Set')).toHaveCount(0)
 })
 
-test('editing a saved timed session keeps its last set; "+ Set" then adds a hold', async ({ page }) => {
+test('removing the set that is resting ends its rest', async ({ page }) => {
+  await button(page, 'Start').click()
+  await page.clock.fastForward(7_000)
+  await button(page, 'Finish').click()
+  await restStarted(page)
+  await button(page, 'Remove set 1').click()
+  await expect(rest(page)).toHaveCount(0)
+  expect(await page.evaluate(() => Object.keys(localStorage).filter((k) => k.endsWith('-rest')))).toEqual([])
+})
+
+test('editing a saved timed session keeps its last set and offers the next hold', async ({ page }) => {
   await button(page, 'Start').click()
   await page.clock.fastForward(7_000)
   await button(page, 'Finish').click()
   await button(page, 'Skip').click()
   await button(page, 'All exercises').click()
-  await page.getByRole('button', { name: 'Finish session' }).click()
+  await page.getByRole('button', { name: 'Finish session' }).first().click()
   await page.getByRole('button', { name: 'Save session' }).click()
   // Imported or older sets carry no "completed" flag.
   await page.evaluate(() => {
@@ -152,8 +162,6 @@ test('editing a saved timed session keeps its last set; "+ Set" then adds a hold
   await page.getByRole('button', { name: /^Edit/ }).first().click()
   await page.getByRole('button', { name: /^Plank/ }).click()
   await expect(page.locator('.timedSetRowLogged')).toHaveText('00:07 · rest 00:00')
-  await expect(hold(page)).toHaveCount(0)
-  await button(page, '+ Set').click()
   await expect(hold(page)).toBeVisible()
 })
 
@@ -172,4 +180,23 @@ test('the minus button stops at the smallest step so a hold always has a target'
   await button(page, '−5s').click()
   await expect(page.getByText('Target 00:05').first()).toBeVisible()
   await expect(button(page, '−5s')).toBeDisabled()
+})
+
+test('removing a logged hold never gives two sets the same id', async ({ page }) => {
+  const holdFor = async (ms: number) => {
+    await button(page, 'Start').click()
+    await page.clock.fastForward(ms)
+    await button(page, 'Finish').click()
+    await button(page, 'Skip').click()
+  }
+  // Each target is the last hold, so shorter holds keep Finish in reach.
+  await holdFor(5_000)
+  await holdFor(4_000)
+  await button(page, 'Remove set 1').click()
+  await holdFor(3_000)
+  await expect(page.locator('.timedSetRowLogged')).toHaveText(['00:04 · rest 00:00', '00:03 · rest 00:00'])
+  const ids = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('gym:activeSession')!).exercises[0].sets.map((s: { id: string }) => s.id),
+  )
+  expect(new Set(ids).size).toBe(ids.length)
 })

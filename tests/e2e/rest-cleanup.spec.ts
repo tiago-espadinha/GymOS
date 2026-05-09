@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { finishButton, logSet } from './log-set'
 
 const plan = {
   id: 'p1',
@@ -19,16 +20,13 @@ test.beforeEach(async ({ page }) => {
 const timer = (page: Page) => page.getByRole('timer', { name: /^Rest/ })
 
 const logAndRest = async (page: Page) => {
-  const inputs = page.locator('input[placeholder="0"]:visible')
-  await inputs.nth(0).fill('60')
-  await inputs.nth(1).fill('8')
-  await page.getByRole('button', { name: 'Set done' }).click()
+  await logSet(page, '60', '8')
   await page.getByRole('button', { name: 'All exercises' }).click()
 }
 
 test('saving a session clears its rests, so editing it later shows none', async ({ page }) => {
   await logAndRest(page)
-  await page.getByRole('button', { name: 'Finish session' }).click()
+  await finishButton(page).click()
   await page.getByRole('button', { name: 'Save session' }).click()
   await page.getByRole('button', { name: /^Edit/ }).first().click()
   await expect(page.getByRole('button', { name: /^Rest/ })).toHaveCount(0)
@@ -38,7 +36,7 @@ test('saving a session clears its rests, so editing it later shows none', async 
 
 test('cancelling a session clears its rests', async ({ page }) => {
   await logAndRest(page)
-  await page.getByRole('button', { name: 'Finish session' }).click()
+  await finishButton(page).click()
   page.once('dialog', (d) => d.accept())
   await page.getByRole('button', { name: 'Cancel' }).click()
   const keys = await page.evaluate(() => Object.keys(localStorage).filter((k) => k.endsWith('-rest')))

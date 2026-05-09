@@ -62,6 +62,14 @@ describe('StepperBlock', () => {
     expect(render(40)).toContain('aria-live="polite"')
   })
 
+  it('can make the value a typeable decimal field named by the label', () => {
+    const html = renderToStaticMarkup(
+      createElement(StepperBlock, { label: 'Weight', value: 37.5, unit: 'kg', onChange: noop, text: '37.5', onType: noop }),
+    )
+    expect(html).toMatch(/<input[^>]*aria-label="Weight"[^>]*inputMode="decimal"[^>]*value="37.5"/)
+    expect(html).not.toContain('aria-live')
+  })
+
   it('gives the buttons a 44 by 88 hit area and a 96px block', () => {
     const stepper = cssOf('StepperBlock')
     expect(stepper).toContain('min-width: var(--size-control)')
