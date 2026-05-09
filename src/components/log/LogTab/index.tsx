@@ -33,6 +33,8 @@ interface LogTabProps {
   onUpdate: (patch: Partial<ActiveSession>) => void;
   onUpdateExercise: (exercise: ExerciseLog) => void;
   onEnd: () => void;
+  onNewPlan: () => void;
+  onImport: () => void;
 }
 
 export function LogTab({
@@ -45,9 +47,13 @@ export function LogTab({
   onUpdate,
   onUpdateExercise,
   onEnd,
+  onNewPlan,
+  onImport,
 }: LogTabProps) {
   const [homeDate, setHomeDate] = useState(today());
-  const [saved, setSaved] = useState("");
+  // The session saved or updated since Log home was last shown; its row is marked in Recent.
+  const [justSaved, setJustSaved] = useState<{ id: string; planName: string; updated: boolean } | null>(null);
+  const [deleted, setDeleted] = useState("");
   const [finishing, setFinishing] = useState(false);
   // Refused Saves in a row on the Done screen; 0 once a save lands or Done closes.
   const [saveFailures, setSaveFailures] = useState(0);
@@ -70,12 +76,14 @@ export function LogTab({
   const editingId = session?.editingId;
 
   const startPlan = (plan: TrainingPlan) => {
-    setSaved("");
+    setJustSaved(null);
+    setDeleted("");
     onBegin(fromPlan(plan, homeDate));
   };
 
   const startEdit = (previous: WorkoutSession) => {
-    setSaved("");
+    setJustSaved(null);
+    setDeleted("");
     onBegin(fromSaved(previous));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -94,7 +102,8 @@ export function LogTab({
   const saveSession = () => {
     if (!session) return;
 
-    const stored = toWorkoutSession(session, editingId ?? generateId());
+    const id = editingId ?? generateId();
+    const stored = toWorkoutSession(session, id);
     if (!stored) return;
 
     const next = editingId
@@ -106,8 +115,7 @@ export function LogTab({
       return;
     }
     setSaveFailures(0);
-    setSaved(editingId ? "✓ Session updated!" : "✓ Session saved!");
-    setTimeout(() => setSaved(""), 4000);
+    setJustSaved({ id, planName: session.planName, updated: Boolean(editingId) });
     clearSessionRests(session.exercises);
     setFinishing(false);
     onEnd();
@@ -118,10 +126,16 @@ export function LogTab({
     if (unsaved) downloadCSV(exportToCSV([], [unsaved]), `gymos_session_${unsaved.date}.csv`);
   };
 
-  const deleteSession = (id: string) => {
-    if (window.confirm("Delete this session?")) {
-      setSessions(sessions.filter((s) => s.id !== id));
-    }
+  // Only a saved session being edited can be deleted; the confirm sheet has asked already.
+  const deleteSession = () => {
+    if (!session || !editingId) return;
+    setSessions(sessions.filter((s) => s.id !== editingId));
+    clearSessionRests(session.exercises);
+    setJustSaved(null);
+    setDeleted(`${session.planName} session deleted`);
+    setSaveFailures(0);
+    setFinishing(false);
+    onEnd();
   };
 
   const canFinish = session ? hasLoggedSets(session) : false;
@@ -133,13 +147,13 @@ export function LogTab({
   return (
     <div>
       {!session && (
-        <h1 className="logTabTitle" ref={titleRef} tabIndex={-1}>
+        <h1 className="logTabTitle visuallyHidden" ref={titleRef} tabIndex={-1}>
           Log
         </h1>
       )}
 
-      <div role="status" className="logTabSaved">
-        {saved}
+      <div role="status" className="visuallyHidden">
+        {justSaved ? `${justSaved.planName} session ${justSaved.updated ? "updated" : "saved"}` : deleted}
       </div>
 
       {session && finishing ? (
@@ -156,6 +170,7 @@ export function LogTab({
             setFinishing(false);
           }}
           onCancel={cancelSession}
+          onDelete={deleteSession}
         />
       ) : (
         <>
@@ -233,7 +248,9 @@ export function LogTab({
               onDateChange={setHomeDate}
               onStart={startPlan}
               onEdit={startEdit}
-              onDelete={deleteSession}
+              justSaved={justSaved && { id: justSaved.id, label: justSaved.updated ? "Just updated" : "Just saved" }}
+              onNewPlan={onNewPlan}
+              onImport={onImport}
             />
           )}
         </>

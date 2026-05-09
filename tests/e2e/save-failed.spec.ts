@@ -80,7 +80,7 @@ test.describe('Finish', () => {
     await expect(page.getByRole('heading', { name: 'Log', exact: true })).toBeVisible()
     await expect(page.getByText('Session saved')).toBeVisible()
     await page.reload()
-    await expect(page.locator('.logHomeNotes').first()).toHaveText('Felt strong')
+    await expect(page.locator('.logHomeItemSummary').first()).toHaveText('1 set · 480 kg · Felt strong')
     const [session] = await stored(page, 'gym:sessions')
     expect(session).toMatchObject({ planName: 'Push day', notes: 'Felt strong' })
   })

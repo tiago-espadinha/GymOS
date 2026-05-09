@@ -14,10 +14,6 @@
   text-transform: uppercase;
 }
 
-.logTabTitle {
-  margin-bottom: 24px;
-}
-
 .logTabSessionTitle {
   overflow-wrap: anywhere;
 }
@@ -84,17 +80,6 @@
 .logTabHint {
   font-size: var(--text-secondary);
   color: var(--color-text-muted);
-}
-
-.logTabSaved:empty {
-  display: none;
-}
-
-.logTabSaved {
-  margin-bottom: 16px;
-  font-size: 12px;
-  color: var(--color-accent);
-  font-weight: 600;
 }
 
 /* Sticky at the bottom of the list once every exercise is done, as on the Done screen. */

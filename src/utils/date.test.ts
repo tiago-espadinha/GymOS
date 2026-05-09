@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDateKicker, formatDateMeta, formatDateStat } from "./date";
+import { dayBefore, formatDateFull, formatDateKicker, formatDateMeta, formatDateStat } from "./date";
 
 describe("formatDateKicker", () => {
   it("reads as weekday, day and month in capitals", () => {
@@ -20,5 +20,19 @@ describe("formatDateStat", () => {
 describe("formatDateMeta", () => {
   it("reads as weekday, day and month without a comma", () => {
     expect(formatDateMeta("2026-11-15")).toBe("Sun 15 Nov");
+  });
+});
+
+describe("formatDateFull", () => {
+  it("reads as day, short month and year", () => {
+    expect(formatDateFull("2026-05-07")).toBe("7 May 2026");
+  });
+});
+
+describe("dayBefore", () => {
+  it("steps back across a month and a year", () => {
+    expect(dayBefore("2026-11-15")).toBe("2026-11-14");
+    expect(dayBefore("2024-03-01")).toBe("2024-02-29");
+    expect(dayBefore("2026-01-01")).toBe("2025-12-31");
   });
 });

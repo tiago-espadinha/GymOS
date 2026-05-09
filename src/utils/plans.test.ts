@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   archivePlan,
   archivedSummary,
+  defaultPlan,
   deletePlan,
   lastTrained,
   muscleGroupsOf,
   planActionsSummary,
+  planTrainedSummary,
   planSummary,
   plansCountLabel,
   restorePlan,
@@ -98,5 +100,24 @@ describe("dates and labels", () => {
     expect(plansCountLabel(1, 0)).toBe("1 plan");
     expect(plansCountLabel(16, 3)).toBe("16 plans · 3 archived");
     expect(plansCountLabel(0, 2)).toBe("No plans · 2 archived");
+  });
+});
+
+describe("Log home plan choice", () => {
+  const sessions = [session("p", "2026-05-02")];
+
+  it("says when a plan was last trained, or that it never was", () => {
+    expect(planTrainedSummary(plan(["A", "B"]), sessions, "2026-06-10")).toBe("2 exercises · last trained 2 May");
+    expect(planTrainedSummary(plan(["A"]), sessions, "2026-06-10", "last")).toBe("1 exercise · last 2 May");
+    expect(planTrainedSummary(plan(["A"], { id: "x" }), sessions, "2026-06-10")).toBe("1 exercise · not trained yet");
+  });
+
+  it("starts on the newest session's plan while it is active, else the first active plan", () => {
+    const p = plan(["A"]);
+    const q = plan(["B"], { id: "q" });
+    expect(defaultPlan([q, p], sessions)).toBe(p);
+    expect(defaultPlan([q], sessions)).toBe(q);
+    expect(defaultPlan([q, p], [])).toBe(q);
+    expect(defaultPlan([], sessions)).toBeUndefined();
   });
 });

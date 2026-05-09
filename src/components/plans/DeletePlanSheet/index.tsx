@@ -2,7 +2,6 @@ import { useId } from "react";
 import { PrimaryButton, Sheet } from "../../shared";
 import { exerciseCount } from "../../../utils/plans";
 import { TrainingPlan } from "../../../types";
-import "./DeletePlanSheet.css";
 
 interface DeletePlanSheetProps {
   plan: TrainingPlan;
@@ -25,7 +24,7 @@ export function DeletePlanSheet({ plan, onDelete, onClose }: DeletePlanSheetProp
       <PrimaryButton tone="light" onClick={onClose}>
         Keep it
       </PrimaryButton>
-      <button type="button" className="deletePlan__confirm" onClick={() => onDelete(plan)}>
+      <button type="button" className="sheet__danger" onClick={() => onDelete(plan)}>
         Delete plan
       </button>
     </Sheet>

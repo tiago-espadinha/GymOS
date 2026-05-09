@@ -13,10 +13,12 @@ export function sessionStats(session: WorkoutSession): { sets: number; volume: n
   return { sets, volume };
 }
 
-// "Nov 16, 25 · 12 sets · 4200 kg"; volume is left out when nothing was lifted.
-export function sessionSummary(date: string, stats: { sets: number; volume: number }): string {
-  const sets = `${stats.sets} set${stats.sets === 1 ? "" : "s"}`;
-  const parts = [date, sets];
-  if (stats.volume > 0) parts.push(`${stats.volume.toFixed(0)} kg`);
+// "30 sets · 5,022 kg · Felt strong": volume is left out when nothing was lifted,
+// and multi-line notes are folded onto the row's single line.
+export function sessionSummary(stats: { sets: number; volume: number }, notes = ""): string {
+  const parts = [`${stats.sets} set${stats.sets === 1 ? "" : "s"}`];
+  if (stats.volume > 0) parts.push(`${Math.round(stats.volume).toLocaleString("en-US")} kg`);
+  const note = notes.replace(/\s+/g, " ").trim();
+  if (note) parts.push(note);
   return parts.join(" · ");
 }

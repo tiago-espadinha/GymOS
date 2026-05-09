@@ -1,6 +1,7 @@
 export { Button } from './Button';
 export { Input } from './Input';
 export { Select } from './Select';
+export { moveListboxFocus } from './Select/listbox';
 export { Label } from './Label';
 export { NumericInput } from './NumericInput';
 export { Badge } from './Badge';
@@ -21,3 +22,4 @@ export { Switch } from './Switch';
 export { WarningIcon } from './WarningIcon';
 export { SaveFailedAlert } from './SaveFailedAlert';
 export { CheckIcon } from './CheckIcon';
+export { ChevronIcon } from './ChevronIcon';

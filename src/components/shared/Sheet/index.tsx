@@ -10,6 +10,8 @@ interface SheetProps {
   role?: 'dialog' | 'alertdialog';
   /** Escape, Cancel or a tap outside the sheet. */
   onClose: () => void;
+  /** Covers the whole screen, tab bar included, for a long list such as the plan picker. */
+  full?: boolean;
   children: ReactNode;
 }
 
@@ -22,7 +24,7 @@ const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select
  * marked data-autofocus, else the first control, gets focus on open, so put the
  * safe choice first.
  */
-export function Sheet({ labelledBy, describedBy, role = 'dialog', onClose, children }: SheetProps) {
+export function Sheet({ labelledBy, describedBy, role = 'dialog', onClose, full, children }: SheetProps) {
   const ref = useRef<HTMLElement>(null);
   const close = useRef(onClose);
   useEffect(() => {
@@ -59,7 +61,7 @@ export function Sheet({ labelledBy, describedBy, role = 'dialog', onClose, child
   return createPortal(
     <section
       ref={ref}
-      className="sheet"
+      className={full ? 'sheet sheet--full' : 'sheet'}
       role={role}
       aria-modal="true"
       aria-labelledby={labelledBy}

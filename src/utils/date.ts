@@ -37,6 +37,18 @@ export const formatDayMonth = (d: string, todayStr: string): string => {
   return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', options);
 };
 
+// "7 May 2026": a saved session's date on Log home and the editing kicker.
+export const formatDateFull = (d: string): string => {
+  return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+// The ISO date one day before d ("2026-03-01" gives "2026-02-28").
+export const dayBefore = (d: string): string => {
+  const date = new Date(d + 'T12:00:00Z');
+  date.setUTCDate(date.getUTCDate() - 1);
+  return date.toISOString().slice(0, 10);
+};
+
 // "4 MAY": the Progress last/best labels.
 export const formatDateStat = (d: string, todayStr: string): string => formatDayMonth(d, todayStr).toUpperCase();
 
@@ -48,4 +60,6 @@ export default {
   formatDateMeta,
   formatDayMonth,
   formatDateStat,
+  formatDateFull,
+  dayBefore,
 };
