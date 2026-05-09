@@ -71,6 +71,13 @@ export function readRunningTimer(
   };
 }
 
+// Time a timer another component owns has run so far, paused or not; 0 when there is none.
+export function readElapsedMs(timerId: string, now: number): number {
+  const state = loadPersisted(timerId);
+  if (!state) return 0;
+  return state.accumulatedMs + (state.isRunning && state.startedAt !== null ? Math.max(0, now - state.startedAt) : 0);
+}
+
 // Forgets a timer another component owned, e.g. when its session has ended.
 export function clearTimer(timerId: string) {
   clearPersisted(timerId);

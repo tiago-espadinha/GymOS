@@ -1,10 +1,11 @@
+import { CheckIcon } from "../../shared";
 import { Set } from "../../../types";
 import { isLoggedSet } from "../../../utils/activeSession";
 import "./SetsTable.css";
 
 interface SetsTableProps {
   sets: Set[];
-  /** The set being entered; equal to sets.length when it is the virtual next set. */
+  /** The set being entered; equal to sets.length when it is the virtual next set, -1 for none. */
   currentIndex: number;
   /** The draft's values, shown on the current row and on rows still to come. */
   draftLabel: string;
@@ -14,12 +15,6 @@ interface SetsTableProps {
   onEdit: (index: number) => void;
   onRemove: (index: number) => void;
 }
-
-const CheckIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M4 12l5 5L20 6" />
-  </svg>
-);
 
 const CrossIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">

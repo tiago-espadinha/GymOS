@@ -1,15 +1,16 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { PrimaryButton } from "../../shared";
+import { CheckIcon, PrimaryButton } from "../../shared";
 import { ExerciseLog, Set } from "../../../types";
 import { getExerciseMeta } from "../../../utils/metrics";
 import { isLoggedSet } from "../../../utils/activeSession";
 import { restTimerId } from "../../../utils/restTimers";
 import { NO_VALUES, currentSetNumber, formatSet, lastTimeLabel } from "../../../utils/sessionList";
 import { SetDraft, addPendingSet, currentSetIndex, logDraft, seedDraft } from "../../../utils/setModel";
-import { clearTimer, readRunningTimer } from "../../../hooks/useTimer";
+import { clearTimer, formatClock, readElapsedMs, readRunningTimer } from "../../../hooks/useTimer";
 import RestBlock from "../RestBlock";
 import SetsTable from "../SetsTable";
 import SetSteppers from "../SetSteppers";
+import EditSetPanel from "./EditSetPanel";
 import TimedSets from "./TimedSets";
 import "./ExerciseLogger.css";
 
@@ -37,11 +38,16 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, fo
   });
   // Unsaved stepper values; lost on reload by design.
   const [draft, setDraft] = useState<SetDraft>(() => seedDraft(exercise, history));
-  const [editing, setEditing] = useState<{ index: number; draft: SetDraft } | null>(null);
+  // A logged set being edited, with its values as changed so far.
+  const [editing, setEditing] = useState<{ index: number; draft: Set } | null>(null);
 
   const index = currentSetIndex(exercise);
   const { number, total } = currentSetNumber(exercise);
-  const format = (s: Set) => formatSet(s, exercise) || NO_VALUES;
+  const format = (s: Set) => {
+    const values = formatSet(s, exercise);
+    const rest = timed && s.restTaken ? `rest ${formatClock(Number(s.restTaken) * 1000)}` : "";
+    return [values, rest].filter(Boolean).join(" · ") || NO_VALUES;
+  };
   const draftSet = (d: SetDraft): Set => ({ id: "", ...d });
 
   // Only one rest at a time: end the previous one so it cannot linger on the strip.
@@ -59,6 +65,15 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, fo
       });
     }
     setRest(null);
+  };
+
+  // "Start hold now" during a chained rest: the rest so far counts as taken.
+  const endRestNow = () => {
+    if (!rest) return;
+    const id = restTimerId(rest.setId);
+    const seconds = Math.round(readElapsedMs(id, Date.now()) / 1000);
+    clearTimer(id);
+    endRest(rest.setId, seconds);
   };
 
   const setDone = () => {
@@ -99,33 +114,32 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, fo
     if (editingIndex !== null) root?.querySelector<HTMLInputElement>(".setSteppers input")?.focus();
     else if (editedIndex.current !== null) {
       const edit = root?.querySelector<HTMLElement>(`[aria-label="Edit set ${editedIndex.current + 1}"]`);
-      (edit ?? root?.querySelector<HTMLElement>(".setsTable"))?.focus();
+      // With a rest running the table steps aside, so the title takes focus.
+      (edit ?? root?.querySelector<HTMLElement>(".setsTable") ?? document.getElementById(titleId))?.focus();
     }
     editedIndex.current = editingIndex;
-  }, [editingIndex]);
+  }, [editingIndex, titleId]);
 
   const kicker = editing
     ? `Edit set ${editing.index + 1}`
     : rest
       ? `Next · Set ${number} of ${total}`
       : `Set ${number} of ${total}`;
+  const startEdit = (i: number) => setEditing({ index: i, draft: exercise.sets[i] });
+  const editingRow = editing && { index: editing.index, label: format(editing.draft) };
+  // A timed set needs a time; a distance alone is not a set.
+  const canSave = editing !== null && (timed ? Number(editing.draft.duration) > 0 : isLoggedSet(editing.draft));
+
   const lastTime = !editing && !rest && lastTimeLabel(exercise, history);
+  const restIndex = rest ? exercise.sets.findIndex((s) => s.id === rest.setId) : -1;
+  // A hold's block sits above its title, so a timed exercise places the heading itself.
+  const headingInHold = timed && !rest && !editing;
 
-  return (
-    <div className="exerciseLogger" ref={rootRef}>
-      {rest && (
-        <RestBlock
-          key={rest.setId}
-          setId={rest.setId}
-          setNumber={exercise.sets.findIndex((s) => s.id === rest.setId) + 1}
-          category={meta.category}
-          autoStart={rest.fresh}
-          onSkip={(seconds) => endRest(rest.setId, seconds)}
-        />
-      )}
-
+  const heading = (
+    <>
       <div className={`exerciseLoggerKicker${rest ? " exerciseLoggerKicker--next" : ""}`}>
-        <span className="exerciseLoggerSet">{kicker}</span>
+        {/* Above a hold the block already names the set. */}
+        {!headingInHold && <span className="exerciseLoggerSet">{kicker}</span>}
         {!rest && <span>{place}</span>}
       </div>
       <div className="exerciseLoggerHeading">
@@ -134,9 +148,45 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, fo
         </h1>
         {lastTime && <span className="exerciseLoggerLastTime">{lastTime}</span>}
       </div>
+    </>
+  );
+
+  return (
+    <div className="exerciseLogger" ref={rootRef}>
+      {rest && (
+        <RestBlock
+          key={rest.setId}
+          setId={rest.setId}
+          setNumber={restIndex + 1}
+          meta={timed ? `${exercise.name} · set ${number} next` : undefined}
+          timed={timed}
+          category={meta.category}
+          autoStart={rest.fresh}
+          onSkip={(seconds) => endRest(rest.setId, seconds)}
+        />
+      )}
+
+      {timed && rest && restIndex >= 0 && (
+        <p className="exerciseLoggerLogged">
+          <CheckIcon />
+          Set {restIndex + 1} logged · {formatClock(Number(exercise.sets[restIndex].duration) * 1000)}
+        </p>
+      )}
+      {!headingInHold && heading}
 
       {timed ? (
-        <TimedSets exercise={exercise} onChange={onChange} resting={Boolean(rest)} onRest={startRest} onRemove={removeSet} />
+        <TimedSets
+          exercise={exercise}
+          onChange={onChange}
+          resting={Boolean(rest)}
+          heading={headingInHold && heading}
+          editing={editingRow}
+          format={format}
+          onRest={startRest}
+          onEndRest={endRestNow}
+          onEdit={startEdit}
+          onRemove={removeSet}
+        />
       ) : (
         <>
           {!rest && (
@@ -144,9 +194,9 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, fo
               sets={exercise.sets}
               currentIndex={index}
               draftLabel={format(draftSet(draft))}
-              editing={editing && { index: editing.index, label: format(draftSet(editing.draft)) }}
+              editing={editingRow}
               format={format}
-              onEdit={(i) => setEditing({ index: i, draft: { weight: exercise.sets[i].weight, reps: exercise.sets[i].reps } })}
+              onEdit={startEdit}
               onRemove={removeSet}
             />
           )}
@@ -155,32 +205,30 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, fo
               + Add set
             </button>
           )}
-          <SetSteppers
-            draft={editing?.draft ?? draft}
-            onChange={(d) => (editing ? setEditing({ ...editing, draft: d }) : setDraft(d))}
-            trackWeight={meta.trackWeight}
-            outlined={Boolean(editing)}
-          />
-          {editing ? (
+          {!editing && (
             <>
-              <PrimaryButton onClick={saveEdit} disabled={!isLoggedSet(draftSet(editing.draft))}>
-                Save set {editing.index + 1}
+              <SetSteppers draft={draft} onChange={setDraft} trackWeight={meta.trackWeight} />
+              <PrimaryButton onClick={setDone} disabled={!isLoggedSet(draftSet(draft))}>
+                Set done
               </PrimaryButton>
-              <div className="exerciseLoggerEditActions">
-                <button type="button" className="exerciseLoggerDelete" onClick={deleteEdit}>
-                  Delete set {editing.index + 1}
-                </button>
-                <button type="button" className="exerciseLoggerCancel" onClick={() => setEditing(null)}>
-                  Cancel
-                </button>
-              </div>
             </>
-          ) : (
-            <PrimaryButton onClick={setDone} disabled={!isLoggedSet(draftSet(draft))}>
-              Set done
-            </PrimaryButton>
           )}
         </>
+      )}
+
+      {editing && (
+        <EditSetPanel
+          set={editing.draft}
+          index={editing.index}
+          timed={timed}
+          trackWeight={meta.trackWeight}
+          distanceUnit={meta.trackDistance ? meta.distanceUnit : undefined}
+          canSave={canSave}
+          onChange={(d) => setEditing({ ...editing, draft: d })}
+          onSave={saveEdit}
+          onDelete={deleteEdit}
+          onCancel={() => setEditing(null)}
+        />
       )}
 
       {!editing && footer}

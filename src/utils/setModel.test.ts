@@ -40,6 +40,13 @@ describe("currentSetIndex", () => {
     expect(currentSetIndex(exercise([done("35", "12")]))).toBe(1);
     expect(currentSetIndex(exercise([]))).toBe(0);
   });
+
+  it("moves past a timed set once it has a held time, with or without a distance", () => {
+    const timed = { category: "cardio" as const, trackingType: "time" as const, trackDistance: true };
+    expect(currentSetIndex(exercise([set({ duration: "30" }), set()], timed))).toBe(1);
+    expect(currentSetIndex(exercise([set({ duration: "30", distance: "1.2" })], timed))).toBe(1);
+    expect(currentSetIndex(exercise([set()], timed))).toBe(0);
+  });
 });
 
 describe("virtualSetId", () => {

@@ -1,5 +1,6 @@
 import { StepperBlock } from "../../shared";
 import { SetDraft } from "../../../utils/setModel";
+import { decimal, whole } from "../../../utils/typedNumber";
 import "./SetSteppers.css";
 
 interface SetSteppersProps {
@@ -8,13 +9,6 @@ interface SetSteppersProps {
   trackWeight: boolean;
   outlined?: boolean;
 }
-
-// Typed text keeps its first decimal point; a comma counts as one (European keyboards).
-const decimal = (text: string) => {
-  const [whole, ...fraction] = text.replace(/,/g, ".").replace(/[^\d.]/g, "").split(".");
-  return fraction.length ? `${whole}.${fraction.join("")}` : whole;
-};
-const whole = (text: string) => text.replace(/\D/g, "");
 
 export function SetSteppers({ draft, onChange, trackWeight, outlined }: SetSteppersProps) {
   return (

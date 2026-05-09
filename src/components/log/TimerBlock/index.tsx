@@ -5,6 +5,8 @@ interface TimerBlockProps {
   tone: "hold" | "rest";
   label: string;
   setNumber: number;
+  /** Top right; "Set n" unless given, e.g. "Set 2 of 3" or "Plank · set 3 next". */
+  meta?: string;
   countdown: string;
   /** The line under the countdown, e.g. "Target 01:30". */
   caption: string;
@@ -17,7 +19,7 @@ interface TimerBlockProps {
 // The block fills from the bottom as time passes. The countdown is drawn twice,
 // once on the empty part and once, inverted, on the filled part; the fill clips
 // the second copy, so the numeral stays readable without any blend mode.
-export function TimerBlock({ tone, label, setNumber, countdown, caption, fillPct, status, children }: TimerBlockProps) {
+export function TimerBlock({ tone, label, setNumber, meta, countdown, caption, fillPct, status, children }: TimerBlockProps) {
   // A live region only announces changes, so it is filled once the block has mounted.
   const [armed, setArmed] = useState(false);
   useEffect(() => {
@@ -29,7 +31,7 @@ export function TimerBlock({ tone, label, setNumber, countdown, caption, fillPct
     <>
       <div className="timerBlockTop">
         <span>{label}</span>
-        <span>Set {setNumber}</span>
+        <span>{meta ?? `Set ${setNumber}`}</span>
       </div>
       <div className="timerBlockCountdown">{countdown}</div>
       <div className="timerBlockTarget">{caption}</div>
