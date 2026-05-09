@@ -156,6 +156,11 @@ export default function GymTracker() {
             onUpdate={activeSession.update}
             onUpdateExercise={activeSession.updateExercise}
             onEnd={endSession}
+            onNewPlan={() => {
+              setTab("plans");
+              setCreatingPlan(true);
+            }}
+            onImport={openData}
           />
         )}
         {visibleTab === "progress" && (

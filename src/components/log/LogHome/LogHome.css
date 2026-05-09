@@ -1,18 +1,104 @@
-.logHomeForm {
+/* The lime block: outside a session, lime is the primary action. */
+.logHomeBlock {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  margin-bottom: var(--space-7);
+  margin-bottom: var(--space-5);
+  padding: var(--space-7) var(--gutter) var(--space-5);
+  border-radius: var(--radius-surface);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
-.logHomeForm .pill-button {
-  align-self: flex-start;
-}
-
-.logHomeSelectField {
+.logHomeBlockTop {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.logHomeKicker {
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.logHomeHeadline {
+  margin: 0;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-hero);
+  line-height: var(--leading-hero);
+  text-transform: uppercase;
+  color: inherit;
+  /* Titles wrap between words, and inside a word only when it cannot fit. */
+  overflow-wrap: break-word;
+}
+
+/* "No plans yet" is a sentence, so it takes the screen-title size. */
+h2.logHomeHeadline {
+  font-size: var(--text-screen-title);
+  line-height: var(--leading-screen-title);
+}
+
+.logHomeLead {
+  font-size: var(--text-body-lg);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+span.logHomeLead {
+  font-size: var(--text-secondary);
+}
+
+/* Change sits beside the name, or under it when the name needs the width. */
+.logHomePlan .logHomeHeadline {
+  min-width: auto;
+  max-width: 100%;
+}
+
+.logHomeChoice {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
   gap: var(--space-2);
+  min-height: var(--size-control);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--text-secondary);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.logHomePlan {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.logHomeChoice:focus-visible,
+.logHomePlan:focus-visible,
+.logHomeImport:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+.logHomeBlock :focus-visible {
+  outline-color: var(--color-on-accent);
 }
 
 .logHomeLabel {
@@ -25,24 +111,18 @@
   color: var(--color-text-muted);
 }
 
-.logHomeSelectField .logHomeLabel {
-  margin: 0;
-}
-
-.logHomeSelect {
-  min-height: var(--size-field);
-  padding: 0 var(--space-4);
-  border: 2px solid transparent;
-  border-radius: var(--radius-surface);
-  background: var(--color-surface);
+.logHomeImport {
+  align-self: flex-start;
+  min-height: var(--size-control);
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--color-text);
-  font-family: var(--font-body);
-  font-size: var(--text-body-lg);
-}
-
-.logHomeSelect:focus-visible {
-  outline: none;
-  border-color: var(--color-accent);
+  font-family: inherit;
+  font-size: var(--text-secondary);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .logHomeEmptyText {
@@ -51,6 +131,13 @@
   font-weight: 500;
   line-height: 1.4;
   color: var(--color-text-muted);
+}
+
+/* Label and empty text line up with the row text. */
+.logHomeRecent > .logHomeLabel,
+.logHomeRecent > p,
+.logHomeRecent > button {
+  margin-left: var(--space-4);
 }
 
 .logHomeRecent--empty {

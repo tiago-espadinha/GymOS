@@ -14,10 +14,6 @@
   text-transform: uppercase;
 }
 
-.logTabTitle {
-  margin-bottom: 24px;
-}
-
 .logTabSessionTitle {
   overflow-wrap: anywhere;
 }

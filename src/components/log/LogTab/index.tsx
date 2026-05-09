@@ -33,6 +33,8 @@ interface LogTabProps {
   onUpdate: (patch: Partial<ActiveSession>) => void;
   onUpdateExercise: (exercise: ExerciseLog) => void;
   onEnd: () => void;
+  onNewPlan: () => void;
+  onImport: () => void;
 }
 
 export function LogTab({
@@ -45,6 +47,8 @@ export function LogTab({
   onUpdate,
   onUpdateExercise,
   onEnd,
+  onNewPlan,
+  onImport,
 }: LogTabProps) {
   const [homeDate, setHomeDate] = useState(today());
   const [saved, setSaved] = useState("");
@@ -133,7 +137,7 @@ export function LogTab({
   return (
     <div>
       {!session && (
-        <h1 className="logTabTitle" ref={titleRef} tabIndex={-1}>
+        <h1 className="logTabTitle visuallyHidden" ref={titleRef} tabIndex={-1}>
           Log
         </h1>
       )}
@@ -234,6 +238,8 @@ export function LogTab({
               onStart={startPlan}
               onEdit={startEdit}
               onDelete={deleteSession}
+              onNewPlan={onNewPlan}
+              onImport={onImport}
             />
           )}
         </>

@@ -1,0 +1,79 @@
+.dateSheet__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--size-action);
+  padding: 0 var(--gutter);
+  border: 2px solid var(--color-line-strong);
+  border-radius: var(--radius-surface);
+  background: none;
+  color: var(--color-text);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Chosen is filled white with a check mark, never colour alone. */
+.dateSheet__option[aria-pressed='true'] {
+  border-color: var(--color-inverse);
+  background: var(--color-inverse);
+  color: var(--color-on-inverse);
+}
+
+.dateSheet__option:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+.dateSheet__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.dateSheet__label {
+  font-size: var(--text-body-lg);
+  font-weight: 700;
+}
+
+.dateSheet__date {
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.dateSheet__option[aria-pressed='true'] .dateSheet__date {
+  font-weight: 600;
+  color: var(--color-on-inverse);
+}
+
+.dateSheet__other {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dateSheet__otherLabel {
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* Inset black inside the surface sheet, radius 12 (nested). */
+.dateSheet__input {
+  min-height: var(--size-field-lg);
+  padding: 0 var(--space-4);
+  border: 2px solid transparent;
+  border-radius: var(--radius-nested);
+  background: var(--color-surface-inset);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--text-body-lg);
+  font-weight: 600;
+  color-scheme: dark;
+}
+
+.dateSheet__input:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+}

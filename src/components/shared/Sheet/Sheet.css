@@ -20,6 +20,17 @@
   font-family: var(--font-body);
 }
 
+.sheet--full {
+  top: 0;
+  max-width: none;
+  max-height: none;
+  gap: 0;
+  /* Full width so nothing shows beside it; the content keeps the app's 600px column. */
+  padding: var(--space-5) max(0px, calc((100% - 600px) / 2)) var(--space-7);
+  border-radius: 0;
+  background: var(--color-bg);
+}
+
 .sheet:focus {
   outline: none;
 }

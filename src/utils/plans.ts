@@ -62,6 +62,24 @@ export function planActionsSummary(plan: TrainingPlan, sessions: WorkoutSession[
   return last ? `${exerciseCount(plan)} · last trained ${formatDayMonth(last, todayStr)}` : exerciseCount(plan);
 }
 
+// "7 exercises · last trained 4 May" on Log home, "7 exercises · last 4 May" in the
+// plan picker, or "9 exercises · not trained yet".
+export function planTrainedSummary(
+  plan: TrainingPlan,
+  sessions: WorkoutSession[],
+  todayStr: string,
+  lead = "last trained",
+): string {
+  const last = lastTrained(plan.id, sessions);
+  return `${exerciseCount(plan)} · ${last ? `${lead} ${formatDayMonth(last, todayStr)}` : "not trained yet"}`;
+}
+
+// Log home starts on the plan of the newest session when it is still active, else the first active plan.
+export function defaultPlan(active: TrainingPlan[], sessions: WorkoutSession[]): TrainingPlan | undefined {
+  const newest = sessions[0];
+  return (newest && active.find((p) => p.id === newest.planId)) || active[0];
+}
+
 // The kicker over the Plans title: "17 plans", "16 plans · 3 archived", "No plans".
 export function plansCountLabel(active: number, archived: number): string {
   const lead = active === 0 ? "No plans" : `${active} plan${active === 1 ? "" : "s"}`;
