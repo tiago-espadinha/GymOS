@@ -12,7 +12,15 @@ export default defineConfig({
     baseURL: origin,
     trace: 'on-first-retry',
   },
-  projects: [{ name: 'mobile-chromium', use: { ...devices['Pixel 7'] } }],
+  projects: [
+    { name: 'mobile-chromium', use: { ...devices['Pixel 7'] } },
+    // The timer specs again at desktop width, where the session splits around the timer.
+    {
+      name: 'wide-chromium',
+      testMatch: /(rest-timer|timed-set|rest-cleanup)\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } },
+    },
+  ],
   webServer: {
     command: `npm run build && npm run preview -- --port ${port} --strictPort`,
     url: origin,

@@ -16,3 +16,10 @@
 .sessionListRows .list-row {
   scroll-margin-top: var(--size-row-summary);
 }
+
+/* Wide: an open exercise fills the window, so the list's bottom margin would make it scroll. */
+@media (min-width: 1024px) {
+  .sessionList:has(> .exerciseScreen:not([hidden])) {
+    margin-bottom: 0;
+  }
+}

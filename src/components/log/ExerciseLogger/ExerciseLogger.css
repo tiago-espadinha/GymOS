@@ -112,3 +112,26 @@
   font-size: var(--text-secondary);
   font-weight: 700;
 }
+
+/*
+ * Wide: this column is the right of the split (TimerBlock.css holds the left).
+ * The name keeps its screen-title size during a rest, the steppers stack and the
+ * main button stays at the bottom of the window.
+ */
+@media (min-width: 1024px) {
+  .exerciseLoggerTitle,
+  .exerciseLoggerTitle--resting {
+    font-size: var(--text-screen-title);
+    line-height: var(--leading-screen-title);
+  }
+
+  .exerciseLogger .setSteppers {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .exerciseLogger > .primary-button {
+    position: sticky;
+    bottom: var(--gutter-wide);
+    margin-top: auto;
+  }
+}

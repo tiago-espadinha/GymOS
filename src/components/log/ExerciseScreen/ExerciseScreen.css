@@ -40,6 +40,10 @@
   text-align: right;
 }
 
+.exerciseScreenTop {
+  display: none;
+}
+
 .exerciseScreenBack:focus-visible,
 .exerciseScreenNext:focus-visible {
   outline: var(--border-focus);
@@ -49,5 +53,28 @@
 @media (max-width: 600px) {
   .exerciseScreen {
     min-height: calc(100dvh - 40px);
+  }
+}
+
+/* Wide: the navigation and Finish sit on top of the entry column, as on board C. */
+@media (min-width: 1024px) {
+  /* The window less the shell's padding, so the split fits it without scrolling. */
+  .exerciseScreen {
+    min-height: calc(100dvh - var(--space-7) - var(--gutter-wide));
+  }
+
+  .exerciseScreenTop {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+  }
+
+  .exerciseScreenTop .exerciseScreenBack {
+    color: var(--color-text);
+    font-weight: 700;
+  }
+
+  .exerciseScreenNav {
+    display: none;
   }
 }

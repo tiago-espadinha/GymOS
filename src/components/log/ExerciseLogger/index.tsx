@@ -8,6 +8,7 @@ import { NO_VALUES, currentSetNumber, formatSet, lastTimeLabel } from "../../../
 import { SetDraft, addPendingSet, currentSetIndex, logDraft, seedDraft } from "../../../utils/setModel";
 import { clearTimer, formatClock, readElapsedMs, readRunningTimer } from "../../../hooks/useTimer";
 import RestBlock from "../RestBlock";
+import IdleRest from "../RestBlock/IdleRest";
 import SetsTable from "../SetsTable";
 import SetSteppers from "../SetSteppers";
 import EditSetPanel from "./EditSetPanel";
@@ -22,11 +23,13 @@ interface ExerciseLoggerProps {
   /** e.g. "Back · exercise 2 of 7". */
   place: string;
   titleId: string;
-  /** Navigation, hidden while a set is being edited. */
+  /** Wide-only navigation on top, hidden while a set is being edited. */
+  header: ReactNode;
+  /** Navigation at the bottom below the wide breakpoint, hidden while a set is being edited. */
   footer: ReactNode;
 }
 
-export function ExerciseLogger({ exercise, onChange, history, place, titleId, footer }: ExerciseLoggerProps) {
+export function ExerciseLogger({ exercise, onChange, history, place, titleId, header, footer }: ExerciseLoggerProps) {
   const meta = getExerciseMeta(exercise);
   const timed = meta.trackingType === "time";
   const rootRef = useRef<HTMLDivElement>(null);
@@ -153,6 +156,8 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, fo
 
   return (
     <div className="exerciseLogger" ref={rootRef}>
+      {!editing && header}
+      {!timed && !rest && <IdleRest setNumber={number} category={meta.category} />}
       {rest && (
         <RestBlock
           key={rest.setId}

@@ -1,9 +1,9 @@
-import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef } from "react";
 import { ListRow, SetTicks } from "../../shared";
 import { ExerciseLog, WorkoutSession } from "../../../types";
 import { currentExerciseId, exerciseProgress, rowSubtitle } from "../../../utils/sessionList";
 import { lastTimeSets } from "../../../utils/setModel";
-import ExerciseScreen from "../ExerciseScreen";
+import ExerciseScreen, { type FinishAction } from "../ExerciseScreen";
 import RestStrip from "../RestStrip";
 import "./SessionList.css";
 
@@ -19,14 +19,18 @@ interface SessionListProps {
   header: ReactNode;
   /** Shown below the rows, with the list only. */
   actions: ReactNode;
+  /** Finish on each exercise screen at wide widths; the list's own is in the header. */
+  finish: FinishAction;
+  /** The exercise shown as a full screen, or null for the list; kept by the parent across the Done screen. */
+  openId: string | null;
+  onOpen: (exerciseId: string | null) => void;
 }
 
 const itemId = (exerciseId: string) => `sessionItem-${exerciseId}`;
 const titleId = (exerciseId: string) => `exerciseTitle-${exerciseId}`;
 
 // The list of exercises, or one exercise as a full screen.
-export function SessionList({ planName, exercises, onChangeExercise, sessions, editingId, header, actions }: SessionListProps) {
-  const [openId, setOpenId] = useState<string | null>(null);
+export function SessionList({ planName, exercises, onChangeExercise, sessions, editingId, header, actions, finish, openId, onOpen }: SessionListProps) {
   const names = exercises.map((ex) => ex.name).join("\n");
   // Keyed by name, which only changes with the plan, not on every logged set.
   const history = useMemo(
@@ -49,7 +53,7 @@ export function SessionList({ planName, exercises, onChangeExercise, sessions, e
 
   return (
     <div className="sessionList">
-      <RestStrip exercises={exercises} openExerciseId={openId} onOpen={setOpenId} />
+      <RestStrip exercises={exercises} openExerciseId={openId} onOpen={onOpen} />
       {openId === null && (
         <>
           {header}
@@ -63,7 +67,7 @@ export function SessionList({ planName, exercises, onChangeExercise, sessions, e
                     title={ex.name}
                     subtitle={rowSubtitle(ex, history.get(ex.name) ?? [])}
                     current={ex.id === currentId}
-                    onClick={() => setOpenId(ex.id)}
+                    onClick={() => onOpen(ex.id)}
                     trailing={<SetTicks total={total} done={done} />}
                   />
                 </li>
@@ -85,8 +89,9 @@ export function SessionList({ planName, exercises, onChangeExercise, sessions, e
           hidden={ex.id !== openId}
           titleId={titleId(ex.id)}
           onChange={onChangeExercise}
-          onAllExercises={() => setOpenId(null)}
-          onNext={() => setOpenId(exercises[i + 1].id)}
+          onAllExercises={() => onOpen(null)}
+          onNext={() => onOpen(exercises[i + 1].id)}
+          finish={finish}
         />
       ))}
     </div>
