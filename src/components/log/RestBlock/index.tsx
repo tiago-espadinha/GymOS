@@ -50,7 +50,7 @@ export function RestBlock({ setId, setNumber, category, autoStart, onSkip }: Res
       {/* Past the target a shorter rest means nothing, so −15s goes. */}
       {!over && <TimerButton onClick={() => adjustTargetSec(-STEP_SEC)}>−{STEP_SEC}s</TimerButton>}
       <TimerButton onClick={() => adjustTargetSec(STEP_SEC)}>+{STEP_SEC}s</TimerButton>
-      <TimerButton onClick={skip}>{over ? "Done resting" : "Skip"}</TimerButton>
+      <TimerButton onClick={skip} wide={over}>{over ? "Done resting" : "Skip"}</TimerButton>
     </TimerBlock>
   );
 }

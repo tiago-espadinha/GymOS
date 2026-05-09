@@ -91,6 +91,11 @@
   cursor: pointer;
 }
 
+.timerBlockButton--wide {
+  flex: 2;
+  white-space: nowrap;
+}
+
 .timerBlockButton:active {
   opacity: 0.8;
 }

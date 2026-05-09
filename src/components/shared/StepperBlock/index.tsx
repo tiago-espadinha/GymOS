@@ -41,7 +41,7 @@ export function StepperBlock({
       <div className="stepper-block__reading" aria-live={onType ? undefined : 'polite'}>
         {onType ? (
           <input
-            className="stepper-block__value stepper-block__input"
+            className={`stepper-block__value stepper-block__input${(text ?? "").length > 3 ? " stepper-block__input--long" : ""}`}
             aria-label={label}
             inputMode="decimal"
             placeholder="0"
