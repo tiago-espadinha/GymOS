@@ -13,6 +13,7 @@ const primitives = {
   TabBar: '.tab-bar__tab',
   Select: '.select__button',
   Switch: '.switch',
+  StepperBlock: '.stepper-block__button',
 } as const
 
 type Name = keyof typeof primitives
@@ -122,12 +123,12 @@ test('every shared primitive has a 44px hit area and a visible focus state', asy
   await check(page, 'Session list')
 
   await page.getByRole('button', { name: /^Bench press/ }).click()
+  await check(page, 'Exercise')
   await logSet(page, '60', '8')
   await page.getByRole('button', { name: 'All exercises' }).click()
   await finishButton(page).click()
   await check(page, 'Finish')
 
-  // StepperBlock is not mounted on any screen yet; its sizing is pinned in inputs.test.ts.
   const all = Object.keys(primitives).sort()
   expect([...sized].sort(), 'primitives measured').toEqual(all)
   expect([...focused].sort(), 'primitives reached by keyboard').toEqual(all)
