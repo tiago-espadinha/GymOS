@@ -12,6 +12,7 @@ interface DotProps {
   cx?: number;
   cy?: number;
   index?: number;
+  payload?: ProgressPoint;
   lastIndex: number;
 }
 
@@ -20,9 +21,23 @@ interface TooltipProps {
   payload?: Array<{ payload: ProgressPoint }>;
 }
 
-function LastPointDot({ cx, cy, index, lastIndex }: DotProps) {
-  if (index !== lastIndex) return null;
-  return <circle cx={cx} cy={cy} r={7} fill="var(--color-accent)" />;
+/** Lime dot on the latest point, labelled PR when it is one; a lime ring on earlier PRs. */
+function PointDot({ cx, cy, index, lastIndex, payload }: DotProps) {
+  if (cx === undefined || cy === undefined) return null;
+  if (index === lastIndex) {
+    return (
+      <g>
+        <circle cx={cx} cy={cy} r={8} fill="var(--color-accent)" />
+        {payload?.pr && (
+          <text x={cx} y={cy - 20} textAnchor="end" className="progressChartPR">
+            PR
+          </text>
+        )}
+      </g>
+    );
+  }
+  if (!payload?.pr) return null;
+  return <circle cx={cx} cy={cy} r={6} fill="var(--color-bg)" stroke="var(--color-accent)" strokeWidth={3} />;
 }
 
 function PointTooltip({ active, payload }: TooltipProps) {
@@ -40,7 +55,7 @@ export function ProgressChart({ points, description, formatTick }: ProgressChart
   return (
     <div className="progressChart" role="img" aria-label={description}>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={points} margin={{ top: 24, right: 8, bottom: 8, left: 8 }}>
+        <LineChart data={points} margin={{ top: 28, right: 10, bottom: 8, left: 8 }}>
           <CartesianGrid stroke="var(--color-line)" vertical={false} />
           <YAxis
             mirror
@@ -64,7 +79,7 @@ export function ProgressChart({ points, description, formatTick }: ProgressChart
             strokeLinejoin="round"
             strokeLinecap="round"
             isAnimationActive={false}
-            dot={<LastPointDot lastIndex={points.length - 1} />}
+            dot={<PointDot lastIndex={points.length - 1} />}
             activeDot={{ r: 6, fill: "var(--color-text)", stroke: "var(--color-bg)", strokeWidth: 2 }}
           />
         </LineChart>

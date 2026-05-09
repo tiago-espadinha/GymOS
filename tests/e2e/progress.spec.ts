@@ -11,6 +11,7 @@ const plan = {
     { id: 'e1', name: 'Lat pulldown', muscleGroup: 'Back' },
     { id: 'e2', name: 'Plank', muscleGroup: 'Core', category: 'calisthenics', trackingType: 'time' },
     { id: 'e3', name: 'Row', muscleGroup: 'Back' },
+    { id: 'e4', name: 'Seated row', muscleGroup: 'Back' },
   ],
 }
 
@@ -31,6 +32,8 @@ const sessions = [
   session(20, 'Lat pulldown', '30', '12'),
   session(5, 'Lat pulldown', '40', '12'),
   session(200, 'Row', '60', '10'),
+  session(30, 'Seated row', '60', '10'),
+  session(3, 'Seated row', '65', '10'),
 ]
 
 test.beforeEach(async ({ page }) => {
@@ -45,13 +48,22 @@ test.beforeEach(async ({ page }) => {
   await page.getByText('Progress', { exact: true }).first().click()
 })
 
+const picker = (page: Page) => page.getByRole('button', { name: /^Exercise: / })
+const pick = async (page: Page, name: string) => {
+  await picker(page).click()
+  await page.getByRole('dialog').getByRole('searchbox', { name: 'Search exercises' }).fill(name)
+  await page.getByRole('option', { name: new RegExp(`^${name}`, 'i') }).first().click()
+}
+const metric = (page: Page, name: string) =>
+  page.getByRole('group', { name: 'Metric' }).getByRole('button', { name, exact: true })
+const rings = (page: Page) => page.locator('.progressChart circle[stroke="var(--color-accent)"]')
 const figures = (page: Page) => page.locator('.progressStatValue')
 const caption = (page: Page) => page.locator('.progressCaption')
 const range = (page: Page, name: string) =>
   page.getByRole('group', { name: 'Time range' }).getByRole('button', { name, exact: true })
 
 test('shows last and best for the chosen metric', async ({ page }) => {
-  await expect(page.getByLabel('Exercise')).toHaveValue('Lat pulldown')
+  await expect(picker(page)).toHaveAccessibleName('Exercise: Lat pulldown. Change')
   await expect(figures(page)).toHaveText(['40.0kg/rep', '57.0kg/rep'])
   await page.getByRole('group', { name: 'Metric' }).getByRole('button', { name: 'Peak' }).click()
   await expect(figures(page)).toHaveText(['40kg × 12', '57kg × 8'])
@@ -73,18 +85,78 @@ test('ranges narrow the chart and keep last and best', async ({ page }) => {
 
 test('ranges with no sessions are disabled and fall back to All', async ({ page }) => {
   await range(page, '1M').click()
-  await page.getByLabel('Exercise').selectOption('Row')
+  await pick(page, 'Row')
   await expect(range(page, '1M')).toBeDisabled()
   await expect(range(page, '3M')).toBeDisabled()
   await expect(range(page, 'All')).toHaveAttribute('aria-pressed', 'true')
   await expect(caption(page).locator('span').nth(1)).toHaveText('1 session')
 })
 
-test('an exercise without sessions shows the empty state and three metrics', async ({ page }) => {
-  await page.getByLabel('Exercise').selectOption('Plank')
-  await expect(page.getByText('No sessions yet for this exercise')).toBeVisible()
+test('an exercise without sessions shows the board empty state and Go to Log opens Log', async ({ page }) => {
+  await pick(page, 'Plank')
+  await expect(page.getByRole('heading', { name: 'Nothing logged yet' })).toBeVisible()
+  await expect(page.getByText('Plank is in 1 plan but has no saved sets.')).toBeVisible()
   await expect(page.locator('.progressChart')).toHaveCount(0)
-  await expect(page.getByRole('group', { name: 'Metric' }).getByRole('button')).toHaveText(['Average', 'Peak', 'Total'])
+  await expect(page.getByRole('group', { name: 'Metric' })).toHaveCount(0)
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+  expect(results.violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([])
+  await page.getByRole('button', { name: 'Go to Log' }).click()
+  await expect(page.getByRole('button', { name: 'Log', exact: true })).toHaveAttribute('aria-current', 'page')
+})
+
+test('the exercise search filters by name, counts and shows each history', async ({ page }) => {
+  await picker(page).click()
+  const sheet = page.getByRole('dialog')
+  const search = sheet.getByRole('searchbox', { name: 'Search exercises' })
+  await expect(search).toBeFocused()
+  await expect(sheet.getByText('4 exercises')).toBeVisible()
+  await expect(sheet.getByRole('option', { name: /Lat pulldown/ })).toHaveAttribute('aria-selected', 'true')
+  await expect(sheet.getByRole('option', { name: /Lat pulldown/ })).toContainText('6 sessions · last')
+  await expect(sheet.getByRole('option', { name: /Plank/ })).toContainText('No sessions yet')
+
+  await search.fill('ROW')
+  await expect(sheet.getByRole('option')).toHaveText([/^Row/, /^Seated row/])
+  await expect(sheet.getByText('2 of 4 exercises')).toBeVisible()
+  await search.press('ArrowDown')
+  await expect(sheet.getByRole('option', { name: /^Row/ })).toBeFocused()
+
+  await search.fill('squat')
+  await expect(sheet.getByText('No exercise matches “squat”.')).toBeVisible()
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+  expect(results.violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([])
+
+  await page.keyboard.press('Escape')
+  await expect(sheet).toHaveCount(0)
+  await expect(picker(page)).toBeFocused()
+  await expect(picker(page)).toHaveAccessibleName('Exercise: Lat pulldown. Change')
+})
+
+test('PRs get rings, and Best is kept when the latest session is not a PR', async ({ page }) => {
+  // Average per rep: 50, 57, 30, 35, 30, 40; only 57 beats everything before it.
+  await expect(rings(page)).toHaveCount(1)
+  await expect(page.locator('.progressChartPR')).toHaveCount(0)
+  await expect(page.locator('.progressLegend')).toHaveText('PR')
+  await expect(page.locator('.progressChart')).toHaveAttribute('aria-label', /, 1 personal record$/)
+  await expect(page.locator('.progressStatKicker').nth(1)).toContainText('Best ·')
+  await range(page, '1M').click()
+  await expect(rings(page)).toHaveCount(0)
+  await expect(page.locator('.progressLegend')).toHaveCount(0)
+})
+
+test('a latest PR is labelled on the chart and replaces Best with NEW PR', async ({ page }) => {
+  await pick(page, 'Seated row')
+  await expect(page.locator('.progressChartPR')).toHaveText('PR')
+  await expect(page.locator('.progressStatKicker').nth(1)).toHaveText('New PR')
+  await expect(page.getByText(/^Up 5\.0 kg\/rep on your previous best \(60\.0, /)).toBeVisible()
+  await expect(page.locator('.progressChart')).toHaveAttribute('aria-label', /the latest one a PR$/)
+})
+
+test('e1RM explains itself under the metric control', async ({ page }) => {
+  const note = page.getByText('Estimated one-rep max from your best set each session (Epley).')
+  await expect(note).toHaveCount(0)
+  await metric(page, 'e1RM').click()
+  await expect(note).toBeVisible()
+  await expect(figures(page)).toHaveText(['56.0kg', '72.2kg'])
 })
 
 test('Progress with data has no detectable WCAG A/AA violations', async ({ page }) => {
