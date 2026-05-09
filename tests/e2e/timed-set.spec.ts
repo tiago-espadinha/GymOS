@@ -51,7 +51,7 @@ test('idle shows the category target (calisthenics: 15s) and Start hold begins t
   await expect(restSwitch(page)).toHaveAttribute('aria-checked', 'true')
   await button(page, 'Start hold').click()
   await page.clock.fastForward(5_000)
-  await expect(hold(page)).toContainText('00:10')
+  await expect(hold(page)).toContainText('00:05')
 })
 
 test('the hold fills white in step with elapsed time', async ({ page }) => {
@@ -120,7 +120,7 @@ test('Pause stops the clock and Resume continues it; +step lengthens the target'
   await expect(label(page)).toContainText('Hold · paused')
   await expect(button(page, 'Stop and log 00:04')).toBeVisible()
   await page.clock.fastForward(30_000)
-  await expect(hold(page)).toContainText('00:11')
+  await expect(hold(page)).toContainText('00:04')
   await button(page, 'Resume').click()
   await button(page, '+5s').click()
   await expect(page.getByText('of 00:20').first()).toBeVisible()
@@ -207,7 +207,7 @@ test('a running hold survives a reload and follows the real clock', async ({ pag
   await page.reload()
   await page.getByRole('button', { name: /^Plank/ }).click()
   await page.clock.fastForward(1_000)
-  await expect(hold(page)).toContainText('00:08')
+  await expect(hold(page)).toContainText('00:07')
 })
 
 test('phase changes are announced once the block is up', async ({ page }) => {

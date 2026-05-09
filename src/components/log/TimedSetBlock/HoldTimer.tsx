@@ -1,4 +1,4 @@
-import { formatRestClock, type TimerControls } from "../../../hooks/useTimer";
+import { formatClock, formatRestClock, type TimerControls } from "../../../hooks/useTimer";
 import { getAdjustStepSec } from "../../../constants/timerPresets";
 import { TimerBlock, TimerButton } from "../TimerBlock";
 import { HoldPhase, holdPhase } from "./holdPhase";
@@ -27,7 +27,8 @@ export function HoldTimer({ timer, name, setNumber, setTotal, onDiscard }: HoldT
       label={name + SUFFIX[phase]}
       setNumber={setNumber}
       meta={`Set ${setNumber} of ${setTotal}`}
-      countdown={formatRestClock(Math.max(0, targetMs - elapsedMs), overtimeMs)}
+      // A hold shows the time held, the number Stop and log saves; ready shows the target.
+      countdown={phase === "ready" ? formattedTarget : isComplete ? formatRestClock(0, overtimeMs) : formatClock(elapsedMs)}
       caption={phase === "ready" ? "" : isComplete ? `${formattedTarget} reached` : `of ${formattedTarget}`}
       fillPct={isComplete ? 100 : Math.round(progress * 1000) / 10}
       status={phase === "ready" ? "" : phase === "over" ? "Target reached" : `${name} ${phase}`}

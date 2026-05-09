@@ -18,3 +18,14 @@
   font-weight: 500;
   color: var(--color-text-muted);
 }
+
+/* The presets sit on one row, as on the boards. */
+.timedSetTarget .chip-group {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.timedSetTarget .chip-group__chip {
+  min-width: 0;
+  padding: 0;
+}

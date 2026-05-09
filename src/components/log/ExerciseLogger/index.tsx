@@ -137,7 +137,8 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, fo
   const heading = (
     <>
       <div className={`exerciseLoggerKicker${rest ? " exerciseLoggerKicker--next" : ""}`}>
-        <span className="exerciseLoggerSet">{kicker}</span>
+        {/* Above a hold the block already names the set. */}
+        {!headingInHold && <span className="exerciseLoggerSet">{kicker}</span>}
         {!rest && <span>{place}</span>}
       </div>
       <div className="exerciseLoggerHeading">
