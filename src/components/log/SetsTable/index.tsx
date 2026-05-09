@@ -5,7 +5,7 @@ import "./SetsTable.css";
 
 interface SetsTableProps {
   sets: Set[];
-  /** The set being entered; equal to sets.length when it is the virtual next set. */
+  /** The set being entered; equal to sets.length when it is the virtual next set, -1 for none. */
   currentIndex: number;
   /** The draft's values, shown on the current row and on rows still to come. */
   draftLabel: string;

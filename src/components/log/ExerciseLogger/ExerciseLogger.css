@@ -104,39 +104,6 @@
   outline-offset: 2px;
 }
 
-.exerciseLoggerTimedRows {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.exerciseLoggerTimedRows:empty {
-  display: none;
-}
-
-.exerciseLoggerChain {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: var(--size-control);
-  font-size: var(--text-small);
-  color: var(--color-text-muted);
-  cursor: pointer;
-  user-select: none;
-}
-
-.exerciseLoggerChain input {
-  accent-color: var(--color-accent);
-}
-
-.exerciseLoggerDistance {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-small);
-  color: var(--color-text-muted);
-}
-
 .exerciseLoggerLogged {
   display: flex;
   align-items: center;

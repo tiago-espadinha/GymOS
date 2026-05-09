@@ -3,10 +3,10 @@ import { DEFAULT_PRESETS } from "../../../constants/timerPresets";
 import { ExerciseLog, Set } from "../../../types";
 import { getExerciseMeta } from "../../../utils/metrics";
 import { generateId } from "../../../utils/id";
-import { currentSetNumber } from "../../../utils/sessionList";
+import { NO_VALUES, currentSetNumber } from "../../../utils/sessionList";
 import { currentSetIndex, virtualSetId } from "../../../utils/setModel";
 import TimedSetBlock from "../TimedSetBlock";
-import TimedSetRow from "../TimedSetRow";
+import SetsTable from "../SetsTable";
 
 interface TimedSetsProps {
   exercise: ExerciseLog;
@@ -14,13 +14,18 @@ interface TimedSetsProps {
   resting: boolean;
   /** Kicker and title, placed under the hold block. */
   heading: ReactNode;
+  /** The logged set being edited; the hold block steps aside meanwhile. */
+  editing: { index: number; label: string } | null;
+  format: (set: Set) => string;
   onRest: (setId: string) => void;
   onEndRest: () => void;
+  onEdit: (index: number) => void;
   onRemove: (index: number) => void;
 }
 
-// The hold block for the current set, then the logged holds.
-export function TimedSets({ exercise, onChange, resting, heading, onRest, onEndRest, onRemove }: TimedSetsProps) {
+// The hold block for the current set, then the sets table (hidden during a rest, as for reps).
+export function TimedSets(props: TimedSetsProps) {
+  const { exercise, onChange, resting, editing } = props;
   const { category, trackDistance, distanceUnit } = getExerciseMeta(exercise);
   // Isometric holds and loaded carries chain into a rest before the next set;
   // steady-state cardio usually doesn't. The switch lets the person override it.
@@ -39,7 +44,7 @@ export function TimedSets({ exercise, onChange, resting, heading, onRest, onEndR
       ...exercise,
       sets: index < exercise.sets.length ? exercise.sets.map((s, i) => (i === index ? logged : s)) : [...exercise.sets, logged],
     });
-    if (chainRest) onRest(id);
+    if (chainRest) props.onRest(id);
   };
 
   const lastHeldSec = Number(exercise.sets.findLast((s) => Number(s.duration) > 0)?.duration) || 0;
@@ -58,17 +63,23 @@ export function TimedSets({ exercise, onChange, resting, heading, onRest, onEndR
         onChainRestChange={setChainRest}
         distanceUnit={trackDistance ? distanceUnit : undefined}
         resting={resting}
-        heading={heading}
+        hidden={Boolean(editing)}
+        heading={props.heading}
         onHoldDone={holdDone}
-        onEndRest={onEndRest}
+        onEndRest={props.onEndRest}
       />
-      <div className="exerciseLoggerTimedRows">
-        {exercise.sets.map((set, i) =>
-          i === index ? null : (
-            <TimedSetRow key={set.id} set={set} index={i} onRemove={() => onRemove(i)} distanceUnit={distanceUnit} />
-          ),
-        )}
-      </div>
+      {!resting && exercise.sets.length > 0 && (
+        <SetsTable
+          sets={exercise.sets}
+          // The hold block is the current set, so the table has no NOW row.
+          currentIndex={-1}
+          draftLabel={NO_VALUES}
+          editing={editing}
+          format={props.format}
+          onEdit={props.onEdit}
+          onRemove={props.onRemove}
+        />
+      )}
     </>
   );
 }
