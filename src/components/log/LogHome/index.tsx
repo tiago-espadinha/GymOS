@@ -16,6 +16,8 @@ interface LogHomeProps {
   onStart: (plan: TrainingPlan) => void;
   onEdit: (session: WorkoutSession) => void;
   onDelete: (id: string) => void;
+  /** The session just saved or updated, marked in Recent. */
+  justSaved: { id: string; label: string } | null;
   onNewPlan: () => void;
   onImport: () => void;
 }
@@ -35,7 +37,7 @@ function NoPlans({ onNewPlan }: { onNewPlan: () => void }) {
   );
 }
 
-export function LogHome({ plans, sessions, date, onDateChange, onStart, onEdit, onDelete, onNewPlan, onImport }: LogHomeProps) {
+export function LogHome({ plans, sessions, date, onDateChange, onStart, onEdit, onDelete, justSaved, onNewPlan, onImport }: LogHomeProps) {
   const [planId, setPlanId] = useState("");
   const [open, setOpen] = useState<"plan" | "date" | null>(null);
   const activePlans = plans.filter((p) => !p.isArchived);
@@ -84,7 +86,7 @@ export function LogHome({ plans, sessions, date, onDateChange, onStart, onEdit, 
         <NoPlans onNewPlan={onNewPlan} />
       )}
 
-      <RecentSessions sessions={sessions} onEdit={onEdit} onDelete={onDelete} empty={emptyRecent} />
+      <RecentSessions sessions={sessions} onEdit={onEdit} onDelete={onDelete} justSaved={justSaved} empty={emptyRecent} />
 
       {open === "plan" && plan && (
         <PlanPicker

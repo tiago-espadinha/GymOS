@@ -103,6 +103,8 @@ test('editing a saved session updates it in place, also after a reload', async (
   await finishButton(page).click()
   await page.getByRole('button', { name: 'Update session' }).click()
   await expect(tabBar(page)).toBeVisible()
+  await expect(page.getByRole('status').filter({ hasText: 'Push day session updated' })).toHaveCount(1)
+  await expect(page.getByRole('listitem').first()).toContainText('Just updatedPush day')
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('gym:sessions') ?? '[]'))
   expect(stored).toHaveLength(1)
   expect(stored[0].id).toBe('s1')

@@ -51,7 +51,8 @@ export function LogTab({
   onImport,
 }: LogTabProps) {
   const [homeDate, setHomeDate] = useState(today());
-  const [saved, setSaved] = useState("");
+  // The session saved or updated since Log home was last shown; its row is marked in Recent.
+  const [justSaved, setJustSaved] = useState<{ id: string; planName: string; updated: boolean } | null>(null);
   const [finishing, setFinishing] = useState(false);
   // Refused Saves in a row on the Done screen; 0 once a save lands or Done closes.
   const [saveFailures, setSaveFailures] = useState(0);
@@ -74,12 +75,12 @@ export function LogTab({
   const editingId = session?.editingId;
 
   const startPlan = (plan: TrainingPlan) => {
-    setSaved("");
+    setJustSaved(null);
     onBegin(fromPlan(plan, homeDate));
   };
 
   const startEdit = (previous: WorkoutSession) => {
-    setSaved("");
+    setJustSaved(null);
     onBegin(fromSaved(previous));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -98,7 +99,8 @@ export function LogTab({
   const saveSession = () => {
     if (!session) return;
 
-    const stored = toWorkoutSession(session, editingId ?? generateId());
+    const id = editingId ?? generateId();
+    const stored = toWorkoutSession(session, id);
     if (!stored) return;
 
     const next = editingId
@@ -110,8 +112,7 @@ export function LogTab({
       return;
     }
     setSaveFailures(0);
-    setSaved(editingId ? "✓ Session updated!" : "✓ Session saved!");
-    setTimeout(() => setSaved(""), 4000);
+    setJustSaved({ id, planName: session.planName, updated: Boolean(editingId) });
     clearSessionRests(session.exercises);
     setFinishing(false);
     onEnd();
@@ -142,8 +143,8 @@ export function LogTab({
         </h1>
       )}
 
-      <div role="status" className="logTabSaved">
-        {saved}
+      <div role="status" className="visuallyHidden">
+        {justSaved && `${justSaved.planName} session ${justSaved.updated ? "updated" : "saved"}`}
       </div>
 
       {session && finishing ? (
@@ -238,6 +239,7 @@ export function LogTab({
               onStart={startPlan}
               onEdit={startEdit}
               onDelete={deleteSession}
+              justSaved={justSaved && { id: justSaved.id, label: justSaved.updated ? "Just updated" : "Just saved" }}
               onNewPlan={onNewPlan}
               onImport={onImport}
             />

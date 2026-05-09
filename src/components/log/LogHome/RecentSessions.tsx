@@ -9,11 +9,12 @@ interface RecentSessionsProps {
   sessions: WorkoutSession[];
   onEdit: (session: WorkoutSession) => void;
   onDelete: (id: string) => void;
+  justSaved: { id: string; label: string } | null;
   /** Shown under the label while nothing has been saved. */
   empty: ReactNode;
 }
 
-export function RecentSessions({ sessions, onEdit, onDelete, empty }: RecentSessionsProps) {
+export function RecentSessions({ sessions, onEdit, onDelete, justSaved, empty }: RecentSessionsProps) {
   const recent = sessions.slice(0, RECENT_COUNT);
   if (recent.length === 0) {
     return (
@@ -33,9 +34,11 @@ export function RecentSessions({ sessions, onEdit, onDelete, empty }: RecentSess
       <ul className="logHomeList" role="list">
         {recent.map((s) => {
           const when = formatDateFull(s.date);
+          const saved = s.id === justSaved?.id;
           return (
-            <li key={s.id} className="logHomeItem">
+            <li key={s.id} className={saved ? "logHomeItem logHomeItem--saved" : "logHomeItem"}>
               <div className="logHomeItemText">
+                {saved && <span className="logHomeItemKicker">{justSaved.label}</span>}
                 <span className="logHomeItemHead">
                   <span className="logHomeItemTitle">{s.planName}</span>
                   <span className="logHomeItemMeta">{when}</span>

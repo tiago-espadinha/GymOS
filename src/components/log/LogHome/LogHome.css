@@ -167,6 +167,27 @@ span.logHomeLead {
   color: var(--color-text);
 }
 
+/* The session just saved is inverted, with a label: never colour alone. */
+.logHomeItem--saved {
+  background: var(--color-inverse);
+  color: var(--color-on-inverse);
+}
+
+.logHomeItem--saved .logHomeItemMeta {
+  color: var(--color-on-inverse);
+}
+
+.logHomeItem--saved .logHomeEdit:focus-visible {
+  outline-color: var(--color-on-inverse);
+}
+
+.logHomeItemKicker {
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
 .logHomeItemText {
   display: flex;
   flex-direction: column;
