@@ -4,7 +4,7 @@ import { ExerciseLog, Set } from "../../../types";
 import { getExerciseMeta } from "../../../utils/metrics";
 import { isLoggedSet } from "../../../utils/activeSession";
 import { restTimerId } from "../../../utils/restTimers";
-import { NO_VALUES, formatSet, lastTimeLabel } from "../../../utils/sessionList";
+import { NO_VALUES, currentSetNumber, formatSet, lastTimeLabel } from "../../../utils/sessionList";
 import { SetDraft, addPendingSet, currentSetIndex, logDraft, seedDraft } from "../../../utils/setModel";
 import { clearTimer, readRunningTimer } from "../../../hooks/useTimer";
 import RestBlock from "../RestBlock";
@@ -40,7 +40,7 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, fo
   const [editing, setEditing] = useState<{ index: number; draft: SetDraft } | null>(null);
 
   const index = currentSetIndex(exercise);
-  const total = Math.max(exercise.sets.length, index + 1);
+  const { number, total } = currentSetNumber(exercise);
   const format = (s: Set) => formatSet(s, exercise) || NO_VALUES;
   const draftSet = (d: SetDraft): Set => ({ id: "", ...d });
 
@@ -85,6 +85,8 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, fo
   const deleteEdit = () => {
     if (!editing) return;
     removeSet(editing.index);
+    // Another set now has this number; focus goes to the table instead.
+    editedIndex.current = -1;
     setEditing(null);
   };
 
@@ -105,8 +107,8 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, fo
   const kicker = editing
     ? `Edit set ${editing.index + 1}`
     : rest
-      ? `Next · Set ${index + 1} of ${total}`
-      : `Set ${index + 1} of ${total}`;
+      ? `Next · Set ${number} of ${total}`
+      : `Set ${number} of ${total}`;
   const lastTime = !editing && !rest && lastTimeLabel(exercise, history);
 
   return (

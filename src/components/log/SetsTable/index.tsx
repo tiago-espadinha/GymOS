@@ -73,7 +73,7 @@ export function SetsTable({ sets, currentIndex, draftLabel, editing, format, onE
           <li key={set?.id ?? "next"} className="setsTableRow setsTableRow--pending">
             <span className="setsTableLabel">Set {n}</span>
             <span className="setsTableValues">{draftLabel}</span>
-            {set && (
+            {set && !editing && (
               <button type="button" className="setsTableRemove" aria-label={`Remove set ${n}`} onClick={() => onRemove(i)}>
                 <CrossIcon />
               </button>

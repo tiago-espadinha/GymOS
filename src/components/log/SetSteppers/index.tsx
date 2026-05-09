@@ -9,8 +9,11 @@ interface SetSteppersProps {
   outlined?: boolean;
 }
 
-// Typed text keeps one decimal point; a comma counts as one (European keyboards).
-const decimal = (text: string) => text.replace(",", ".").replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1");
+// Typed text keeps its first decimal point; a comma counts as one (European keyboards).
+const decimal = (text: string) => {
+  const [whole, ...fraction] = text.replace(/,/g, ".").replace(/[^\d.]/g, "").split(".");
+  return fraction.length ? `${whole}.${fraction.join("")}` : whole;
+};
 const whole = (text: string) => text.replace(/\D/g, "");
 
 export function SetSteppers({ draft, onChange, trackWeight, outlined }: SetSteppersProps) {
