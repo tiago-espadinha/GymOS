@@ -90,3 +90,21 @@
   outline: var(--border-focus);
   outline-offset: 2px;
 }
+
+/* The destructive choice of a confirm sheet: danger outline and label only. */
+.sheet__danger {
+  min-height: var(--size-action);
+  border: 2px solid var(--color-danger);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-danger);
+  font-family: inherit;
+  font-size: var(--text-body-lg);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sheet__danger:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
