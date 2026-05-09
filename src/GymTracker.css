@@ -84,6 +84,7 @@
 
   /* Screens with a wide layout fill the 1200 frame, 40 in from the window edge. */
   .mainContent:has(.logHome),
+  .mainContent:has(.plansTab--wide),
   .mainContent:has(.progressTab--wide) {
     max-width: calc(var(--width-wide) + 2 * var(--gutter-wide));
     padding-inline: var(--gutter-wide);

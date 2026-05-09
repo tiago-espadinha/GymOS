@@ -5,7 +5,10 @@ import PlanCard from '../PlanCard';
 import ArchivedPlanRow from '../ArchivedPlanRow';
 import PlanActionsSheet from '../PlanActionsSheet';
 import DeletePlanSheet from '../DeletePlanSheet';
-import { archivePlan, deletePlan, plansCountLabel, restorePlan } from '../../../utils/plans';
+import PlanDetail from '../PlanDetail';
+import PlanSelectRow from '../PlanSelectRow';
+import { useMediaQuery, WIDE_QUERY } from '../../../hooks/useMediaQuery';
+import { archivePlan, deletePlan, neighbourOf, plansCountLabel, restorePlan } from '../../../utils/plans';
 import { today } from '../../../utils/date';
 import { TrainingPlan, WorkoutSession } from '../../../types';
 import './PlansTab.css';
@@ -30,11 +33,15 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
   const [archivedOpen, setArchivedOpen] = useState(false);
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [archived, setArchived] = useState<TrainingPlan | null>(null);
+  // Wide only: the plan shown in the detail pane. Not stored; the first plan by default.
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const wide = useMediaQuery(WIDE_QUERY);
   const root = useRef<HTMLDivElement>(null);
   // Where focus goes after the next render, when the control that had it is gone.
   const focusNext = useRef<string | null>(null);
   const archivedListId = useId();
   const emptyTitleId = useId();
+  const detailId = useId();
   const todayStr = today();
 
   // Runs after a sheet has closed and the page is no longer inert.
@@ -46,6 +53,7 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
 
   const activePlans = plans.filter((p) => !p.isArchived);
   const archivedPlans = plans.filter((p) => p.isArchived);
+  const selected = activePlans.find((p) => p.id === selectedId) ?? activePlans[0];
 
   // A refused write keeps the form open with what was entered.
   const savePlan = (p: TrainingPlan) => {
@@ -61,6 +69,7 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
   };
 
   const archive = (plan: TrainingPlan) => {
+    if (plan.id === selected?.id) setSelectedId(neighbourOf(activePlans, plan.id)?.id ?? null);
     setPlans(archivePlan(plans, plan.id, todayStr));
     setOverlay(null);
     setArchived(plan);
@@ -69,6 +78,7 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
 
   const restore = (plan: TrainingPlan) => {
     setPlans(restorePlan(plans, plan.id));
+    setSelectedId(plan.id);
     setArchived((a) => (a?.id === plan.id ? null : a));
     focusNext.current = `[data-plan-actions="${CSS.escape(plan.id)}"]`;
   };
@@ -80,69 +90,58 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
     focusNext.current = archivedPlans.length > 1 ? '.archivedToggle' : '.plansTabTitle';
   };
 
+  // The ⋯ that opened the sheet is gone if the layout switched meanwhile, so aim at the plan's ⋯ in either.
+  const closeActions = (plan: TrainingPlan) => {
+    setOverlay(null);
+    focusNext.current = `[data-plan-actions="${CSS.escape(plan.id)}"]`;
+  };
+
   const showEmpty = activePlans.length === 0;
 
   // New plan replaces the whole screen, "Plans" heading included.
   if (creating) return <CreatePlanForm onSave={savePlan} onCancel={closeForm} />;
 
-  return (
-    <div className={`plansTab${archived ? ' plansTab--toast' : ''}`} ref={root}>
-      <header className="plansTabHeader">
-        <div className="plansTabHeading">
-          <span className="plansTabCount">{plansCountLabel(activePlans.length, archivedPlans.length)}</span>
-          <h1 className="plansTabTitle" tabIndex={-1}>Plans</h1>
-        </div>
-        {!showEmpty && (
-          <PillButton variant="white" onClick={() => onCreatingChange(true)}>+ New plan</PillButton>
-        )}
-      </header>
-
-      {showEmpty ? (
-        <section className="plansEmpty" aria-labelledby={emptyTitleId}>
-          <h2 id={emptyTitleId} className="plansEmptyTitle">No training plans yet</h2>
-          <p className="plansEmptyText">
-            A plan is the list of exercises you repeat. Make one, then start it from here or from Log.
-          </p>
-          <PrimaryButton tone="lime" onClick={() => onCreatingChange(true)}>+ New plan</PrimaryButton>
-          <button type="button" className="textLink plansEmptyImport" onClick={onImport}>
-            Have a CSV backup? Import it
-          </button>
-        </section>
-      ) : (
-        <ul className="plansTabList" role="list">
-          {activePlans.map((p) => (
-            <PlanCard key={p.id} plan={p} onStart={onStartPlan} onMore={(plan) => setOverlay({ kind: 'actions', plan })} />
-          ))}
-        </ul>
+  const header = (
+    <header className="plansTabHeader">
+      <div className="plansTabHeading">
+        <span className="plansTabCount">{plansCountLabel(activePlans.length, archivedPlans.length)}</span>
+        <h1 className="plansTabTitle" tabIndex={-1}>Plans</h1>
+      </div>
+      {!showEmpty && (
+        <PillButton variant="white" onClick={() => onCreatingChange(true)}>+ New plan</PillButton>
       )}
+    </header>
+  );
 
-      {archivedPlans.length > 0 && (
-        <section className="archivedSection">
-          <button
-            type="button"
-            className="archivedToggle"
-            aria-expanded={archivedOpen}
-            aria-controls={archivedListId}
-            onClick={() => setArchivedOpen(!archivedOpen)}
-          >
-            <span>Archived · {archivedPlans.length}</span>
-            <svg className="archivedChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M6 9l6 6 6-6" />
-            </svg>
-          </button>
-          <ul id={archivedListId} className="plansTabList" role="list" hidden={!archivedOpen}>
-            {archivedPlans.map((p) => (
-              <ArchivedPlanRow key={p.id} plan={p} today={todayStr} onRestore={restore}
-                onDelete={(plan) => setOverlay({ kind: 'delete', plan })} />
-            ))}
-          </ul>
-        </section>
-      )}
+  const archivedSection = archivedPlans.length > 0 && (
+    <section className="archivedSection">
+      <button
+        type="button"
+        className="archivedToggle"
+        aria-expanded={archivedOpen}
+        aria-controls={archivedListId}
+        onClick={() => setArchivedOpen(!archivedOpen)}
+      >
+        <span>Archived · {archivedPlans.length}</span>
+        <svg className="archivedChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+      <ul id={archivedListId} className="plansTabList" role="list" hidden={!archivedOpen}>
+        {archivedPlans.map((p) => (
+          <ArchivedPlanRow key={p.id} plan={p} today={todayStr} onRestore={restore}
+            onDelete={(plan) => setOverlay({ kind: 'delete', plan })} />
+        ))}
+      </ul>
+    </section>
+  );
 
+  const overlays = (
+    <>
       {overlay?.kind === 'actions' && (
         <PlanActionsSheet plan={overlay.plan} sessions={sessions} today={todayStr} onArchive={archive}
-          onClose={() => setOverlay(null)} />
+          onClose={() => closeActions(overlay.plan)} />
       )}
       {overlay?.kind === 'delete' && (
         <DeletePlanSheet plan={overlay.plan} onDelete={remove} onClose={() => setOverlay(null)} />
@@ -152,6 +151,58 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
         <Toast key={archived.id} message={`${archived.name} archived`} actionLabel="Undo" onAction={() => restore(archived)}
           onDismiss={() => setArchived(null)} />
       )}
+    </>
+  );
+
+  // Wide: the plans on the left, the chosen one in full on the right. One root in
+  // both layouts, so an open sheet or toast survives crossing the breakpoint.
+  const panes = wide && selected;
+
+  return (
+    <div className={`plansTab${archived ? ' plansTab--toast' : ''}${panes ? ' plansTab--wide' : ''}`} ref={root}>
+      {panes ? (
+        <>
+          <div className="plansPane">
+            {header}
+            <ul className="plansTabList" role="list">
+              {activePlans.map((p) => (
+                <PlanSelectRow key={p.id} plan={p} selected={p.id === selected.id} controls={detailId}
+                  onSelect={(plan) => setSelectedId(plan.id)} />
+              ))}
+            </ul>
+            {archivedSection}
+          </div>
+          <PlanDetail id={detailId} plan={selected} sessions={sessions} today={todayStr} onStart={onStartPlan}
+            onMore={(plan) => setOverlay({ kind: 'actions', plan })} />
+        </>
+      ) : (
+        <>
+          {header}
+
+          {showEmpty ? (
+            <section className="plansEmpty" aria-labelledby={emptyTitleId}>
+              <h2 id={emptyTitleId} className="plansEmptyTitle">No training plans yet</h2>
+              <p className="plansEmptyText">
+                A plan is the list of exercises you repeat. Make one, then start it from here or from Log.
+              </p>
+              <PrimaryButton tone="lime" onClick={() => onCreatingChange(true)}>+ New plan</PrimaryButton>
+              <button type="button" className="textLink plansEmptyImport" onClick={onImport}>
+                Have a CSV backup? Import it
+              </button>
+            </section>
+          ) : (
+            <ul className="plansTabList" role="list">
+              {activePlans.map((p) => (
+                <PlanCard key={p.id} plan={p} onStart={onStartPlan} onMore={(plan) => setOverlay({ kind: 'actions', plan })} />
+              ))}
+            </ul>
+          )}
+
+          {archivedSection}
+        </>
+      )}
+
+      {overlays}
     </div>
   );
 }
