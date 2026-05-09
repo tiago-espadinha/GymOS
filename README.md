@@ -16,7 +16,7 @@ A phone-first gym tracker for logging a set and running a rest timer in a few ta
 - **Finish screen**: totals for the session, notes, then save. A newly saved session is first in Recent on the Log home.
 - **Progress**: per-exercise chart of average, peak, total or estimated one-rep max (e1RM), over the last 5 or 10 sessions, 1 or 3 months, or all time, with last and best figures and personal records marked.
 - **CSV import and export**: export everything to one file; import a file, review what was found, then add it to your data or replace your data. A file that can't be read changes nothing.
-- **Installable**: a web manifest lets the app be added to a home screen, and the two typefaces are bundled, so no request leaves the app's origin. There is no service worker yet, so the app needs the network to load.
+- **Installable**: a web manifest lets the app be added to a home screen, and the two typefaces are bundled, so no request leaves the app's origin. A service worker caches the build, so after a first visit the app reloads with no network.
 
 ## Stack
 
