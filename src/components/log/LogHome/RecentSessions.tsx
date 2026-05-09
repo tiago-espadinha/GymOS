@@ -15,42 +15,36 @@ interface RecentSessionsProps {
 
 export function RecentSessions({ sessions, onEdit, justSaved, empty }: RecentSessionsProps) {
   const recent = sessions.slice(0, RECENT_COUNT);
-  if (recent.length === 0) {
-    return (
-      <section aria-labelledby="logHomeRecentTitle" className="logHomeRecent logHomeRecent--empty">
-        <h2 id="logHomeRecentTitle" className="logHomeLabel">
-          Recent sessions
-        </h2>
-        {empty}
-      </section>
-    );
-  }
   return (
-    <section aria-labelledby="logHomeRecentTitle" className="logHomeRecent">
+    <section aria-labelledby="logHomeRecentTitle" className={recent.length ? "logHomeRecent" : "logHomeRecent logHomeRecent--empty"}>
       <h2 id="logHomeRecentTitle" className="logHomeLabel">
         Recent sessions
       </h2>
-      <ul className="logHomeList" role="list">
-        {recent.map((s) => {
-          const when = formatDateFull(s.date);
-          const saved = s.id === justSaved?.id;
-          return (
-            <li key={s.id} className={saved ? "logHomeItem logHomeItem--saved" : "logHomeItem"}>
-              <div className="logHomeItemText">
-                {saved && <span className="logHomeItemKicker">{justSaved.label}</span>}
-                <span className="logHomeItemHead">
-                  <span className="logHomeItemTitle">{s.planName}</span>
-                  <span className="logHomeItemMeta">{when}</span>
-                </span>
-                <span className="logHomeItemMeta logHomeItemSummary">{sessionSummary(sessionStats(s), s.notes)}</span>
-              </div>
-              <button type="button" className="logHomeEdit" onClick={() => onEdit(s)} aria-label={`Edit ${s.planName}, ${when}`}>
-                Edit
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+      {recent.length === 0 ? (
+        empty
+      ) : (
+        <ul className="logHomeList" role="list">
+          {recent.map((s) => {
+            const when = formatDateFull(s.date);
+            const saved = s.id === justSaved?.id;
+            return (
+              <li key={s.id} className={saved ? "logHomeItem logHomeItem--saved" : "logHomeItem"}>
+                <div className="logHomeItemText">
+                  {saved && <span className="logHomeItemKicker">{justSaved.label}</span>}
+                  <span className="logHomeItemHead">
+                    <span className="logHomeItemTitle">{s.planName}</span>
+                    <span className="logHomeItemMeta">{when}</span>
+                  </span>
+                  <span className="logHomeItemMeta logHomeItemSummary">{sessionSummary(sessionStats(s), s.notes)}</span>
+                </div>
+                <button type="button" className="logHomeEdit" onClick={() => onEdit(s)} aria-label={`Edit ${s.planName}, ${when}`}>
+                  Edit
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </section>
   );
 }

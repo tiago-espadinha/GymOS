@@ -147,7 +147,7 @@ span.logHomeLead {
 }
 
 .logHomeRecent--empty .logHomeLabel {
-  margin: 0;
+  margin-bottom: 0;
 }
 
 .logHomeList {
