@@ -1,74 +1,105 @@
-import { useEffect, useRef } from "react";
-import { formatRestClock, useTimer } from "../../../hooks/useTimer";
-import { getAdjustStepSec } from "../../../constants/timerPresets";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { ChipGroup, PrimaryButton, Switch } from "../../shared";
+import { formatClock, useTimer } from "../../../hooks/useTimer";
+import { DEFAULT_PRESETS, formatPresetLabel } from "../../../constants/timerPresets";
 import { holdTimerId } from "../../../utils/restTimers";
 import { ExerciseCategory } from "../../../types";
-import { TimerBlock, TimerButton } from "../TimerBlock";
+import { HoldTimer } from "./HoldTimer";
+import { holdPhase } from "./holdPhase";
+import DistanceField from "./DistanceField";
+import "./TimedSetBlock.css";
 
 interface TimedSetBlockProps {
   setId: string;
   setNumber: number;
+  setTotal: number;
   category: ExerciseCategory;
   initialTargetSec: number;
   // When on, reaching the target ends the hold; when off the hold runs on as overtime.
   chainRest: boolean;
-  // The hold is over: the seconds actually held.
-  onHoldDone: (seconds: number) => void;
+  onChainRestChange: (on: boolean) => void;
+  /** Set when the exercise tracks distance. */
+  distanceUnit?: "km" | "mi";
+  /** A chained rest is on screen: this hold waits under it, ready to start early. */
+  resting: boolean;
+  /** Hidden while a logged set is edited; the timer keeps going. */
+  hidden?: boolean;
+  /** Shown between the block and the controls, as on the boards. */
+  heading?: ReactNode;
+  // The hold is over: the seconds actually held and the distance typed, if any.
+  onHoldDone: (seconds: number, distance: string) => void;
+  /** Ends the rest so this hold can start now. */
+  onEndRest: () => void;
 }
 
-// Idle shows the target with Start; running and paused show Pause or Resume, a
-// longer target and Finish.
-export function TimedSetBlock({ setId, setNumber, category, initialTargetSec, chainRest, onHoldDone }: TimedSetBlockProps) {
-  const {
-    isRunning, isComplete, elapsedMs, targetMs, overtimeMs, progress, formattedTarget,
-    start, pause, reset, adjustTargetSec,
-  } = useTimer(holdTimerId(setId), initialTargetSec);
+// One hold: the block, the target, the rest switch, the distance and the main button.
+export function TimedSetBlock(props: TimedSetBlockProps) {
+  const { setId, setNumber, setTotal, category, initialTargetSec, chainRest, distanceUnit, resting } = props;
+  const timer = useTimer(holdTimerId(setId), initialTargetSec);
+  // Written with the set, so a distance alone never logs one; lost on reload.
+  const [distance, setDistance] = useState("");
 
-  const started = isRunning || elapsedMs > 0;
-  const heldSec = Math.round(elapsedMs / 1000);
-  const step = getAdjustStepSec(Math.round(targetMs / 1000));
-
+  const heldSec = Math.round(timer.elapsedMs / 1000);
   const doneRef = useRef(false);
   const finish = () => {
     if (doneRef.current) return;
     doneRef.current = true;
-    reset();
-    onHoldDone(heldSec);
+    timer.reset();
+    props.onHoldDone(heldSec, distance);
   };
 
   // Reaching the target ends the hold when a rest is chained after it.
   useEffect(() => {
-    if (chainRest && isComplete) finish();
+    if (chainRest && timer.isComplete) finish();
     // finish reads the current render's values, which these dependencies track.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chainRest, isComplete]);
+  }, [chainRest, timer.isComplete]);
 
-  const status = isComplete ? "Target reached" : started ? (isRunning ? "Hold running" : "Hold paused") : "";
+  if (props.hidden) return null;
+
+  const phase = holdPhase(timer);
+  const name = category === "cardio" ? "Effort" : "Hold";
+  const targetSec = Math.round(timer.targetMs / 1000);
+  // Past the target there is nothing left to choose; a running effort makes room for its distance.
+  const choosing = !timer.isComplete && !(distanceUnit && phase !== "ready");
+  const startNow = () => {
+    if (resting) props.onEndRest();
+    timer.start();
+  };
 
   return (
-    <TimerBlock
-      tone="hold"
-      label={category === "cardio" ? "Cardio" : "Hold"}
-      setNumber={setNumber}
-      countdown={formatRestClock(Math.max(0, targetMs - elapsedMs), overtimeMs)}
-      caption={`Target ${formattedTarget}`}
-      fillPct={isComplete ? 100 : Math.round(progress * 1000) / 10}
-      status={status}
-    >
-      {started ? (
-        <>
-          <TimerButton onClick={isRunning ? pause : start}>{isRunning ? "Pause" : "Resume"}</TimerButton>
-          <TimerButton onClick={() => adjustTargetSec(step)}>+{step}s</TimerButton>
-          <TimerButton onClick={finish} disabled={heldSec < 1}>Finish</TimerButton>
-        </>
-      ) : (
-        <>
-          <TimerButton onClick={() => adjustTargetSec(-step)} disabled={targetMs / 1000 <= step}>−{step}s</TimerButton>
-          <TimerButton onClick={() => adjustTargetSec(step)}>+{step}s</TimerButton>
-          <TimerButton onClick={start}>Start</TimerButton>
-        </>
+    <>
+      {!resting && <HoldTimer timer={timer} name={name} setNumber={setNumber} setTotal={setTotal} onDiscard={timer.reset} />}
+      {props.heading}
+      {timer.isComplete && <p className="timedSetHelp">Target reached. Keep going: the extra time counts.</p>}
+      {choosing && (
+        <div className="timedSetTarget">
+          <span className="timedSetLabel" aria-hidden="true">Target</span>
+          <ChipGroup
+            label="Target time"
+            options={DEFAULT_PRESETS[category].work.map((s) => ({ value: String(s), label: formatPresetLabel(s) }))}
+            value={String(targetSec)}
+            onChange={(v) => timer.setTargetSec(Number(v))}
+          />
+        </div>
       )}
-    </TimerBlock>
+      {choosing && !resting && (
+        <Switch
+          label={`Then rest ${formatClock(DEFAULT_PRESETS[category].rest[0] * 1000)}`}
+          description={`Rest starts when the ${name.toLowerCase()} ends`}
+          checked={chainRest}
+          onChange={props.onChainRestChange}
+        />
+      )}
+      {distanceUnit && !resting && <DistanceField setNumber={setNumber} unit={distanceUnit} value={distance} onChange={setDistance} />}
+      {phase === "ready" ? (
+        <PrimaryButton onClick={startNow}>{`Start ${name.toLowerCase()}${resting ? " now" : ""}`}</PrimaryButton>
+      ) : (
+        <PrimaryButton onClick={finish} disabled={heldSec < 1}>
+          {phase === "running" ? "Stop and log" : `Stop and log ${formatClock(timer.elapsedMs)}`}
+        </PrimaryButton>
+      )}
+    </>
   );
 }
 

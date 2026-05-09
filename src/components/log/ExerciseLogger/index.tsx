@@ -1,12 +1,12 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { PrimaryButton } from "../../shared";
+import { CheckIcon, PrimaryButton } from "../../shared";
 import { ExerciseLog, Set } from "../../../types";
 import { getExerciseMeta } from "../../../utils/metrics";
 import { isLoggedSet } from "../../../utils/activeSession";
 import { restTimerId } from "../../../utils/restTimers";
 import { NO_VALUES, currentSetNumber, formatSet, lastTimeLabel } from "../../../utils/sessionList";
 import { SetDraft, addPendingSet, currentSetIndex, logDraft, seedDraft } from "../../../utils/setModel";
-import { clearTimer, readRunningTimer } from "../../../hooks/useTimer";
+import { clearTimer, formatClock, readElapsedMs, readRunningTimer } from "../../../hooks/useTimer";
 import RestBlock from "../RestBlock";
 import SetsTable from "../SetsTable";
 import SetSteppers from "../SetSteppers";
@@ -61,6 +61,15 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, fo
     setRest(null);
   };
 
+  // "Start hold now" during a chained rest: the rest so far counts as taken.
+  const endRestNow = () => {
+    if (!rest) return;
+    const id = restTimerId(rest.setId);
+    const seconds = Math.round(readElapsedMs(id, Date.now()) / 1000);
+    clearTimer(id);
+    endRest(rest.setId, seconds);
+  };
+
   const setDone = () => {
     const logged = logDraft(exercise, draft);
     onChange(logged.exercise);
@@ -110,20 +119,12 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, fo
       ? `Next · Set ${number} of ${total}`
       : `Set ${number} of ${total}`;
   const lastTime = !editing && !rest && lastTimeLabel(exercise, history);
+  const restIndex = rest ? exercise.sets.findIndex((s) => s.id === rest.setId) : -1;
+  // A hold's block sits above its title, so a timed exercise places the heading itself.
+  const headingInHold = timed && !rest && !editing;
 
-  return (
-    <div className="exerciseLogger" ref={rootRef}>
-      {rest && (
-        <RestBlock
-          key={rest.setId}
-          setId={rest.setId}
-          setNumber={exercise.sets.findIndex((s) => s.id === rest.setId) + 1}
-          category={meta.category}
-          autoStart={rest.fresh}
-          onSkip={(seconds) => endRest(rest.setId, seconds)}
-        />
-      )}
-
+  const heading = (
+    <>
       <div className={`exerciseLoggerKicker${rest ? " exerciseLoggerKicker--next" : ""}`}>
         <span className="exerciseLoggerSet">{kicker}</span>
         {!rest && <span>{place}</span>}
@@ -134,9 +135,42 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, fo
         </h1>
         {lastTime && <span className="exerciseLoggerLastTime">{lastTime}</span>}
       </div>
+    </>
+  );
+
+  return (
+    <div className="exerciseLogger" ref={rootRef}>
+      {rest && (
+        <RestBlock
+          key={rest.setId}
+          setId={rest.setId}
+          setNumber={restIndex + 1}
+          meta={timed ? `${exercise.name} · set ${number} next` : undefined}
+          timed={timed}
+          category={meta.category}
+          autoStart={rest.fresh}
+          onSkip={(seconds) => endRest(rest.setId, seconds)}
+        />
+      )}
+
+      {timed && rest && restIndex >= 0 && (
+        <p className="exerciseLoggerLogged">
+          <CheckIcon />
+          Set {restIndex + 1} logged · {formatClock(Number(exercise.sets[restIndex].duration) * 1000)}
+        </p>
+      )}
+      {!headingInHold && heading}
 
       {timed ? (
-        <TimedSets exercise={exercise} onChange={onChange} resting={Boolean(rest)} onRest={startRest} onRemove={removeSet} />
+        <TimedSets
+          exercise={exercise}
+          onChange={onChange}
+          resting={Boolean(rest)}
+          heading={headingInHold && heading}
+          onRest={startRest}
+          onEndRest={endRestNow}
+          onRemove={removeSet}
+        />
       ) : (
         <>
           {!rest && (

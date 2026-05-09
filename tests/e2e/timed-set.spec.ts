@@ -8,6 +8,7 @@ const plan = {
   desc: '',
   exercises: [
     { id: 'e1', name: 'Plank', muscleGroup: 'Core', category: 'calisthenics', trackingType: 'time' },
+    { id: 'e2', name: 'Rowing', muscleGroup: 'Cardio', category: 'cardio', trackingType: 'time', trackDistance: true, distanceUnit: 'km' },
   ],
 }
 
@@ -26,81 +27,164 @@ test.beforeEach(async ({ page }) => {
 const hold = (page: Page) => page.getByRole('timer', { name: /^Hold/ })
 const rest = (page: Page) => page.getByRole('timer', { name: /^Rest/ })
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true })
+const restSwitch = (page: Page) => page.getByRole('switch', { name: /^Then rest/ })
+// Hidden exercise screens stay mounted; these look at the one on screen.
+const shown = (page: Page, selector: string) => page.locator(`.exerciseScreen:not([hidden]) ${selector}`)
+// The face is drawn twice (plain and on the fill); the first is the plain one.
+const label = (page: Page) => shown(page, '.timerBlockTop').first()
 
 // Height of the white fill as a share of the block.
 const fillShare = (page: Page) =>
   page.evaluate(() => {
-    const block = document.querySelector('.timerBlock')!.getBoundingClientRect()
-    const fill = document.querySelector('.timerBlockFill')!.getBoundingClientRect()
+    const block = document.querySelector('.exerciseScreen:not([hidden]) .timerBlock')!.getBoundingClientRect()
+    const fill = document.querySelector('.exerciseScreen:not([hidden]) .timerBlockFill')!.getBoundingClientRect()
     return fill.height / block.height
   })
 
-test('idle shows the category target (calisthenics: 15s) and Start begins the hold', async ({ page }) => {
+test('idle shows the category target (calisthenics: 15s) and Start hold begins the hold', async ({ page }) => {
   await expect(hold(page)).toContainText('00:15')
+  await expect(label(page)).toContainText('Hold · ready')
+  await expect(label(page)).toContainText('Set 1 of 1')
   expect(await fillShare(page)).toBe(0)
-  await button(page, 'Start').click()
+  await expect(shown(page, '.timerBlockControls').getByRole('button')).toHaveCount(0)
+  await expect(restSwitch(page)).toHaveAttribute('aria-checked', 'true')
+  await button(page, 'Start hold').click()
   await page.clock.fastForward(5_000)
   await expect(hold(page)).toContainText('00:10')
 })
 
 test('the hold fills white in step with elapsed time', async ({ page }) => {
-  await button(page, 'Start').click()
+  await button(page, 'Start hold').click()
   await page.clock.fastForward(5_000)
   await expect.poll(() => fillShare(page)).toBeCloseTo(1 / 3, 1)
   await page.clock.fastForward(5_000)
   await expect.poll(() => fillShare(page)).toBeCloseTo(2 / 3, 1)
-  const fill = await page.locator('.timerBlockFill').evaluate((el) => getComputedStyle(el).backgroundColor)
+  const fill = await shown(page, '.timerBlockFill').evaluate((el) => getComputedStyle(el).backgroundColor)
   expect(fill).toBe('rgb(255, 255, 255)')
 })
 
 test('at the target the hold is logged and a lime rest starts; Skip saves the rest taken', async ({ page }) => {
-  await button(page, 'Start').click()
+  await button(page, 'Start hold').click()
   await page.clock.fastForward(15_000)
   await expect(hold(page)).toHaveCount(0)
   await expect(rest(page)).toBeVisible()
-  const fill = await page.locator('.timerBlockFill').evaluate((el) => getComputedStyle(el).backgroundColor)
+  const fill = await shown(page, '.timerBlockFill').evaluate((el) => getComputedStyle(el).backgroundColor)
   expect(fill).toBe('rgb(198, 255, 61)')
   await restStarted(page)
   await page.clock.fastForward(10_000)
   await button(page, 'Skip').click()
   await expect(rest(page)).toHaveCount(0)
-  await expect(page.locator('.timedSetRowLogged')).toHaveText('00:15 · rest 00:10')
+  await expect(shown(page, '.timedSetRowLogged')).toHaveText('00:15 · rest 00:10')
   // The next set is ready with the same target.
   await expect(hold(page)).toContainText('00:15')
 })
 
 test('Finish early records the time held, not the target', async ({ page }) => {
-  await button(page, 'Start').click()
+  await button(page, 'Start hold').click()
   await page.clock.fastForward(7_000)
-  await button(page, 'Finish').click()
+  await button(page, 'Stop and log').click()
   await expect(rest(page)).toBeVisible()
   await button(page, 'Skip').click()
-  await expect(page.locator('.timedSetRowLogged')).toHaveText('00:07 · rest 00:00')
+  await expect(shown(page, '.timedSetRowLogged')).toHaveText('00:07 · rest 00:00')
 })
 
-test('with the rest chain off the hold runs on as overtime and no rest starts', async ({ page }) => {
-  await page.getByLabel('Chain rest timer').uncheck()
-  await button(page, 'Start').click()
+test('a target chip sets the target', async ({ page }) => {
+  const chips = page.getByRole('group', { name: 'Target time' })
+  await chips.getByRole('button', { name: '45s' }).click()
+  await expect(chips.getByRole('button', { name: '45s' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(hold(page)).toContainText('00:45')
+})
+
+test('with the rest off, past the target the block is full and the time held is logged', async ({ page }) => {
+  await restSwitch(page).click()
+  await button(page, 'Start hold').click()
   await page.clock.fastForward(20_000)
   await expect(hold(page)).toContainText('+0:05')
-  await button(page, 'Finish').click()
+  await expect(label(page)).toContainText('Hold · past target')
+  await expect(page.getByText('00:15 reached').first()).toBeVisible()
+  await expect.poll(() => fillShare(page)).toBe(1)
+  const fill = await shown(page, '.timerBlockFill').evaluate((el) => getComputedStyle(el).backgroundColor)
+  expect(fill).toBe('rgb(255, 255, 255)')
+  await expect(page.getByRole('group', { name: 'Target time' })).toHaveCount(0)
+  await expect(shown(page, '.timerBlockControls').getByRole('button')).toHaveText(['Pause'])
+  await button(page, 'Stop and log 00:20').click()
   await expect(rest(page)).toHaveCount(0)
-  await expect(page.locator('.timedSetRowLogged')).toHaveText('00:20')
+  await expect(shown(page, '.timedSetRowLogged')).toHaveText('00:20')
 })
 
 test('Pause stops the clock and Resume continues it; +step lengthens the target', async ({ page }) => {
-  await button(page, 'Start').click()
+  await button(page, 'Start hold').click()
   await page.clock.fastForward(4_000)
   await button(page, 'Pause').click()
+  await expect(label(page)).toContainText('Hold · paused')
+  await expect(button(page, 'Stop and log 00:04')).toBeVisible()
   await page.clock.fastForward(30_000)
   await expect(hold(page)).toContainText('00:11')
   await button(page, 'Resume').click()
   await button(page, '+5s').click()
-  await expect(page.getByText('Target 00:20').first()).toBeVisible()
+  await expect(page.getByText('of 00:20').first()).toBeVisible()
+})
+
+test('Stop on a paused hold drops it and goes back to ready', async ({ page }) => {
+  await button(page, 'Start hold').click()
+  await page.clock.fastForward(4_000)
+  await button(page, 'Pause').click()
+  await button(page, 'Stop').click()
+  await expect(label(page)).toContainText('Hold · ready')
+  await expect(hold(page)).toContainText('00:15')
+  await expect(shown(page, '.timedSetRowLogged')).toHaveCount(0)
+})
+
+test('during a chained rest the next hold shows, and Start hold now saves the rest so far', async ({ page }) => {
+  await button(page, 'Start hold').click()
+  await page.clock.fastForward(15_000)
+  await restStarted(page)
+  await expect(page.getByText('Set 1 logged · 00:15')).toBeVisible()
+  await expect(page.getByText('Next · Set 2 of 2')).toBeVisible()
+  await expect(label(page)).toContainText('Plank · set 2 next')
+  await expect(button(page, '−5s')).toBeVisible()
+  await expect(page.getByRole('group', { name: 'Target time' })).toBeVisible()
+  await page.clock.fastForward(6_000)
+  await button(page, 'Start hold now').click()
+  await expect(rest(page)).toHaveCount(0)
+  await expect(label(page)).toContainText('Hold')
+  await expect(button(page, 'Pause')).toBeVisible()
+  await expect(shown(page, '.timedSetRowLogged')).toHaveText('00:15 · rest 00:06')
+})
+
+test('a reload during a chained rest, then Skip, still saves the rest', async ({ page }) => {
+  await button(page, 'Start hold').click()
+  await page.clock.fastForward(15_000)
+  await restStarted(page)
+  await page.clock.fastForward(4_000)
+  await page.reload()
+  await page.getByRole('button', { name: /^Plank/ }).click()
+  await page.clock.fastForward(4_000)
+  await button(page, 'Skip').click()
+  await expect(shown(page, '.timedSetRowLogged')).toHaveText('00:15 · rest 00:08')
+  await expect(button(page, 'Start hold')).toBeVisible()
+})
+
+test('cardio: the distance has a label and is saved with the set on Stop and log', async ({ page }) => {
+  await button(page, 'All exercises').click()
+  await page.getByRole('button', { name: /^Rowing/ }).click()
+  await expect(label(page)).toContainText('Effort · ready')
+  await expect(restSwitch(page)).toHaveAttribute('aria-checked', 'false')
+  await button(page, 'Start effort').click()
+  await expect(page.getByRole('group', { name: 'Target time' })).toHaveCount(0)
+  const distance = page.getByRole('textbox', { name: 'Distance · set 1' })
+  await distance.fill('1.2')
+  await expect(page.getByText('Distance · set 1', { exact: true })).toBeVisible()
+  // A distance alone does not log the set.
+  await expect(shown(page, '.timedSetRowLogged')).toHaveCount(0)
+  await page.clock.fastForward(30_000)
+  await button(page, 'Stop and log').click()
+  await expect(shown(page, '.timedSetRowLogged')).toHaveText('00:30 · 1.2 km')
+  await expect(page.getByRole('textbox', { name: 'Distance · set 2' })).toHaveValue('')
 })
 
 test('a running hold survives a reload and follows the real clock', async ({ page }) => {
-  await button(page, 'Start').click()
+  await button(page, 'Start hold').click()
   await page.clock.fastForward(6_000)
   await page.reload()
   await page.getByRole('button', { name: /^Plank/ }).click()
@@ -109,13 +193,13 @@ test('a running hold survives a reload and follows the real clock', async ({ pag
 })
 
 test('phase changes are announced once the block is up', async ({ page }) => {
-  await button(page, 'Start').click()
+  await button(page, 'Start hold').click()
   await page.clock.fastForward(500)
   await expect(page.getByRole('status').filter({ hasText: 'Hold' })).toHaveText('Hold running')
 })
 
 test('the timed set view has no detectable WCAG A/AA violations', async ({ page }) => {
-  await button(page, 'Start').click()
+  await button(page, 'Start hold').click()
   await page.clock.fastForward(5_000)
   await page.clock.resume() // axe needs the page's timers
   const results = await new AxeBuilder({ page })
@@ -125,19 +209,19 @@ test('the timed set view has no detectable WCAG A/AA violations', async ({ page 
 })
 
 test('a logged hold is followed by the next hold, with no "+ Set"', async ({ page }) => {
-  await button(page, 'Start').click()
+  await button(page, 'Start hold').click()
   await page.clock.fastForward(7_000)
-  await button(page, 'Finish').click()
+  await button(page, 'Stop and log').click()
   await button(page, 'Skip').click()
-  await expect(page.locator('.timedSetRowLogged')).toHaveCount(1)
+  await expect(shown(page, '.timedSetRowLogged')).toHaveCount(1)
   await expect(hold(page)).toBeVisible()
   await expect(button(page, '+ Set')).toHaveCount(0)
 })
 
 test('removing the set that is resting ends its rest', async ({ page }) => {
-  await button(page, 'Start').click()
+  await button(page, 'Start hold').click()
   await page.clock.fastForward(7_000)
-  await button(page, 'Finish').click()
+  await button(page, 'Stop and log').click()
   await restStarted(page)
   await button(page, 'Remove set 1').click()
   await expect(rest(page)).toHaveCount(0)
@@ -145,9 +229,9 @@ test('removing the set that is resting ends its rest', async ({ page }) => {
 })
 
 test('editing a saved timed session keeps its last set and offers the next hold', async ({ page }) => {
-  await button(page, 'Start').click()
+  await button(page, 'Start hold').click()
   await page.clock.fastForward(7_000)
-  await button(page, 'Finish').click()
+  await button(page, 'Stop and log').click()
   await button(page, 'Skip').click()
   await button(page, 'All exercises').click()
   await page.getByRole('button', { name: 'Finish session' }).first().click()
@@ -161,12 +245,12 @@ test('editing a saved timed session keeps its last set and offers the next hold'
   await page.reload()
   await page.getByRole('button', { name: /^Edit/ }).first().click()
   await page.getByRole('button', { name: /^Plank/ }).click()
-  await expect(page.locator('.timedSetRowLogged')).toHaveText('00:07 · rest 00:00')
+  await expect(shown(page, '.timedSetRowLogged')).toHaveText('00:07 · rest 00:00')
   await expect(hold(page)).toBeVisible()
 })
 
 test('cancelling a session forgets a hold in progress', async ({ page }) => {
-  await button(page, 'Start').click()
+  await button(page, 'Start hold').click()
   await page.clock.fastForward(3_000)
   await button(page, 'All exercises').click()
   page.once('dialog', (d) => d.accept())
@@ -176,17 +260,18 @@ test('cancelling a session forgets a hold in progress', async ({ page }) => {
 })
 
 test('the minus button stops at the smallest step so a hold always has a target', async ({ page }) => {
+  await button(page, 'Start hold').click()
   await button(page, '−5s').click()
   await button(page, '−5s').click()
-  await expect(page.getByText('Target 00:05').first()).toBeVisible()
+  await expect(page.getByText('of 00:05').first()).toBeVisible()
   await expect(button(page, '−5s')).toBeDisabled()
 })
 
 test('removing a logged hold never gives two sets the same id', async ({ page }) => {
   const holdFor = async (ms: number) => {
-    await button(page, 'Start').click()
+    await button(page, 'Start hold').click()
     await page.clock.fastForward(ms)
-    await button(page, 'Finish').click()
+    await button(page, 'Stop and log').click()
     await button(page, 'Skip').click()
   }
   // Each target is the last hold, so shorter holds keep Finish in reach.
@@ -194,7 +279,7 @@ test('removing a logged hold never gives two sets the same id', async ({ page })
   await holdFor(4_000)
   await button(page, 'Remove set 1').click()
   await holdFor(3_000)
-  await expect(page.locator('.timedSetRowLogged')).toHaveText(['00:04 · rest 00:00', '00:03 · rest 00:00'])
+  await expect(shown(page, '.timedSetRowLogged')).toHaveText(['00:04 · rest 00:00', '00:03 · rest 00:00'])
   const ids = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('gym:activeSession')!).exercises[0].sets.map((s: { id: string }) => s.id),
   )

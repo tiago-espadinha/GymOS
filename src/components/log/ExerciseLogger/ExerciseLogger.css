@@ -136,3 +136,12 @@
   font-size: var(--text-small);
   color: var(--color-text-muted);
 }
+
+.exerciseLoggerLogged {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--text-secondary);
+  font-weight: 700;
+}
