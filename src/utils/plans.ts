@@ -22,6 +22,14 @@ export function planSummary(plan: TrainingPlan): string {
   return groups.length ? `${exerciseCount(plan)} · ${groups.join(", ")}` : exerciseCount(plan);
 }
 
+// The first exercise names of a plan and how many are left over ("+ 3 more").
+export function planPreview(plan: TrainingPlan, count = 4): { names: string[]; more: number } {
+  return {
+    names: plan.exercises.slice(0, count).map((ex) => ex.name),
+    more: Math.max(0, plan.exercises.length - count),
+  };
+}
+
 // Archiving and restoring keep the plan in place, so Undo returns it to the same position.
 export function archivePlan(plans: TrainingPlan[], id: string, date: string): TrainingPlan[] {
   return plans.map((p) => (p.id === id ? { ...p, isArchived: true, archivedAt: date } : p));

@@ -7,6 +7,7 @@ import {
   lastTrained,
   muscleGroupsOf,
   planActionsSummary,
+  planPreview,
   planTrainedSummary,
   planSummary,
   plansCountLabel,
@@ -44,6 +45,20 @@ describe("plan summary", () => {
   it("shows only the count when no exercise has a muscle group", () => {
     expect(planSummary(plan(["", ""]))).toBe("2 exercises");
     expect(planSummary(plan([]))).toBe("0 exercises");
+  });
+});
+
+describe("plan preview", () => {
+  it("lists the first four names and counts the rest", () => {
+    expect(planPreview(plan(["A", "B", "C", "D", "E", "F"]))).toEqual({
+      names: ["Ex 0", "Ex 1", "Ex 2", "Ex 3"],
+      more: 2,
+    });
+  });
+
+  it("has nothing more when the plan fits", () => {
+    expect(planPreview(plan(["A", "B", "C", "D"]))).toEqual({ names: ["Ex 0", "Ex 1", "Ex 2", "Ex 3"], more: 0 });
+    expect(planPreview(plan([]))).toEqual({ names: [], more: 0 });
   });
 });
 
