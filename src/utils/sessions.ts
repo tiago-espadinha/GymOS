@@ -13,14 +13,20 @@ export function sessionStats(session: WorkoutSession): { sets: number; volume: n
   return { sets, volume };
 }
 
-// "30 sets · 5,022 kg · Felt strong": volume is left out when nothing was lifted,
-// and multi-line notes are folded onto the row's single line.
+// The parts of a session row: "30 sets", "5,022 kg" ("" when nothing was lifted)
+// and the notes folded onto one line.
+export function sessionCells(stats: { sets: number; volume: number }, notes = ""): { sets: string; volume: string; notes: string } {
+  return {
+    sets: `${stats.sets} set${stats.sets === 1 ? "" : "s"}`,
+    volume: stats.volume > 0 ? `${Math.round(stats.volume).toLocaleString("en-US")} kg` : "",
+    notes: notes.replace(/\s+/g, " ").trim(),
+  };
+}
+
+// "30 sets · 5,022 kg · Felt strong", skipping the empty parts.
 export function sessionSummary(stats: { sets: number; volume: number }, notes = ""): string {
-  const parts = [`${stats.sets} set${stats.sets === 1 ? "" : "s"}`];
-  if (stats.volume > 0) parts.push(`${Math.round(stats.volume).toLocaleString("en-US")} kg`);
-  const note = notes.replace(/\s+/g, " ").trim();
-  if (note) parts.push(note);
-  return parts.join(" · ");
+  const { sets, volume, notes: note } = sessionCells(stats, notes);
+  return [sets, volume, note].filter(Boolean).join(" · ");
 }
 
 // Sessions by date, newest first. Storage order is not date order: import appends and a
