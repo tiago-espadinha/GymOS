@@ -11,7 +11,7 @@
 
 /* Phone column, centred until the wider layouts are designed. */
 #root {
-  width: 600px;
+  width: var(--width-column);
   max-width: 100%;
   margin: 0 auto;
   min-height: 100svh;

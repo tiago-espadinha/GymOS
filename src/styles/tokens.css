@@ -89,6 +89,20 @@
   --size-timer-block-fit: max(var(--size-timer-block), var(--size-timer-block-min));
   --size-tick-w: 8px;
   --size-tick-h: 28px;
+  --size-topbar: 72px;
+
+  /*
+   * Layout widths. Media queries cannot read custom properties, so a query
+   * repeats the breakpoint value; breakpoints.test.ts keeps them in step.
+   *   < 600: phone. 600–1023: the phone column, centred. >= 1024: wide.
+   */
+  --breakpoint-tablet: 600px;
+  --breakpoint-wide: 1024px;
+  --width-column: 600px;
+  --width-sheet: 560px;
+  --width-wide: 1200px;
+  --gutter-wide: 40px;
+  --text-wordmark: 30px;
 
   /* Radius */
   --radius-pill: 999px;
