@@ -3,6 +3,7 @@ import { NumericInput } from "../../shared";
 import { DEFAULT_PRESETS } from "../../../constants/timerPresets";
 import { ExerciseLog, Set } from "../../../types";
 import { getExerciseMeta } from "../../../utils/metrics";
+import { generateId } from "../../../utils/id";
 import { virtualSetId } from "../../../utils/setModel";
 import TimedSetBlock from "../TimedSetBlock";
 import TimedSetRow from "../TimedSetRow";
@@ -21,7 +22,7 @@ const holdIndex = (sets: Set[]) => {
   return i === -1 ? sets.length : i;
 };
 
-// Logged holds, then the hold block for the next set (restyled in T-046).
+// Logged holds, then the hold block for the next set.
 export function TimedSets({ exercise, onChange, resting, onRest, onRemove }: TimedSetsProps) {
   const { category, trackDistance } = getExerciseMeta(exercise);
   // Isometric holds and loaded carries chain into a rest before the next set;
@@ -29,7 +30,7 @@ export function TimedSets({ exercise, onChange, resting, onRest, onRemove }: Tim
   const [chainRest, setChainRest] = useState(category !== "cardio");
 
   const index = holdIndex(exercise.sets);
-  const hold: Set = exercise.sets[index] ?? { id: virtualSetId(exercise, index), weight: "", reps: "" };
+  const hold: Set = exercise.sets[index] ?? { id: virtualSetId(exercise), weight: "", reps: "" };
 
   // Writes the hold, appending it when it was the virtual next set.
   const writeHold = (next: Set) =>
@@ -38,9 +39,11 @@ export function TimedSets({ exercise, onChange, resting, onRest, onRemove }: Tim
       sets: index < exercise.sets.length ? exercise.sets.map((s, i) => (i === index ? next : s)) : [...exercise.sets, next],
     });
 
+  // The hold's timer is already reset, so a virtual id can give way to the set's own.
   const holdDone = (seconds: number) => {
-    writeHold({ ...hold, duration: String(seconds), completed: true });
-    if (chainRest) onRest(hold.id);
+    const id = hold.id === virtualSetId(exercise) ? generateId() : hold.id;
+    writeHold({ ...hold, id, duration: String(seconds), completed: true });
+    if (chainRest) onRest(id);
   };
 
   const lastHeldSec = Number(exercise.sets.findLast((s) => s.completed)?.duration) || 0;

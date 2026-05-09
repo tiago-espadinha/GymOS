@@ -43,8 +43,9 @@ describe("currentSetIndex", () => {
 });
 
 describe("virtualSetId", () => {
-  it("is stable for the same exercise and position", () => {
-    expect(virtualSetId(exercise([]), 2)).toBe("e1-next-2");
+  it("is stable for the exercise, whatever its sets", () => {
+    expect(virtualSetId(exercise([]))).toBe("e1-next");
+    expect(virtualSetId(exercise([done("35", "12")]))).toBe("e1-next");
   });
 });
 

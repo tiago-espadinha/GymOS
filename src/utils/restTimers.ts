@@ -38,6 +38,6 @@ export function clearSessionRests(exercises: ExerciseLog[]) {
       clearTimer(holdTimerId(set.id));
     }
     // A hold started on the virtual next set has no set yet.
-    clearTimer(holdTimerId(virtualSetId(exercise, exercise.sets.length)));
+    clearTimer(holdTimerId(virtualSetId(exercise)));
   }
 }

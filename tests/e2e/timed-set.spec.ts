@@ -181,3 +181,22 @@ test('the minus button stops at the smallest step so a hold always has a target'
   await expect(page.getByText('Target 00:05').first()).toBeVisible()
   await expect(button(page, '−5s')).toBeDisabled()
 })
+
+test('removing a logged hold never gives two sets the same id', async ({ page }) => {
+  const holdFor = async (ms: number) => {
+    await button(page, 'Start').click()
+    await page.clock.fastForward(ms)
+    await button(page, 'Finish').click()
+    await button(page, 'Skip').click()
+  }
+  // Each target is the last hold, so shorter holds keep Finish in reach.
+  await holdFor(5_000)
+  await holdFor(4_000)
+  await button(page, 'Remove set 1').click()
+  await holdFor(3_000)
+  await expect(page.locator('.timedSetRowLogged')).toHaveText(['00:04 · rest 00:00', '00:03 · rest 00:00'])
+  const ids = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('gym:activeSession')!).exercises[0].sets.map((s: { id: string }) => s.id),
+  )
+  expect(new Set(ids).size).toBe(ids.length)
+})

@@ -10,8 +10,9 @@ export function currentSetIndex(exercise: ExerciseLog): number {
 }
 
 // A virtual timed set's hold needs an id before the set exists, stable across
-// reloads so a running hold is found again.
-export const virtualSetId = (exercise: ExerciseLog, index: number) => `${exercise.id}-next-${index}`;
+// reloads and row removals so a running hold is found again. A logged hold gets
+// its own id, so at most one set carries this one.
+export const virtualSetId = (exercise: ExerciseLog) => `${exercise.id}-next`;
 
 // True once every exercise has at least one logged set (plans have no target set count).
 export function allExercisesDone(exercises: ExerciseLog[]): boolean {
