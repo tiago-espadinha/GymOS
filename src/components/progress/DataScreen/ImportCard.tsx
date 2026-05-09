@@ -1,5 +1,5 @@
 import { useId, useRef, useState } from "react";
-import { PillButton } from "../../shared";
+import { CheckIcon, WarningIcon } from "../../shared";
 import { TrainingPlan, WorkoutSession } from "../../../types";
 import { CSVImport, importFromCSV } from "../../../utils/csv";
 import { mergeImport } from "../../../utils/importData";
@@ -10,25 +10,21 @@ interface ImportCardProps {
   sessions: WorkoutSession[];
   setPlans: (plans: TrainingPlan[]) => void;
   setSessions: (sessions: WorkoutSession[]) => void;
+  /** See progress: leaves the Data screen. */
+  onSeeProgress: () => void;
 }
 
 type ImportState =
   | { kind: "idle" }
   | { kind: "ready"; fileName: string; data: CSVImport }
   | { kind: "error"; fileName: string; message: string }
-  | { kind: "done"; message: string };
+  | { kind: "done"; fileName: string; message: string };
 
 const KICKER: Record<ImportState["kind"], string> = {
   idle: "Import",
   ready: "Import · file ready",
-  error: "Import · could not read",
-  done: "Import · done",
-};
-
-const CHOOSE_LABEL: Record<Exclude<ImportState["kind"], "ready">, string> = {
-  idle: "Choose CSV file",
-  error: "Choose another file",
-  done: "Import another file",
+  error: "Can't import this file",
+  done: "Imported",
 };
 
 async function readImport(file: File): Promise<ImportState> {
@@ -71,7 +67,7 @@ function ImportChoices({ onAdd, onReplace, onCancel, deletes }: ImportChoicesPro
   );
 }
 
-export function ImportCard({ plans, sessions, setPlans, setSessions }: ImportCardProps) {
+export function ImportCard({ plans, sessions, setPlans, setSessions, onSeeProgress }: ImportCardProps) {
   const [state, setState] = useState<ImportState>({ kind: "idle" });
   const fileInput = useRef<HTMLInputElement>(null);
   const kickerId = useId();
@@ -91,47 +87,72 @@ export function ImportCard({ plans, sessions, setPlans, setSessions }: ImportCar
     if (file) settle(await readImport(file));
   };
 
-  const add = (data: CSVImport) => {
+  const add = (fileName: string, data: CSVImport) => {
     const merged = mergeImport(plans, sessions, data);
     setPlans(merged.plans);
     setSessions(merged.sessions);
-    settle({ kind: "done", message: addedText(merged.addedPlans, merged.addedSessions) });
+    const alreadyHere = data.sessions.length - merged.addedSessions;
+    settle({ kind: "done", fileName, message: addedText(merged.addedPlans, merged.addedSessions, alreadyHere) });
   };
 
-  const replace = (data: CSVImport) => {
+  const replace = (fileName: string, data: CSVImport) => {
     setPlans(data.plans);
     setSessions(data.sessions);
-    settle({ kind: "done", message: `Replaced with ${plansAndSessions(data.plans.length, data.sessions.length)}.` });
+    const message = `Replaced with ${plansAndSessions(data.plans.length, data.sessions.length)}.`;
+    settle({ kind: "done", fileName, message });
   };
 
   return (
     <section className={`importCard importCard--${state.kind}`} aria-labelledby={kickerId}>
       <h2 ref={kicker} id={kickerId} className="dataKicker importCardKicker" tabIndex={-1}>
+        {state.kind === "error" && <WarningIcon />}
+        {state.kind === "done" && <CheckIcon />}
         {KICKER[state.kind]}
       </h2>
       <div className="importCardBody" aria-live="polite">
         {state.kind === "idle" && (
           <p className="importCardText">
-            Choose a CSV exported from GymOS. Nothing changes until you choose to add or replace.
+            Bring in a CSV exported from GymOS. You choose whether it adds to or replaces what's here.
           </p>
         )}
-        {(state.kind === "ready" || state.kind === "error") && <p className="importCardFile">{state.fileName}</p>}
+        {state.kind !== "idle" && <p className="importCardFile">{state.fileName}</p>}
         {state.kind === "ready" && <p className="importCardText">{foundText(state.data)}</p>}
-        {state.kind === "error" && <p className="importCardText importCardText--error">{state.message}</p>}
-        {state.kind === "done" && <p className="importCardFile">{state.message}</p>}
+        {state.kind === "error" && (
+          <>
+            <p className="importCardMessage">{state.message}</p>
+            <p className="importCardText">Nothing on this device was changed.</p>
+          </>
+        )}
+        {state.kind === "done" && <p className="importCardMessage">{state.message}</p>}
       </div>
 
-      {state.kind === "ready" ? (
+      {state.kind === "idle" && (
+        <button type="button" className="importPick" onClick={chooseFile}>
+          Choose a CSV file
+        </button>
+      )}
+      {state.kind === "ready" && (
         <ImportChoices
-          onAdd={() => add(state.data)}
-          onReplace={() => replace(state.data)}
+          onAdd={() => add(state.fileName, state.data)}
+          onReplace={() => replace(state.fileName, state.data)}
           onCancel={() => settle({ kind: "idle" })}
           deletes={plans.length || sessions.length ? plansAndSessions(plans.length, sessions.length) : null}
         />
-      ) : (
-        <PillButton variant="outline-white" onClick={chooseFile}>
-          {CHOOSE_LABEL[state.kind]}
-        </PillButton>
+      )}
+      {state.kind === "error" && (
+        <button type="button" className="importAction importAction--outline" onClick={chooseFile}>
+          Choose another file
+        </button>
+      )}
+      {state.kind === "done" && (
+        <>
+          <button type="button" className="importAction importAction--accent" onClick={onSeeProgress}>
+            See progress
+          </button>
+          <button type="button" className="importCancel" onClick={chooseFile}>
+            Import another file
+          </button>
+        </>
       )}
       <input ref={fileInput} type="file" accept=".csv,text/csv" onChange={handleFile} hidden />
     </section>

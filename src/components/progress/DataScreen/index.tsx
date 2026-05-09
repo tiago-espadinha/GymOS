@@ -54,7 +54,13 @@ export function DataScreen({ plans, sessions, setPlans, setSessions, onClose }: 
         </PrimaryButton>
       </section>
 
-      <ImportCard plans={plans} sessions={sessions} setPlans={setPlans} setSessions={setSessions} />
+      <ImportCard
+        plans={plans}
+        sessions={sessions}
+        setPlans={setPlans}
+        setSessions={setSessions}
+        onSeeProgress={onClose}
+      />
     </div>
   );
 }

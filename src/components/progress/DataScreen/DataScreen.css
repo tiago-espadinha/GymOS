@@ -42,7 +42,9 @@
 .dataKicker:focus-visible,
 .dataClose:focus-visible,
 .importCancel:focus-visible,
-.importChoice:focus-visible {
+.importChoice:focus-visible,
+.importPick:focus-visible,
+.importAction:focus-visible {
   outline: var(--border-focus);
   outline-offset: 2px;
 }
@@ -94,6 +96,7 @@
 
 .importCard {
   padding: var(--space-5);
+  border: 2px solid transparent;
   border-radius: var(--radius-surface);
   background: var(--color-surface);
 }
@@ -103,15 +106,35 @@
   color: var(--color-accent);
 }
 
-.importCard--error .importCardKicker,
-.importCardText--error {
+/* An error is an outline, an icon and text, never colour alone. */
+.importCard--error {
+  border-color: var(--color-danger);
+  background: var(--color-surface-inset);
+}
+
+.importCard--error .importCardKicker {
   color: var(--color-danger);
+}
+
+.importCardKicker {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.importCardKicker svg {
+  flex: none;
 }
 
 .importCardBody {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+}
+
+.importCard--error .importCardBody,
+.importCard--done .importCardBody {
+  gap: var(--space-3);
 }
 
 .importCardBody p {
@@ -124,10 +147,64 @@
   overflow-wrap: anywhere;
 }
 
-.importCardText {
+.importCardText,
+.importCardMessage {
   font-size: var(--text-secondary);
+  font-weight: 500;
   line-height: var(--leading-body);
   color: var(--color-text-muted);
+}
+
+.importCard--idle .importCardText {
+  font-size: var(--text-body);
+}
+
+.importCardMessage {
+  color: var(--color-text);
+}
+
+/* The no-file target: a dashed box rather than a pill, so it reads as a place for a file. */
+.importPick {
+  min-height: var(--size-action);
+  border: 2px dashed var(--color-line-empty);
+  border-radius: var(--radius-surface);
+  background: none;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.importPick:hover {
+  border-color: var(--color-text-muted);
+}
+
+.importAction {
+  min-height: var(--size-field-lg);
+  border: 2px solid transparent;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity var(--motion-press) linear;
+}
+
+.importAction:active,
+.importPick:active {
+  opacity: 0.8;
+}
+
+.importAction--outline {
+  border-color: var(--color-text);
+  background: none;
+  color: var(--color-text);
+}
+
+.importAction--accent {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 .importChoice {
