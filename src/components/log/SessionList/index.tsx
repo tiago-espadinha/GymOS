@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { ListRow, SetTicks } from "../../shared";
 import { ExerciseLog, WorkoutSession } from "../../../types";
-import { currentExerciseId, exerciseProgress, lastValues } from "../../../utils/sessionList";
+import { currentExerciseId, exerciseProgress, rowSubtitle } from "../../../utils/sessionList";
 import { lastTimeSets } from "../../../utils/setModel";
 import ExerciseScreen from "../ExerciseScreen";
 import RestStrip from "../RestStrip";
@@ -61,7 +61,7 @@ export function SessionList({ planName, exercises, onChangeExercise, sessions, e
                   <ListRow
                     number={i + 1}
                     title={ex.name}
-                    subtitle={lastValues(ex)}
+                    subtitle={rowSubtitle(ex, history.get(ex.name) ?? [])}
                     current={ex.id === currentId}
                     onClick={() => setOpenId(ex.id)}
                     trailing={<SetTicks total={total} done={done} />}

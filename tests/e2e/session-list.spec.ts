@@ -51,6 +51,8 @@ const axe = async (page: Page) => {
 
 test('one row per exercise with ticks, and last time or "Not logged recently" before anything is logged', async ({ page }) => {
   await expect(page.getByRole('listitem').filter({ has: page.getByRole('button', { name: /^(Bench press|Cable row|Lateral raise)/ }) })).toHaveCount(3)
+  await expect(row(page, 'Bench press')).toContainText('Not logged recently')
+  await expect(row(page, 'Cable row')).toContainText('Last 35 kg × 12')
   await expect(row(page, 'Bench press').getByRole('img', { name: '0 of 1 sets done' })).toBeVisible()
 })
 
@@ -75,7 +77,7 @@ test('the first exercise with no logged set is the only inverted row, and it mov
   await logSet(page, '60', '8')
   await allExercises(page)
 
-  await expect(row(page, 'Bench press')).toContainText('60 kg × 8')
+  await expect(row(page, 'Bench press')).toContainText('60 kg × 8 · done')
   await expect(row(page, 'Bench press').getByRole('img', { name: '1 of 1 sets done' })).toBeVisible()
   await expect(row(page, 'Bench press')).not.toHaveAttribute('aria-current', 'true')
   await expect(row(page, 'Cable row')).toHaveAttribute('aria-current', 'true')
@@ -88,6 +90,33 @@ test('with no rest running the strip is hidden, also after a rest is skipped', a
   await page.getByRole('button', { name: 'Skip' }).click()
   await allExercises(page)
   await expect(strip(page)).toHaveCount(0)
+})
+
+test('once every exercise has a logged set: filled Finish, an "All 3 exercises done" status and a Finish session bar', async ({ page }) => {
+  await expect(page.getByText('All 3 exercises done')).toHaveCount(0)
+  for (const name of ['Bench press', 'Cable row', 'Lateral raise']) {
+    await row(page, name).click()
+    await logSet(page, '20', '10')
+    await allExercises(page)
+  }
+  await expect(page.locator('[aria-current="true"]')).toHaveCount(0)
+  await expect(page.getByRole('status').filter({ hasText: 'All 3 exercises done' })).toBeVisible()
+  await expect(page.locator('#logTabFinish')).toHaveClass(/pill-button--white/)
+  const bar = page.getByRole('button', { name: 'Finish session' }).last()
+  expect((await bar.boundingBox())?.height).toBeGreaterThanOrEqual(72)
+  await bar.click()
+  await expect(page.getByRole('heading', { name: 'Done' })).toBeVisible()
+})
+
+test('the all-done list has no detectable WCAG A/AA violations', async ({ page }) => {
+  for (const name of ['Bench press', 'Cable row', 'Lateral raise']) {
+    await row(page, name).click()
+    await logSet(page, '20', '10')
+    await page.getByRole('button', { name: 'Skip' }).click()
+    await allExercises(page)
+  }
+  await expect(page.getByText('All 3 exercises done')).toBeVisible()
+  await axe(page)
 })
 
 test('the exercise screen shows last time and seeds the steppers from it, then from the last logged set', async ({ page }) => {

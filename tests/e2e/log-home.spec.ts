@@ -78,7 +78,7 @@ test('Edit opens the saved session and is at least 44px tall', async ({ page }) 
   expect((await edit.boundingBox())?.height).toBeGreaterThanOrEqual(44)
   await edit.click()
   await expect(page.getByText(/^Editing session · /)).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Finish session' })).toBeVisible()
+  await expect(finishButton(page)).toBeVisible()
 })
 
 test('editing a saved session changes its date on Finish, and only there', async ({ page }) => {

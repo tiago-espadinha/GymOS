@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { PillButton } from "../../shared";
+import { PillButton, PrimaryButton } from "../../shared";
 import { today, formatDate, formatDateMeta } from "../../../utils/date";
 import { ExerciseLog, TrainingPlan, WorkoutSession } from "../../../types";
 import {
@@ -14,6 +14,7 @@ import { exportToCSV } from "../../../utils/csv";
 import { downloadCSV } from "../../../utils/download";
 import { clearSessionRests } from "../../../utils/restTimers";
 import { sessionTotals } from "../../../utils/sessionList";
+import { allExercisesDone } from "../../../utils/setModel";
 import FinishScreen from "../FinishScreen";
 import LogHome from "../LogHome";
 import SessionList from "../SessionList";
@@ -124,6 +125,7 @@ export function LogTab({
   };
 
   const canFinish = session ? hasLoggedSets(session) : false;
+  const allDone = session ? allExercisesDone(session.exercises) : false;
   const loggedSets = session ? sessionTotals(session.exercises).sets : 0;
 
   // The status region stays mounted while the Done screen shows, so a save
@@ -187,7 +189,7 @@ export function LogTab({
                   </div>
                   <PillButton
                     id={FINISH_ID}
-                    variant="outline-white"
+                    variant={allDone ? "white" : "outline-white"}
                     onClick={() => setFinishing(true)}
                     disabled={!canFinish}
                     aria-label="Finish session"
@@ -197,14 +199,30 @@ export function LogTab({
                 </header>
               }
               actions={
-                !canFinish && (
-                  <div className="logTabActions">
-                    <span className="logTabHint">Log a set to finish.</span>
-                    <button type="button" className="textLink" onClick={cancelSession}>
-                      Cancel
-                    </button>
+                <>
+                  {!canFinish && (
+                    <div className="logTabActions">
+                      <span className="logTabHint">Log a set to finish.</span>
+                      <button type="button" className="textLink" onClick={cancelSession}>
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                  {/* The status stays mounted so "all done" is announced when it appears. */}
+                  <div className={`logTabDoneBar${allDone ? "" : " logTabDoneBar--empty"}`}>
+                    <span role="status" className="logTabDoneStatus">
+                      {allDone && (
+                        <>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M4 12l5 5L20 6" />
+                          </svg>
+                          All {session.exercises.length} exercises done
+                        </>
+                      )}
+                    </span>
+                    {allDone && <PrimaryButton onClick={() => setFinishing(true)}>Finish session</PrimaryButton>}
                   </div>
-                )
+                </>
               }
             />
           ) : (
