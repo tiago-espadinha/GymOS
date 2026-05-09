@@ -39,11 +39,16 @@ describe("sessionStats", () => {
 });
 
 describe("sessionSummary", () => {
-  it("joins date, sets and volume", () => {
-    expect(sessionSummary("Nov 16, 26", { sets: 12, volume: 4200 })).toBe("Nov 16, 26 · 12 sets · 4200 kg");
+  it("joins sets, grouped volume and notes", () => {
+    expect(sessionSummary({ sets: 30, volume: 5022 }, "Bonito")).toBe("30 sets · 5,022 kg · Bonito");
   });
 
-  it("uses the singular and omits volume when nothing was lifted", () => {
-    expect(sessionSummary("Nov 16, 26", { sets: 1, volume: 0 })).toBe("Nov 16, 26 · 1 set");
+  it("uses the singular and omits volume and empty notes", () => {
+    expect(sessionSummary({ sets: 1, volume: 0 })).toBe("1 set");
+    expect(sessionSummary({ sets: 1, volume: 0 }, "  ")).toBe("1 set");
+  });
+
+  it("folds multi-line notes onto one line", () => {
+    expect(sessionSummary({ sets: 2, volume: 0 }, "Bonito\nGrip gave out.")).toBe("2 sets · Bonito Grip gave out.");
   });
 });

@@ -1,11 +1,8 @@
 import { useId, useState } from "react";
-import { Field, ListRow, PillButton } from "../../shared";
-import { formatDate } from "../../../utils/date";
-import { sessionStats, sessionSummary } from "../../../utils/sessions";
+import { Field, PillButton } from "../../shared";
 import { TrainingPlan, WorkoutSession } from "../../../types";
+import RecentSessions from "./RecentSessions";
 import "./LogHome.css";
-
-const RECENT_COUNT = 6;
 
 interface LogHomeProps {
   plans: TrainingPlan[];
@@ -17,55 +14,11 @@ interface LogHomeProps {
   onDelete: (id: string) => void;
 }
 
-function RecentSessions({
-  sessions,
-  onEdit,
-  onDelete,
-}: {
-  sessions: WorkoutSession[];
-  onEdit: (session: WorkoutSession) => void;
-  onDelete: (id: string) => void;
-}) {
-  if (sessions.length === 0) return null;
-  return (
-    <section aria-labelledby="logHomeRecentTitle">
-      <h2 id="logHomeRecentTitle" className="logHomeLabel">
-        Recent sessions
-      </h2>
-      <ul className="logHomeList" role="list">
-        {sessions.map((s) => {
-          const when = formatDate(s.date);
-          return (
-            <li key={s.id} className="logHomeItem">
-              <ListRow
-                title={s.planName}
-                subtitle={sessionSummary(when, sessionStats(s))}
-                trailing={
-                  <PillButton variant="outline-white" onClick={() => onEdit(s)} aria-label={`Edit ${s.planName}, ${when}`}>
-                    Edit
-                  </PillButton>
-                }
-              />
-              {s.notes && <p className="logHomeNotes">{s.notes}</p>}
-              <div className="logHomeActions">
-                <PillButton variant="outline-white" onClick={() => onDelete(s.id)} aria-label={`Delete ${s.planName}, ${when}`}>
-                  Delete
-                </PillButton>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
-  );
-}
-
 export function LogHome({ plans, sessions, date, onDateChange, onStart, onEdit, onDelete }: LogHomeProps) {
   const [planId, setPlanId] = useState("");
   const selectId = useId();
   const activePlans = plans.filter((p) => !p.isArchived);
   const chosen = activePlans.find((p) => p.id === planId);
-  const recent = sessions.slice(0, RECENT_COUNT);
 
   return (
     <>
@@ -100,9 +53,16 @@ export function LogHome({ plans, sessions, date, onDateChange, onStart, onEdit, 
         </PillButton>
       </form>
 
-      <p className="logHomeEmpty">Select a training plan to begin logging</p>
-
-      <RecentSessions sessions={recent} onEdit={onEdit} onDelete={onDelete} />
+      <RecentSessions
+        sessions={sessions}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        empty={
+          <p className="logHomeEmptyText">
+            No sessions yet. Your first one lands here after you press Start and save it.
+          </p>
+        }
+      />
     </>
   );
 }

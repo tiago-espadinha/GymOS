@@ -67,7 +67,7 @@ test('Recent shows the six newest sessions with sets, volume and notes', async (
   const rows = page.getByRole('region', { name: 'Recent sessions' }).getByRole('listitem')
   await expect(rows).toHaveCount(6)
   await expect(rows.first()).toContainText('Session 0')
-  await expect(rows.first()).toContainText('2 sets · 1080 kg')
+  await expect(rows.first()).toContainText('2 sets · 1,080 kg · Felt strong, new bench PR')
   await expect(rows.first()).toContainText('Felt strong, new bench PR')
   await expect(rows.last()).toContainText('Session 5')
 })

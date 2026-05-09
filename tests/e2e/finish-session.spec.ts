@@ -74,7 +74,7 @@ test('Save stores the trimmed notes and lands on Log home with the session in Re
   await page.reload()
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('gym:sessions') ?? '[]'))
   expect(stored[0].notes).toBe('Felt strong')
-  await expect(page.locator('.logHomeNotes').first()).toHaveText('Felt strong')
+  await expect(page.locator('.logHomeItemSummary').first()).toHaveText('1 set · 480 kg · Felt strong')
 })
 
 test('the Done screen passes the axe scan', async ({ page }) => {

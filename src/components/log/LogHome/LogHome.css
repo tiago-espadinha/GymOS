@@ -45,15 +45,22 @@
   border-color: var(--color-accent);
 }
 
-.logHomeEmpty {
-  margin: 0 0 var(--space-7);
-  padding: var(--space-7) var(--space-5);
-  text-align: center;
-  font-family: var(--font-body);
-  font-size: var(--text-secondary);
+.logHomeEmptyText {
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: 1.4;
   color: var(--color-text-muted);
-  background: var(--color-surface);
-  border-radius: var(--radius-surface);
+}
+
+.logHomeRecent--empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.logHomeRecent--empty .logHomeLabel {
+  margin: 0;
 }
 
 .logHomeList {
@@ -63,23 +70,71 @@
 }
 
 .logHomeItem {
-  border-bottom: var(--border-hairline);
-  padding-bottom: var(--space-3);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--size-row-lg);
+  padding: 0 0 0 var(--space-4);
+  border-top: var(--border-hairline);
+  color: var(--color-text);
 }
 
-.logHomeNotes {
-  margin: 0;
-  padding: 0 var(--gutter) var(--space-2);
+.logHomeItemText {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: var(--space-3) 0;
+}
+
+.logHomeItemHead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* Long names stay on one line in list rows. */
+.logHomeItemTitle {
+  min-width: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font-family: var(--font-body);
-  font-size: var(--text-secondary);
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-row-title);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.logHomeItemMeta {
+  flex-shrink: 0;
+  font-size: var(--text-small);
+  font-weight: 500;
   color: var(--color-text-muted);
 }
 
-.logHomeActions {
-  display: flex;
-  gap: var(--space-2);
-  padding: 0 var(--gutter);
+.logHomeItemSummary {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.logHomeEdit {
+  min-height: var(--size-control);
+  padding: 0 var(--space-3);
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: var(--text-secondary);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.logHomeEdit:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: -2px;
 }
