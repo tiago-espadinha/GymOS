@@ -4,7 +4,7 @@ import { formatDateFull } from "../../../utils/date";
 
 interface DeleteSessionSheetProps {
   planName: string;
-  /** The stored date, so the sheet names the session as it was saved. */
+  /** The session's date as the editing kicker shows it. */
   date: string;
   onDelete: () => void;
   onClose: () => void;

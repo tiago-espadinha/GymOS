@@ -104,6 +104,7 @@ test('the date sheet picks Yesterday or another past day for Start', async ({ pa
   await dateButton(page).click()
   await expect(sheet.getByRole('button', { name: /^Yesterday/ })).toHaveAttribute('aria-pressed', 'true')
   await expect(sheet.getByLabel('Another day')).toHaveAttribute('max', isoDaysAgo(0))
+  await expect(sheet.getByLabel('Another day')).toHaveAttribute('min', '2000-01-01')
   await sheet.getByLabel('Another day').fill('2026-11-01')
   await sheet.getByRole('button', { name: 'Close' }).click()
   await expect(dateButton(page)).toContainText('Sun 1 Nov')
@@ -153,6 +154,8 @@ test('editing a saved session: plan title, date sheet, multi-line notes and Upda
   await expect(page.getByRole('region', { name: 'Recent sessions' }).getByRole('listitem').first()).toContainText(
     'Just updatedSession 010 Nov 2026',
   )
+  // The inverted row is new colour work: scan it while it shows.
+  await axe(page)
   await page.reload()
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('gym:sessions') ?? '[]'))
   const s0 = stored.find((s: { id: string }) => s.id === 's0')

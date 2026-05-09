@@ -3,13 +3,17 @@ import { CheckIcon, Sheet } from "../../shared";
 import { dayBefore, formatDateMeta, today } from "../../../utils/date";
 import "./DateSheet.css";
 
+// A browser reports a valid date after each typed year digit (0002, 0020, 0202),
+// so years before this are taken as half-typed and ignored.
+const EARLIEST = "2000-01-01";
+
 interface DateSheetProps {
   value: string;
   onChange: (date: string) => void;
   onClose: () => void;
 }
 
-/** Today and Yesterday pick and close; Another day applies as it is typed, Close ends. Future dates are refused. */
+/** Today and Yesterday pick and close; Another day applies as it is typed, Close ends. Dates before 2000 or in the future are refused. */
 export function DateSheet({ value, onChange, onClose }: DateSheetProps) {
   const titleId = useId();
   const otherId = useId();
@@ -57,12 +61,13 @@ export function DateSheet({ value, onChange, onClose }: DateSheetProps) {
           id={otherId}
           type="date"
           className="dateSheet__input"
+          min={EARLIEST}
           max={todayStr}
           defaultValue={isQuick ? "" : value}
           // Uncontrolled, so clearing a segment to retype it does not snap back.
           onChange={(e) => {
             const date = e.target.value;
-            if (date && date <= todayStr) onChange(date);
+            if (date >= EARLIEST && date <= todayStr) onChange(date);
           }}
         />
       </div>
