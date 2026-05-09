@@ -47,7 +47,15 @@ Storage reads and writes are wrapped in `try`/`catch`. A read failure returns no
 
 ## Offline and install
 
-`public/manifest.webmanifest` lets the app be added to a home screen. Both typefaces come from npm packages and are served from the app's own origin, and no code requests another origin. There is no service worker, so the app needs the network to load; once loaded, it works without one because all data is local.
+`public/manifest.webmanifest` lets the app be added to a home screen. Both typefaces come from npm packages and are served from the app's own origin, and no code requests another origin. A service worker makes the app reload with no network after a first visit. `build/serviceWorker.ts` is a small Vite plugin that writes `sw.js` at build time:
+
+- It lists every built file and public asset to precache, and names the cache after a hash of their content.
+- On install, the worker caches that list.
+- It answers same-origin requests from the cache, matching on the URL alone because hosts may send `Vary: Origin`.
+- Page loads go to the network first and fall back to the cached `index.html`.
+- On activate, it deletes older caches.
+
+A new worker and its cache take over only once every open tab of the old build is closed. An online reload already gets the new build from the network, and since nothing is loaded lazily, a page never mixes files from two builds. The worker is registered only in production builds and assumes the app is hosted at the root path. If registration fails, the app still runs but needs the network to load.
 
 ## Configuration
 
@@ -55,8 +63,8 @@ There are no environment variables (`.env.example` declares none) and no runtime
 
 ## Testing
 
-- Unit: Vitest, colocated as `src/**/*.test.ts`. It covers storage, CSV parsing and export, import merging and its summary, session and set models, the active session, progress series, metrics and personal records, rest timer rules, clock formatting, the hold phase, plan building, archive, restore and delete, dates, and the shared controls' sizing and colour rules. Run `npm test`.
-- End to end: Playwright in `tests/e2e/`, against the built app on port 4173 (set `E2E_PORT` to use another) in a Pixel 7 mobile Chromium profile. There is one spec per area: plans and new plan, Log home, the session list and set logging, rest timers and their cleanup, timed sets, finish and save, save failures, progress, the Data screen, the app shell, fonts, shared controls (44 px hit areas) and a smoke load of the three tabs. `session-journey.spec.ts` runs a whole session from Log home to Recent. Run `npm run test:e2e`.
+- Unit: Vitest, colocated as `src/**/*.test.ts`. It covers storage, CSV parsing and export, import merging and its summary, session and set models, the active session, progress series, metrics and personal records, rest timer rules, clock formatting, the hold phase, plan building, archive, restore and delete, dates, and the shared controls' sizing and colour rules. `build/serviceWorker.test.ts` checks the worker's precache list and cache name against a real build. Run `npm test`.
+- End to end: Playwright in `tests/e2e/`, against the built app on port 4173 (set `E2E_PORT` to use another) in a Pixel 7 mobile Chromium profile. There is one spec per area: plans and new plan, Log home, the session list and set logging, rest timers and their cleanup, timed sets, offline reload through the service worker, finish and save, save failures, progress, the Data screen, the app shell, fonts, shared controls (44 px hit areas) and a smoke load of the three tabs. `session-journey.spec.ts` runs a whole session from Log home to Recent. Run `npm run test:e2e`.
 - Accessibility: axe (WCAG 2.1 A and AA) runs inside those specs on each screen and its main states, and `accessibility.spec.ts` adds the three tabs, the plan sheets and the new-plan form. `npm run test:e2e` runs all of it; `npx playwright test accessibility` runs only that file.
 - Lint and types: `npm run lint` and `npx tsc -b`.
 - Continuous integration: none configured.

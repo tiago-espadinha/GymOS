@@ -14,3 +14,11 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 )
+
+// sw.js only exists in production builds. If registration fails the app still works,
+// it just needs the network to load.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  navigator.serviceWorker
+    .register('/sw.js')
+    .catch((error: unknown) => console.warn('Offline support unavailable:', error))
+}
