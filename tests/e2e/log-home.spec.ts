@@ -92,9 +92,9 @@ test('the plan picker lists active plans only, keyboard first, and the pick is w
   await expect(page.getByRole('heading', { name: 'Leg day', level: 1 })).toBeVisible()
 })
 
-test('the plan chevron keeps to the right edge, centred on the name however many lines it takes', async ({ page }) => {
+test('the plan name takes three lines at most, with its chevron at the right edge, centred on it', async ({ page }) => {
   await openLog(page)
-  for (const name of ['Push day', 'Hypertrophyblockweekone', 'Upper body hypertrophy block']) {
+  for (const name of ['Push day', 'Hypertrophyblockweekone', 'Upper body hypertrophy block', 'Full body strength and conditioning week one', 'Twelve week powerbuilding programme with deload and peaking phases for meet day']) {
     await page.evaluate((n) => {
       const p = JSON.parse(localStorage.getItem('gym:plans')!)
       p[0].name = n
@@ -105,7 +105,8 @@ test('the plan chevron keeps to the right edge, centred on the name however many
     await expect(planButton(page)).toHaveAccessibleName(`Training plan: ${name}`)
     await expect(planButton(page).locator('svg')).toBeVisible()
     const layout = await planButton(page).evaluate((button) => {
-      const text = button.querySelector('.logHomeHeadline')!.getBoundingClientRect()
+      const headline = button.querySelector('.logHomeHeadline')!
+      const text = headline.getBoundingClientRect()
       const icon = button.querySelector('svg')!.getBoundingClientRect()
       const date = button.closest('section')!.querySelector('.logHomeBlockTop svg')!.getBoundingClientRect()
       const block = button.closest('section')!
@@ -114,9 +115,10 @@ test('the plan chevron keeps to the right edge, centred on the name however many
         rightEdge: Math.abs(icon.right - date.right) <= 1,
         centred: Math.abs((icon.top + icon.bottom) / 2 - (text.top + text.bottom) / 2) <= 1,
         fits: block.scrollWidth <= block.clientWidth,
+        atMostThreeLines: text.height <= 3 * parseFloat(getComputedStyle(headline).lineHeight) + 1,
       }
     })
-    expect(layout, name).toEqual({ beside: true, rightEdge: true, centred: true, fits: true })
+    expect(layout, name).toEqual({ beside: true, rightEdge: true, centred: true, fits: true, atMostThreeLines: true })
   }
 })
 
