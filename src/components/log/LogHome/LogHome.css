@@ -53,12 +53,6 @@ span.logHomeLead {
   font-size: var(--text-secondary);
 }
 
-/* Change sits beside the name, or under it when the name needs the width. */
-.logHomePlan .logHomeHeadline {
-  min-width: auto;
-  max-width: 100%;
-}
-
 .logHomeChoice {
   display: inline-flex;
   flex-shrink: 0;
@@ -75,12 +69,9 @@ span.logHomeLead {
   cursor: pointer;
 }
 
+/* The whole name is the plan picker; a chevron after it says so, like the date. */
 .logHomePlan {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-3);
+  display: block;
   padding: 0;
   border: 0;
   background: none;
@@ -88,6 +79,15 @@ span.logHomeLead {
   font-family: inherit;
   text-align: left;
   cursor: pointer;
+}
+
+/* After the last word, or under the name when that word fills the line. */
+.logHomePlanChevron {
+  width: 0.45em;
+  height: 0.45em;
+  margin-left: 0.06em;
+  vertical-align: 0.15em;
+  stroke-width: 3.5;
 }
 
 .logHomeChoice:focus-visible,
@@ -285,7 +285,7 @@ span.logHomeLead {
   }
 
   /* Change plan sits beside Start instead. */
-  .logHomePlan .logHomeChoice {
+  .logHomePlanChevron {
     display: none;
   }
 
