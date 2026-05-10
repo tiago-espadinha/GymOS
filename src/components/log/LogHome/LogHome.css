@@ -91,6 +91,26 @@ span.logHomeLead {
   min-width: 0;
 }
 
+/*
+ * Three lines at most (useFitLines sets data-fit): hero size, then screen-title, then
+ * section-title, cut with an ellipsis only if even that needs more. The picker and the
+ * accessible name keep the full name.
+ */
+.logHomePlan .logHomeHeadline[data-fit="1"] {
+  font-size: var(--text-screen-title);
+  line-height: var(--leading-screen-title);
+}
+
+.logHomePlan .logHomeHeadline[data-fit="2"] {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: var(--text-section-title-lg);
+  line-height: 0.9;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
 .logHomePlanChevron {
   flex-shrink: 0;
   width: var(--space-7);
