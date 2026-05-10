@@ -86,10 +86,9 @@ export function LogHome({ plans, sessions, date, onDateChange, onStart, onEdit, 
           </div>
           <button type="button" className="logHomePlan" aria-haspopup="dialog" onClick={() => setOpen("plan")}>
             <span className="visuallyHidden">Training plan: </span>
-            <span className="logHomeHeadline">{plan.name}</span>
-            <span className="logHomeChoice">
-              Change
-              <ChevronIcon />
+            <span className="logHomeHeadline">
+              {plan.name}
+              <ChevronIcon className="logHomePlanChevron" />
             </span>
           </button>
           <span className="logHomeLead">{planTrainedSummary(plan, sessions, today())}</span>
