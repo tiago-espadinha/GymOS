@@ -33,14 +33,14 @@
   /* Type scale: size / line-height */
   --text-timer: 200px;
   --leading-timer: 0.78;
-  --text-hero: 120px;
-  --leading-hero: 0.8;
+  --text-hero: 100px;
+  --leading-hero: 0.9;
   --text-stat: 112px;
   --leading-stat: 0.82;
   --text-count: 72px;
   --leading-count: 0.9;
   --text-screen-title: 88px;
-  --leading-screen-title: 0.82;
+  --leading-screen-title: 0.9;
   --text-stepper: 60px;
   --text-stepper-long: 36px; /* a value like 37.5 in a half-width stepper */
   --leading-stepper: 0.95;

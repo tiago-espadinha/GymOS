@@ -6,20 +6,20 @@ function lineCount(el: HTMLElement): number {
 }
 
 /**
- * Sets `data-fit` on the element to the first of `steps` (0, 1, …) at which its text
- * takes at most `maxLines` lines, or to the last step. CSS maps each step to a smaller
- * type size. It fits again when the text, the parent's width or the web font changes.
+ * Sets `data-fit` on the element to the first step (0, 1, …) at which its text takes
+ * at most `maxLines[step]` lines, or to the last step. CSS maps each step to a type
+ * size. It fits again when the text, the parent's width or the web font changes.
  */
-export function useFitLines(ref: RefObject<HTMLElement | null>, text: string, maxLines: number, steps: number) {
+export function useFitLines(ref: RefObject<HTMLElement | null>, text: string, maxLines: readonly number[]) {
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     let live = true;
     const fit = () => {
       if (!live) return;
-      for (let step = 0; step < steps; step++) {
+      for (const [step, max] of maxLines.entries()) {
         el.dataset.fit = String(step);
-        if (lineCount(el) <= maxLines) return;
+        if (lineCount(el) <= max) return;
       }
     };
     fit();
@@ -30,5 +30,5 @@ export function useFitLines(ref: RefObject<HTMLElement | null>, text: string, ma
       live = false;
       observer?.disconnect();
     };
-  }, [ref, text, maxLines, steps]);
+  }, [ref, text, maxLines]);
 }
