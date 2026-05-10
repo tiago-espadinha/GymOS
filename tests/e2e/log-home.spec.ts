@@ -92,7 +92,7 @@ test('the plan picker lists active plans only, keyboard first, and the pick is w
   await expect(page.getByRole('heading', { name: 'Leg day', level: 1 })).toBeVisible()
 })
 
-test('the plan name takes three lines at most, with its chevron at the right edge, centred on it', async ({ page }) => {
+test('the plan name is never taller than two hero lines, with its chevron at the right edge, centred on it', async ({ page }) => {
   await openLog(page)
   for (const name of ['Push day', 'Hypertrophyblockweekone', 'Upper body hypertrophy block', 'Full body strength and conditioning week one', 'Twelve week powerbuilding programme with deload and peaking phases for meet day']) {
     await page.evaluate((n) => {
@@ -115,10 +115,17 @@ test('the plan name takes three lines at most, with its chevron at the right edg
         rightEdge: Math.abs(icon.right - date.right) <= 1,
         centred: Math.abs((icon.top + icon.bottom) / 2 - (text.top + text.bottom) / 2) <= 1,
         fits: block.scrollWidth <= block.clientWidth,
-        atMostThreeLines: text.height <= 3 * parseFloat(getComputedStyle(headline).lineHeight) + 1,
+        heroHeight: (() => {
+          const root = getComputedStyle(document.documentElement)
+          const twoHeroLines = 2 * parseFloat(root.getPropertyValue('--text-hero')) * parseFloat(root.getPropertyValue('--leading-hero'))
+          const lines = Math.round(headline.scrollHeight / parseFloat(getComputedStyle(headline).lineHeight))
+          if ((headline as HTMLElement).dataset.fit === '0') return lines <= 2 && text.height <= twoHeroLines + 1
+          // Smaller type: three lines fill exactly the height of two hero lines.
+          return text.height <= twoHeroLines + 1 && (lines < 3 || Math.abs(text.height - twoHeroLines) <= 1)
+        })(),
       }
     })
-    expect(layout, name).toEqual({ beside: true, rightEdge: true, centred: true, fits: true, atMostThreeLines: true })
+    expect(layout, name).toEqual({ beside: true, rightEdge: true, centred: true, fits: true, heroHeight: true })
   }
 })
 

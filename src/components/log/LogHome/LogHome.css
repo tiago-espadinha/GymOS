@@ -92,19 +92,15 @@ span.logHomeLead {
 }
 
 /*
- * Three lines at most (useFitLines sets data-fit): hero size, then screen-title, then
- * section-title, cut with an ellipsis only if even that needs more. The picker and the
- * accessible name keep the full name.
+ * Never taller than two hero lines (useFitLines sets data-fit). A longer name takes
+ * three lines of a size that fills that same height, cut with an ellipsis only if it
+ * needs more. The 0.9 leading keeps the clamp from clipping letter tops. The picker and
+ * the accessible name keep the full name.
  */
 .logHomePlan .logHomeHeadline[data-fit="1"] {
-  font-size: var(--text-screen-title);
-  line-height: var(--leading-screen-title);
-}
-
-.logHomePlan .logHomeHeadline[data-fit="2"] {
   display: -webkit-box;
   overflow: hidden;
-  font-size: var(--text-section-title-lg);
+  font-size: calc(var(--text-hero) * var(--leading-hero) * 2 / (3 * 0.9));
   line-height: 0.9;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
