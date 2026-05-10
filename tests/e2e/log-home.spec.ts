@@ -92,14 +92,9 @@ test('the plan picker lists active plans only, keyboard first, and the pick is w
   await expect(page.getByRole('heading', { name: 'Leg day', level: 1 })).toBeVisible()
 })
 
-test('a chevron after the plan name marks it as the picker, or sits under it when the last word fills the line', async ({ page }) => {
+test('the plan chevron keeps to the right edge, centred on the name however many lines it takes', async ({ page }) => {
   await openLog(page)
-  const cases = [
-    { name: 'Push day', inline: true },
-    { name: 'Hypertrophyblockweekone', inline: true },
-    { name: 'Upper body hypertrophy block', inline: false },
-  ]
-  for (const { name, inline } of cases) {
+  for (const name of ['Push day', 'Hypertrophyblockweekone', 'Upper body hypertrophy block']) {
     await page.evaluate((n) => {
       const p = JSON.parse(localStorage.getItem('gym:plans')!)
       p[0].name = n
@@ -108,23 +103,20 @@ test('a chevron after the plan name marks it as the picker, or sits under it whe
     await page.reload()
     await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Log' }).click()
     await expect(planButton(page)).toHaveAccessibleName(`Training plan: ${name}`)
-    const chevron = planButton(page).locator('svg')
-    await expect(chevron).toBeVisible()
+    await expect(planButton(page).locator('svg')).toBeVisible()
     const layout = await planButton(page).evaluate((button) => {
-      const range = document.createRange()
-      range.selectNodeContents(button.querySelector('.logHomeHeadline')!.firstChild!)
-      const lines = [...range.getClientRects()].filter((r) => r.width > 0)
-      const last = lines[lines.length - 1]
+      const text = button.querySelector('.logHomeHeadline')!.getBoundingClientRect()
       const icon = button.querySelector('svg')!.getBoundingClientRect()
+      const date = button.closest('section')!.querySelector('.logHomeBlockTop svg')!.getBoundingClientRect()
       const block = button.closest('section')!
-      const sameLine = icon.top >= last.top && icon.bottom <= last.bottom
       return {
-        inline: sameLine && icon.left >= last.right - 1,
-        under: icon.top >= last.bottom - 1,
+        beside: icon.left >= text.right,
+        rightEdge: Math.abs(icon.right - date.right) <= 1,
+        centred: Math.abs((icon.top + icon.bottom) / 2 - (text.top + text.bottom) / 2) <= 1,
         fits: block.scrollWidth <= block.clientWidth,
       }
     })
-    expect(layout, name).toEqual({ inline, under: !inline, fits: true })
+    expect(layout, name).toEqual({ beside: true, rightEdge: true, centred: true, fits: true })
   }
 })
 

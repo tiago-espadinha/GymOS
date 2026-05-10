@@ -69,9 +69,15 @@ span.logHomeLead {
   cursor: pointer;
 }
 
-/* The whole name is the plan picker; a chevron after it says so, like the date. */
+/*
+ * The whole name is the plan picker. Its chevron keeps to the right edge, under the
+ * date's, centred on the name however many lines it takes.
+ */
 .logHomePlan {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
   padding: 0;
   border: 0;
   background: none;
@@ -81,13 +87,15 @@ span.logHomeLead {
   cursor: pointer;
 }
 
-/* After the last word, or under the name when that word fills the line. */
+.logHomePlan .logHomeHeadline {
+  min-width: 0;
+}
+
 .logHomePlanChevron {
-  width: 0.45em;
-  height: 0.45em;
-  margin-left: 0.06em;
-  vertical-align: 0.15em;
-  stroke-width: 3.5;
+  flex-shrink: 0;
+  width: var(--space-7);
+  height: var(--space-7);
+  stroke-width: 3;
 }
 
 .logHomeChoice:focus-visible,
