@@ -7,7 +7,7 @@ interface SwitchProps {
   onChange: (checked: boolean) => void;
 }
 
-/** A full-width row with a pill switch on the right; lime when on. */
+/** A full-width row with a squared switch on the right that prints its state; lime when on. */
 export function Switch({ label, description, checked, onChange }: SwitchProps) {
   return (
     <button type="button" role="switch" aria-checked={checked} className="switch" onClick={() => onChange(!checked)}>
@@ -17,6 +17,7 @@ export function Switch({ label, description, checked, onChange }: SwitchProps) {
       </span>
       <span className="switch__track" aria-hidden="true">
         <span className="switch__thumb" />
+        <span className="switch__state">{checked ? 'On' : 'Off'}</span>
       </span>
     </button>
   );

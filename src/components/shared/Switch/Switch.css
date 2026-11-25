@@ -37,32 +37,51 @@
   color: var(--color-text-muted);
 }
 
-/* Off: an outlined track with the thumb on the left. On: lime with a black thumb on the right. */
+/*
+ * A squared block, not a pill: the segment radius, a square thumb and the state
+ * printed inside the track. Off: outlined, grey thumb left, "OFF" muted. On: lime, the thumb
+ * moves right and "ON" reads black on lime.
+ */
 .switch__track {
   flex: none;
   display: flex;
   align-items: center;
-  width: 52px;
-  height: 32px;
+  width: 76px;
+  height: 36px;
   box-sizing: border-box;
-  padding: 2px;
+  padding: 3px;
   border: var(--border-chip);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-segment);
 }
 
 .switch__thumb {
-  width: 24px;
-  height: 24px;
-  border-radius: var(--radius-pill);
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: calc(var(--radius-segment) / 2);
   background: var(--color-line-empty);
 }
 
+.switch__state {
+  flex: 1;
+  text-align: center;
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-button);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
 .switch[aria-checked='true'] .switch__track {
-  justify-content: flex-end;
+  flex-direction: row-reverse;
   border-color: var(--color-accent);
   background: var(--color-accent);
 }
 
 .switch[aria-checked='true'] .switch__thumb {
   background: var(--color-on-accent);
+}
+
+.switch[aria-checked='true'] .switch__state {
+  color: var(--color-on-accent);
 }

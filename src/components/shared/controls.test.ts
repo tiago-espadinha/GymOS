@@ -50,6 +50,19 @@ describe('Switch', () => {
     expect(onChange).toHaveBeenCalledExactlyOnceWith(false)
   })
 
+  it('prints On or Off to match its state', () => {
+    expect(render(createElement(Switch, { label: 'x', checked: true, onChange: noop }))).toContain('>On<')
+    expect(render(createElement(Switch, { label: 'x', checked: false, onChange: noop }))).toContain('>Off<')
+  })
+
+  it('is a squared block: segment radius, square thumb, thumb moves right and the state reads on lime', () => {
+    const css = cssOf('Switch')
+    expect(css).toMatch(/\.switch__track\s*{[^}]*border-radius: var\(--radius-segment\)/)
+    expect(css).not.toContain('--radius-pill')
+    expect(css).toMatch(/\.switch\[aria-checked='true'\] \.switch__track\s*{[^}]*flex-direction: row-reverse/)
+    expect(css).toMatch(/\.switch\[aria-checked='true'\] \.switch__state\s*{[^}]*color: var\(--color-on-accent\)/)
+  })
+
   it('turns lime when on and has a 44px+ row', () => {
     const css = cssOf('Switch')
     expect(css).toMatch(/\.switch\[aria-checked='true'\] \.switch__track\s*{[^}]*background: var\(--color-accent\)/)
