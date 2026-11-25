@@ -20,10 +20,10 @@ interface RestBlockProps {
   // True right after "Set done": start the rest. A rest restored from storage is left as it was.
   autoStart: boolean;
   // Called with the seconds the rest lasted, overtime included.
-  onSkip: (restSeconds: number) => void;
+  onEnd: (restSeconds: number) => void;
 }
 
-export function RestBlock({ setId, setNumber, meta, timed = false, category, autoStart, onSkip }: RestBlockProps) {
+export function RestBlock({ setId, setNumber, meta, timed = false, category, autoStart, onEnd }: RestBlockProps) {
   const {
     isRunning, isComplete, elapsedMs, targetMs, overtimeMs, progress, formattedTarget,
     start, reset, adjustTargetSec,
@@ -34,14 +34,14 @@ export function RestBlock({ setId, setNumber, meta, timed = false, category, aut
 
   useEffect(() => {
     if (autoStart && !isRunning && elapsedMs === 0) start();
-    // Only on mount: a later pause or skip must not restart the rest.
+    // Only on mount: a later pause or End rest must not restart the rest.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const skip = () => {
+  const end = () => {
     const restSeconds = Math.round(elapsedMs / 1000);
     reset();
-    onSkip(restSeconds);
+    onEnd(restSeconds);
   };
 
   return (
@@ -58,7 +58,8 @@ export function RestBlock({ setId, setNumber, meta, timed = false, category, aut
       {/* Past the target a shorter rest means nothing, so −step goes. */}
       {!over && <TimerButton onClick={() => adjustTargetSec(-step)}>−{step}s</TimerButton>}
       <TimerButton onClick={() => adjustTargetSec(step)}>+{step}s</TimerButton>
-      <TimerButton onClick={skip} wide={over}>{over ? "Done resting" : "Skip"}</TimerButton>
+      {/* One label before and after the target, so the way out never moves or changes. */}
+      <TimerButton onClick={end} wide>End rest</TimerButton>
     </TimerBlock>
   );
 }

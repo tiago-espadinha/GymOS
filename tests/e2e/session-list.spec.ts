@@ -87,7 +87,7 @@ test('with no rest running the strip is hidden, also after a rest is skipped', a
   await expect(strip(page)).toHaveCount(0)
   await row(page, 'Bench press').click()
   await logSet(page, '60', '8')
-  await page.getByRole('button', { name: 'Skip' }).click()
+  await page.getByRole('button', { name: 'End rest' }).click()
   await allExercises(page)
   await expect(strip(page)).toHaveCount(0)
 })
@@ -112,7 +112,7 @@ test('the all-done list has no detectable WCAG A/AA violations', async ({ page }
   for (const name of ['Bench press', 'Cable row', 'Lateral raise']) {
     await row(page, name).click()
     await logSet(page, '20', '10')
-    await page.getByRole('button', { name: 'Skip' }).click()
+    await page.getByRole('button', { name: 'End rest' }).click()
     await allExercises(page)
   }
   await expect(page.getByText('All 3 exercises done')).toBeVisible()
@@ -131,7 +131,7 @@ test('the exercise screen shows last time and seeds the steppers from it, then f
   await expect(reps(page)).toHaveValue('11')
   await page.getByRole('button', { name: 'Set done' }).click()
   await expect(page.getByRole('timer', { name: /^Rest/ })).toBeVisible()
-  await page.getByRole('button', { name: 'Skip' }).click()
+  await page.getByRole('button', { name: 'End rest' }).click()
 
   await expect(sets(page).first()).toContainText('37.5 kg × 11')
   await expect(sets(page).nth(1)).toContainText('Now')
@@ -146,7 +146,7 @@ test('typed values are accepted, and a comma reads as a decimal point', async ({
   await reps(page).fill('8x')
   await expect(reps(page)).toHaveValue('8')
   await page.getByRole('button', { name: 'Set done' }).click()
-  await page.getByRole('button', { name: 'Skip' }).click()
+  await page.getByRole('button', { name: 'End rest' }).click()
   await expect(sets(page).first()).toContainText('62.5 kg × 8')
 })
 
@@ -154,9 +154,9 @@ test('Set done keeps adding sets; there is no Add set button', async ({ page }) 
   await row(page, 'Bench press').click()
   await expect(page.getByRole('button', { name: /Add set/ })).toHaveCount(0)
   await logSet(page, '60', '8')
-  await page.getByRole('button', { name: 'Skip' }).click()
+  await page.getByRole('button', { name: 'End rest' }).click()
   await logSet(page, '60', '6')
-  await page.getByRole('button', { name: 'Skip' }).click()
+  await page.getByRole('button', { name: 'End rest' }).click()
   await expect(sets(page)).toHaveCount(3)
   await expect(sets(page).nth(1)).toContainText('60 kg × 6')
 })
@@ -164,7 +164,7 @@ test('Set done keeps adding sets; there is no Add set button', async ({ page }) 
 test('editing a done set changes it, Finish totals follow and it survives a reload', async ({ page }) => {
   await row(page, 'Bench press').click()
   await logSet(page, '60', '8')
-  await page.getByRole('button', { name: 'Skip' }).click()
+  await page.getByRole('button', { name: 'End rest' }).click()
 
   await page.getByRole('button', { name: 'Edit set 1' }).click()
   await expect(page.getByText('Edit set 1')).toBeVisible()
@@ -188,9 +188,9 @@ test('editing a done set changes it, Finish totals follow and it survives a relo
 test('Cancel leaves a done set unchanged; Delete set removes it', async ({ page }) => {
   await row(page, 'Bench press').click()
   await logSet(page, '60', '8')
-  await page.getByRole('button', { name: 'Skip' }).click()
+  await page.getByRole('button', { name: 'End rest' }).click()
   await logSet(page, '65', '6')
-  await page.getByRole('button', { name: 'Skip' }).click()
+  await page.getByRole('button', { name: 'End rest' }).click()
 
   await page.getByRole('button', { name: 'Edit set 1' }).click()
   await weight(page).fill('100')
@@ -206,7 +206,7 @@ test('Cancel leaves a done set unchanged; Delete set removes it', async ({ page 
 test('the edit state has no detectable WCAG A/AA violations', async ({ page }) => {
   await row(page, 'Bench press').click()
   await logSet(page, '60', '8')
-  await page.getByRole('button', { name: 'Skip' }).click()
+  await page.getByRole('button', { name: 'End rest' }).click()
   await page.getByRole('button', { name: 'Edit set 1' }).click()
   await axe(page)
 })

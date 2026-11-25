@@ -167,7 +167,7 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, he
           timed={timed}
           category={meta.category}
           autoStart={rest.fresh}
-          onSkip={(seconds) => endRest(rest.setId, seconds)}
+          onEnd={(seconds) => endRest(rest.setId, seconds)}
         />
       )}
 

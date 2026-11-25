@@ -54,7 +54,7 @@ export function TimerBlock({ tone, label, setNumber, meta, countdown, caption, f
   );
 }
 
-// wide: takes twice the room, for a label that would wrap ("Done resting").
+// wide: takes twice the room, for a label that would wrap ("End rest").
 export function TimerButton({ onClick, disabled, wide, children }: { onClick: () => void; disabled?: boolean; wide?: boolean; children: ReactNode }) {
   return (
     <button type="button" className={`timerBlockButton${wide ? " timerBlockButton--wide" : ""}`} onClick={onClick} disabled={disabled}>

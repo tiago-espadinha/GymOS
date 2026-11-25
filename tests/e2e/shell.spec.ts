@@ -58,7 +58,7 @@ test('reloading mid-session restores the session and its logged set', async ({ p
   await startPlan(page)
   await openBench(page)
   await logSet(page, '62.5', '8')
-  await page.getByRole('button', { name: 'Skip' }).click()
+  await page.getByRole('button', { name: 'End rest' }).click()
   await page.reload()
   await expect(tabBar(page)).toHaveCount(0)
   await expect(page.getByRole('heading', { name: 'Push day' })).toBeVisible()
