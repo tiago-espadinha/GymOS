@@ -35,7 +35,8 @@ interface LogTabProps {
   onUpdateExercise: (exercise: ExerciseLog) => void;
   onEnd: () => void;
   onNewPlan: () => void;
-  onImport: () => void;
+  /** Opens Settings to import a CSV; passed only while the device holds no data. */
+  onImport?: () => void;
 }
 
 export function LogTab({
@@ -178,7 +179,7 @@ export function LogTab({
           text={
             editingId
               ? "Your changes are lost. The saved session stays as it was."
-              : "The sets you logged are lost. Nothing is saved to Log or Progress."
+              : "The sets you logged are lost. Nothing is saved to Log or Stats."
           }
           confirmLabel={editingId ? "Discard changes" : "Discard session"}
           onConfirm={discardSession}

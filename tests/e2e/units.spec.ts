@@ -93,10 +93,10 @@ test('with lb chosen, weights read and are entered in lb on every Log screen', a
   await expect(page.locator('.finishRow')).toContainText('1 × 135 lb × 5')
 })
 
-test('with lb chosen, Progress figures and the chart read in lb', async ({ page }) => {
+test('with lb chosen, Stats figures and the chart read in lb', async ({ page }) => {
   await seed(page, { weight: 'lbs', distance: 'km' })
   await page.goto('/')
-  await page.getByText('Progress', { exact: true }).first().click()
+  await page.getByText('Stats', { exact: true }).first().click()
   await page.getByRole('group', { name: 'Metric' }).getByRole('button', { name: 'Peak', exact: true }).click()
   await expect(page.locator('.progressStatValue').first()).toHaveText('220.5lb × 5')
   // Axis ticks are whole numbers: 220 and 221 lb rather than 100 kg.

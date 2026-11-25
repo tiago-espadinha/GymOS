@@ -17,7 +17,7 @@ const sessions = [
   },
 ]
 
-const tabs = ['Plans', 'Log', 'Progress']
+const tabs = ['Plans', 'Log', 'Stats']
 
 test('New plan form, with errors, a removed exercise and the muscle group sheet, has no detectable WCAG A/AA violations', async ({ page }) => {
   const axe = async () => {
@@ -43,9 +43,9 @@ test('New plan form, with errors, a removed exercise and the muscle group sheet,
 
 for (const tab of tabs) {
   test(`${tab} tab has no detectable WCAG A/AA violations`, async ({ page }) => {
-    // Plans and Progress are scanned with data; Log keeps its empty-state scan.
+    // Plans and Stats are scanned with data; Log keeps its empty-state scan.
     if (tab !== 'Log') await page.addInitScript((p) => localStorage.setItem('gym:plans', JSON.stringify(p)), plans)
-    if (tab === 'Progress') await page.addInitScript((s) => localStorage.setItem('gym:sessions', JSON.stringify(s)), sessions)
+    if (tab === 'Stats') await page.addInitScript((s) => localStorage.setItem('gym:sessions', JSON.stringify(s)), sessions)
     await page.goto('/')
     await page.getByText(tab, { exact: true }).first().click()
     if (tab === 'Plans') await page.getByRole('button', { name: /^Archived · / }).click()
@@ -79,6 +79,6 @@ test('Plans sheets, toast and empty state have no detectable WCAG A/AA violation
   await page.getByRole('button', { name: 'Delete plan' }).click()
   await page.getByRole('button', { name: 'Delete Push day' }).click()
   await page.getByRole('button', { name: 'Delete plan' }).click()
-  await expect(page.getByRole('heading', { name: 'No training plans yet' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'No plans yet' })).toBeVisible()
   await scan(page)
 })

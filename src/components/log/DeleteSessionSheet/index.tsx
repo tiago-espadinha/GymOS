@@ -15,7 +15,7 @@ export function DeleteSessionSheet({ planName, date, onDelete, onClose }: Delete
     <ConfirmSheet
       kicker="Delete for good"
       title={`Delete ${planName}, ${formatDateFull(date)}?`}
-      text="The session and its sets are removed from Log and Progress and can't be restored."
+      text="The session and its sets are removed from Log and Stats and can't be restored."
       confirmLabel="Delete session"
       onConfirm={onDelete}
       onClose={onClose}

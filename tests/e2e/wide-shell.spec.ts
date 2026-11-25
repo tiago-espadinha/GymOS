@@ -27,7 +27,7 @@ test.describe('tablet, 768 wide', () => {
     expect(bar.x).toBe(84)
     expect(bar.y + bar.height).toBe(1024)
     await expect(page.getByText('GymOS', { exact: true })).toBeHidden()
-    for (const tab of ['Plans', 'Log', 'Progress']) {
+    for (const tab of ['Plans', 'Log', 'Stats']) {
       await nav(page).getByRole('button', { name: tab }).click()
       expect(await box(page, '.mainContent')).toMatchObject({ x: 84, width: 600 })
     }
@@ -42,7 +42,7 @@ test.describe('wide, 1280', () => {
     const bar = await box(page, '.shellBar')
     expect(bar).toMatchObject({ x: 0, y: 0, width: 1280, height: 72 })
     await expect(page.getByText('GymOS', { exact: true })).toBeVisible()
-    await expect(nav(page).getByRole('button')).toHaveText(['Plans', 'Log', 'Progress'])
+    await expect(nav(page).getByRole('button')).toHaveText(['Plans', 'Log', 'Stats'])
 
     const log = nav(page).getByRole('button', { name: 'Log' })
     await log.click()
@@ -55,7 +55,7 @@ test.describe('wide, 1280', () => {
     // The bar's content sits in the 1200 frame: 40 in from each side at 1280.
     const wordmark = (await page.getByText('GymOS', { exact: true }).boundingBox())!
     expect(wordmark.x).toBe(40)
-    const last = (await nav(page).getByRole('button', { name: 'Progress' }).boundingBox())!
+    const last = (await nav(page).getByRole('button', { name: 'Stats' }).boundingBox())!
     expect(last.x + last.width).toBe(1240)
   })
 
@@ -70,7 +70,7 @@ test.describe('wide, 1280', () => {
 
   test('screens without a wide layout keep the 600 column; sheets stay 560', async ({ page }) => {
     await page.goto('/')
-    await nav(page).getByRole('button', { name: 'Progress' }).click()
+    await nav(page).getByRole('button', { name: 'Stats' }).click()
     await page.getByRole('button', { name: 'Settings' }).click()
     await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible()
     expect(await box(page, '.mainContent')).toMatchObject({ x: 340, width: 600 })
@@ -86,9 +86,13 @@ test.describe('wide, 1280', () => {
     expect(await box(page, '.logHome')).toMatchObject({ x: 40, width: 1200 })
   })
 
-  test('Progress has its own two panes in the 1200 frame', async ({ page }) => {
+  test('Stats has its own two panes in the 1200 frame', async ({ page }) => {
+    const set = { id: 's', weight: '60', reps: '8', completed: true }
+    const logged = { id: 'x1', planId: 'p1', planName: 'Push day', date: '2026-01-05', notes: '',
+      exercises: [{ id: 'x', name: 'Bench press', muscleGroup: 'Chest', sets: [set] }] }
+    await page.addInitScript((s) => localStorage.setItem('gym:sessions', JSON.stringify([s])), logged)
     await page.goto('/')
-    await nav(page).getByRole('button', { name: 'Progress' }).click()
+    await nav(page).getByRole('button', { name: 'Stats' }).click()
     expect(await box(page, '.mainContent')).toMatchObject({ x: 0, width: 1280 })
     expect(await box(page, '.progressTab')).toMatchObject({ x: 40, width: 1200 })
   })

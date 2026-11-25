@@ -17,7 +17,7 @@ const raw = (page: Page) =>
   page.evaluate(() => ({ plans: localStorage.getItem('gym:plans'), sessions: localStorage.getItem('gym:sessions') }))
 
 const openSettings = async (page: Page) => {
-  await page.getByText('Progress', { exact: true }).first().click()
+  await page.getByText('Stats', { exact: true }).first().click()
   await page.getByRole('button', { name: 'Settings' }).click()
 }
 
@@ -35,7 +35,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/')
 })
 
-test('Settings opens from Progress with Data, Language, Units and Appearance in order', async ({ page }) => {
+test('Settings opens from Stats with Data, Language, Units and Appearance in order', async ({ page }) => {
   await openSettings(page)
   await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeFocused()
   await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Data', 'Language', 'Units', 'Appearance'])

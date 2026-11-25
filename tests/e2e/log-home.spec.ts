@@ -287,11 +287,11 @@ test.describe('empty', () => {
       [p, s],
     )
 
-  test('with no plans, + New plan opens New plan and Import it opens Data', async ({ page }) => {
+  test('with no data, + New plan opens New plan and Import it opens Data', async ({ page }) => {
     await seed(page, [], [])
     await openLog(page)
-    await expect(page.getByRole('heading', { name: 'No plans yet' })).toBeVisible()
-    await expect(page.getByText('Sessions you save show up here.')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'No sessions yet' })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Recent sessions' })).toHaveCount(0)
     await expect(page.getByRole('button', { name: 'Start', exact: true })).toHaveCount(0)
     await axe(page)
     await page.getByRole('button', { name: '+ New plan' }).click()
@@ -300,6 +300,15 @@ test.describe('empty', () => {
     await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Log' }).click()
     await page.getByRole('button', { name: 'Have a CSV backup? Import it' }).click()
     await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible()
+  })
+
+  test('with sessions but no active plan, the block asks for a plan and Recent stays, without Import', async ({ page }) => {
+    await seed(page, [], sessions)
+    await openLog(page)
+    await expect(page.getByRole('heading', { name: 'No plans yet' })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Recent sessions' }).getByRole('listitem').first()).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Have a CSV backup? Import it' })).toHaveCount(0)
+    await axe(page)
   })
 
   test('Recent orders by session date when storage is oldest first, as after an import', async ({ page }) => {

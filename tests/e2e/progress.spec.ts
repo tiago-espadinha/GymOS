@@ -45,7 +45,7 @@ test.beforeEach(async ({ page }) => {
     [plan, sessions] as const,
   )
   await page.goto('/')
-  await page.getByText('Progress', { exact: true }).first().click()
+  await page.getByText('Stats', { exact: true }).first().click()
 })
 
 const picker = (page: Page) => page.getByRole('button', { name: /^Exercise: / })
@@ -63,10 +63,10 @@ const range = (page: Page, name: string) =>
   page.getByRole('group', { name: 'Time range' }).getByRole('button', { name, exact: true })
 
 for (const width of [375, 768]) {
-  test(`the Progress title is the same size as the Plans title at ${width}px`, async ({ page }) => {
+  test(`the Stats title is the same size as the Plans title at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 800 })
     const titleSize = () => page.getByRole('heading', { level: 1 }).evaluate((el) => getComputedStyle(el).fontSize)
-    await expect(page.getByRole('heading', { name: 'Progress', level: 1 })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Stats', level: 1 })).toBeVisible()
     const progress = await titleSize()
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
     expect(overflow).toBeLessThanOrEqual(0)
@@ -181,7 +181,7 @@ test('e1RM explains itself under the metric control', async ({ page }) => {
   await expect(figures(page)).toHaveText(['56.0kg', '72.2kg'])
 })
 
-test('Progress with data has no detectable WCAG A/AA violations', async ({ page }) => {
+test('Stats with data has no detectable WCAG A/AA violations', async ({ page }) => {
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([])
 })

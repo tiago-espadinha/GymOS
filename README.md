@@ -4,7 +4,7 @@ A phone-first gym tracker for logging a set and running a rest timer in a few ta
 
 ## Screenshots
 
-| Plans | Log | Rest timer | Progress |
+| Plans | Log | Rest timer | Stats |
 | --- | --- | --- | --- |
 | ![Plans list with Push, Pull and Legs, each with a Start button](docs/images/plans.png) | ![Log home with the Push plan ready to start and recent sessions below](docs/images/log-home.png) | ![Rest timer counting down from one minute, with the next bench press set below](docs/images/rest.png) | ![Bench press progress chart with last and best figures and personal records marked](docs/images/progress.png) |
 
@@ -14,7 +14,7 @@ A phone-first gym tracker for logging a set and running a rest timer in a few ta
 - **Session logging**: start a plan, log weight and reps with large steppers, or time a hold or a cardio effort with optional distance. Edit or delete a logged set, back-date a session, and edit or delete a saved one.
 - **Rest and hold timers**: a rest starts when a set is logged and fills its timer block as it runs, with buttons to add or take off time and to skip. A sound and vibration cue plays at the end. Timers survive switching exercises and reloading the page.
 - **Finish screen**: totals for the session, notes, then save. A newly saved session is first in Recent on the Log home.
-- **Progress**: per-exercise chart of average, peak, total or estimated one-rep max (e1RM), over the last 5 or 10 sessions, 1 or 3 months, or all time, with last and best figures and personal records marked.
+- **Stats**: per-exercise chart of average, peak, total or estimated one-rep max (e1RM), over the last 5 or 10 sessions, 1 or 3 months, or all time, with last and best figures and personal records marked.
 - **CSV import and export**: export everything to one file, in the units you chose; import a file, review what was found, then add it to your data or replace your data. A file that can't be read changes nothing.
 - **kg or lb, km or mi**: pick units in Settings and every screen, figure and export follows; the stored values are never rewritten by the choice.
 - **Accent colour**: choose lime, amber, cyan, violet or red in Settings; rest, the main button and the active tab follow it, and every option keeps black text on it readable.
@@ -22,12 +22,12 @@ A phone-first gym tracker for logging a set and running a rest timer in a few ta
 
 ## Stack
 
-React 19 and TypeScript, built with Vite. Recharts draws the progress chart. Data lives in `localStorage`. Vitest covers the logic, and Playwright drives the built app in a mobile Chromium profile, with axe checking accessibility.
+React 19 and TypeScript, built with Vite. Recharts draws the Stats chart. Data lives in `localStorage`. Vitest covers the logic, and Playwright drives the built app in a mobile Chromium profile, with axe checking accessibility.
 
 ## Engineering highlights
 
 - **Timers that survive reloads.** A running timer is stored as a start time and a target rather than a counter, so it shows the right time after a reload or a backgrounded tab (`src/hooks/useTimer.ts`; reload tests in `tests/e2e/session-list.spec.ts` and `tests/e2e/timed-set.spec.ts`).
-- **Unfinished work never leaks.** An in-progress session is kept under its own storage key and only joins the saved sessions on Save, so Progress and the CSV export see finished sessions only (`src/utils/activeSession.ts`).
+- **Unfinished work never leaks.** An in-progress session is kept under its own storage key and only joins the saved sessions on Save, so Stats and the CSV export see finished sessions only (`src/utils/activeSession.ts`).
 - **A refused save on Finish or New plan is not silent.** If the browser refuses the write, the screen stays open with a Not saved alert and Try again, and Finish offers the session as a CSV download (`tests/e2e/save-failed.spec.ts`).
 - **Import is reviewed before it writes.** The file is parsed and summarised first; nothing is stored until the user picks Add to my data or Replace my data, and a bad file leaves the data untouched (`src/utils/csv.ts`, `src/utils/importData.ts`, `tests/e2e/data.spec.ts`).
 - **Accessibility is tested, not assumed.** axe (WCAG 2.1 A and AA) runs on each screen and its main states in the end-to-end suite, and the shared controls have a 44 px minimum hit area.

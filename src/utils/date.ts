@@ -118,7 +118,7 @@ export const monthWeeks = (d: string): (string | null)[][] => {
   return Array.from({ length: cells.length / 7 }, (_, w) => cells.slice(w * 7, w * 7 + 7));
 };
 
-// "4 MAY": the Progress last/best labels.
+// "4 MAY": the Stats last/best labels.
 export const formatDateStat = (d: string, todayStr: string): string => formatDayMonth(d, todayStr).toUpperCase();
 
 export default {

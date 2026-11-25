@@ -99,13 +99,13 @@ test.describe('wide, 1280', () => {
     await expect(page.getByRole('dialog')).toHaveCount(0)
   })
 
-  test('no plans and no sessions keep their messages in the two panes', async ({ page }) => {
+  test('no plans and no sessions show the empty block with Import and no Recent', async ({ page }) => {
     await seed(page, [], [])
     await page.goto('/')
-    await expect(page.getByRole('heading', { name: 'No plans yet' })).toBeVisible()
-    await expect(recent(page).getByText('Sessions you save show up here.')).toBeVisible()
-    await expect(recent(page).getByRole('button', { name: 'Have a CSV backup? Import it' })).toBeVisible()
-    expect((await recent(page).boundingBox())!.x).toBe(520)
+    await expect(page.getByRole('heading', { name: 'No sessions yet' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Have a CSV backup? Import it' })).toBeVisible()
+    await expect(recent(page)).toHaveCount(0)
+    expect(await page.locator('.emptyState').boundingBox()).toMatchObject({ x: 400, width: 480 })
     expect((await axe(page)).violations.map((v) => v.id)).toEqual([])
   })
 

@@ -166,7 +166,7 @@ test.describe('at 1280', () => {
   test('with no active plans the phone column stays, Archived included', async ({ page }) => {
     await open(page, [plans[3]])
     await expect(page.locator('.plansTab--wide')).toHaveCount(0)
-    await expect(page.getByRole('region', { name: 'No training plans yet' })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'No plans yet' })).toBeVisible()
     expect(await page.locator('.mainContent').boundingBox()).toMatchObject({ x: 340, width: 600 })
     await expect(archivedToggle(page)).toBeVisible()
   })

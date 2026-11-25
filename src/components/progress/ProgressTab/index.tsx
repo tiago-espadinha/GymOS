@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { ChevronIcon, ChipGroup, PrimaryButton, SegmentedControl } from "../../shared";
+import { ChevronIcon, ChipGroup, EmptyState, PrimaryButton, SegmentedControl } from "../../shared";
 import { TrainingPlan, WorkoutSession, Exercise } from "../../../types";
 import { formatClock } from "../../../hooks/useTimer";
 import { formatDateStat, formatDayMonth, today } from "../../../utils/date";
@@ -44,8 +44,12 @@ interface ProgressTabProps {
   /** Settings (data, language, units), opened from here or from an empty-state import link. */
   showSettings: boolean;
   setShowSettings: (open: boolean) => void;
-  /** The empty state's way to log the exercise. */
+  /** The empty states' way to log a session. */
   onGoToLog: () => void;
+  /** The empty state's way to make a first plan. */
+  onNewPlan: () => void;
+  /** Opens Settings to import a CSV; passed only while the device holds no data. */
+  onImport?: () => void;
 }
 
 /** Exercises from active plans and from logged sessions, by name. */
@@ -156,6 +160,8 @@ export function ProgressTab({
   showSettings,
   setShowSettings,
   onGoToLog,
+  onNewPlan,
+  onImport,
 }: ProgressTabProps) {
   const [metricChoice, setMetric] = useState<MetricKind>(DEFAULT_METRIC);
   const [rangeChoice, setRange] = useState<TimeRange>("all");
@@ -206,20 +212,39 @@ export function ProgressTab({
     );
   }
 
+  const settingsEntry = (
+    <button type="button" className="progressSettings" ref={settingsButton} onClick={() => setShowSettings(true)}>
+      Settings
+    </button>
+  );
   const header = (
     <header className="progressHeader">
-      <h1 className="progressTitle">Progress</h1>
-      <button type="button" className="progressSettings" ref={settingsButton} onClick={() => setShowSettings(true)}>
-        Settings
-      </button>
+      <h1 className="progressTitle">Stats</h1>
+      {settingsEntry}
     </header>
   );
 
-  if (!selected || !meta) {
+  // Nothing to chart yet: the block's kicker names the tab, so the title is for screen readers only.
+  if (sessions.length === 0 || !selected || !meta) {
+    const hasPlans = plans.some((p) => !p.isArchived);
     return (
       <div className="progressTab">
-        {header}
-        <p className="progressEmpty">No exercises found. Create a training plan first.</p>
+        <header className="progressHeader progressHeader--empty">
+          <h1 className="progressTitle visuallyHidden">Stats</h1>
+          {settingsEntry}
+        </header>
+        <EmptyState
+          kicker="Stats"
+          title="No stats yet"
+          text={
+            hasPlans
+              ? "Log your first session and the last, best and trend for each exercise show up here."
+              : "Log a few sessions and the last, best and trend for each exercise show up here."
+          }
+          action={hasPlans ? "Go to Log" : "+ New plan"}
+          onAction={hasPlans ? onGoToLog : onNewPlan}
+          onImport={onImport}
+        />
       </div>
     );
   }

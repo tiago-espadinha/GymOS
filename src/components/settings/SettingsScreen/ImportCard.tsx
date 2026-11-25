@@ -10,7 +10,7 @@ interface ImportCardProps {
   sessions: WorkoutSession[];
   setPlans: (plans: TrainingPlan[]) => void;
   setSessions: (sessions: WorkoutSession[]) => void;
-  /** See progress: leaves Settings. */
+  /** See stats: leaves Settings. */
   onSeeProgress: () => void;
 }
 
@@ -147,7 +147,7 @@ export function ImportCard({ plans, sessions, setPlans, setSessions, onSeeProgre
       {state.kind === "done" && (
         <>
           <button type="button" className="importAction importAction--accent" onClick={onSeeProgress}>
-            See progress
+            See stats
           </button>
           <button type="button" className="importCancel" onClick={chooseFile}>
             Import another file
