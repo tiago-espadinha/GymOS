@@ -60,7 +60,7 @@ test('the header shows the date and logged sets, the plan name as the title and 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Push day')
   await expect(page.getByText(/ · 0 sets$/)).toBeVisible()
   await expect(finishButton(page)).toBeDisabled()
-  await expect(page.locator('input[type="date"]')).toHaveCount(0)
+  await expect(page.getByLabel('Another day')).toHaveCount(0)
 
   await row(page, 'Bench press').click()
   await logSet(page, '60', '8')
