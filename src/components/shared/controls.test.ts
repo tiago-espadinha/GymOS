@@ -23,11 +23,11 @@ describe('Select', () => {
     expect(html).not.toContain('role="listbox"')
   })
 
-  it('is inset black with the nested radius, a 44px hit area and the lime focus border', () => {
+  it('is inset black with the nested radius, field height and the lime focus border', () => {
     const css = cssOf('Select')
     expect(css).toMatch(/\.select__button\s*{[^}]*background: var\(--color-surface-inset\)/)
     expect(css).toMatch(/\.select__button\s*{[^}]*border-radius: var\(--radius-nested\)/)
-    expect(css).toMatch(/\.select__button\s*{[^}]*min-height: var\(--size-control\)/)
+    expect(css).toMatch(/\.select__button\s*{[^}]*min-height: var\(--size-field\)/)
     expect(css).toMatch(/\.select__button:focus-visible\s*{[^}]*border-color: var\(--color-accent\)/)
     expect(css).toMatch(/\.select__chevron\s*{[^}]*color: var\(--color-text-muted\)/)
   })

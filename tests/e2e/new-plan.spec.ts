@@ -37,7 +37,9 @@ test('a plan with a strength, a calisthenics and a cardio exercise is saved and 
   await addExercise(page)
   await page.getByLabel('Exercise 3 name').fill('Run')
   await choose(page, 'Category', 'Cardio')
-  await choose(page, 'Distance unit', 'mi')
+  await expect(page.getByRole('switch', { name: /^Track distance/ })).toHaveAttribute('aria-checked', 'true')
+  await expect(page.getByText('Log km with each set')).toBeVisible()
+  await expect(group(page, 'Distance unit')).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Save plan' }).click()
   await expect(page.getByRole('button', { name: 'Start Full body' })).toBeVisible()
@@ -50,8 +52,9 @@ test('a plan with a strength, a calisthenics and a cardio exercise is saved and 
   expect(plan.exercises).toMatchObject([
     { name: 'Bench press', muscleGroup: 'Triceps', category: 'strength' },
     { name: 'Plank', category: 'calisthenics', trackingType: 'time', timeGoal: 'shorter' },
-    { name: 'Run', muscleGroup: 'Cardio', category: 'cardio', trackingType: 'time', trackDistance: true, distanceUnit: 'mi' },
+    { name: 'Run', muscleGroup: 'Cardio', category: 'cardio', trackingType: 'time', trackDistance: true },
   ])
+  expect(plan.exercises[2]).not.toHaveProperty('distanceUnit')
 })
 
 test('weight is a switch: on for strength, off for calisthenics until turned on', async ({ page }) => {
@@ -232,5 +235,16 @@ for (const width of [375, 768, 1280]) {
         .map(({ el }) => el.outerHTML.slice(0, 80)),
     )
     expect(small).toEqual([])
+  })
+}
+
+for (const width of [375, 768, 1280]) {
+  test(`the muscle group field is as tall as the Measured in control at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 })
+    await openForm(page)
+    const select = await page.getByRole('button', { name: /^Muscle group/ }).boundingBox()
+    const segmented = await group(page, 'Measured in').boundingBox()
+    expect(select?.height).toBeGreaterThan(0)
+    expect(select?.height).toBe(segmented?.height)
   })
 }

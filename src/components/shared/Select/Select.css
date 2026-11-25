@@ -12,13 +12,14 @@
   color: var(--color-text-muted);
 }
 
-/* Inset black inside a surface card, radius 12 (nested). */
+/* Inset black inside a surface card, radius 12 (nested). Field height, so it lines up
+   with a segmented control (44px segments in a 4px inset) beside it. */
 .select__button {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  min-height: var(--size-control);
+  min-height: var(--size-field);
   min-width: var(--size-control);
   padding: 0 var(--space-3) 0 var(--space-4);
   border: 2px solid transparent;
