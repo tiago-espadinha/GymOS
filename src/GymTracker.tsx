@@ -27,7 +27,7 @@ export default function GymTracker() {
   const [loaded, setLoaded] = useState(false);
   const activeSession = useActiveSession();
   const [selectedExName, setSelectedExName] = useState<string>("");
-  const [showData, setShowData] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   // New plan is modal-like: the tab bar hides and Cancel is the exit.
   const [creatingPlan, setCreatingPlan] = useState(false);
 
@@ -116,13 +116,13 @@ export default function GymTracker() {
   const showTabs = !session && !creatingPlan;
 
   const changeTab = (next: TabId) => {
-    setShowData(false);
+    setShowSettings(false);
     setTab(next);
   };
 
-  const openData = () => {
+  const openSettings = () => {
     setTab("progress");
-    setShowData(true);
+    setShowSettings(true);
   };
 
   const endSession = () => {
@@ -147,7 +147,7 @@ export default function GymTracker() {
             setPlans={storePlans}
             commitPlans={commitPlans}
             onStartPlan={handleStartPlan}
-            onImport={openData}
+            onImport={openSettings}
             creating={creatingPlan}
             onCreatingChange={setCreatingPlan}
           />
@@ -167,7 +167,7 @@ export default function GymTracker() {
               setTab("plans");
               setCreatingPlan(true);
             }}
-            onImport={openData}
+            onImport={openSettings}
           />
         )}
         {visibleTab === "progress" && (
@@ -178,8 +178,8 @@ export default function GymTracker() {
             setSessions={storeSessions}
             selectedExName={selectedExName}
             setSelectedExName={setSelectedExName}
-            showData={showData}
-            setShowData={setShowData}
+            showSettings={showSettings}
+            setShowSettings={setShowSettings}
             onGoToLog={() => changeTab("log")}
           />
         )}

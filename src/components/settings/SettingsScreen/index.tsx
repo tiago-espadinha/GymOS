@@ -4,9 +4,10 @@ import { TrainingPlan, WorkoutSession } from "../../../types";
 import { exportToCSV } from "../../../utils/csv";
 import { downloadCSV } from "../../../utils/download";
 import { ImportCard } from "./ImportCard";
-import "./DataScreen.css";
+import { PreferenceSections } from "./PreferenceSections";
+import "./SettingsScreen.css";
 
-interface DataScreenProps {
+interface SettingsScreenProps {
   plans: TrainingPlan[];
   sessions: WorkoutSession[];
   setPlans: (plans: TrainingPlan[]) => void;
@@ -22,26 +23,26 @@ function DeviceCount({ n, noun }: { n: number; noun: string }) {
   );
 }
 
-/** Export and import, opened from Progress. */
-export function DataScreen({ plans, sessions, setPlans, setSessions, onClose }: DataScreenProps) {
+/** Data, language, units and appearance on one screen, opened from Progress or an empty-state import link. */
+export function SettingsScreen({ plans, sessions, setPlans, setSessions, onClose }: SettingsScreenProps) {
   const title = useRef<HTMLHeadingElement>(null);
-  const deviceId = useId();
+  const dataId = useId();
   useEffect(() => title.current?.focus(), []);
 
   return (
     <div className="dataScreen">
       <header className="dataHeader">
         <h1 ref={title} className="dataTitle" tabIndex={-1}>
-          Data
+          Settings
         </h1>
         <button type="button" className="dataClose" onClick={onClose}>
           Close
         </button>
       </header>
 
-      <section className="dataDevice" aria-labelledby={deviceId}>
-        <h2 id={deviceId} className="dataKicker">
-          On this device
+      <section className="settingsSection" aria-labelledby={dataId}>
+        <h2 id={dataId} className="dataKicker">
+          Data
         </h2>
         <div className="dataCounts">
           <DeviceCount n={plans.length} noun="plan" />
@@ -52,15 +53,16 @@ export function DataScreen({ plans, sessions, setPlans, setSessions, onClose }: 
           }>
           Export CSV
         </PrimaryButton>
+        <ImportCard
+          plans={plans}
+          sessions={sessions}
+          setPlans={setPlans}
+          setSessions={setSessions}
+          onSeeProgress={onClose}
+        />
       </section>
 
-      <ImportCard
-        plans={plans}
-        sessions={sessions}
-        setPlans={setPlans}
-        setSessions={setSessions}
-        onSeeProgress={onClose}
-      />
+      <PreferenceSections />
     </div>
   );
 }

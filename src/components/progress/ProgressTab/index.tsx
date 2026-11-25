@@ -27,7 +27,7 @@ import {
   splitLabel,
 } from "../../../utils/progress";
 import { useMediaQuery, WIDE_QUERY } from "../../../hooks/useMediaQuery";
-import { DataScreen } from "../DataScreen";
+import { SettingsScreen } from "../../settings";
 import { ExercisePicker, ExerciseSearch } from "../ExercisePicker";
 import { ProgressChart } from "./ProgressChart";
 import "./ProgressTab.css";
@@ -39,9 +39,9 @@ interface ProgressTabProps {
   setSessions: (sessions: WorkoutSession[]) => void;
   selectedExName: string;
   setSelectedExName: (name: string) => void;
-  /** Import and export, opened from here or from the Plans empty state. */
-  showData: boolean;
-  setShowData: (open: boolean) => void;
+  /** Settings (data, language, units), opened from here or from an empty-state import link. */
+  showSettings: boolean;
+  setShowSettings: (open: boolean) => void;
   /** The empty state's way to log the exercise. */
   onGoToLog: () => void;
 }
@@ -151,24 +151,24 @@ export function ProgressTab({
   setSessions,
   selectedExName: storedExName,
   setSelectedExName,
-  showData,
-  setShowData,
+  showSettings,
+  setShowSettings,
   onGoToLog,
 }: ProgressTabProps) {
   const [metricChoice, setMetric] = useState<MetricKind>(DEFAULT_METRIC);
   const [rangeChoice, setRange] = useState<TimeRange>("all");
   const [picking, setPicking] = useState(false);
-  const dataLink = useRef<HTMLButtonElement>(null);
+  const settingsButton = useRef<HTMLButtonElement>(null);
   const returnFocus = useRef(false);
   const detailId = useId();
   const wide = useMediaQuery(WIDE_QUERY);
 
-  // Closing Data puts focus back on the link that opened it.
+  // Closing Settings puts focus back on the button that opened it.
   useEffect(() => {
-    if (showData || !returnFocus.current) return;
+    if (showSettings || !returnFocus.current) return;
     returnFocus.current = false;
-    dataLink.current?.focus();
-  }, [showData]);
+    settingsButton.current?.focus();
+  }, [showSettings]);
 
   const exercises = useMemo(() => exercisesOf(plans, sessions), [plans, sessions]);
   // Fall back to the first exercise when the stored selection no longer exists.
@@ -193,21 +193,21 @@ export function ProgressTab({
   // The sheet is phone-only: a window that turns wide closes it, so it does not reopen when it narrows again.
   if (wide && picking) setPicking(false);
 
-  if (showData) {
-    const closeData = () => {
+  if (showSettings) {
+    const closeSettings = () => {
       returnFocus.current = true;
-      setShowData(false);
+      setShowSettings(false);
     };
     return (
-      <DataScreen plans={plans} sessions={sessions} setPlans={setPlans} setSessions={setSessions} onClose={closeData} />
+      <SettingsScreen plans={plans} sessions={sessions} setPlans={setPlans} setSessions={setSessions} onClose={closeSettings} />
     );
   }
 
   const header = (
     <header className="progressHeader">
       <h1 className="progressTitle">Progress</h1>
-      <button type="button" className="progressDataLink" ref={dataLink} onClick={() => setShowData(true)}>
-        Import / export
+      <button type="button" className="progressSettings" ref={settingsButton} onClick={() => setShowSettings(true)}>
+        Settings
       </button>
     </header>
   );

@@ -299,7 +299,7 @@ test.describe('empty', () => {
     await page.getByRole('button', { name: 'Cancel' }).click()
     await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Log' }).click()
     await page.getByRole('button', { name: 'Have a CSV backup? Import it' }).click()
-    await expect(page.getByRole('heading', { name: 'Data', level: 1 })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible()
   })
 
   test('Recent orders by session date when storage is oldest first, as after an import', async ({ page }) => {

@@ -188,7 +188,7 @@ test.describe('empty', () => {
     await expect(page.getByRole('heading', { name: 'No training plans yet' })).toBeVisible()
     await expect(page.getByRole('button', { name: '+ Create New' })).toHaveCount(1)
     await page.getByRole('button', { name: 'Have a CSV backup? Import it' }).click()
-    await expect(page.getByRole('heading', { name: 'Data', level: 1 })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible()
     await tabBar(page).getByText('Plans').click()
     await page.getByRole('button', { name: '+ Create New' }).click()
     await expect(page.getByPlaceholder('e.g. Push Day')).toBeVisible()

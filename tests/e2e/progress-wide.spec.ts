@@ -53,7 +53,7 @@ test.describe('at 1280', () => {
     await expect(search(page)).not.toBeFocused()
     await expect(search(page)).toHaveAttribute('placeholder', 'Search exercises')
     await expect(pane(page).getByText('10 exercises')).toBeVisible()
-    await expect(pane(page).getByRole('button', { name: 'Import / export' })).toBeVisible()
+    await expect(pane(page).getByRole('button', { name: 'Settings' })).toBeVisible()
     await expect(page.getByRole('heading', { level: 2, name: 'Lat pulldown' })).toBeVisible()
 
     const chart = (await page.locator('.progressChart').boundingBox())!
@@ -124,12 +124,12 @@ test.describe('at 1280', () => {
     expect(parseFloat(progress)).toBeLessThan(20)
   })
 
-  test('Import / export opens Data and returns focus to its link', async ({ page }) => {
+  test('Settings opens and returns focus to its button', async ({ page }) => {
     await open(page)
-    await pane(page).getByRole('button', { name: 'Import / export' }).click()
+    await pane(page).getByRole('button', { name: 'Settings' }).click()
     await expect(pane(page)).toHaveCount(0)
     await page.getByRole('button', { name: 'Close' }).click()
-    await expect(pane(page).getByRole('button', { name: 'Import / export' })).toBeFocused()
+    await expect(pane(page).getByRole('button', { name: 'Settings' })).toBeFocused()
   })
 
   test('Progress with data has no detectable WCAG A/AA violations', async ({ page }) => {

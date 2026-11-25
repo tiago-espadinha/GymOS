@@ -114,8 +114,8 @@ test('every shared primitive has a 44px hit area and a visible focus state', asy
   await page.getByRole('button', { name: 'Progress', exact: true }).click()
   await check(page, 'Progress')
 
-  await page.getByRole('button', { name: 'Import / export' }).click()
-  await check(page, 'Data')
+  await page.getByRole('button', { name: 'Settings' }).click()
+  await check(page, 'Settings')
   await page.getByRole('button', { name: 'Close' }).click()
   await page.getByRole('button', { name: 'Plans', exact: true }).click()
 
