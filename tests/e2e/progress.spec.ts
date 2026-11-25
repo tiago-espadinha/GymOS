@@ -87,6 +87,11 @@ test('shows last and best for the chosen metric', async ({ page }) => {
 
 test('ranges narrow the chart and keep last and best', async ({ page }) => {
   await expect(caption(page)).toContainText('6 sessions')
+  await expect(page.locator('.progressAnalysis p')).toHaveText([
+    'Lat pulldown tracked across 6 sessions.',
+    '1 personal record achieved.',
+    'Overall decline of 10.0 kg/rep from first session.',
+  ])
   await expect(page.locator('.progressChart circle[fill="var(--color-accent)"]')).toHaveCount(1)
   for (const [name, text] of [['5S', 'last 5 of 6'], ['10S', '6 sessions'], ['1M', 'last 2 of 6'], ['3M', 'last 4 of 6']]) {
     await range(page, name).click()
@@ -94,7 +99,10 @@ test('ranges narrow the chart and keep last and best', async ({ page }) => {
     await expect(caption(page)).toContainText(text)
   }
   await expect(figures(page)).toHaveText(['40.0kg/rep', '57.0kg/rep'])
-  await expect(page.locator('.progressAnalysis')).toContainText('Lat pulldown tracked across 4 sessions.')
+  await expect(page.locator('.progressAnalysis p')).toHaveText([
+    'Lat pulldown tracked across 4 sessions.',
+    'Overall gain: 10.0 kg/rep.',
+  ])
 })
 
 test('ranges with no sessions are disabled and fall back to All', async ({ page }) => {
