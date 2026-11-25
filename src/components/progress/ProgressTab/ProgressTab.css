@@ -29,24 +29,27 @@
   text-transform: uppercase;
 }
 
-.progressDataLink {
+/* Typed, not an icon: type does the work of chrome. */
+.progressSettings {
   min-height: var(--size-control);
-  padding: 0;
-  border: 0;
+  padding: 0 var(--space-4);
+  border: var(--border-chip);
+  border-radius: var(--radius-pill);
   background: none;
-  color: var(--color-text-muted);
+  color: var(--color-text);
   font-family: var(--font-body);
-  font-size: var(--text-secondary);
-  font-weight: 600;
-  text-decoration: underline;
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
   cursor: pointer;
 }
 
-.progressDataLink:hover {
-  color: var(--color-text);
+.progressSettings:hover {
+  border-color: var(--color-text-muted);
 }
 
-.progressDataLink:focus-visible,
+.progressSettings:focus-visible,
 .progressPicker:focus-visible {
   outline: var(--border-focus);
   outline-offset: 2px;

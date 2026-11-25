@@ -71,8 +71,8 @@ test.describe('wide, 1280', () => {
   test('screens without a wide layout keep the 600 column; sheets stay 560', async ({ page }) => {
     await page.goto('/')
     await nav(page).getByRole('button', { name: 'Progress' }).click()
-    await page.getByRole('button', { name: 'Import / export' }).click()
-    await expect(page.getByRole('heading', { name: 'Data', level: 1 })).toBeVisible()
+    await page.getByRole('button', { name: 'Settings' }).click()
+    await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible()
     expect(await box(page, '.mainContent')).toMatchObject({ x: 340, width: 600 })
     await nav(page).getByRole('button', { name: 'Plans' }).click()
     await page.getByRole('button', { name: 'More actions for Push day' }).click()

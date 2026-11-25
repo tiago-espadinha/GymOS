@@ -20,7 +20,7 @@ interface PlansTabProps {
   /** Stores plans and reports whether the browser kept them. */
   commitPlans: (plans: TrainingPlan[]) => boolean;
   onStartPlan: (plan: TrainingPlan) => void;
-  /** Opens Import and export. */
+  /** Opens Settings, where import lives. */
   onImport: () => void;
   /** New plan is open; the shell hides the tab bar meanwhile. */
   creating: boolean;

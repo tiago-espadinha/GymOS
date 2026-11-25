@@ -10,7 +10,7 @@ interface ImportCardProps {
   sessions: WorkoutSession[];
   setPlans: (plans: TrainingPlan[]) => void;
   setSessions: (sessions: WorkoutSession[]) => void;
-  /** See progress: leaves the Data screen. */
+  /** See progress: leaves Settings. */
   onSeeProgress: () => void;
 }
 
@@ -104,11 +104,11 @@ export function ImportCard({ plans, sessions, setPlans, setSessions, onSeeProgre
 
   return (
     <section className={`importCard importCard--${state.kind}`} aria-labelledby={kickerId}>
-      <h2 ref={kicker} id={kickerId} className="dataKicker importCardKicker" tabIndex={-1}>
+      <h3 ref={kicker} id={kickerId} className="dataKicker importCardKicker" tabIndex={-1}>
         {state.kind === "error" && <WarningIcon />}
         {state.kind === "done" && <CheckIcon />}
         {KICKER[state.kind]}
-      </h2>
+      </h3>
       <div className="importCardBody" aria-live="polite">
         {state.kind === "idle" && (
           <p className="importCardText">
