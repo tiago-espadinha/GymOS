@@ -14,6 +14,7 @@ import {
   availableMetrics,
   higherIsBetterFor,
   formatMetricNumber,
+  metricInfo,
 } from "../../../utils/metrics";
 import { useUnitPrefs } from "../../../utils/unitPrefs";
 import {
@@ -31,6 +32,7 @@ import {
 import { useMediaQuery, WIDE_QUERY } from "../../../hooks/useMediaQuery";
 import { SettingsScreen } from "../../settings";
 import { ExercisePicker, ExerciseSearch } from "../ExercisePicker";
+import { MetricInfo } from "./MetricInfo";
 import { ProgressChart } from "./ProgressChart";
 import "./ProgressTab.css";
 
@@ -252,17 +254,14 @@ export function ProgressTab({
   const detail = (
     <>
       {figures && (
-        <div className="progressMetric">
+        <MetricInfo label={METRIC_LABELS[metric]} text={metricInfo(resolveBranch(meta), metric, meta.timeGoal)}>
           <SegmentedControl
             label="Metric"
             options={metricOptions.map((m) => ({ value: m, label: METRIC_LABELS[m] }))}
             value={metric}
             onChange={setMetric}
           />
-          {metric === "e1rm" && (
-            <p className="progressMetricNote">Estimated one-rep max from your best set each session (Epley).</p>
-          )}
-        </div>
+        </MetricInfo>
       )}
 
       {!figures ? (

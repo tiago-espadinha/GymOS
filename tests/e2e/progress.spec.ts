@@ -188,12 +188,34 @@ test('every session gets a node, distinct from PR rings and the latest point', a
   await expect(nodes).toHaveCount(5)
 })
 
-test('e1RM explains itself under the metric control', async ({ page }) => {
-  const note = page.getByText('Estimated one-rep max from your best set each session (Epley).')
-  await expect(note).toHaveCount(0)
+test('the info button explains the selected metric, by keyboard alone', async ({ page }) => {
+  const info = page.getByRole('button', { name: 'About Average' })
+  const panel = page.locator('.progressInfoPanel')
+  await expect(info).toHaveAttribute('aria-expanded', 'false')
+  await expect(panel).toBeHidden()
+  const box = (await info.boundingBox())!
+  expect(Math.min(box.width, box.height)).toBeGreaterThanOrEqual(44)
+
+  await info.focus()
+  await page.keyboard.press('Enter')
+  await expect(info).toHaveAttribute('aria-expanded', 'true')
+  await expect(panel).toContainText('Weight per rep across the session')
+  await expect(panel).toContainText('A PR is a session that beat every earlier one on this metric.')
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+  expect(results.violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([])
+
+  // It stays open while the metric changes, and follows it.
   await metric(page, 'e1RM').click()
-  await expect(note).toBeVisible()
+  await expect(page.getByRole('button', { name: 'About e1RM' })).toHaveAttribute('aria-expanded', 'true')
+  await expect(panel).toContainText('Epley')
   await expect(figures(page)).toHaveText(['56.0kg', '72.2kg'])
+
+  // Focus is on the e1RM segment: Escape still closes the panel and hands focus to the info button.
+  await page.keyboard.press('Escape')
+  await expect(panel).toBeHidden()
+  await expect(page.getByRole('button', { name: 'About e1RM' })).toBeFocused()
+  await page.keyboard.press('Space')
+  await expect(panel).toBeVisible()
 })
 
 test('Stats with data has no detectable WCAG A/AA violations', async ({ page }) => {
