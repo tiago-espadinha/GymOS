@@ -1,4 +1,7 @@
-/* Wide Plans only (board "B · Two panes · Plans"): the selected plan on the right. */
+/*
+ * A plan's overview: the right pane of wide Plans (board "B · Two panes · Plans"),
+ * or on the phone a screen of its own (board "plan-overview" O1, S1).
+ */
 .planDetail {
   display: flex;
   flex-direction: column;
@@ -27,11 +30,39 @@
   text-transform: uppercase;
 }
 
+/* Right after Save: the accent confirms it, with the dot so it is not colour alone. */
+.planDetail__kicker--saved {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-accent);
+}
+
+.planDetail__kicker--saved::before {
+  content: "";
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.planDetail__name:focus {
+  outline: none;
+}
+
 .planDetail__meta {
   margin: 0;
   font-size: var(--text-body-lg);
   font-weight: 600;
   color: var(--color-text-muted);
+}
+
+.planDetail__desc {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
 }
 
 .planDetail__actions {
@@ -107,4 +138,59 @@
   font-weight: 500;
   color: var(--color-text-muted);
   text-align: right;
+}
+
+/* Phone screen: "‹ Plans" (and DONE after Save) on top, Start as wide as the column allows. */
+.planDetail__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--size-control);
+}
+
+.planDetail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--size-control);
+  margin-left: calc(-1 * var(--space-2));
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.planDetail__back:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+.planDetail--screen .planDetail__actions .primary-button {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+
+/* Too narrow for name and meta side by side: the meta goes under the name. */
+.planDetail--screen .planDetail__exercise {
+  grid-template-columns: var(--size-control) minmax(0, 1fr);
+  row-gap: var(--space-1);
+  padding-block: var(--space-2);
+}
+
+.planDetail--screen .planDetail__number {
+  grid-row: span 2;
+}
+
+.planDetail--screen .planDetail__exerciseMeta {
+  font-size: var(--text-small);
+  text-align: left;
 }
