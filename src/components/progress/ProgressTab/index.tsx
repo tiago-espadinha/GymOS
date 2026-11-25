@@ -205,7 +205,7 @@ export function ProgressTab({
 
   const header = (
     <header className="progressHeader">
-      <h1 className="progressKicker">Progress</h1>
+      <h1 className="progressTitle">Progress</h1>
       <button type="button" className="progressDataLink" ref={dataLink} onClick={() => setShowData(true)}>
         Import / export
       </button>

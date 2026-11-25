@@ -62,6 +62,20 @@ const caption = (page: Page) => page.locator('.progressCaption')
 const range = (page: Page, name: string) =>
   page.getByRole('group', { name: 'Time range' }).getByRole('button', { name, exact: true })
 
+for (const width of [375, 768]) {
+  test(`the Progress title is the same size as the Plans title at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 })
+    const titleSize = () => page.getByRole('heading', { level: 1 }).evaluate((el) => getComputedStyle(el).fontSize)
+    await expect(page.getByRole('heading', { name: 'Progress', level: 1 })).toBeVisible()
+    const progress = await titleSize()
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+    expect(overflow).toBeLessThanOrEqual(0)
+    await page.getByRole('navigation', { name: 'Main' }).getByText('Plans').click()
+    await expect(page.getByRole('heading', { name: '1 Plan', level: 1 })).toBeVisible()
+    expect(progress).toBe(await titleSize())
+  })
+}
+
 test('shows last and best for the chosen metric', async ({ page }) => {
   await expect(picker(page)).toHaveAccessibleName('Exercise: Lat pulldown. Change')
   await expect(figures(page)).toHaveText(['40.0kg/rep', '57.0kg/rep'])

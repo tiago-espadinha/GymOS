@@ -8,18 +8,25 @@
 
 .progressHeader {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: flex-end;
   justify-content: space-between;
+  gap: var(--space-3);
+  /* Ruled off from the exercise below, as the Plans header is. */
+  padding-bottom: var(--space-4);
+  border-bottom: var(--border-hairline);
 }
 
-.progressKicker {
+/* The same screen title as Plans and Log. */
+.progressTitle {
+  min-width: 0;
   margin: 0;
-  font-family: var(--font-body);
-  font-size: var(--text-small);
-  font-weight: 700;
-  letter-spacing: var(--tracking-label);
+  overflow-wrap: anywhere;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-screen-title);
+  line-height: var(--leading-screen-title);
   text-transform: uppercase;
-  color: var(--color-text-muted);
 }
 
 .progressDataLink {
@@ -289,7 +296,20 @@
   }
 
   .progressPane .progressHeader {
+    align-items: center;
     margin-bottom: var(--space-3);
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  /* As in Plans, the screen title shrinks to the pane's label; the exercise name is the big title. */
+  .progressPane .progressTitle {
+    font-family: var(--font-body);
+    font-size: var(--text-small);
+    font-weight: 700;
+    line-height: var(--leading-body);
+    letter-spacing: var(--tracking-label);
+    color: var(--color-text-muted);
   }
 
   .progressPane .exercisePicker__head,

@@ -114,6 +114,16 @@ test.describe('at 1280', () => {
     await expect(page.getByRole('button', { name: 'Log', exact: true })).toHaveAttribute('aria-current', 'page')
   })
 
+  test('the Progress title shrinks to the pane label, as Plans does', async ({ page }) => {
+    await open(page)
+    const size = (el: Element) => getComputedStyle(el).fontSize
+    const progress = await pane(page).getByRole('heading', { name: 'Progress', level: 1 }).evaluate(size)
+    await page.getByRole('navigation', { name: 'Main' }).getByText('Plans').click()
+    const plans = await page.getByRole('heading', { name: '1 Plan', level: 1 }).evaluate(size)
+    expect(progress).toBe(plans)
+    expect(parseFloat(progress)).toBeLessThan(20)
+  })
+
   test('Import / export opens Data and returns focus to its link', async ({ page }) => {
     await open(page)
     await pane(page).getByRole('button', { name: 'Import / export' }).click()
