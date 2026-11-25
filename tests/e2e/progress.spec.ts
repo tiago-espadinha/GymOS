@@ -111,7 +111,7 @@ test('ranges with no sessions are disabled and fall back to All', async ({ page 
   await expect(range(page, '1M')).toBeDisabled()
   await expect(range(page, '3M')).toBeDisabled()
   await expect(range(page, 'All')).toHaveAttribute('aria-pressed', 'true')
-  await expect(caption(page).locator('span').nth(1)).toHaveText('1 session')
+  await expect(caption(page).locator('.progressCount')).toHaveText('1 session')
 })
 
 test('an exercise without sessions shows the board empty state and Go to Log opens Log', async ({ page }) => {
@@ -173,12 +173,49 @@ test('a latest PR is labelled on the chart and replaces Best with NEW PR', async
   await expect(page.locator('.progressChart')).toHaveAttribute('aria-label', /the latest one a PR$/)
 })
 
-test('e1RM explains itself under the metric control', async ({ page }) => {
-  const note = page.getByText('Estimated one-rep max from your best set each session (Epley).')
-  await expect(note).toHaveCount(0)
+test('every session gets a node, distinct from PR rings and the latest point', async ({ page }) => {
+  // Lat pulldown: six sessions, one PR (57), the latest (40) not a PR.
+  const nodes = page.locator('.progressChart [data-kind]')
+  await expect(nodes).toHaveCount(6)
+  await expect(page.locator('.progressChart [data-kind="session"]')).toHaveCount(4)
+  await expect(page.locator('.progressChart [data-kind="pr"]')).toHaveCount(1)
+  await expect(page.locator('.progressChart [data-kind="last"]')).toHaveCount(1)
+  // A plain node is a solid dot; a PR is a hollow ring, so they differ by shape as well as colour.
+  await expect(page.locator('.progressChart [data-kind="session"]').first()).toHaveAttribute('fill', 'var(--color-text)')
+  await expect(page.locator('.progressChart [data-kind="pr"]')).toHaveAttribute('fill', 'var(--color-bg)')
+  await expect(page.locator('.progressLegendSession')).toHaveText('Session')
+  await range(page, '5S').click()
+  await expect(nodes).toHaveCount(5)
+})
+
+test('the info button explains the selected metric, by keyboard alone', async ({ page }) => {
+  const info = page.getByRole('button', { name: 'About Average' })
+  const panel = page.locator('.progressInfoPanel')
+  await expect(info).toHaveAttribute('aria-expanded', 'false')
+  await expect(panel).toBeHidden()
+  const box = (await info.boundingBox())!
+  expect(Math.min(box.width, box.height)).toBeGreaterThanOrEqual(44)
+
+  await info.focus()
+  await page.keyboard.press('Enter')
+  await expect(info).toHaveAttribute('aria-expanded', 'true')
+  await expect(panel).toContainText('Weight per rep across the session')
+  await expect(panel).toContainText('A PR is a session that beat every earlier one on this metric.')
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+  expect(results.violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([])
+
+  // It stays open while the metric changes, and follows it.
   await metric(page, 'e1RM').click()
-  await expect(note).toBeVisible()
+  await expect(page.getByRole('button', { name: 'About e1RM' })).toHaveAttribute('aria-expanded', 'true')
+  await expect(panel).toContainText('Epley')
   await expect(figures(page)).toHaveText(['56.0kg', '72.2kg'])
+
+  // Focus is on the e1RM segment: Escape still closes the panel and hands focus to the info button.
+  await page.keyboard.press('Escape')
+  await expect(panel).toBeHidden()
+  await expect(page.getByRole('button', { name: 'About e1RM' })).toBeFocused()
+  await page.keyboard.press('Space')
+  await expect(panel).toBeVisible()
 })
 
 test('Stats with data has no detectable WCAG A/AA violations', async ({ page }) => {

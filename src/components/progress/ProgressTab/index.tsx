@@ -14,6 +14,7 @@ import {
   availableMetrics,
   higherIsBetterFor,
   formatMetricNumber,
+  metricInfo,
 } from "../../../utils/metrics";
 import { useUnitPrefs } from "../../../utils/unitPrefs";
 import {
@@ -31,6 +32,7 @@ import {
 import { useMediaQuery, WIDE_QUERY } from "../../../hooks/useMediaQuery";
 import { SettingsScreen } from "../../settings";
 import { ExercisePicker, ExerciseSearch } from "../ExercisePicker";
+import { MetricInfo } from "./MetricInfo";
 import { ProgressChart } from "./ProgressChart";
 import "./ProgressTab.css";
 
@@ -252,17 +254,14 @@ export function ProgressTab({
   const detail = (
     <>
       {figures && (
-        <div className="progressMetric">
+        <MetricInfo label={METRIC_LABELS[metric]} text={metricInfo(resolveBranch(meta), metric, meta.timeGoal)}>
           <SegmentedControl
             label="Metric"
             options={metricOptions.map((m) => ({ value: m, label: METRIC_LABELS[m] }))}
             value={metric}
             onChange={setMetric}
           />
-          {metric === "e1rm" && (
-            <p className="progressMetricNote">Estimated one-rep max from your best set each session (Epley).</p>
-          )}
-        </div>
+        </MetricInfo>
       )}
 
       {!figures ? (
@@ -294,21 +293,32 @@ export function ProgressTab({
               description={chartDescription(METRIC_LABELS[metric], selected.name, points, prCount)}
             />
             <figcaption className="progressCaption">
-              <span>{monthYear(points[0].date)}</span>
-              {prCount > 0 && (
-                <span className="progressLegend">
-                  <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
-                    <circle cx="7" cy="7" r="5" fill="var(--color-bg)" stroke="var(--color-accent)" strokeWidth="3" />
-                  </svg>
-                  PR
+              <span className="progressCaptionRow">
+                <span>{monthYear(points[0].date)}</span>
+                <span className="progressCount">
+                  {points.length === series.length
+                    ? `${series.length} session${series.length === 1 ? "" : "s"}`
+                    : `last ${points.length} of ${series.length} sessions`}
                 </span>
-              )}
-              <span>
-                {points.length === series.length
-                  ? `${series.length} session${series.length === 1 ? "" : "s"}`
-                  : `last ${points.length} of ${series.length} sessions`}
+                <span>{monthYear(points[points.length - 1].date)}</span>
               </span>
-              <span>{monthYear(points[points.length - 1].date)}</span>
+              {/* Its own line, so a partial range's longer count still fits a phone row. */}
+              <span className="progressKey">
+                <span className="progressLegendSession">
+                  <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+                    <circle cx="7" cy="7" r="4" fill="var(--color-text)" />
+                  </svg>
+                  Session
+                </span>
+                {prCount > 0 && (
+                  <span className="progressLegend">
+                    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+                      <circle cx="7" cy="7" r="5" fill="var(--color-bg)" stroke="var(--color-accent)" strokeWidth="3" />
+                    </svg>
+                    PR
+                  </span>
+                )}
+              </span>
             </figcaption>
           </figure>
 

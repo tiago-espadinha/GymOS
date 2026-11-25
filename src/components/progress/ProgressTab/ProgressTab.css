@@ -99,18 +99,66 @@
   gap: var(--space-2);
 }
 
-.progressMetricNote {
+.progressMetricRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* Discreet on purpose (rarely used): a small muted glyph inside a full-size hit area. */
+.progressInfo {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--size-control);
+  height: var(--size-control);
+  margin-right: calc(-1 * var(--space-2));
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.progressInfo[aria-expanded='true'] {
+  color: var(--color-text);
+}
+
+.progressInfoPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-surface);
+  background: var(--color-surface);
+}
+
+.progressInfoPanel[hidden] {
+  display: none;
+}
+
+.progressInfoPanel p {
   margin: 0;
-  font-size: var(--text-small);
+  font-size: var(--text-body);
   font-weight: 500;
+  line-height: var(--leading-body);
+}
+
+.progressInfoPanel .progressInfoPR {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-small);
   color: var(--color-text-muted);
 }
 
 .progressMetric .segmented {
+  flex: 1;
+  min-width: 0;
   display: grid;
   grid-auto-columns: minmax(0, 1fr);
   grid-auto-flow: column;
-  width: 100%;
   box-sizing: border-box;
   background: var(--color-surface);
   border-radius: var(--radius-pill);
@@ -198,7 +246,7 @@
 
 .progressCaption {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   gap: var(--space-2);
   font-size: var(--text-small);
   font-weight: 500;
@@ -272,7 +320,19 @@
   color: var(--color-text-muted);
 }
 
-.progressLegend {
+.progressCaptionRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.progressKey {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.progressLegend,
+.progressLegendSession {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -362,22 +422,9 @@
     text-transform: uppercase;
   }
 
-  /* The e1RM note sits beside the control, under it when the pane is narrow. */
+  /* The control keeps the phone column's width; the info button and its panel follow it. */
   .progressDetail .progressMetric {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2) var(--space-5);
-  }
-
-  .progressDetail .progressMetric .segmented {
-    width: 480px;
-    max-width: 100%;
-  }
-
-  .progressDetail .progressMetricNote {
-    flex: 1 1 200px;
-    max-width: 240px;
+    max-width: calc(480px + var(--size-control));
   }
 
   .progressDetail .progressStats {

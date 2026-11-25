@@ -82,6 +82,38 @@ export const METRIC_LABELS: Record<MetricKind, string> = {
   e1rm: "e1RM",
 };
 
+const METRIC_INFO: Record<MetricBranch, Partial<Record<MetricKind, string>>> = {
+  strength: {
+    average:
+      "Weight per rep across the session: everything you lifted (weight × reps, all sets) divided by your total reps.",
+    peak: "Your best set of the session, ranked by weight × reps; the chart shows its weight.",
+    total: "Volume: weight × reps added up over every set in the session.",
+    e1rm: "Estimated one-rep max from your best set each session (Epley: weight × (1 + reps ÷ 30)).",
+  },
+  reps: {
+    average: "Reps per set across the session.",
+    peak: "Most reps in one set.",
+    total: "All reps in the session added up.",
+  },
+  time: {
+    average: "Average set duration in the session.",
+    total: "Time across all sets in the session.",
+  },
+  distance: {
+    average: "Average distance per set.",
+    peak: "Your longest set.",
+    total: "Distance across all sets in the session.",
+  },
+};
+
+/** What the metric measures for this kind of exercise, in the words of the Stats info panel. */
+export function metricInfo(branch: MetricBranch, metric: MetricKind, timeGoal: TimeGoal): string {
+  if (branch === "time" && metric === "peak") {
+    return timeGoal === "longer" ? "Your longest set." : "Your shortest set.";
+  }
+  return METRIC_INFO[branch][metric] ?? "";
+}
+
 function num(v: string | undefined): number {
   const n = parseFloat(v || "");
   return isNaN(n) ? 0 : n;

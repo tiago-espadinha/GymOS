@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { computeMetric, getExerciseMeta, resolveBranch } from './metrics'
+import { availableMetrics, computeMetric, getExerciseMeta, metricInfo, resolveBranch, type MetricBranch } from './metrics'
 import type { Set } from '../types'
 
 const strength = getExerciseMeta({
@@ -63,5 +63,34 @@ describe('getExerciseMeta distance unit', () => {
 
   it('keeps a stored mi, so distances already logged in miles are not relabelled', () => {
     expect(getExerciseMeta({ category: 'cardio', distanceUnit: 'mi' }).distanceUnit).toBe('mi')
+  })
+})
+
+describe('metricInfo', () => {
+  const branches: MetricBranch[] = ['strength', 'reps', 'time', 'distance']
+
+  it('explains every metric each kind of exercise offers', () => {
+    for (const branch of branches) {
+      for (const metric of availableMetrics(branch)) {
+        expect(metricInfo(branch, metric, 'longer'), `${branch} ${metric}`).not.toBe('')
+      }
+    }
+  })
+
+  it('names the Epley estimate for e1RM', () => {
+    expect(metricInfo('strength', 'e1rm', 'longer')).toMatch(/Epley/)
+  })
+
+  it('follows the exercise goal for the peak of a timed set', () => {
+    expect(metricInfo('time', 'peak', 'longer')).toBe('Your longest set.')
+    expect(metricInfo('time', 'peak', 'shorter')).toBe('Your shortest set.')
+  })
+
+  it('never mentions weight for exercises charted without it', () => {
+    for (const branch of ['reps', 'time', 'distance'] as const) {
+      for (const metric of availableMetrics(branch)) {
+        expect(metricInfo(branch, metric, 'longer')).not.toMatch(/weight/i)
+      }
+    }
   })
 })

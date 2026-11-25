@@ -21,12 +21,18 @@ interface TooltipProps {
   payload?: Array<{ payload: ProgressPoint }>;
 }
 
-/** Lime dot on the latest point, labelled PR when it is one; a lime ring on earlier PRs. */
+// Beyond this many points the session dots shrink, so a long range still reads as a line.
+const DENSE_POINTS = 24;
+
+/**
+ * A node per session: a white dot, a hollow accent ring on a PR, and a filled accent dot on the
+ * latest point (labelled PR when it is one). data-kind names which, for tests.
+ */
 function PointDot({ cx, cy, index, lastIndex, payload }: DotProps) {
   if (cx === undefined || cy === undefined) return null;
   if (index === lastIndex) {
     return (
-      <g>
+      <g data-kind="last">
         <circle cx={cx} cy={cy} r={8} fill="var(--color-accent)" />
         {payload?.pr && (
           <text x={cx} y={cy - 20} textAnchor="end" className="progressChartPR">
@@ -36,8 +42,12 @@ function PointDot({ cx, cy, index, lastIndex, payload }: DotProps) {
       </g>
     );
   }
-  if (!payload?.pr) return null;
-  return <circle cx={cx} cy={cy} r={6} fill="var(--color-bg)" stroke="var(--color-accent)" strokeWidth={3} />;
+  if (payload?.pr) {
+    return (
+      <circle data-kind="pr" cx={cx} cy={cy} r={6} fill="var(--color-bg)" stroke="var(--color-accent)" strokeWidth={3} />
+    );
+  }
+  return <circle data-kind="session" cx={cx} cy={cy} r={lastIndex >= DENSE_POINTS ? 3 : 4} fill="var(--color-text)" />;
 }
 
 function PointTooltip({ active, payload }: TooltipProps) {

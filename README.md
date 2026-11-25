@@ -6,7 +6,7 @@ A phone-first gym tracker for logging a set and running a rest timer in a few ta
 
 | Plans | Log | Rest timer | Stats |
 | --- | --- | --- | --- |
-| ![Plans list with Push, Pull and Legs, each with a Start button](docs/images/plans.png) | ![Log home with the Push plan ready to start and recent sessions below](docs/images/log-home.png) | ![Rest timer counting down from one minute, with the next bench press set below](docs/images/rest.png) | ![Bench press progress chart with last and best figures and personal records marked](docs/images/progress.png) |
+| ![Plans list with Push, Pull and Legs, each with a Start button](docs/images/plans.png) | ![Log home with the Push plan ready to start and recent sessions below](docs/images/log-home.png) | ![Rest timer counting down from one minute, with the next bench press set below](docs/images/rest.png) | ![Bench press progress chart with last and best figures, a dot per session and personal records ringed](docs/images/progress.png) |
 
 ## Features
 
@@ -14,7 +14,7 @@ A phone-first gym tracker for logging a set and running a rest timer in a few ta
 - **Session logging**: start a plan, log weight and reps with large steppers, or time a hold or a cardio effort with optional distance. Edit or delete a logged set, back-date a session, and edit or delete a saved one.
 - **Rest and hold timers**: a rest starts when a set is logged and fills its timer block as it runs, with buttons to add or take off time and to skip. A sound and vibration cue plays at the end. Timers survive switching exercises and reloading the page.
 - **Finish screen**: totals for the session, notes, then save. A newly saved session is first in Recent on the Log home.
-- **Stats**: per-exercise chart of average, peak, total or estimated one-rep max (e1RM), over the last 5 or 10 sessions, 1 or 3 months, or all time, with last and best figures and personal records marked.
+- **Stats**: per-exercise chart of average, peak, total or estimated one-rep max (e1RM), over the last 5 or 10 sessions, 1 or 3 months, or all time, with last and best figures, a dot for every session and personal records ringed; an info button says what each metric measures.
 - **CSV import and export**: export everything to one file, in the units you chose; import a file, review what was found, then add it to your data or replace your data. A file that can't be read changes nothing.
 - **kg or lb, km or mi**: pick units in Settings and every screen, figure and export follows; the stored values are never rewritten by the choice.
 - **Accent colour**: choose lime, amber, cyan, violet or red in Settings; rest, the main button and the active tab follow it, and every option keeps black text on it readable.
