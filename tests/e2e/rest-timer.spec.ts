@@ -51,6 +51,18 @@ test('Set done is disabled until the set has values, then logs it and starts a r
   await expect(page.getByRole('img', { name: '1 of 1 sets done' })).toBeVisible()
 })
 
+test('while resting only End rest moves on: Set done is gone, the steppers stay for the next set', async ({ page }) => {
+  await logAndRest(page)
+  await expect(setDone(page)).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'End rest' })).toBeFocused()
+  const weight = page.getByRole('textbox', { name: 'Weight', exact: true })
+  await weight.fill('62.5')
+  await page.getByRole('button', { name: 'End rest' }).click()
+  await expect(timer(page)).toHaveCount(0)
+  await expect(setDone(page)).toBeFocused()
+  await expect(weight).toHaveValue('62.5')
+})
+
 test('the block fills in step with the elapsed rest', async ({ page }) => {
   await logAndRest(page)
   await page.clock.fastForward(15_000)
@@ -93,7 +105,6 @@ test('past the target the button still reads End rest and ends the rest', async 
   await logAndRest(page)
   await page.clock.fastForward(65_000)
   await expect(page.getByRole('timer', { name: /^Rest over/ })).toContainText('+0:05')
-  await expect(page.getByRole('button', { name: /Skip|Done resting/ })).toHaveCount(0)
   await page.getByRole('button', { name: 'End rest' }).click()
   await expect(timer(page)).toHaveCount(0)
   await page.getByRole('button', { name: 'All exercises' }).click()

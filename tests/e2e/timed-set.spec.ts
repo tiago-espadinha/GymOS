@@ -75,6 +75,7 @@ test('at the target the hold is logged and a lime rest starts; End rest saves th
   await page.clock.fastForward(10_000)
   await button(page, 'End rest').click()
   await expect(rest(page)).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'Plank' })).toBeFocused()
   await expect(logged(page)).toHaveText('00:15 · rest 00:10')
   // The next set is ready with the same target.
   await expect(hold(page)).toContainText('00:15')
