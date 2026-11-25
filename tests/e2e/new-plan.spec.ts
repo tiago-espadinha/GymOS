@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 
 const openForm = async (page: Page) => {
   await page.goto('/')
-  await page.getByRole('button', { name: '+ New plan' }).click()
+  await page.getByRole('button', { name: '+ Create New' }).click()
 }
 
 const storedPlans = (page: Page) =>

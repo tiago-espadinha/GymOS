@@ -48,7 +48,7 @@ async function finishWithASet(page: Page) {
 
 async function failNewPlan(page: Page) {
   await page.goto('/')
-  await page.getByRole('button', { name: '+ New plan' }).click()
+  await page.getByRole('button', { name: '+ Create New' }).click()
   await page.getByLabel('Name', { exact: true }).fill('Pull day')
   await page.getByLabel('Exercise 1 name').fill('Row')
   await refuseSaves(page)

@@ -3,7 +3,7 @@ import './PillButton.css';
 
 /**
  * lime: filled lime (Start)
- * white: filled white (+ New plan)
+ * white: filled white (+ Create New)
  * outline-white: outlined white (Finish)
  * outline-black: outlined black, for use on a filled block
  * outline-danger: outlined in the danger colour (Delete)

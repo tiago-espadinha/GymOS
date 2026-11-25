@@ -12,7 +12,7 @@ import {
   planPreview,
   planTrainedSummary,
   planSummary,
-  plansCountLabel,
+  plansTitle,
   restorePlan,
 } from "./plans";
 import { TrainingPlan, WorkoutSession } from "../types";
@@ -112,11 +112,10 @@ describe("dates and labels", () => {
     expect(archivedSummary(plan(["A"], { isArchived: true }), "2026-11-01")).toBe("Archived · 1 exercise");
   });
 
-  it("counts active and archived plans for the header", () => {
-    expect(plansCountLabel(0, 0)).toBe("No plans");
-    expect(plansCountLabel(1, 0)).toBe("1 plan");
-    expect(plansCountLabel(16, 3)).toBe("16 plans · 3 archived");
-    expect(plansCountLabel(0, 2)).toBe("No plans · 2 archived");
+  it("counts active plans in the screen title", () => {
+    expect(plansTitle(0)).toBe("Plans");
+    expect(plansTitle(1)).toBe("1 Plan");
+    expect(plansTitle(16)).toBe("16 Plans");
   });
 });
 

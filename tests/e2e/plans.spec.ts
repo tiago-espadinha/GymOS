@@ -44,9 +44,10 @@ test.describe('with plans', () => {
     await seed(page)
   })
 
-  test('the header counts active and archived plans; a row shows its exercise count and each group once', async ({ page }) => {
+  test('the title counts active plans; a row shows its exercise count and each group once', async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByText('2 plans · 1 archived')).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('2 Plans')
+    await expect(archivedToggle(page)).toHaveText(/Archived · 1/)
     await expect(page.getByText('3 exercises · Chest, Back')).toBeVisible()
     await expect(page.getByText('1 exercise · Legs')).toBeVisible()
   })
@@ -64,9 +65,9 @@ test.describe('with plans', () => {
     await expect(page.getByRole('button', { name: /^Bench press/ })).toBeVisible()
   })
 
-  test('+ New plan replaces the list and hides the tab bar until Cancel', async ({ page }) => {
+  test('+ Create New replaces the list and hides the tab bar until Cancel', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: '+ New plan' }).click()
+    await page.getByRole('button', { name: '+ Create New' }).click()
     await expect(page.getByPlaceholder('e.g. Push Day')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Plans', level: 1 })).toHaveCount(0)
     await expect(tabBar(page)).toHaveCount(0)
@@ -108,7 +109,7 @@ test.describe('with plans', () => {
     await page.getByRole('button', { name: /Archive plan/ }).click()
     const toast = page.getByRole('status').filter({ hasText: 'Push day archived' })
     await expect(toast).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Plans', level: 1 })).toBeFocused()
+    await expect(page.getByRole('heading', { name: '1 Plan', level: 1 })).toBeFocused()
     await expect(page.getByRole('button', { name: 'Start Push day' })).toHaveCount(0)
     await expect(archivedToggle(page)).toHaveText(/Archived · 2/)
     await toast.getByRole('button', { name: 'Undo' }).click()
@@ -161,7 +162,7 @@ test.describe('with plans', () => {
     await expect(page.getByRole('button', { name: 'Undo' })).toHaveCount(0)
     await page.reload()
     await expect(page.getByText('Old block')).toHaveCount(0)
-    await expect(page.getByText('2 plans', { exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('2 Plans')
   })
 
   for (const width of [375, 768, 1280]) {
@@ -180,23 +181,23 @@ test.describe('with plans', () => {
 })
 
 test.describe('empty', () => {
-  test('with no plans the empty state offers New plan and Import', async ({ page }) => {
+  test('with no plans the empty state offers Create New and Import', async ({ page }) => {
     await seed(page, [])
     await page.goto('/')
-    await expect(page.getByText('No plans', { exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Plans')
     await expect(page.getByRole('heading', { name: 'No training plans yet' })).toBeVisible()
-    await expect(page.getByRole('button', { name: '+ New plan' })).toHaveCount(1)
+    await expect(page.getByRole('button', { name: '+ Create New' })).toHaveCount(1)
     await page.getByRole('button', { name: 'Have a CSV backup? Import it' }).click()
     await expect(page.getByRole('heading', { name: 'Data', level: 1 })).toBeVisible()
     await tabBar(page).getByText('Plans').click()
-    await page.getByRole('button', { name: '+ New plan' }).click()
+    await page.getByRole('button', { name: '+ Create New' }).click()
     await expect(page.getByPlaceholder('e.g. Push Day')).toBeVisible()
   })
 
   test('with every plan archived the empty state shows above Archived', async ({ page }) => {
     await seed(page, [plans[2]])
     await page.goto('/')
-    await expect(page.getByText('No plans · 1 archived')).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Plans')
     await expect(page.getByRole('heading', { name: 'No training plans yet' })).toBeVisible()
     await expect(archivedToggle(page)).toBeVisible()
   })

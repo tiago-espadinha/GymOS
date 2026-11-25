@@ -102,8 +102,8 @@ export function neighbourOf(plans: TrainingPlan[], id: string): TrainingPlan | u
   return plans[i + 1] ?? plans[i - 1];
 }
 
-// The kicker over the Plans title: "17 plans", "16 plans · 3 archived", "No plans".
-export function plansCountLabel(active: number, archived: number): string {
-  const lead = active === 0 ? "No plans" : `${active} plan${active === 1 ? "" : "s"}`;
-  return archived ? `${lead} · ${archived} archived` : lead;
+// The Plans screen title counts active plans: "17 Plans", "1 Plan"; the empty state already says there are none.
+export function plansTitle(active: number): string {
+  if (active === 0) return "Plans";
+  return `${active} Plan${active === 1 ? "" : "s"}`;
 }
