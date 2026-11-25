@@ -92,16 +92,14 @@ span.logHomeLead {
 }
 
 /*
- * Never taller than two hero lines (useFitLines sets data-fit). A longer name takes
- * three lines of a size that fills that same height, cut with an ellipsis only if it
- * needs more. The 0.9 leading keeps the clamp from clipping letter tops. The picker and
- * the accessible name keep the full name.
+ * Never taller than two hero lines: useFitLines picks the largest size that keeps the
+ * name within that height, down to the size at which three lines fill it. A name that
+ * needs more is cut there with an ellipsis. The picker and the accessible name keep
+ * the full name.
  */
-.logHomePlan .logHomeHeadline[data-fit="1"] {
+.logHomePlan .logHomeHeadline[data-clamp] {
   display: -webkit-box;
   overflow: hidden;
-  font-size: calc(var(--text-hero) * var(--leading-hero) * 2 / (3 * 0.9));
-  line-height: 0.9;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   line-clamp: 3;

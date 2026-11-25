@@ -38,11 +38,9 @@ function NoPlans({ onNewPlan }: { onNewPlan: () => void }) {
 }
 
 // Two lines at hero size, else three lines of a size that takes the same height (LogHome.css).
-const PLAN_NAME_LINES = [2, 3] as const;
-
 function PlanName({ name }: { name: string }) {
   const ref = useRef<HTMLSpanElement>(null);
-  useFitLines(ref, name, PLAN_NAME_LINES);
+  useFitLines(ref, name, 2, 3);
   return (
     <span ref={ref} className="logHomeHeadline">
       {name}
