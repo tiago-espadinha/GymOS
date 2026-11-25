@@ -58,15 +58,3 @@ export function logDraft(exercise: ExerciseLog, draft: SetDraft): { exercise: Ex
     : [...exercise.sets, logged];
   return { exercise: { ...exercise, sets }, setId: logged.id };
 }
-
-const emptySet = (): Set => ({ id: generateId(), weight: "", reps: "" });
-
-// Adds a row below the last one in the table. When the current set is virtual
-// it becomes a real row too, so the new one shows up after it.
-export function addPendingSet(exercise: ExerciseLog): ExerciseLog {
-  const virtual = currentSetIndex(exercise) === exercise.sets.length;
-  return {
-    ...exercise,
-    sets: [...exercise.sets, ...(virtual ? [emptySet(), emptySet()] : [emptySet()])],
-  };
-}

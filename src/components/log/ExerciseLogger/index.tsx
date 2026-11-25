@@ -5,7 +5,7 @@ import { getExerciseMeta } from "../../../utils/metrics";
 import { isLoggedSet } from "../../../utils/activeSession";
 import { restTimerId } from "../../../utils/restTimers";
 import { NO_VALUES, currentSetNumber, formatSet, lastTimeLabel } from "../../../utils/sessionList";
-import { SetDraft, addPendingSet, currentSetIndex, logDraft, seedDraft } from "../../../utils/setModel";
+import { SetDraft, currentSetIndex, logDraft, seedDraft } from "../../../utils/setModel";
 import { clearTimer, formatClock, readElapsedMs, readRunningTimer } from "../../../hooks/useTimer";
 import RestBlock from "../RestBlock";
 import IdleRest from "../RestBlock/IdleRest";
@@ -79,7 +79,18 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, he
     endRest(rest.setId, seconds);
   };
 
+  // Set done and End rest each vanish when pressed, so the other one takes focus;
+  // a timed exercise has no Set done, so its title does.
+  const handOffFocus = useRef(false);
+  useEffect(() => {
+    if (!handOffFocus.current) return;
+    handOffFocus.current = false;
+    const next = rest ? ".timerBlock--rest .timerBlockButton--wide" : "[data-set-done]";
+    (rootRef.current?.querySelector<HTMLElement>(next) ?? document.getElementById(titleId))?.focus();
+  }, [rest, titleId]);
+
   const setDone = () => {
+    handOffFocus.current = true;
     const logged = logDraft(exercise, draft);
     onChange(logged.exercise);
     startRest(logged.setId);
@@ -167,7 +178,10 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, he
           timed={timed}
           category={meta.category}
           autoStart={rest.fresh}
-          onSkip={(seconds) => endRest(rest.setId, seconds)}
+          onEnd={(seconds) => {
+            handOffFocus.current = true;
+            endRest(rest.setId, seconds);
+          }}
         />
       )}
 
@@ -205,17 +219,15 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, he
               onRemove={removeSet}
             />
           )}
-          {!rest && !editing && (
-            <button type="button" className="exerciseLoggerAdd" onClick={() => onChange(addPendingSet(exercise))}>
-              + Add set
-            </button>
-          )}
           {!editing && (
             <>
               <SetSteppers draft={draft} onChange={setDraft} trackWeight={meta.trackWeight} />
-              <PrimaryButton onClick={setDone} disabled={!isLoggedSet(draftSet(draft))}>
-                Set done
-              </PrimaryButton>
+              {/* Only End rest moves on from a rest; the steppers stay to set up the next set. */}
+              {!rest && (
+                <PrimaryButton onClick={setDone} disabled={!isLoggedSet(draftSet(draft))} data-set-done>
+                  Set done
+                </PrimaryButton>
+              )}
             </>
           )}
         </>

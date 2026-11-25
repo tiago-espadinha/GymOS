@@ -64,7 +64,7 @@ test('the hold fills white in step with elapsed time', async ({ page }) => {
   expect(fill).toBe('rgb(255, 255, 255)')
 })
 
-test('at the target the hold is logged and a lime rest starts; Skip saves the rest taken', async ({ page }) => {
+test('at the target the hold is logged and a lime rest starts; End rest saves the rest taken', async ({ page }) => {
   await button(page, 'Start hold').click()
   await page.clock.fastForward(15_000)
   await expect(hold(page)).toHaveCount(0)
@@ -73,8 +73,9 @@ test('at the target the hold is logged and a lime rest starts; Skip saves the re
   expect(fill).toBe('rgb(198, 255, 61)')
   await restStarted(page)
   await page.clock.fastForward(10_000)
-  await button(page, 'Skip').click()
+  await button(page, 'End rest').click()
   await expect(rest(page)).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'Plank' })).toBeFocused()
   await expect(logged(page)).toHaveText('00:15 · rest 00:10')
   // The next set is ready with the same target.
   await expect(hold(page)).toContainText('00:15')
@@ -85,7 +86,7 @@ test('Finish early records the time held, not the target', async ({ page }) => {
   await page.clock.fastForward(7_000)
   await button(page, 'Stop and log').click()
   await expect(rest(page)).toBeVisible()
-  await button(page, 'Skip').click()
+  await button(page, 'End rest').click()
   await expect(logged(page)).toHaveText('00:07 · rest 00:00')
 })
 
@@ -153,7 +154,7 @@ test('during a chained rest the next hold shows, and Start hold now saves the re
   await expect(logged(page)).toHaveText('00:15 · rest 00:06')
 })
 
-test('a reload during a chained rest, then Skip, still saves the rest', async ({ page }) => {
+test('a reload during a chained rest, then End rest, still saves the rest', async ({ page }) => {
   await button(page, 'Start hold').click()
   await page.clock.fastForward(15_000)
   await restStarted(page)
@@ -161,7 +162,7 @@ test('a reload during a chained rest, then Skip, still saves the rest', async ({
   await page.reload()
   await page.getByRole('button', { name: /^Plank/ }).click()
   await page.clock.fastForward(4_000)
-  await button(page, 'Skip').click()
+  await button(page, 'End rest').click()
   await expect(logged(page)).toHaveText('00:15 · rest 00:08')
   await expect(button(page, 'Start hold')).toBeVisible()
 })
@@ -255,7 +256,7 @@ const axeStates: Record<string, (page: Page) => Promise<void>> = {
     await button(page, 'Start hold').click()
     await page.clock.fastForward(7_000)
     await button(page, 'Stop and log').click()
-    await button(page, 'Skip').click()
+    await button(page, 'End rest').click()
     await button(page, 'Edit set 1').click()
   },
 }
@@ -272,7 +273,7 @@ test('a hold that ends while a set is edited leaves the table and focus in place
   await button(page, 'Start hold').click()
   await page.clock.fastForward(7_000)
   await button(page, 'Stop and log').click()
-  await button(page, 'Skip').click()
+  await button(page, 'End rest').click()
   await button(page, 'Start hold').click()
   await button(page, 'Edit set 1').click()
   await page.clock.fastForward(8_000)
@@ -288,7 +289,7 @@ test('a logged hold is followed by the next hold, with no "+ Set"', async ({ pag
   await button(page, 'Start hold').click()
   await page.clock.fastForward(7_000)
   await button(page, 'Stop and log').click()
-  await button(page, 'Skip').click()
+  await button(page, 'End rest').click()
   await expect(logged(page)).toHaveCount(1)
   await expect(hold(page)).toBeVisible()
   await expect(button(page, '+ Set')).toHaveCount(0)
@@ -298,7 +299,7 @@ test('a logged hold can be edited, cancelled and deleted', async ({ page }) => {
   await button(page, 'Start hold').click()
   await page.clock.fastForward(7_000)
   await button(page, 'Stop and log').click()
-  await button(page, 'Skip').click()
+  await button(page, 'End rest').click()
   await button(page, 'Edit set 1').click()
   // A phone hides the hold while editing; the wide split keeps it in the timer half.
   const wide = page.viewportSize()!.width >= 1024
@@ -319,7 +320,7 @@ test('editing a saved timed session keeps its last set and offers the next hold'
   await button(page, 'Start hold').click()
   await page.clock.fastForward(7_000)
   await button(page, 'Stop and log').click()
-  await button(page, 'Skip').click()
+  await button(page, 'End rest').click()
   await button(page, 'All exercises').click()
   await page.getByRole('button', { name: 'Finish session' }).first().click()
   await page.getByRole('button', { name: 'Save session' }).click()
@@ -359,7 +360,7 @@ test('removing a logged hold never gives two sets the same id', async ({ page })
     await button(page, 'Start hold').click()
     await page.clock.fastForward(ms)
     await button(page, 'Stop and log').click()
-    await button(page, 'Skip').click()
+    await button(page, 'End rest').click()
   }
   const deleteSet = async (n: number) => {
     await button(page, `Edit set ${n}`).click()

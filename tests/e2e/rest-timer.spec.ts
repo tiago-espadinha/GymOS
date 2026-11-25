@@ -45,10 +45,22 @@ test('Set done is disabled until the set has values, then logs it and starts a r
   await expect(timer(page)).toBeVisible()
   await expect(timer(page)).toContainText('01:00')
   // No empty set is appended; the next one is virtual until it is logged.
-  await page.getByRole('button', { name: 'Skip' }).click()
+  await page.getByRole('button', { name: 'End rest' }).click()
   await expect(page.getByRole('list', { name: 'Sets' }).getByRole('listitem')).toHaveCount(2)
   await page.getByRole('button', { name: 'All exercises' }).click()
   await expect(page.getByRole('img', { name: '1 of 1 sets done' })).toBeVisible()
+})
+
+test('while resting only End rest moves on: Set done is gone, the steppers stay for the next set', async ({ page }) => {
+  await logAndRest(page)
+  await expect(setDone(page)).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'End rest' })).toBeFocused()
+  const weight = page.getByRole('textbox', { name: 'Weight', exact: true })
+  await weight.fill('62.5')
+  await page.getByRole('button', { name: 'End rest' }).click()
+  await expect(timer(page)).toHaveCount(0)
+  await expect(setDone(page)).toBeFocused()
+  await expect(weight).toHaveValue('62.5')
 })
 
 test('the block fills in step with the elapsed rest', async ({ page }) => {
@@ -60,14 +72,14 @@ test('the block fills in step with the elapsed rest', async ({ page }) => {
   await expect(timer(page)).toContainText('00:30')
 })
 
-test('−15s and +15s move the target; Skip ends the rest', async ({ page }) => {
+test('−15s and +15s move the target; End rest ends the rest', async ({ page }) => {
   await logAndRest(page)
   await page.getByRole('button', { name: '+15s' }).click()
   await expect(page.getByText('Target 01:15').first()).toBeVisible()
   await page.getByRole('button', { name: '−15s' }).click()
   await page.getByRole('button', { name: '−15s' }).click()
   await expect(page.getByText('Target 00:45').first()).toBeVisible()
-  await page.getByRole('button', { name: 'Skip' }).click()
+  await page.getByRole('button', { name: 'End rest' }).click()
   await expect(timer(page)).toHaveCount(0)
   await expect(page.getByRole('button', { name: /^Rest/ })).toHaveCount(0)
 })
@@ -89,10 +101,11 @@ test('a finished rest reads REST OVER, fills the block and counts up as +m:ss, h
   await expect(strip).toContainText('+0:16')
 })
 
-test('Done resting ends a finished rest', async ({ page }) => {
+test('past the target the button still reads End rest and ends the rest', async ({ page }) => {
   await logAndRest(page)
   await page.clock.fastForward(65_000)
-  await page.getByRole('button', { name: 'Done resting' }).click()
+  await expect(page.getByRole('timer', { name: /^Rest over/ })).toContainText('+0:05')
+  await page.getByRole('button', { name: 'End rest' }).click()
   await expect(timer(page)).toHaveCount(0)
   await page.getByRole('button', { name: 'All exercises' }).click()
   // The strip polls the stored timers; let one poll run on the paused clock.
