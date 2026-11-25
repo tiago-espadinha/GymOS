@@ -24,6 +24,25 @@
   white-space: nowrap;
 }
 
+/* The name and mix open the plan's overview; the row looks the same (board "plan-overview" R1). */
+.planRow__open {
+  align-self: stretch;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-segment);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.planRow__open:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
 .planRow__name {
   font-family: var(--font-display);
   font-weight: var(--weight-display);
