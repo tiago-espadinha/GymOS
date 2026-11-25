@@ -4,7 +4,7 @@
   justify-content: space-between;
   gap: var(--space-3);
   min-height: var(--size-action);
-  padding: 0 var(--gutter);
+  padding: 0 var(--space-4);
   border: 2px solid var(--color-line-strong);
   border-radius: var(--radius-surface);
   background: none;
@@ -47,6 +47,12 @@
   color: var(--color-on-inverse);
 }
 
+.dateSheet__quick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
 .dateSheet__other {
   display: flex;
   flex-direction: column;
@@ -70,10 +76,130 @@
   font-family: inherit;
   font-size: var(--text-body-lg);
   font-weight: 600;
-  color-scheme: dark;
+}
+
+.dateSheet__input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 1;
 }
 
 .dateSheet__input:focus-visible {
   outline: none;
   border-color: var(--color-accent);
+}
+
+.dateSheet__input[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.dateSheet__error {
+  margin: 0;
+  font-size: var(--text-small);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-danger);
+}
+
+.calendar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.calendar__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calendar__month {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-tab);
+  letter-spacing: var(--tracking-button);
+  text-transform: uppercase;
+}
+
+.calendar__step {
+  display: grid;
+  place-items: center;
+  width: var(--size-control);
+  height: var(--size-control);
+  border: 2px solid var(--color-line-strong);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.calendar__step--prev svg {
+  transform: rotate(90deg);
+}
+
+.calendar__step--next svg {
+  transform: rotate(-90deg);
+}
+
+.calendar__step[aria-disabled='true'] {
+  border-color: var(--color-line);
+  color: var(--color-line-empty);
+  cursor: default;
+}
+
+.calendar__step:focus-visible,
+.calendar__day:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+.calendar__grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.calendar__weekday {
+  padding-bottom: var(--space-1);
+  font-size: var(--text-small);
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.calendar__grid td {
+  padding: 0;
+  text-align: center;
+}
+
+/* Shrinks with its column below 7 × 44 (a 320 px phone) rather than overlapping. */
+.calendar__day {
+  width: 100%;
+  max-width: var(--size-control);
+  height: var(--size-control);
+  border: 2px solid transparent;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--text-body-lg);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+/* Today is ringed; the chosen day is filled white, as the chosen option above. */
+.calendar__day[aria-current='date'] {
+  border-color: var(--color-text-muted);
+}
+
+[aria-selected='true'] > .calendar__day {
+  border-color: var(--color-inverse);
+  background: var(--color-inverse);
+  color: var(--color-on-inverse);
+  font-weight: 800;
+}
+
+.calendar__day[aria-disabled='true'] {
+  color: var(--color-line-empty);
+  cursor: default;
 }

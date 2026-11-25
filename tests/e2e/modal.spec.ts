@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Locator, type Page } from '@playwright/test'
 import { finishButton, logSet } from './log-set'
 
 const plans = [
@@ -22,8 +22,8 @@ const dateButton = (page: Page) => page.getByRole('button', { name: /^Session da
 const dateSheet = (page: Page) => page.getByRole('dialog', { name: 'Session date' })
 
 /** The centre of an element, read before a sheet covers the page. */
-const centre = async (page: Page, name: string) => {
-  const box = (await page.getByRole('button', { name, exact: true }).boundingBox())!
+const centreOf = async (el: Locator) => {
+  const box = (await el.boundingBox())!
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
 }
 
@@ -32,29 +32,27 @@ const axe = async (page: Page) => {
   expect(results.violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([])
 }
 
+// The date button is the one control above the open date sheet: a click that reached it
+// would open the sheet again.
 test('a click outside a sheet only dismisses it; the control behind does not act', async ({ page }) => {
   await openLog(page)
-  const start = await centre(page, 'Start')
+  const behind = await centreOf(dateButton(page))
   await dateButton(page).click()
   await expect(dateSheet(page)).toBeVisible()
   const sheetTop = (await dateSheet(page).boundingBox())!.y
-  expect(start.y).toBeLessThan(sheetTop)
+  expect(behind.y).toBeLessThan(sheetTop)
 
-  await page.mouse.click(start.x, start.y)
+  await page.mouse.click(behind.x, behind.y)
   await expect(dateSheet(page)).toHaveCount(0)
-  // Still on Log home: Start did not begin a session.
-  await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible()
-  await expect(finishButton(page)).toHaveCount(0)
 })
 
 test('a tap outside a sheet only dismisses it', async ({ page }) => {
   await openLog(page)
-  const start = await centre(page, 'Start')
+  const behind = await centreOf(dateButton(page))
   await dateButton(page).click()
   await expect(dateSheet(page)).toBeVisible()
-  await page.touchscreen.tap(start.x, start.y)
+  await page.touchscreen.tap(behind.x, behind.y)
   await expect(dateSheet(page)).toHaveCount(0)
-  await expect(finishButton(page)).toHaveCount(0)
 })
 
 test('the page behind an open sheet is inert, and Tab stays inside the sheet', async ({ page }) => {

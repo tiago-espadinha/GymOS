@@ -150,15 +150,14 @@ test('the date sheet picks Yesterday or another past day for Start', async ({ pa
 
   await dateButton(page).click()
   await expect(sheet.getByRole('button', { name: /^Yesterday/ })).toHaveAttribute('aria-pressed', 'true')
-  await expect(sheet.getByLabel('Another day')).toHaveAttribute('max', isoDaysAgo(0))
-  await expect(sheet.getByLabel('Another day')).toHaveAttribute('min', '2000-01-01')
-  await sheet.getByLabel('Another day').fill('2026-11-01')
+  await expect(sheet.getByLabel('Another day')).toHaveAttribute('placeholder', 'DD/MM/YYYY')
+  await sheet.getByLabel('Another day').fill('01/11/2026')
   await sheet.getByRole('button', { name: 'Close' }).click()
   await expect(dateButton(page)).toContainText('Sun 1 Nov')
   await page.getByRole('button', { name: 'Start', exact: true }).click()
   await expect(page.getByText('Sun 1 Nov · 0 sets')).toBeVisible()
   // The date is picked before starting only.
-  await expect(page.locator('input[type="date"]')).toHaveCount(0)
+  await expect(page.getByLabel('Another day')).toHaveCount(0)
 })
 
 test('Recent shows the six newest sessions with sets, volume and notes', async ({ page }) => {
@@ -183,7 +182,7 @@ test('Edit opens the saved session and is at least 44px tall', async ({ page }) 
 test('editing a saved session: plan title, date sheet, multi-line notes and Update session', async ({ page }) => {
   await openLog(page)
   await page.getByRole('button', { name: /^Edit Session 0/ }).click()
-  await expect(page.locator('input[type="date"]')).toHaveCount(0)
+  await expect(page.getByLabel('Another day')).toHaveCount(0)
   await finishButton(page).click()
   await expect(page.getByRole('heading', { name: 'Session 0', level: 1 })).toBeFocused()
   const date = page.getByRole('button', { name: /^Session date: / })
@@ -192,7 +191,7 @@ test('editing a saved session: plan title, date sheet, multi-line notes and Upda
   await expect(page.getByRole('button', { name: 'Discard changes' })).toBeVisible()
   await date.click()
   const sheet = page.getByRole('dialog', { name: 'Session date' })
-  await sheet.getByLabel('Another day').fill('2026-11-10')
+  await sheet.getByLabel('Another day').fill('10/11/2026')
   await sheet.getByRole('button', { name: 'Close' }).click()
   await expect(date).toHaveText(/Saved 10 Nov 2026/)
   await expect(date).toBeFocused()
