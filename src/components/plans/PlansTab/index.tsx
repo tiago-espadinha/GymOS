@@ -8,7 +8,7 @@ import DeletePlanSheet from '../DeletePlanSheet';
 import PlanDetail from '../PlanDetail';
 import PlanSelectRow from '../PlanSelectRow';
 import { useMediaQuery, WIDE_QUERY } from '../../../hooks/useMediaQuery';
-import { archivePlan, deletePlan, neighbourOf, plansCountLabel, restorePlan } from '../../../utils/plans';
+import { archivePlan, deletePlan, neighbourOf, plansTitle, restorePlan } from '../../../utils/plans';
 import { today } from '../../../utils/date';
 import { TrainingPlan, WorkoutSession } from '../../../types';
 import './PlansTab.css';
@@ -103,12 +103,9 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
 
   const header = (
     <header className="plansTabHeader">
-      <div className="plansTabHeading">
-        <span className="plansTabCount">{plansCountLabel(activePlans.length, archivedPlans.length)}</span>
-        <h1 className="plansTabTitle" tabIndex={-1}>Plans</h1>
-      </div>
+      <h1 className="plansTabTitle" tabIndex={-1}>{plansTitle(activePlans.length)}</h1>
       {!showEmpty && (
-        <PillButton variant="white" onClick={() => onCreatingChange(true)}>+ New plan</PillButton>
+        <PillButton variant="white" onClick={() => onCreatingChange(true)}>+ Create New</PillButton>
       )}
     </header>
   );
@@ -185,7 +182,7 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
               <p className="plansEmptyText">
                 A plan is the list of exercises you repeat. Make one, then start it from here or from Log.
               </p>
-              <PrimaryButton tone="lime" onClick={() => onCreatingChange(true)}>+ New plan</PrimaryButton>
+              <PrimaryButton tone="lime" onClick={() => onCreatingChange(true)}>+ Create New</PrimaryButton>
               <button type="button" className="textLink plansEmptyImport" onClick={onImport}>
                 Have a CSV backup? Import it
               </button>
