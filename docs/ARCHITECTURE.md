@@ -13,23 +13,24 @@ GymOS is a frontend-only single-page app. A React tree holds plans and logged se
 
 ## Boundaries
 
-`GymTracker` owns the shared state (plans, sessions, active tab, selected exercise) and passes it down to three feature areas plus shared primitives under `src/components/`:
+`GymTracker` owns the shared state (plans, sessions, active tab, selected exercise) and passes it down to four feature areas plus shared primitives under `src/components/`:
 
 | Area | Role |
 | --- | --- |
 | `plans` | Create, archive, restore, delete and start training plans |
 | `log` | Log a session set by set, including timed sets, rests and holds and their timers |
-| `progress` | Per-exercise charts and analysis, plus the Data screen for CSV import and export |
+| `progress` | Per-exercise charts and analysis |
+| `settings` | The Settings screen, opened from Progress or an empty-state import link: CSV import and export, language, units, appearance |
 | `shared` | Small form and layout primitives |
 
 Starting a plan creates an active session, kept in storage until Save, so a reload mid-session restores it and unfinished work never reaches Progress or the export. The tab bar is hidden while a session is open. Layout widths and breakpoints are tokens in `src/styles/tokens.css`: below 600 px the phone layout fills the screen; from 600 px the app keeps a centred 600 px column with the tab bar inside it; from 1024 px the tabs move to a top bar beside the wordmark. Log home then fills the 1200 px frame in two panes (`.mainContent:has(.logHome)`): New session in a fixed 440 px pane with the plan's first exercises, Recent sessions as a table beside it. Progress does the same: its exercise search and list sit in the left pane in place of the full-screen search sheet, and the chart and figures fill the right; because the sheet and the list are different controls, `ProgressTab` picks one with `useMediaQuery(WIDE_QUERY)` rather than CSS. Plans uses the same hook: the active plans become selectable rows in the left pane, with Archived below them, and the selected plan is shown in full on the right with Start and the actions sheet; the selection is not stored and opens on the first active plan. With no active plans Plans keeps the 600 px column. Screens without a wide layout keep the 600 px column. The wide-only parts are in the phone markup too, hidden below 1024 px, so the narrower layouts render as before. During a session the log shows either the exercise list or one exercise as a full screen. Every exercise screen stays mounted, hidden when not shown, so a running rest or hold keeps its timer and sound cue while the person looks at another exercise. From 1024 px an open exercise spans the window: its timer is fixed in the left 60% at full height, and the entry column (navigation and Finish on top, the main button at the bottom) flows on the right. A reps exercise with no rest running shows the rest it will start, so the split holds still on Set done. The session list and the Done screen keep the 600 px column.
 
-Logic that has no UI lives outside the components: `src/utils` (storage, CSV, import merging, the active session, sessions and sets, progress and metrics, rest rules, plans, dates, ids, timer preferences), `src/hooks` (`useTimer`, `useActiveSession`, `useMediaQuery`), `src/constants` and `src/types`.
+Logic that has no UI lives outside the components: `src/utils` (storage, CSV, import merging, the active session, sessions and sets, progress and metrics, rest rules, plans, dates, ids, timer and unit preferences), `src/hooks` (`useTimer`, `useActiveSession`, `useMediaQuery`), `src/constants` and `src/types`.
 
 ## Data and state
 
 - Store: `localStorage` in the user's browser, accessed through `src/utils/storage.ts`.
-- Keys: `gym:plans`, `gym:sessions`, `gym:tab`, `gym:selectedExName` (written by `GymTracker`), `gym:activeSession` (the unfinished session, `src/utils/activeSession.ts`), `gym:timer:<id>` (one per rest or hold shown in the session, cleared when the session is saved or cancelled, `src/hooks/useTimer.ts`) and `gym:timerPrefs` (sound and vibration, read if present; nothing in the app writes it, so both are on, `src/utils/timerPrefs.ts`).
+- Keys: `gym:plans`, `gym:sessions`, `gym:tab`, `gym:selectedExName` (written by `GymTracker`), `gym:activeSession` (the unfinished session, `src/utils/activeSession.ts`), `gym:timer:<id>` (one per rest or hold shown in the session, cleared when the session is saved or cancelled, `src/hooks/useTimer.ts`), `gym:timerPrefs` (sound and vibration, read if present; nothing in the app writes it, so both are on, `src/utils/timerPrefs.ts`) and `gym:unitPrefs` (weight `kg`/`lbs` and distance `km`/`mi`, written from Settings, kg and km when missing or unreadable, `src/utils/unitPrefs.ts`; nothing reads it yet, so display, entry and CSV stay in kg and km).
 - Order: sessions are kept newest first by save order, not sorted by date. Saving prepends; an import appends.
 - Key entities, defined in `src/types/index.ts`: `TrainingPlan` holds `Exercise` definitions; a `WorkoutSession` holds `ExerciseLog` entries, each with its `Set` values. Exercises carry an optional category (`strength`, `calisthenics`, `cardio`) and tracking type (`reps` or `time`); data saved before these fields existed is read as strength and reps.
 - Loading and saving: the app reads storage on start and shows a loading screen until it has finished. Plans and sessions are written as they change, before the screen updates. Saving a session on Finish and saving a new plan update the screen only if the browser kept the write. Other changes (archive, restore, delete, import) update the screen either way. The tab and the selected Progress exercise are written after each change.
@@ -37,7 +38,7 @@ Logic that has no UI lives outside the components: `src/utils` (storage, CSV, im
 
 ## Import and export
 
-Export builds one CSV from plans and sessions (`exportToCSV`). Import (`importFromCSV`) accepts the current header or the older, shorter one and rejects any other header. Nothing is stored at parse time: the Data screen shows what the file holds, then the user chooses **Add to my data**, which merges plans by name and skips sessions already present (same date, plan and notes), or **Replace my data**, which overwrites stored plans and sessions. A file that fails to parse leaves stored data unchanged.
+Export builds one CSV from plans and sessions (`exportToCSV`). Import (`importFromCSV`) accepts the current header or the older, shorter one and rejects any other header. Nothing is stored at parse time: Settings shows what the file holds, then the user chooses **Add to my data**, which merges plans by name and skips sessions already present (same date, plan and notes), or **Replace my data**, which overwrites stored plans and sessions. A file that fails to parse leaves stored data unchanged.
 
 ## Trust boundaries
 
@@ -64,7 +65,7 @@ There are no environment variables (`.env.example` declares none) and no runtime
 ## Testing
 
 - Unit: Vitest, colocated as `src/**/*.test.ts`. It covers storage, CSV parsing and export, import merging and its summary, session and set models, the active session, progress series, metrics and personal records, rest timer rules, clock formatting, the hold phase, plan building, archive, restore and delete, dates, and the shared controls' sizing and colour rules. `build/serviceWorker.test.ts` checks the worker's precache list and cache name against a real build. Run `npm test`.
-- End to end: Playwright in `tests/e2e/`, against the built app on port 4173 (set `E2E_PORT` to use another) in a Pixel 7 mobile Chromium profile; the date picker spec also runs in an iPhone 13 WebKit profile. There is one spec per area: plans and new plan, Log home, the session date picker, the session list and set logging, rest timers and their cleanup, timed sets, offline reload through the service worker, finish and save, save failures, progress, the Data screen, the app shell and its tablet and wide layouts, fonts, shared controls (44 px hit areas) and a smoke load of the three tabs. `session-journey.spec.ts` runs a whole session from Log home to Recent. Run `npm run test:e2e`.
+- End to end: Playwright in `tests/e2e/`, against the built app on port 4173 (set `E2E_PORT` to use another) in a Pixel 7 mobile Chromium profile; the date picker spec also runs in an iPhone 13 WebKit profile. There is one spec per area: plans and new plan, Log home, the session date picker, the session list and set logging, rest timers and their cleanup, timed sets, offline reload through the service worker, finish and save, save failures, progress, Settings and its Data section, the app shell and its tablet and wide layouts, fonts, shared controls (44 px hit areas) and a smoke load of the three tabs. `session-journey.spec.ts` runs a whole session from Log home to Recent. Run `npm run test:e2e`.
 - Accessibility: axe (WCAG 2.1 A and AA) runs inside those specs on each screen and its main states, and `accessibility.spec.ts` adds the three tabs, the plan sheets and the new-plan form. `npm run test:e2e` runs all of it; `npx playwright test accessibility` runs only that file.
 - Lint and types: `npm run lint` and `npx tsc -b`.
 - Continuous integration: none configured.
