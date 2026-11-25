@@ -37,8 +37,9 @@ test('saving a session clears its rests, so editing it later shows none', async 
 test('cancelling a session clears its rests', async ({ page }) => {
   await logAndRest(page)
   await finishButton(page).click()
-  page.once('dialog', (d) => d.accept())
   await page.getByRole('button', { name: 'Cancel' }).click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Discard session' }).click()
+  await expect(page.getByRole('alertdialog')).toHaveCount(0)
   const keys = await page.evaluate(() => Object.keys(localStorage).filter((k) => k.endsWith('-rest')))
   expect(keys).toEqual([])
 })

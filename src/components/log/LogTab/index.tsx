@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { PillButton, PrimaryButton } from "../../shared";
+import { ConfirmSheet, PillButton, PrimaryButton } from "../../shared";
 import { today, formatDate, formatDateMeta } from "../../../utils/date";
 import { ExerciseLog, TrainingPlan, WorkoutSession } from "../../../types";
 import {
@@ -59,6 +59,7 @@ export function LogTab({
   const [openId, setOpenId] = useState<string | null>(null);
   // Refused Saves in a row on the Done screen; 0 once a save lands or Done closes.
   const [saveFailures, setSaveFailures] = useState(0);
+  const [confirmingDiscard, setConfirmingDiscard] = useState(false);
 
   const titleRef = useRef<HTMLHeadingElement>(null);
   const inSession = Boolean(session);
@@ -99,10 +100,12 @@ export function LogTab({
   };
 
   const cancelSession = () => {
-    if (session && hasLoggedSets(session)) {
-      const question = editingId ? "Discard your changes?" : "Discard this session?";
-      if (!window.confirm(question)) return;
-    }
+    if (session && hasLoggedSets(session)) setConfirmingDiscard(true);
+    else discardSession();
+  };
+
+  const discardSession = () => {
+    setConfirmingDiscard(false);
     if (session) clearSessionRests(session.exercises);
     setSaveFailures(0);
     setFinishing(false);
@@ -165,6 +168,21 @@ export function LogTab({
       <div role="status" className="visuallyHidden">
         {justSaved ? `${justSaved.planName} session ${justSaved.updated ? "updated" : "saved"}` : deleted}
       </div>
+
+      {session && confirmingDiscard && (
+        <ConfirmSheet
+          kicker="Discard"
+          title={editingId ? "Discard your changes?" : "Discard this session?"}
+          text={
+            editingId
+              ? "Your changes are lost. The saved session stays as it was."
+              : "The sets you logged are lost. Nothing is saved to Log or Progress."
+          }
+          confirmLabel={editingId ? "Discard changes" : "Discard session"}
+          onConfirm={discardSession}
+          onClose={() => setConfirmingDiscard(false)}
+        />
+      )}
 
       {session && finishing ? (
         <FinishScreen

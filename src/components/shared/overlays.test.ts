@@ -37,3 +37,19 @@ describe('Sheet', () => {
     expect(css).toMatch(/\.sheet__cancel:focus-visible\s*{[^}]*outline: var\(--border-focus\)/)
   })
 })
+
+describe('browser dialogs', () => {
+  const sources = import.meta.glob<string>(['/src/**/*.{ts,tsx}', '!/src/**/*.test.{ts,tsx}'], {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+  })
+
+  it('are never used: confirms are ConfirmSheet, not confirm(), alert() or prompt()', () => {
+    expect(Object.keys(sources).length).toBeGreaterThan(20)
+    const offenders = Object.entries(sources)
+      .filter(([, text]) => /\b(?:confirm|alert|prompt)\s*\(/.test(text))
+      .map(([file]) => file)
+    expect(offenders).toEqual([])
+  })
+})
