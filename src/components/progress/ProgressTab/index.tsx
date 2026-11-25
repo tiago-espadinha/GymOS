@@ -122,7 +122,7 @@ function EmptyExercise({
   );
 }
 
-function analysisText(name: string, points: ProgressPoint[], higherIsBetter: boolean, describe: (n: number) => string) {
+function analysisLines(name: string, points: ProgressPoint[], higherIsBetter: boolean, describe: (n: number) => string) {
   const { total, improvements, stagnations, delta } = analyseProgress(points, higherIsBetter);
   const parts = [`${name} tracked across ${total} sessions.`];
   if (improvements > 0) parts.push(`${improvements} personal record${improvements !== 1 ? "s" : ""} achieved.`);
@@ -131,7 +131,7 @@ function analysisText(name: string, points: ProgressPoint[], higherIsBetter: boo
   if (delta === 0) parts.push("Performance has remained stable.");
   else if (gained) parts.push(`Overall gain: ${describe(Math.abs(delta))}.`);
   else parts.push(`Overall decline of ${describe(Math.abs(delta))} from first session.`);
-  return parts.join(" ");
+  return parts;
 }
 
 function chartDescription(metricLabel: string, name: string, points: ProgressPoint[], prCount: number) {
@@ -289,9 +289,11 @@ export function ProgressTab({
           </div>
 
           {points.length > 1 && (
-            <p className="progressAnalysis">
-              {analysisText(selected.name, points, higherIsBetter, (n) => formatMetricNumber(n, meta, metric))}
-            </p>
+            <div className="progressAnalysis">
+              {analysisLines(selected.name, points, higherIsBetter, (n) => formatMetricNumber(n, meta, metric)).map((line) => (
+                <p key={line}>{line}</p>
+              ))}
+            </div>
           )}
         </>
       )}
