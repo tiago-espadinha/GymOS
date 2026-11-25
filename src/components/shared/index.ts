@@ -24,3 +24,4 @@ export { WarningIcon } from './WarningIcon';
 export { SaveFailedAlert } from './SaveFailedAlert';
 export { CheckIcon } from './CheckIcon';
 export { ChevronIcon } from './ChevronIcon';
+export { EmptyState } from './EmptyState';
