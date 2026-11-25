@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ExerciseLog, Set, WorkoutSession } from "../types";
 import {
-  addPendingSet,
   allExercisesDone,
   currentSetIndex,
   lastTimeSets,
@@ -116,17 +115,5 @@ describe("logDraft", () => {
     expect(ex.sets).toHaveLength(2);
     expect(ex.sets[1].id).toBe(setId);
     expect(currentSetIndex(ex)).toBe(2);
-  });
-});
-
-describe("addPendingSet", () => {
-  it("appends one empty set after a pending one", () => {
-    expect(addPendingSet(exercise([done("35", "12"), set()])).sets).toHaveLength(3);
-  });
-
-  it("makes the virtual current set real so the added row follows it", () => {
-    const ex = addPendingSet(exercise([done("35", "12")]));
-    expect(ex.sets).toHaveLength(3);
-    expect(currentSetIndex(ex)).toBe(1);
   });
 });

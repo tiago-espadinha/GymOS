@@ -58,18 +58,6 @@
   color: var(--color-text-muted);
 }
 
-.exerciseLoggerAdd {
-  min-height: var(--size-control);
-  border: 2px dashed var(--color-line-empty);
-  border-radius: var(--radius-nested);
-  background: none;
-  color: var(--color-text);
-  font: inherit;
-  font-size: var(--text-secondary);
-  font-weight: 700;
-  cursor: pointer;
-}
-
 .exerciseLoggerEditActions {
   display: flex;
   align-items: center;
@@ -97,7 +85,6 @@
   font-weight: 600;
 }
 
-.exerciseLoggerAdd:focus-visible,
 .exerciseLoggerDelete:focus-visible,
 .exerciseLoggerCancel:focus-visible {
   outline: var(--border-focus);

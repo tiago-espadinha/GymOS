@@ -5,7 +5,7 @@ import { getExerciseMeta } from "../../../utils/metrics";
 import { isLoggedSet } from "../../../utils/activeSession";
 import { restTimerId } from "../../../utils/restTimers";
 import { NO_VALUES, currentSetNumber, formatSet, lastTimeLabel } from "../../../utils/sessionList";
-import { SetDraft, addPendingSet, currentSetIndex, logDraft, seedDraft } from "../../../utils/setModel";
+import { SetDraft, currentSetIndex, logDraft, seedDraft } from "../../../utils/setModel";
 import { clearTimer, formatClock, readElapsedMs, readRunningTimer } from "../../../hooks/useTimer";
 import RestBlock from "../RestBlock";
 import IdleRest from "../RestBlock/IdleRest";
@@ -204,11 +204,6 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, he
               onEdit={startEdit}
               onRemove={removeSet}
             />
-          )}
-          {!rest && !editing && (
-            <button type="button" className="exerciseLoggerAdd" onClick={() => onChange(addPendingSet(exercise))}>
-              + Add set
-            </button>
           )}
           {!editing && (
             <>

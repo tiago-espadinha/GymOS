@@ -150,17 +150,15 @@ test('typed values are accepted, and a comma reads as a decimal point', async ({
   await expect(sets(page).first()).toContainText('62.5 kg × 8')
 })
 
-test('Add set appends a pending row with a remove button; ✕ removes it', async ({ page }) => {
+test('Set done keeps adding sets; there is no Add set button', async ({ page }) => {
   await row(page, 'Bench press').click()
+  await expect(page.getByRole('button', { name: /Add set/ })).toHaveCount(0)
   await logSet(page, '60', '8')
   await page.getByRole('button', { name: 'Skip' }).click()
-  await expect(sets(page)).toHaveCount(2)
-  await page.getByRole('button', { name: '+ Add set' }).click()
+  await logSet(page, '60', '6')
+  await page.getByRole('button', { name: 'Skip' }).click()
   await expect(sets(page)).toHaveCount(3)
-  await expect(sets(page).nth(1)).toContainText('Now')
-  await page.getByRole('button', { name: 'Remove set 3' }).click()
-  await expect(sets(page)).toHaveCount(2)
-  await expect(page.getByText('Set 2 of 2')).toBeVisible()
+  await expect(sets(page).nth(1)).toContainText('60 kg × 6')
 })
 
 test('editing a done set changes it, Finish totals follow and it survives a reload', async ({ page }) => {
@@ -209,7 +207,6 @@ test('the edit state has no detectable WCAG A/AA violations', async ({ page }) =
   await row(page, 'Bench press').click()
   await logSet(page, '60', '8')
   await page.getByRole('button', { name: 'Skip' }).click()
-  await page.getByRole('button', { name: '+ Add set' }).click()
   await page.getByRole('button', { name: 'Edit set 1' }).click()
   await axe(page)
 })
