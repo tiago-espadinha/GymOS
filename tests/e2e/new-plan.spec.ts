@@ -234,3 +234,14 @@ for (const width of [375, 768, 1280]) {
     expect(small).toEqual([])
   })
 }
+
+for (const width of [375, 768, 1280]) {
+  test(`the muscle group field is as tall as the Measured in control at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 })
+    await openForm(page)
+    const select = await page.getByRole('button', { name: /^Muscle group/ }).boundingBox()
+    const segmented = await group(page, 'Measured in').boundingBox()
+    expect(select?.height).toBeGreaterThan(0)
+    expect(select?.height).toBe(segmented?.height)
+  })
+}
