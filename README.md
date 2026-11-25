@@ -46,7 +46,7 @@ npm run dev
 | `npm run lint` | ESLint |
 | `npx tsc -b` | Type-check only |
 | `npm test` | Unit tests (Vitest) |
-| `npx playwright install chromium` | One-time browser install for the end-to-end tests |
+| `npx playwright install chromium webkit` | One-time browser install for the end-to-end tests (WebKit on Linux may also need `sudo npx playwright install-deps webkit`) |
 | `npm run test:e2e` | End-to-end and accessibility tests against the built app on port 4173 (set `E2E_PORT` to change it) |
 
 ## Documentation
