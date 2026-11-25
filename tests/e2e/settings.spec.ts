@@ -60,12 +60,12 @@ test('the Plans empty-state import link opens Settings', async ({ page }) => {
 test('unit choices survive a reload and leave stored plans and sessions untouched', async ({ page }) => {
   const before = await raw(page)
   await openSettings(page)
-  await page.getByRole('group', { name: 'Weight unit' }).getByRole('button', { name: 'lbs' }).click()
+  await page.getByRole('group', { name: 'Weight unit' }).getByRole('button', { name: 'lb', exact: true }).click()
   await page.getByRole('group', { name: 'Distance unit' }).getByRole('button', { name: 'mi' }).click()
 
   await page.reload()
   await openSettings(page)
-  await expect(page.getByRole('group', { name: 'Weight unit' }).getByRole('button', { name: 'lbs' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('group', { name: 'Weight unit' }).getByRole('button', { name: 'lb', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByRole('group', { name: 'Distance unit' }).getByRole('button', { name: 'mi' })).toHaveAttribute('aria-pressed', 'true')
   expect(await raw(page)).toEqual(before)
 })
@@ -77,7 +77,7 @@ test('a unit choice the browser refuses to store is undone and reported', async 
       throw new DOMException('full', 'QuotaExceededError')
     }
   })
-  await page.getByRole('group', { name: 'Weight unit' }).getByRole('button', { name: 'lbs' }).click()
+  await page.getByRole('group', { name: 'Weight unit' }).getByRole('button', { name: 'lb', exact: true }).click()
   await expect(page.getByRole('alert')).toContainText('Not saved')
   await expect(page.getByRole('group', { name: 'Weight unit' }).getByRole('button', { name: 'kg' })).toHaveAttribute('aria-pressed', 'true')
 })
