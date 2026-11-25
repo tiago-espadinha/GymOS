@@ -79,6 +79,6 @@ test('Plans sheets, toast and empty state have no detectable WCAG A/AA violation
   await page.getByRole('button', { name: 'Delete plan' }).click()
   await page.getByRole('button', { name: 'Delete Push day' }).click()
   await page.getByRole('button', { name: 'Delete plan' }).click()
-  await expect(page.getByRole('heading', { name: 'No training plans yet' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'No plans yet' })).toBeVisible()
   await scan(page)
 })

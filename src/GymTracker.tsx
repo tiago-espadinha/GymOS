@@ -125,6 +125,14 @@ export default function GymTracker() {
     setShowSettings(true);
   };
 
+  const newPlan = () => {
+    changeTab("plans");
+    setCreatingPlan(true);
+  };
+
+  // Import is offered on an empty tab only while the device holds no plans and no sessions.
+  const importOffer = plans.length === 0 && sessions.length === 0 ? openSettings : undefined;
+
   const endSession = () => {
     activeSession.end();
     setTab("log");
@@ -147,7 +155,7 @@ export default function GymTracker() {
             setPlans={storePlans}
             commitPlans={commitPlans}
             onStartPlan={handleStartPlan}
-            onImport={openSettings}
+            onImport={importOffer}
             creating={creatingPlan}
             onCreatingChange={setCreatingPlan}
           />
@@ -163,11 +171,8 @@ export default function GymTracker() {
             onUpdate={activeSession.update}
             onUpdateExercise={activeSession.updateExercise}
             onEnd={endSession}
-            onNewPlan={() => {
-              setTab("plans");
-              setCreatingPlan(true);
-            }}
-            onImport={openSettings}
+            onNewPlan={newPlan}
+            onImport={importOffer}
           />
         )}
         {visibleTab === "progress" && (
@@ -181,6 +186,8 @@ export default function GymTracker() {
             showSettings={showSettings}
             setShowSettings={setShowSettings}
             onGoToLog={() => changeTab("log")}
+            onNewPlan={newPlan}
+            onImport={importOffer}
           />
         )}
       </div>

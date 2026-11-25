@@ -35,7 +35,8 @@ interface LogTabProps {
   onUpdateExercise: (exercise: ExerciseLog) => void;
   onEnd: () => void;
   onNewPlan: () => void;
-  onImport: () => void;
+  /** Opens Settings to import a CSV; passed only while the device holds no data. */
+  onImport?: () => void;
 }
 
 export function LogTab({

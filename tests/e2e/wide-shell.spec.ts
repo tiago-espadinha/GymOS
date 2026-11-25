@@ -87,6 +87,10 @@ test.describe('wide, 1280', () => {
   })
 
   test('Stats has its own two panes in the 1200 frame', async ({ page }) => {
+    const set = { id: 's', weight: '60', reps: '8', completed: true }
+    const logged = { id: 'x1', planId: 'p1', planName: 'Push day', date: '2026-01-05', notes: '',
+      exercises: [{ id: 'x', name: 'Bench press', muscleGroup: 'Chest', sets: [set] }] }
+    await page.addInitScript((s) => localStorage.setItem('gym:sessions', JSON.stringify([s])), logged)
     await page.goto('/')
     await nav(page).getByRole('button', { name: 'Stats' }).click()
     expect(await box(page, '.mainContent')).toMatchObject({ x: 0, width: 1280 })

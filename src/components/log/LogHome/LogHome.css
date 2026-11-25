@@ -37,12 +37,6 @@
   overflow-wrap: break-word;
 }
 
-/* "No plans yet" is a sentence, so it takes the screen-title size. */
-h2.logHomeHeadline {
-  font-size: var(--text-screen-title);
-  line-height: var(--leading-screen-title);
-}
-
 .logHomeLead {
   font-size: var(--text-body-lg);
   font-weight: 600;
@@ -116,8 +110,7 @@ span.logHomeLead {
 
 .logHomeChoice:focus-visible,
 .logHomePlan:focus-visible,
-.logHomeChangePlan:focus-visible,
-.logHomeImport:focus-visible {
+.logHomeChangePlan:focus-visible {
   outline: var(--border-focus);
   outline-offset: 2px;
 }
@@ -134,20 +127,6 @@ span.logHomeLead {
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--color-text-muted);
-}
-
-.logHomeImport {
-  align-self: flex-start;
-  min-height: var(--size-control);
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--color-text);
-  font-family: inherit;
-  font-size: var(--text-secondary);
-  font-weight: 600;
-  text-decoration: underline;
-  cursor: pointer;
 }
 
 .logHomeEmptyText {
@@ -296,6 +275,13 @@ span.logHomeLead {
     grid-template-columns: var(--width-pane) minmax(0, 1fr);
     align-items: start;
     gap: var(--gutter-wide);
+  }
+
+  /* Nothing to list: the block alone, centred in the phone column as on Stats. */
+  .logHome--empty {
+    display: block;
+    max-width: 480px;
+    margin: 0 auto;
   }
 
   .logHomeBlock {

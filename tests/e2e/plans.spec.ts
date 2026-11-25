@@ -181,11 +181,13 @@ test.describe('with plans', () => {
 })
 
 test.describe('empty', () => {
-  test('with no plans the empty state offers Create New and Import', async ({ page }) => {
+  test('with no plans and no sessions the empty state offers Create New and Import', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('gym:sessions', '[]'))
     await seed(page, [])
     await page.goto('/')
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Plans')
-    await expect(page.getByRole('heading', { name: 'No training plans yet' })).toBeVisible()
+    await expect(page.locator('.plansTabHeader')).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'No plans yet' })).toBeVisible()
     await expect(page.getByRole('button', { name: '+ Create New' })).toHaveCount(1)
     await page.getByRole('button', { name: 'Have a CSV backup? Import it' }).click()
     await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible()
@@ -198,7 +200,15 @@ test.describe('empty', () => {
     await seed(page, [plans[2]])
     await page.goto('/')
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Plans')
-    await expect(page.getByRole('heading', { name: 'No training plans yet' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'No plans yet' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Have a CSV backup? Import it' })).toHaveCount(0)
     await expect(archivedToggle(page)).toBeVisible()
+  })
+  test('Cancel on the new-plan form from the empty state focuses the hidden Plans title', async ({ page }) => {
+    await seed(page, [])
+    await page.goto('/')
+    await page.getByRole('button', { name: '+ Create New' }).click()
+    await page.getByRole('button', { name: 'Cancel' }).click()
+    await expect(page.getByRole('heading', { name: 'Plans', level: 1 })).toBeFocused()
   })
 })

@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { PillButton, PrimaryButton, Toast } from '../../shared';
+import { EmptyState, PillButton, Toast } from '../../shared';
 import CreatePlanForm from '../CreatePlanForm';
 import PlanCard from '../PlanCard';
 import ArchivedPlanRow from '../ArchivedPlanRow';
@@ -20,8 +20,8 @@ interface PlansTabProps {
   /** Stores plans and reports whether the browser kept them. */
   commitPlans: (plans: TrainingPlan[]) => boolean;
   onStartPlan: (plan: TrainingPlan) => void;
-  /** Opens Settings, where import lives. */
-  onImport: () => void;
+  /** Opens Settings to import a CSV; passed only while the device holds no data. */
+  onImport?: () => void;
   /** New plan is open; the shell hides the tab bar meanwhile. */
   creating: boolean;
   onCreatingChange: (creating: boolean) => void;
@@ -40,7 +40,6 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
   // Where focus goes after the next render, when the control that had it is gone.
   const focusNext = useRef<string | null>(null);
   const archivedListId = useId();
-  const emptyTitleId = useId();
   const detailId = useId();
   const todayStr = today();
 
@@ -101,12 +100,13 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
   // New plan replaces the whole screen, "Plans" heading included.
   if (creating) return <CreatePlanForm onSave={savePlan} onCancel={closeForm} />;
 
-  const header = (
+  // Empty: the block's kicker names the tab, so the title stays for screen readers only.
+  const header = showEmpty ? (
+    <h1 className="plansTabTitle visuallyHidden" tabIndex={-1}>Plans</h1>
+  ) : (
     <header className="plansTabHeader">
       <h1 className="plansTabTitle" tabIndex={-1}>{plansTitle(activePlans.length)}</h1>
-      {!showEmpty && (
-        <PillButton variant="white" onClick={() => onCreatingChange(true)}>+ Create New</PillButton>
-      )}
+      <PillButton variant="white" onClick={() => onCreatingChange(true)}>+ Create New</PillButton>
     </header>
   );
 
@@ -177,16 +177,14 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
           {header}
 
           {showEmpty ? (
-            <section className="plansEmpty" aria-labelledby={emptyTitleId}>
-              <h2 id={emptyTitleId} className="plansEmptyTitle">No training plans yet</h2>
-              <p className="plansEmptyText">
-                A plan is the list of exercises you repeat. Make one, then start it from here or from Log.
-              </p>
-              <PrimaryButton tone="lime" onClick={() => onCreatingChange(true)}>+ Create New</PrimaryButton>
-              <button type="button" className="textLink plansEmptyImport" onClick={onImport}>
-                Have a CSV backup? Import it
-              </button>
-            </section>
+            <EmptyState
+              kicker="Plans"
+              title="No plans yet"
+              text="A plan is the list of exercises you repeat. Make one, then start it from here or from Log."
+              action="+ Create New"
+              onAction={() => onCreatingChange(true)}
+              onImport={onImport}
+            />
           ) : (
             <ul className="plansTabList" role="list">
               {activePlans.map((p) => (

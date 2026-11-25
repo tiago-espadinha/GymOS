@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ChevronIcon, PrimaryButton } from "../../shared";
+import { ChevronIcon, EmptyState, PrimaryButton } from "../../shared";
 import { formatDateMeta, today } from "../../../utils/date";
 import { defaultPlan, planPreview, planTrainedSummary } from "../../../utils/plans";
 import { TrainingPlan, WorkoutSession } from "../../../types";
@@ -19,22 +19,8 @@ interface LogHomeProps {
   /** The session just saved or updated, marked in Recent. */
   justSaved: { id: string; label: string } | null;
   onNewPlan: () => void;
-  onImport: () => void;
-}
-
-function NoPlans({ onNewPlan }: { onNewPlan: () => void }) {
-  return (
-    <section className="logHomeBlock" aria-labelledby="logHomeNoPlans">
-      <span className="logHomeKicker">New session</span>
-      <h2 id="logHomeNoPlans" className="logHomeHeadline">
-        No plans yet
-      </h2>
-      <p className="logHomeLead">Sessions start from a plan. Make one with the exercises you repeat.</p>
-      <PrimaryButton tone="dark" onClick={onNewPlan}>
-        + New plan
-      </PrimaryButton>
-    </section>
-  );
+  /** Opens Settings to import a CSV; passed only while the device holds no data. */
+  onImport?: () => void;
 }
 
 // Two lines at hero size, else three lines of a size that takes the same height (LogHome.css).
@@ -71,19 +57,13 @@ export function LogHome({ plans, sessions, date, onDateChange, onStart, onEdit, 
   // A chosen plan that was archived or deleted meanwhile falls back to the default.
   const plan = activePlans.find((p) => p.id === planId) ?? defaultPlan(activePlans, sessions);
 
-  const emptyRecent = plan ? (
+  const emptyRecent = (
     <p className="logHomeEmptyText">No sessions yet. Your first one lands here after you press Start and save it.</p>
-  ) : (
-    <>
-      <p className="logHomeEmptyText">Sessions you save show up here.</p>
-      <button type="button" className="logHomeImport" onClick={onImport}>
-        Have a CSV backup? Import it
-      </button>
-    </>
   );
+  const hasContent = Boolean(plan) || sessions.length > 0;
 
   return (
-    <div className="logHome">
+    <div className={hasContent ? "logHome" : "logHome logHome--empty"}>
       {plan ? (
         <section className="logHomeBlock" aria-label="New session">
           <div className="logHomeBlockTop">
@@ -114,10 +94,23 @@ export function LogHome({ plans, sessions, date, onDateChange, onStart, onEdit, 
           </div>
         </section>
       ) : (
-        <NoPlans onNewPlan={onNewPlan} />
+        <EmptyState
+          kicker="New session"
+          title={sessions.length ? "No plans yet" : "No sessions yet"}
+          text={
+            sessions.length
+              ? "Sessions start from a plan. Make one with the exercises you repeat."
+              : "Sessions start from a plan. Make one, press Start, and every session you save lands here."
+          }
+          action="+ New plan"
+          onAction={onNewPlan}
+          onImport={onImport}
+        />
       )}
 
-      <RecentSessions sessions={sessions} onEdit={onEdit} justSaved={justSaved} empty={emptyRecent} />
+      {hasContent && (
+        <RecentSessions sessions={sessions} onEdit={onEdit} justSaved={justSaved} empty={emptyRecent} />
+      )}
 
       {open === "plan" && plan && (
         <PlanPicker
