@@ -87,8 +87,10 @@ span.logHomeLead {
   cursor: pointer;
 }
 
+/* Balanced wrapping spreads the name evenly over its lines. */
 .logHomePlan .logHomeHeadline {
   min-width: 0;
+  text-wrap: balance;
 }
 
 /*
