@@ -273,12 +273,54 @@
   font-weight: 600;
 }
 
-.settingsPlaceholder {
+.accentName {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-row-title);
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.accentSwatches {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-3);
+  padding: var(--space-1);
+}
+
+.accentSwatch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--size-field-lg);
+  border: 0;
+  border-radius: var(--radius-nested);
+  color: var(--color-on-accent);
+  cursor: pointer;
+}
+
+.accentSwatch[aria-pressed='true'] {
+  outline: var(--border-control);
+  outline-offset: 3px;
+}
+
+.accentSwatch:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 3px;
+}
+
+.accentSwatch--lime { background: var(--accent-lime); }
+.accentSwatch--amber { background: var(--accent-amber); }
+.accentSwatch--cyan { background: var(--accent-cyan); }
+.accentSwatch--violet { background: var(--accent-violet); }
+.accentSwatch--red { background: var(--accent-red); }
+
+.settingsHint {
   margin: 0;
-  padding: var(--space-4) 0;
-  border-block: 1px dashed var(--color-line-empty);
   font-size: var(--text-secondary);
   font-weight: 500;
+  line-height: var(--leading-body);
   color: var(--color-text-muted);
 }
 
