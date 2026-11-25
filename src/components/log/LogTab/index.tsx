@@ -19,6 +19,7 @@ import FinishScreen from "../FinishScreen";
 import LogHome from "../LogHome";
 import SessionList from "../SessionList";
 import "./LogTab.css";
+import { useUnitPrefs } from "../../../utils/unitPrefs";
 
 const FINISH_ID = "logTabFinish";
 
@@ -50,6 +51,7 @@ export function LogTab({
   onNewPlan,
   onImport,
 }: LogTabProps) {
+  const units = useUnitPrefs();
   const [homeDate, setHomeDate] = useState(today());
   // The session saved or updated since Log home was last shown; its row is marked in Recent.
   const [justSaved, setJustSaved] = useState<{ id: string; planName: string; updated: boolean } | null>(null);
@@ -136,7 +138,7 @@ export function LogTab({
 
   const downloadSession = () => {
     const unsaved = session && toWorkoutSession(session, editingId ?? "");
-    if (unsaved) downloadCSV(exportToCSV([], [unsaved]), `gymos_session_${unsaved.date}.csv`);
+    if (unsaved) downloadCSV(exportToCSV([], [unsaved], units), `gymos_session_${unsaved.date}.csv`);
   };
 
   // Only a saved session being edited can be deleted; the confirm sheet has asked already.

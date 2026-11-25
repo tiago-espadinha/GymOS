@@ -9,12 +9,12 @@ export const plansAndSessions = (plans: number, sessions: number) =>
 export function foundText(data: CSVImport): string {
   const found = `${plansAndSessions(data.plans.length, data.sessions.length)} found`;
   if (!data.skippedRows) return found;
-  return `${found}. ${count(data.skippedRows, "row")} skipped: a column or field was missing.`;
+  return `${found}. ${count(data.skippedRows, "row")} skipped: a column, field or unit was missing or unknown.`;
 }
 
 export function nothingFoundText(skippedRows: number): string {
   if (!skippedRows) return "No plans or sessions found in this file.";
-  return `No plans or sessions found: ${count(skippedRows, "row")} skipped because a column or field was missing.`;
+  return `No plans or sessions found: ${count(skippedRows, "row")} skipped because a column, field or unit was missing or unknown.`;
 }
 
 /** "Added 3 plans and 41 sessions. 127 sessions already here were skipped." */

@@ -2,7 +2,8 @@ import AxeBuilder from '@axe-core/playwright'
 import { readFile } from 'node:fs/promises'
 import { expect, test, type Page } from '@playwright/test'
 
-const HEADER = 'type,date,name,desc_notes,exercise,muscle,category,tracking,weight,reps,duration,distance'
+const UNITLESS_HEADER = 'type,date,name,desc_notes,exercise,muscle,category,tracking,weight,reps,duration,distance'
+const HEADER = `${UNITLESS_HEADER},weight_unit,distance_unit`
 
 const plan = {
   id: 'p1',
@@ -24,7 +25,7 @@ const session = (date: string) => ({
 
 // A new plan, one session already on the device (2026-01-01) and one new session.
 const importCsv = [
-  HEADER,
+  UNITLESS_HEADER,
   'plan,,Legs,,Squat,Legs,strength,reps,,,,',
   'session,2026-01-01,Pull day,,Row,Back,strength,reps,60,10,,',
   'session,2026-02-01,Legs,,Squat,Legs,strength,reps,100,5,,',
@@ -76,10 +77,24 @@ test('Export CSV downloads the data in the export format', async ({ page }) => {
   const text = await readFile((await download.path())!, 'utf8')
   expect(text.split('\n')).toEqual([
     HEADER,
-    'plan,,Pull day,,Row,Back,strength,reps,,,,',
-    'session,2026-01-01,Pull day,,Row,Back,strength,reps,60,10,,',
-    'session,2026-01-08,Pull day,,Row,Back,strength,reps,60,10,,',
+    'plan,,Pull day,,Row,Back,strength,reps,,,,,,',
+    'session,2026-01-01,Pull day,,Row,Back,strength,reps,60,10,,,kg,km',
+    'session,2026-01-08,Pull day,,Row,Back,strength,reps,60,10,,,kg,km',
   ])
+})
+
+test('with lb chosen, Export writes lb and the file imports back to the same kg', async ({ page }) => {
+  await page.getByRole('group', { name: 'Weight unit' }).getByRole('button', { name: 'lb', exact: true }).click()
+  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Export CSV' }).click()])
+  const text = await readFile((await download.path())!, 'utf8')
+  expect(text.split('\n')[2]).toBe('session,2026-01-01,Pull day,,Row,Back,strength,reps,132.28,10,,,lb,km')
+
+  await chooseFile(page, 'gym_data_lb.csv', text)
+  await expect(page.getByText('1 plan and 2 sessions found', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: /Replace my data/ }).click()
+  await expect(page.getByRole('heading', { name: 'Imported' })).toBeFocused()
+  const sessions = await page.evaluate(() => JSON.parse(localStorage.getItem('gym:sessions')!))
+  expect(sessions.map((s: { exercises: { sets: { weight: string }[] }[] }) => Number(s.exercises[0].sets[0].weight).toFixed(2))).toEqual(['60.00', '60.00'])
 })
 
 test('a chosen file shows what was found, and Add keeps existing data', async ({ page }) => {
@@ -87,7 +102,7 @@ test('a chosen file shows what was found, and Add keeps existing data', async ({
 
   await expect(page.getByRole('heading', { name: 'Import · file ready' })).toBeVisible()
   await expect(page.getByText('gym_data_2026-02-01.csv')).toBeVisible()
-  await expect(page.getByText('1 plan and 2 sessions found. 1 row skipped: a column or field was missing.')).toBeVisible()
+  await expect(page.getByText('1 plan and 2 sessions found. 1 row skipped: a column, field or unit was missing or unknown.')).toBeVisible()
   await expect(page.getByRole('button', { name: /Replace my data/ })).toContainText('Deletes the 1 plan and 2 sessions on this device first')
 
   await page.getByRole('button', { name: /Add to my data/ }).click()
@@ -145,7 +160,7 @@ test('a file that is not an export shows the error and changes no data', async (
   expect(await stored(page)).toEqual(before)
 
   await chooseFile(page, 'empty.csv', `${HEADER}\nplan,,Legs`)
-  await expect(page.getByText('No plans or sessions found: 1 row skipped because a column or field was missing.')).toBeVisible()
+  await expect(page.getByText('No plans or sessions found: 1 row skipped because a column, field or unit was missing or unknown.')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Choose another file' })).toBeVisible()
 })
 

@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { exportToCSV, importFromCSV } from "./csv";
+import { distanceText, storedWeight, weightText } from "./units";
 import { TrainingPlan, WorkoutSession } from "../types";
 
-const HEADER = "type,date,name,desc_notes,exercise,muscle,category,tracking,weight,reps,duration,distance";
+const UNITLESS_HEADER = "type,date,name,desc_notes,exercise,muscle,category,tracking,weight,reps,duration,distance";
+const HEADER = `${UNITLESS_HEADER},weight_unit,distance_unit`;
 
 const plans: TrainingPlan[] = [
   {
@@ -51,12 +53,106 @@ describe("exportToCSV", () => {
   it("writes one row per plan exercise and per logged set, quoting commas and quotes", () => {
     expect(exportToCSV(plans, sessions).split("\n")).toEqual([
       HEADER,
-      'plan,,"Push, heavy","Bench ""first""",Bench Press,Chest,strength,reps,,,,',
-      'plan,,"Push, heavy","Bench ""first""",Plank,Core,calisthenics,time,,,,',
-      'session,2026-11-16,"Push, heavy",felt strong,Bench Press,Chest,strength,reps,60,10,,',
-      'session,2026-11-16,"Push, heavy",felt strong,Bench Press,Chest,strength,reps,62.5,8,,',
-      'session,2026-11-16,"Push, heavy",felt strong,Plank,Core,calisthenics,time,,,45,',
+      'plan,,"Push, heavy","Bench ""first""",Bench Press,Chest,strength,reps,,,,,,',
+      'plan,,"Push, heavy","Bench ""first""",Plank,Core,calisthenics,time,,,,,,',
+      'session,2026-11-16,"Push, heavy",felt strong,Bench Press,Chest,strength,reps,60,10,,,kg,km',
+      'session,2026-11-16,"Push, heavy",felt strong,Bench Press,Chest,strength,reps,62.5,8,,,kg,km',
+      'session,2026-11-16,"Push, heavy",felt strong,Plank,Core,calisthenics,time,,,45,,kg,km',
     ]);
+  });
+
+  it("writes session values in lb and mi, and each exercise's own distance unit on its plan row", () => {
+    const rows = exportToCSV(runPlans, runSessions("100", "5"), { weight: "lbs", distance: "mi" }).split("\n");
+    expect(rows.slice(1)).toEqual([
+      "plan,,Cardio,,Run,Cardio,cardio,time,,,,,,mi",
+      "plan,,Cardio,,Bike,Cardio,cardio,time,,,,,,",
+      "session,2026-11-16,Cardio,,Run,Cardio,cardio,time,220.46,,1500,3.11,lb,mi",
+    ]);
+  });
+});
+
+// A run stored in km in its session, and a plan whose Run exercise stores mi.
+const runPlans: TrainingPlan[] = [
+  {
+    id: "c1",
+    name: "Cardio",
+    desc: "",
+    exercises: [
+      { id: "r", name: "Run", muscleGroup: "Cardio", category: "cardio", trackingType: "time", trackDistance: true, distanceUnit: "mi" },
+      { id: "b", name: "Bike", muscleGroup: "Cardio", category: "cardio", trackingType: "time", trackDistance: true },
+    ],
+  },
+];
+const runSessions = (weight: string, distance: string, distanceUnit: "km" | "mi" = "km"): WorkoutSession[] => [
+  {
+    id: "s",
+    planId: "c1",
+    planName: "Cardio",
+    date: "2026-11-16",
+    notes: "",
+    exercises: [
+      {
+        id: "r", name: "Run", muscleGroup: "Cardio", category: "cardio", trackingType: "time", distanceUnit,
+        sets: [{ id: "x", weight, reps: "", duration: "1500", distance }],
+      },
+    ],
+  },
+];
+
+describe("importFromCSV with units", () => {
+  const setOf = (csv: string) => importFromCSV(csv).sessions[0].exercises[0].sets[0];
+
+  it("re-imports values entered in the export's units exactly, and keeps the exercise's distance unit", () => {
+    const kg = storedWeight("135", "lbs");
+    const sessions = runSessions(kg, "3.1", "mi");
+    const imported = importFromCSV(exportToCSV(runPlans, sessions, { weight: "lbs", distance: "mi" }));
+
+    expect(imported.skippedRows).toBe(0);
+    expect(imported.plans[0].exercises.map((e) => e.distanceUnit)).toEqual(["mi", undefined]);
+    expect(imported.sessions[0].exercises[0].distanceUnit).toBe("mi");
+    expect(imported.sessions[0].exercises[0].sets[0]).toMatchObject({ weight: kg, distance: "3.1", duration: "1500" });
+  });
+
+  it("re-imports values converted on export equal at display precision", () => {
+    const csv = exportToCSV(runPlans, runSessions("100", "5", "mi"), { weight: "lbs", distance: "km" });
+    const set = setOf(csv);
+    expect(weightText(set.weight, "kg")).toBe("100");
+    expect(distanceText(set.distance!, "mi", "mi")).toBe("5");
+    expect(exportToCSV(importFromCSV(csv).plans, importFromCSV(csv).sessions, { weight: "lbs", distance: "km" })).toBe(csv);
+  });
+
+  it("converts each row by its own units", () => {
+    const csv = [
+      HEADER,
+      "session,2026-11-16,Push,,Bench,Chest,strength,reps,100,5,,,kg,km",
+      "session,2026-11-16,Push,,Bench,Chest,strength,reps,135,5,,,lb,km",
+      "session,2026-11-16,Push,,Bench,Chest,strength,reps,135,5,,,lbs,km",
+      "session,2026-11-17,Push,,Run,Cardio,cardio,time,,,1500,3.1,kg,mi",
+    ].join("\n");
+    const { sessions } = importFromCSV(csv);
+    expect(sessions[0].exercises[0].sets.map((s) => s.weight)).toEqual(["100", storedWeight("135", "lbs"), storedWeight("135", "lbs")]);
+    expect(Number(sessions[1].exercises[0].sets[0].distance)).toBeCloseTo(4.98897, 5);
+  });
+
+  it("skips rows whose numbers have a missing or unknown unit", () => {
+    const csv = [
+      HEADER,
+      "plan,,Push,,Bench,Chest,strength,reps,,,,,,furlong", // unknown distance unit
+      "session,2026-11-16,Push,,Bench,Chest,strength,reps,100,5,,,stone,km", // unknown weight unit
+      "session,2026-11-16,Push,,Bench,Chest,strength,reps,100,5,,,,km", // weight without a unit
+      "session,2026-11-16,Push,,Run,Cardio,cardio,time,,,1500,5,kg,", // distance without a unit
+      "session,2026-11-16,Push,,Bench,Chest,strength,reps,100,5,,", // 12 columns under the 14-column header
+      "plan,,Push,,Run,Cardio,cardio,time,,,,,,__proto__", // not a unit, even if an object key
+      "session,2026-11-16,Push,,Bench,Chest,strength,reps,,15,,,,", // no weight, no unit needed
+    ].join("\n");
+    const result = importFromCSV(csv);
+    expect(result.skippedRows).toBe(6);
+    expect(result.sessions[0].exercises[0].sets[0]).toMatchObject({ weight: "", reps: "15" });
+  });
+
+  it("reads the 12-column export as kg and each exercise's own distance unit", () => {
+    const csv = [UNITLESS_HEADER, "session,2026-11-16,Push,,Run,Cardio,cardio,time,20,,1500,3.1"].join("\n");
+    expect(setOf(csv)).toMatchObject({ weight: "20", distance: "3.1" });
   });
 });
 
@@ -112,7 +208,7 @@ describe("importFromCSV", () => {
 
   it("keeps a quote inside an unquoted value and padding around a row from merging or skipping rows", () => {
     const csv = [
-      HEADER,
+      UNITLESS_HEADER,
       'plan,,Push,5\'10" lifter,Bench Press,Chest,strength,reps,,,,',
       "  session,2026-11-16,Push,,Bench Press,Chest,strength,reps,60,10,,  ",
       "session,2026-11-17,Push,,Bench Press,Chest,strength,reps,62.5,8,,",
@@ -138,7 +234,7 @@ describe("importFromCSV", () => {
 
   it("skips and counts rows with missing columns or fields, keeping the rest", () => {
     const csv = [
-      HEADER,
+      UNITLESS_HEADER,
       "plan,,Push,,Bench Press,Chest,strength,reps,,,,",
       "plan,,Push,,Bench Press", // too few columns
       "workout,,Push,,Bench Press,Chest,strength,reps,,,,", // unknown type

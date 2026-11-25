@@ -6,6 +6,7 @@ import { downloadCSV } from "../../../utils/download";
 import { ImportCard } from "./ImportCard";
 import { PreferenceSections } from "./PreferenceSections";
 import "./SettingsScreen.css";
+import { useUnitPrefs } from "../../../utils/unitPrefs";
 
 interface SettingsScreenProps {
   plans: TrainingPlan[];
@@ -26,6 +27,7 @@ function DeviceCount({ n, noun }: { n: number; noun: string }) {
 /** Data, language, units and appearance on one screen, opened from Progress or an empty-state import link. */
 export function SettingsScreen({ plans, sessions, setPlans, setSessions, onClose }: SettingsScreenProps) {
   const title = useRef<HTMLHeadingElement>(null);
+  const units = useUnitPrefs();
   const dataId = useId();
   useEffect(() => title.current?.focus(), []);
 
@@ -49,7 +51,7 @@ export function SettingsScreen({ plans, sessions, setPlans, setSessions, onClose
           <DeviceCount n={sessions.length} noun="session" />
         </div>
         <PrimaryButton tone="light" onClick={() =>
-            downloadCSV(exportToCSV(plans, sessions), `gym_data_${new Date().toISOString().split("T")[0]}.csv`)
+            downloadCSV(exportToCSV(plans, sessions, units), `gym_data_${new Date().toISOString().split("T")[0]}.csv`)
           }>
           Export CSV
         </PrimaryButton>

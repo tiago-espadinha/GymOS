@@ -14,12 +14,12 @@ describe("import summary text", () => {
   });
 
   it("reports skipped rows", () => {
-    expect(foundText(data(2, 3, 1))).toBe("2 plans and 3 sessions found. 1 row skipped: a column or field was missing.");
+    expect(foundText(data(2, 3, 1))).toBe("2 plans and 3 sessions found. 1 row skipped: a column, field or unit was missing or unknown.");
   });
 
   it("explains an import with nothing in it", () => {
     expect(nothingFoundText(0)).toBe("No plans or sessions found in this file.");
-    expect(nothingFoundText(2)).toBe("No plans or sessions found: 2 rows skipped because a column or field was missing.");
+    expect(nothingFoundText(2)).toBe("No plans or sessions found: 2 rows skipped because a column, field or unit was missing or unknown.");
   });
 
   it("says when an add brought nothing new", () => {
