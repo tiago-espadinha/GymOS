@@ -1,4 +1,6 @@
 import { WorkoutSession } from "../types";
+import type { WeightUnit } from "./unitPrefs";
+import { kgTo, weightLabel } from "./units";
 
 // Set count and total volume (weight x reps) of a saved session.
 export function sessionStats(session: WorkoutSession): { sets: number; volume: number } {
@@ -13,19 +15,23 @@ export function sessionStats(session: WorkoutSession): { sets: number; volume: n
   return { sets, volume };
 }
 
-// The parts of a session row: "30 sets", "5,022 kg" ("" when nothing was lifted)
-// and the notes folded onto one line.
-export function sessionCells(stats: { sets: number; volume: number }, notes = ""): { sets: string; volume: string; notes: string } {
+// The parts of a session row: "30 sets", "5,022 kg" ("" when nothing was lifted) in the chosen
+// unit, and the notes folded onto one line. The volume comes in kg.
+export function sessionCells(
+  stats: { sets: number; volume: number },
+  notes = "",
+  unit: WeightUnit = "kg",
+): { sets: string; volume: string; notes: string } {
   return {
     sets: `${stats.sets} set${stats.sets === 1 ? "" : "s"}`,
-    volume: stats.volume > 0 ? `${Math.round(stats.volume).toLocaleString("en-US")} kg` : "",
+    volume: stats.volume > 0 ? `${Math.round(kgTo(stats.volume, unit)).toLocaleString("en-US")} ${weightLabel(unit)}` : "",
     notes: notes.replace(/\s+/g, " ").trim(),
   };
 }
 
 // "30 sets · 5,022 kg · Felt strong", skipping the empty parts.
-export function sessionSummary(stats: { sets: number; volume: number }, notes = ""): string {
-  const { sets, volume, notes: note } = sessionCells(stats, notes);
+export function sessionSummary(stats: { sets: number; volume: number }, notes = "", unit: WeightUnit = "kg"): string {
+  const { sets, volume, notes: note } = sessionCells(stats, notes, unit);
   return [sets, volume, note].filter(Boolean).join(" · ");
 }
 

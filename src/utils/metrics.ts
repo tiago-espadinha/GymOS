@@ -1,6 +1,8 @@
 import { Exercise, Set, ExerciseCategory, TrackingType } from "../types";
 import { DEFAULT_TRACKING_TYPE } from "../constants/exerciseTypes";
 import { formatClock } from "../hooks/useTimer";
+import type { UnitPreferences, WeightUnit } from "./unitPrefs";
+import { trimNumber, weightLabel } from "./units";
 
 export type MetricKind = "average" | "peak" | "total" | "e1rm";
 export type TimeGoal = "longer" | "shorter";
@@ -17,7 +19,10 @@ export interface ExerciseMeta {
   trackWeight: boolean;
   trackDistance: boolean;
   timeGoal: TimeGoal;
+  /** The exercise's stored distance unit; after withUnits, the unit figures are shown in. */
   distanceUnit: "km" | "mi";
+  /** kg as stored; after withUnits, the unit figures are shown in. */
+  weightUnit: WeightUnit;
 }
 
 export interface MetricResult {
@@ -42,7 +47,13 @@ export function getExerciseMeta(ex: MinimalExercise): ExerciseMeta {
     trackDistance: ex.trackDistance ?? category === "cardio",
     timeGoal: ex.timeGoal || "longer",
     distanceUnit: ex.distanceUnit || "km",
+    weightUnit: "kg",
   };
+}
+
+/** The meta with figures shown in the units chosen in Settings. */
+export function withUnits(meta: ExerciseMeta, prefs: UnitPreferences): ExerciseMeta {
+  return { ...meta, weightUnit: prefs.weight, distanceUnit: prefs.distance };
 }
 
 export function resolveBranch(meta: ExerciseMeta): MetricBranch {
@@ -143,7 +154,8 @@ export function higherIsBetterFor(branch: MetricBranch, metric: MetricKind, time
 export function formatMetricNumber(value: number, meta: ExerciseMeta, metric: MetricKind): string {
   const branch = resolveBranch(meta);
   if (branch === "strength") {
-    return metric === "average" ? `${value.toFixed(1)} kg/rep` : `${value.toFixed(1)} kg`;
+    const kg = weightLabel(meta.weightUnit);
+    return metric === "average" ? `${value.toFixed(1)} ${kg}/rep` : `${value.toFixed(1)} ${kg}`;
   }
   if (branch === "reps") {
     return `${value.toFixed(1)} reps`;
@@ -165,6 +177,8 @@ export function computeMetric(
 ): MetricResult | null {
   const branch = resolveBranch(meta);
   const higherIsBetter = higherIsBetterFor(branch, metric, meta.timeGoal);
+  const kg = weightLabel(meta.weightUnit);
+  const weightNote = (w: number) => (w > 0 ? ` (+${trimNumber(w, 1)}${kg})` : "");
 
   if (branch === "strength") {
     const valid = sets.filter((s) => num(s.weight) > 0 && num(s.reps) > 0);
@@ -175,20 +189,21 @@ export function computeMetric(
     const peakSet = pickBestStrengthSet(valid);
     const peakWeight = peakSet ? num(peakSet.weight) : 0;
     const peakReps = peakSet ? num(peakSet.reps) : 0;
+    const peak = `${trimNumber(peakWeight, 1)}${kg} × ${peakReps}`;
 
     switch (metric) {
       case "average":
-        return { value: average, label: `${average.toFixed(1)} kg/rep`, higherIsBetter };
+        return { value: average, label: `${average.toFixed(1)} ${kg}/rep`, higherIsBetter };
       case "peak":
-        return { value: peakWeight, label: `${peakWeight}kg × ${peakReps}`, higherIsBetter };
+        return { value: peakWeight, label: peak, higherIsBetter };
       case "total":
-        return { value: volume, label: `${volume.toFixed(0)} kg`, higherIsBetter };
+        return { value: volume, label: `${volume.toFixed(0)} ${kg}`, higherIsBetter };
       case "e1rm": {
         const e1rm = peakWeight * (1 + peakReps / 30);
         return {
           value: e1rm,
-          label: `${e1rm.toFixed(1)} kg`,
-          subtitle: peakSet ? `from ${peakWeight}kg × ${peakReps}` : undefined,
+          label: `${e1rm.toFixed(1)} ${kg}`,
+          subtitle: peakSet ? `from ${peak}` : undefined,
           higherIsBetter,
         };
       }
@@ -207,8 +222,6 @@ export function computeMetric(
     const peakSet = pickBestRepsSet(valid);
     const peakReps = peakSet ? num(peakSet.reps) : 0;
     const peakWeight = peakSet ? num(peakSet.weight) : 0;
-
-    const weightNote = (w: number) => (w > 0 ? ` (+${w % 1 === 0 ? w : w.toFixed(1)}kg)` : "");
 
     switch (metric) {
       case "average":
@@ -238,8 +251,6 @@ export function computeMetric(
     const peakSet = pickBestTimeSet(valid, meta.timeGoal);
     const peakSec = peakSet ? num(peakSet.duration) : 0;
     const peakWeight = peakSet ? num(peakSet.weight) : 0;
-
-    const weightNote = (w: number) => (w > 0 ? ` (+${w % 1 === 0 ? w : w.toFixed(1)}kg)` : "");
 
     switch (metric) {
       case "average":

@@ -1,6 +1,6 @@
 import { useId, useState, type ReactNode } from "react";
 import { SaveFailedAlert, SegmentedControl } from "../../shared";
-import { loadUnitPrefs, saveUnitPrefs, type UnitPreferences } from "../../../utils/unitPrefs";
+import { saveUnitPrefs, useUnitPrefs, type UnitPreferences } from "../../../utils/unitPrefs";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   const id = useId();
@@ -25,12 +25,11 @@ function SettingRow({ label, children }: { label: string; children: ReactNode })
 
 /** Language, Units and Appearance. A unit choice the browser refuses to store is undone, so the screen shows what is stored. */
 export function PreferenceSections() {
-  const [units, setUnits] = useState(loadUnitPrefs);
+  const units = useUnitPrefs();
   const [saveFailures, setSaveFailures] = useState(0);
 
   const choose = (next: UnitPreferences) => {
     if (saveUnitPrefs(next)) {
-      setUnits(next);
       setSaveFailures(0);
     } else {
       setSaveFailures((n) => n + 1);
@@ -51,7 +50,7 @@ export function PreferenceSections() {
             <SegmentedControl
               label="Weight unit"
               tone="lime"
-              options={[{ value: "kg", label: "kg" }, { value: "lbs", label: "lbs" }]}
+              options={[{ value: "kg", label: "kg" }, { value: "lbs", label: "lb" }]}
               value={units.weight}
               onChange={(weight) => choose({ ...units, weight })}
             />

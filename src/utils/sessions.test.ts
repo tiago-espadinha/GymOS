@@ -42,6 +42,7 @@ describe("sessionCells", () => {
   it("splits a row into sets, volume and notes", () => {
     expect(sessionCells({ sets: 9, volume: 2988.4 }, "Grip\ngave out.")).toEqual({ sets: "9 sets", volume: "2,988 kg", notes: "Grip gave out." });
     expect(sessionCells({ sets: 1, volume: 0 })).toEqual({ sets: "1 set", volume: "", notes: "" });
+    expect(sessionCells({ sets: 3, volume: 1000 }, "", "lbs").volume).toBe("2,205 lb");
   });
 });
 

@@ -51,7 +51,13 @@ describe("lastValues", () => {
 
   it("adds the distance and its unit for cardio", () => {
     const ex = exercise([set({ duration: "1500", distance: "5" })], { category: "cardio", distanceUnit: "mi" });
-    expect(lastValues(ex)).toBe("25:00 · 5 mi");
+    expect(lastValues(ex, { weight: "kg", distance: "mi" })).toBe("25:00 · 5 mi");
+    expect(lastValues(ex)).toBe("25:00 · 8.05 km");
+  });
+
+  it("shows stored kg in lb", () => {
+    const ex = exercise([set({ weight: "100", reps: "5" })]);
+    expect(lastValues(ex, { weight: "lbs", distance: "km" })).toBe("220.5 lb × 5");
   });
 
   it("is a dash when nothing is logged", () => {
@@ -139,5 +145,10 @@ describe("lastTimeLabel", () => {
 
   it("is empty without history", () => {
     expect(lastTimeLabel(exercise([]), [])).toBe("");
+  });
+
+  it("names the shared weight in lb", () => {
+    const history = ["12", "10"].map((reps) => set({ weight: "61.23496995", reps }));
+    expect(lastTimeLabel(exercise([]), history, { weight: "lbs", distance: "km" })).toBe("Last time 135 lb × 12, 10");
   });
 });

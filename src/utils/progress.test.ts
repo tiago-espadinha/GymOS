@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getExerciseMeta } from './metrics'
+import { getExerciseMeta, withUnits } from './metrics'
 import { analyseProgress, exerciseHistory, filterRange, lastAndBest, markPRs, newPR, progressSeries, splitLabel } from './progress'
 import type { ProgressPoint } from './progress'
 import type { WorkoutSession } from '../types'
@@ -34,6 +34,22 @@ describe('progressSeries', () => {
       ['2026-04-01', 50, '50kg × 10'],
       ['2026-05-04', 40, '40kg × 12'],
     ])
+  })
+
+  it('charts weights in lb when lb is chosen', () => {
+    const meta = withUnits(strength, { weight: 'lbs', distance: 'km' })
+    const [point] = progressSeries([session('2026-04-01', 'Row', [{ weight: '100', reps: '5' }])], 'Row', meta, 'peak')
+    expect(point.value).toBeCloseTo(220.46, 2)
+    expect(point.label).toBe('220.5lb × 5')
+  })
+
+  it('converts each session from the distance unit it stored', () => {
+    const run = getExerciseMeta({ category: 'cardio', trackingType: 'time', trackDistance: true })
+    const inKm = session('2026-04-01', 'Run', [{ duration: '1500', distance: '5' }])
+    const inMi = session('2026-04-02', 'Run', [{ duration: '1500', distance: '3.1' }])
+    inMi.exercises[0].distanceUnit = 'mi'
+    const series = progressSeries([inKm, inMi], 'Run', withUnits(run, { weight: 'kg', distance: 'mi' }), 'peak')
+    expect(series.map((p) => p.label)).toEqual(['3.11 mi', '3.10 mi'])
   })
 })
 

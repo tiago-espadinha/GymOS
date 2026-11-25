@@ -90,11 +90,15 @@ describe("seedDraft", () => {
   const history = [done("35", "12"), done("37.5", "10")];
 
   it("starts from the last set logged this session", () => {
-    expect(seedDraft(exercise([done("40", "8")]), history)).toEqual({ weight: "40", reps: "8" });
+    expect(seedDraft(exercise([done("40", "8")]), history)).toMatchObject({ weight: "40", reps: "8" });
   });
 
   it("falls back to the first set of last time", () => {
-    expect(seedDraft(exercise([set()]), history)).toEqual({ weight: "35", reps: "12" });
+    expect(seedDraft(exercise([set()]), history)).toMatchObject({ weight: "35", reps: "12" });
+  });
+
+  it("shows the seeded weight in lb", () => {
+    expect(seedDraft(exercise([done("100", "5")]), [], "lbs")).toMatchObject({ weight: "220.5", reps: "5" });
   });
 
   it("is empty with nothing to go on", () => {
@@ -115,5 +119,21 @@ describe("logDraft", () => {
     expect(ex.sets).toHaveLength(2);
     expect(ex.sets[1].id).toBe(setId);
     expect(currentSetIndex(ex)).toBe(2);
+  });
+
+  it("stores a weight entered in lb as kg and seeds it back as the same lb", () => {
+    const { exercise: ex } = logDraft(exercise([]), { weight: "135", reps: "5" }, "lbs");
+    expect(Number(ex.sets[0].weight)).toBeCloseTo(61.23496995, 8);
+    expect(seedDraft(ex, [], "lbs")).toMatchObject({ weight: "135", reps: "5" });
+  });
+
+  it("logs a seeded weight left as shown at its stored value, in kg and in lb", () => {
+    const ex = exercise([done("61.25", "5")]);
+    for (const unit of ["kg", "lbs"] as const) {
+      const logged = logDraft(ex, seedDraft(ex, [], unit), unit).exercise;
+      expect(logged.sets[1].weight).toBe("61.25");
+    }
+    const changed = logDraft(ex, { ...seedDraft(ex, [], "kg"), weight: "62.5" }, "kg").exercise;
+    expect(changed.sets[1].weight).toBe("62.5");
   });
 });

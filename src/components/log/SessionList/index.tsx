@@ -6,6 +6,7 @@ import { lastTimeSets } from "../../../utils/setModel";
 import ExerciseScreen, { type FinishAction } from "../ExerciseScreen";
 import RestStrip from "../RestStrip";
 import "./SessionList.css";
+import { useUnitPrefs } from "../../../utils/unitPrefs";
 
 interface SessionListProps {
   planName: string;
@@ -32,6 +33,7 @@ const titleId = (exerciseId: string) => `exerciseTitle-${exerciseId}`;
 // The list of exercises, or one exercise as a full screen.
 export function SessionList({ planName, exercises, onChangeExercise, sessions, editingId, header, actions, finish, openId, onOpen }: SessionListProps) {
   const names = exercises.map((ex) => ex.name).join("\n");
+  const units = useUnitPrefs();
   // Keyed by name, which only changes with the plan, not on every logged set.
   const history = useMemo(
     () => new Map(names.split("\n").map((name) => [name, lastTimeSets(sessions, name, editingId)])),
@@ -65,7 +67,7 @@ export function SessionList({ planName, exercises, onChangeExercise, sessions, e
                   <ListRow
                     number={i + 1}
                     title={ex.name}
-                    subtitle={rowSubtitle(ex, history.get(ex.name) ?? [])}
+                    subtitle={rowSubtitle(ex, history.get(ex.name) ?? [], units)}
                     current={ex.id === currentId}
                     onClick={() => onOpen(ex.id)}
                     trailing={<SetTicks total={total} done={done} />}

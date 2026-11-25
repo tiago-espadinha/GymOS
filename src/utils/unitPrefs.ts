@@ -1,3 +1,4 @@
+import { useSyncExternalStore } from "react";
 import { saveToStorage } from "./storage";
 
 export type WeightUnit = "kg" | "lbs";
@@ -29,5 +30,22 @@ export function loadUnitPrefs(): UnitPreferences {
 
 /** Stores the units and reports whether the browser kept them. */
 export function saveUnitPrefs(prefs: UnitPreferences): boolean {
-  return saveToStorage(STORAGE_KEY, prefs);
+  if (!saveToStorage(STORAGE_KEY, prefs)) return false;
+  current = prefs;
+  listeners.forEach((notify) => notify());
+  return true;
+}
+
+// Screens read the units through useUnitPrefs, so a choice saved in Settings shows everywhere at once.
+let current: UnitPreferences | null = null;
+const listeners = new Set<() => void>();
+
+const subscribe = (notify: () => void) => {
+  listeners.add(notify);
+  return () => void listeners.delete(notify);
+};
+const snapshot = () => (current ??= loadUnitPrefs());
+
+export function useUnitPrefs(): UnitPreferences {
+  return useSyncExternalStore(subscribe, snapshot);
 }

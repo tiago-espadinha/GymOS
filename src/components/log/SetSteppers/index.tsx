@@ -2,6 +2,8 @@ import { StepperBlock } from "../../shared";
 import { SetDraft } from "../../../utils/setModel";
 import { decimal, whole } from "../../../utils/typedNumber";
 import "./SetSteppers.css";
+import { useUnitPrefs } from "../../../utils/unitPrefs";
+import { weightLabel, weightStep } from "../../../utils/units";
 
 interface SetSteppersProps {
   draft: SetDraft;
@@ -11,13 +13,14 @@ interface SetSteppersProps {
 }
 
 export function SetSteppers({ draft, onChange, trackWeight, outlined }: SetSteppersProps) {
+  const { weight } = useUnitPrefs();
   return (
     <div className={`setSteppers${trackWeight ? "" : " setSteppers--single"}`}>
       {trackWeight && (
         <StepperBlock
           label="Weight"
-          unit="kg"
-          step={2.5}
+          unit={weightLabel(weight)}
+          step={weightStep(weight)}
           value={parseFloat(draft.weight) || 0}
           onChange={(v) => onChange({ ...draft, weight: String(v) })}
           text={draft.weight}

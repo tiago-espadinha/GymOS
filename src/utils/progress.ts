@@ -1,5 +1,6 @@
 import type { Exercise, WorkoutSession } from "../types";
 import { DEFAULT_METRIC, computeMetric, getExerciseMeta, type ExerciseMeta, type MetricKind } from "./metrics";
+import { setsInUnits } from "./units";
 
 export type TimeRange = "all" | "5" | "10" | "1m" | "3m";
 
@@ -27,7 +28,10 @@ export interface ProgressAnalysis {
   delta: number; // last minus first
 }
 
-/** One point per session that has a value for this exercise and metric, oldest first. */
+/**
+ * One point per session that has a value for this exercise and metric, oldest first, in the meta's
+ * units; each session's distances are converted from the unit that session stored them in.
+ */
 export function progressSeries(
   sessions: WorkoutSession[],
   exerciseName: string,
@@ -37,7 +41,8 @@ export function progressSeries(
   const points: ProgressPoint[] = [];
   for (const session of sessions) {
     const ex = session.exercises.find((e) => e.name === exerciseName);
-    const result = ex ? computeMetric(ex.sets, meta, metric) : null;
+    const sets = ex && setsInUnits(ex.sets, meta.weightUnit, meta.distanceUnit, ex.distanceUnit || "km");
+    const result = sets ? computeMetric(sets, meta, metric) : null;
     if (result) points.push({ date: session.date, value: result.value, label: result.label });
   }
   return points.sort((a, b) => a.date.localeCompare(b.date));

@@ -1,6 +1,8 @@
 import { ExerciseLog, Set, WorkoutSession } from "../types";
 import { isLoggedSet } from "./activeSession";
 import { generateId } from "./id";
+import type { WeightUnit } from "./unitPrefs";
+import { storedWeight, weightText } from "./units";
 
 // The set being entered: the first one with nothing logged. When every set is
 // logged the next one is virtual (index === sets.length) until it is logged.
@@ -34,25 +36,29 @@ export function lastTimeSets(sessions: WorkoutSession[], name: string, excludeId
   return best?.sets ?? [];
 }
 
+/** The steppers' values, with the weight in the unit chosen in Settings. */
 export interface SetDraft {
   weight: string;
   reps: string;
+  /** The stored kg the weight was seeded from, kept when the shown weight is left as seeded. */
+  seededKg?: string;
 }
-
-const draftOf = (s: Set): SetDraft => ({ weight: s.weight, reps: s.reps });
 
 // What the steppers start from: the last set logged this session, else the
 // first set of last time.
-export function seedDraft(exercise: ExerciseLog, history: Set[]): SetDraft {
+export function seedDraft(exercise: ExerciseLog, history: Set[], unit: WeightUnit = "kg"): SetDraft {
   const last = exercise.sets.findLast(isLoggedSet) ?? history[0];
-  return last ? draftOf(last) : { weight: "", reps: "" };
+  return last ? { weight: weightText(last.weight, unit), reps: last.reps, seededKg: last.weight } : { weight: "", reps: "" };
 }
 
-// Writes the draft to the current set, appending it when the current set is virtual.
-export function logDraft(exercise: ExerciseLog, draft: SetDraft): { exercise: ExerciseLog; setId: string } {
+// Writes the draft to the current set, appending it when the current set is virtual. The weight is stored in kg.
+export function logDraft(exercise: ExerciseLog, draft: SetDraft, unit: WeightUnit = "kg"): { exercise: ExerciseLog; setId: string } {
   const index = currentSetIndex(exercise);
   const current = exercise.sets[index];
-  const logged: Set = { ...(current ?? { id: generateId() }), weight: draft.weight, reps: draft.reps };
+  const { seededKg } = draft;
+  const untouched = seededKg !== undefined && draft.weight === weightText(seededKg, unit);
+  const weight = untouched ? seededKg : storedWeight(draft.weight, unit);
+  const logged: Set = { ...(current ?? { id: generateId() }), weight, reps: draft.reps };
   const sets = current
     ? exercise.sets.map((s, i) => (i === index ? logged : s))
     : [...exercise.sets, logged];
