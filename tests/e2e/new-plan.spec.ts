@@ -61,6 +61,8 @@ test('weight is a switch: on for strength, off for calisthenics until turned on'
   await openForm(page)
   const trackWeight = page.getByRole('switch', { name: /^Track weight/ })
   await expect(trackWeight).toHaveAttribute('aria-checked', 'true')
+  // The ON/OFF printed in the track is decoration: the name stays the label and description.
+  await expect(trackWeight).toHaveAccessibleName(/^Track weight ?Log kg with each set$/)
   await choose(page, 'Category', 'Calisthenics')
   await expect(trackWeight).toHaveAttribute('aria-checked', 'false')
   await trackWeight.click()
