@@ -3,6 +3,7 @@ import { describeExercise } from "../CreatePlanForm/describeExercise";
 import { planDetailKicker, planSummary } from "../../../utils/plans";
 import { TrainingPlan, WorkoutSession } from "../../../types";
 import "./PlanDetail.css";
+import { useUnitPrefs } from "../../../utils/unitPrefs";
 
 interface PlanDetailProps {
   id: string;
@@ -16,6 +17,7 @@ interface PlanDetailProps {
 /** Wide Plans' right pane: the selected plan, Start, ⋯ and every exercise in order. */
 export function PlanDetail({ id, plan, sessions, today, onStart, onMore }: PlanDetailProps) {
   const titleId = `${id}-title`;
+  const { distance } = useUnitPrefs();
   return (
     <section id={id} className="planDetail" aria-labelledby={titleId}>
       <p className="planDetail__kicker">{planDetailKicker(plan, sessions, today)}</p>
@@ -46,7 +48,7 @@ export function PlanDetail({ id, plan, sessions, today, onStart, onMore }: PlanD
           <li key={ex.id} className="planDetail__exercise">
             <span className="planDetail__number" aria-hidden="true">{i + 1}</span>
             <span className="planDetail__exerciseName">{ex.name}</span>
-            <span className="planDetail__exerciseMeta">{describeExercise(ex)}</span>
+            <span className="planDetail__exerciseMeta">{describeExercise(ex, distance)}</span>
           </li>
         ))}
       </ol>

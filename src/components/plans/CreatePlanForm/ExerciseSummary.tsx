@@ -2,6 +2,7 @@ import { WarningIcon } from "../../shared";
 import { Exercise } from "../../../types";
 import { EXERCISE_NAME_ERROR } from "./buildPlan";
 import { describeExercise } from "./describeExercise";
+import { useUnitPrefs } from "../../../utils/unitPrefs";
 
 interface ExerciseSummaryProps {
   exercise: Exercise;
@@ -12,6 +13,7 @@ interface ExerciseSummaryProps {
 
 /** A collapsed exercise: number, name and how it is measured. Tapping it opens the card. */
 export function ExerciseSummary({ exercise, number, invalid, onExpand }: ExerciseSummaryProps) {
+  const { distance } = useUnitPrefs();
   const name = exercise.name.trim();
   return (
     <button
@@ -29,7 +31,7 @@ export function ExerciseSummary({ exercise, number, invalid, onExpand }: Exercis
         {invalid ? (
           <span className="exerciseError"><WarningIcon />{EXERCISE_NAME_ERROR}</span>
         ) : (
-          <span className="exerciseSummaryMeta">{describeExercise(exercise)}</span>
+          <span className="exerciseSummaryMeta">{describeExercise(exercise, distance)}</span>
         )}
       </span>
       <svg className="exerciseSummaryChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"

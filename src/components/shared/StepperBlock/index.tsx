@@ -1,6 +1,10 @@
 import { stepValue } from './stepValue';
 import './StepperBlock.css';
 
+// Longer typed values step down in size so they stay inside a half-width block.
+const inputSize = (length: number) =>
+  length > 4 ? " stepper-block__input--long stepper-block__input--xlong" : length > 3 ? " stepper-block__input--long" : "";
+
 interface StepperBlockProps {
   label: string;
   value: number;
@@ -41,7 +45,7 @@ export function StepperBlock({
       <div className="stepper-block__reading" aria-live={onType ? undefined : 'polite'}>
         {onType ? (
           <input
-            className={`stepper-block__value stepper-block__input${(text ?? "").length > 3 ? " stepper-block__input--long" : ""}`}
+            className={`stepper-block__value stepper-block__input${inputSize((text ?? "").length)}`}
             aria-label={label}
             inputMode="decimal"
             placeholder="0"

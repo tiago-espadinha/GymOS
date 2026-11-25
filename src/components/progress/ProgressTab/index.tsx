@@ -9,11 +9,13 @@ import {
   METRIC_LABELS,
   ExerciseMeta,
   getExerciseMeta,
+  withUnits,
   resolveBranch,
   availableMetrics,
   higherIsBetterFor,
   formatMetricNumber,
 } from "../../../utils/metrics";
+import { useUnitPrefs } from "../../../utils/unitPrefs";
 import {
   TIME_RANGES,
   TimeRange,
@@ -173,7 +175,8 @@ export function ProgressTab({
   const exercises = useMemo(() => exercisesOf(plans, sessions), [plans, sessions]);
   // Fall back to the first exercise when the stored selection no longer exists.
   const selected = exercises.find((ex) => ex.name === storedExName) ?? exercises[0];
-  const meta = useMemo(() => (selected ? getExerciseMeta(selected) : null), [selected]);
+  const units = useUnitPrefs();
+  const meta = useMemo(() => (selected ? withUnits(getExerciseMeta(selected), units) : null), [selected, units]);
   const metricOptions = meta ? availableMetrics(resolveBranch(meta)) : [];
   // Fall back to the default when the chosen metric doesn't apply to this exercise.
   const metric = metricOptions.includes(metricChoice) ? metricChoice : DEFAULT_METRIC;

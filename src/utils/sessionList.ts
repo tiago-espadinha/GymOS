@@ -3,6 +3,8 @@ import { ExerciseLog, Set } from "../types";
 import { isLoggedSet } from "./activeSession";
 import { getExerciseMeta } from "./metrics";
 import { currentSetIndex } from "./setModel";
+import { DEFAULT_UNIT_PREFS, type UnitPreferences } from "./unitPrefs";
+import { distanceText, weightLabel, weightText } from "./units";
 
 export const NO_VALUES = "—";
 
@@ -21,23 +23,25 @@ export function currentSetNumber(exercise: ExerciseLog): { number: number; total
   return { number, total: Math.max(exercise.sets.length, number) };
 }
 
-export function formatSet(set: Set, exercise: ExerciseLog): string {
+// Weights and distances read in the chosen units; the sets keep their stored values.
+export function formatSet(set: Set, exercise: ExerciseLog, units: UnitPreferences = DEFAULT_UNIT_PREFS): string {
   const meta = getExerciseMeta(exercise);
   if (meta.trackingType === "time") {
     const parts = [];
     if (Number(set.duration) > 0) parts.push(formatClock(Number(set.duration) * 1000));
-    if (parseFloat(set.distance || "") > 0) parts.push(`${set.distance} ${meta.distanceUnit}`);
+    if (parseFloat(set.distance || "") > 0) parts.push(`${distanceText(set.distance!, meta.distanceUnit, units.distance)} ${units.distance}`);
     return parts.join(" · ");
   }
   const reps = parseInt(set.reps) > 0 ? set.reps : "";
-  if (parseFloat(set.weight) > 0) return reps ? `${set.weight} kg × ${reps}` : `${set.weight} kg`;
+  const weight = `${weightText(set.weight, units.weight)} ${weightLabel(units.weight)}`;
+  if (parseFloat(set.weight) > 0) return reps ? `${weight} × ${reps}` : weight;
   return reps ? `${reps} reps` : "";
 }
 
 // The last logged set of this session, e.g. "60 kg × 8", or a dash when there is none.
-export function lastValues(exercise: ExerciseLog): string {
+export function lastValues(exercise: ExerciseLog, units: UnitPreferences = DEFAULT_UNIT_PREFS): string {
   const last = exercise.sets.findLast(isLoggedSet);
-  return (last && formatSet(last, exercise)) || NO_VALUES;
+  return (last && formatSet(last, exercise, units)) || NO_VALUES;
 }
 
 // Exercises with a logged set, logged sets, and weight x reps over those sets.
@@ -55,32 +59,32 @@ export function sessionTotals(exercises: ExerciseLog[]): { exercises: number; se
 }
 
 // "3 × 40 kg × 12" when every logged set matches, otherwise just "3 sets".
-export function exerciseSummary(exercise: ExerciseLog): string {
+export function exerciseSummary(exercise: ExerciseLog, units: UnitPreferences = DEFAULT_UNIT_PREFS): string {
   const logged = exercise.sets.filter(isLoggedSet);
   if (logged.length === 0) return NO_VALUES;
-  const values = logged.map((s) => formatSet(s, exercise));
+  const values = logged.map((s) => formatSet(s, exercise, units));
   if (values.every((v) => v === values[0]) && values[0]) return `${logged.length} × ${values[0]}`;
   return `${logged.length} set${logged.length === 1 ? "" : "s"}`;
 }
 
 // A row's second line: this session's last set and progress once one is logged,
 // otherwise the first set of last time.
-export function rowSubtitle(exercise: ExerciseLog, history: Set[]): string {
+export function rowSubtitle(exercise: ExerciseLog, history: Set[], units: UnitPreferences = DEFAULT_UNIT_PREFS): string {
   const { done, total } = exerciseProgress(exercise);
-  if (done > 0) return `${lastValues(exercise)} · ${done < total ? `${done} of ${total} done` : "done"}`;
-  return history.length > 0 ? `Last ${formatSet(history[0], exercise)}` : "Not logged recently";
+  if (done > 0) return `${lastValues(exercise, units)} · ${done < total ? `${done} of ${total} done` : "done"}`;
+  return history.length > 0 ? `Last ${formatSet(history[0], exercise, units)}` : "Not logged recently";
 }
 
 // "Last time 35 kg × 12, 12, 10", naming the weight once when every set shares it.
-export function lastTimeLabel(exercise: ExerciseLog, history: Set[]): string {
+export function lastTimeLabel(exercise: ExerciseLog, history: Set[], units: UnitPreferences = DEFAULT_UNIT_PREFS): string {
   if (history.length === 0) return "";
   const meta = getExerciseMeta(exercise);
   const weight = history[0].weight;
   const shared =
     meta.trackingType === "reps" && parseFloat(weight) > 0 && history.every((s) => s.weight === weight && parseInt(s.reps) > 0);
   const values = shared
-    ? `${weight} kg × ${history.map((s) => s.reps).join(", ")}`
-    : history.map((s) => formatSet(s, exercise)).join(", ");
+    ? `${weightText(weight, units.weight)} ${weightLabel(units.weight)} × ${history.map((s) => s.reps).join(", ")}`
+    : history.map((s) => formatSet(s, exercise, units)).join(", ");
   return `Last time ${values}`;
 }
 

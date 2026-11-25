@@ -14,10 +14,10 @@ describe("describeExercise", () => {
     ).toBe("Calisthenics · Core · time");
   });
 
-  it("shows the distance unit for distance cardio and treats legacy data as strength", () => {
-    expect(
-      describeExercise({ id: "d", name: "Run", muscleGroup: "Cardio", category: "cardio", distanceUnit: "mi" }),
-    ).toBe("Cardio · Cardio · time + mi");
+  it("shows the chosen distance unit for distance cardio and treats legacy data as strength", () => {
+    const run = { id: "d", name: "Run", muscleGroup: "Cardio", category: "cardio", distanceUnit: "mi" } as const;
+    expect(describeExercise(run, "mi")).toBe("Cardio · Cardio · time + mi");
+    expect(describeExercise(run)).toBe("Cardio · Cardio · time + km");
     expect(describeExercise({ id: "e", name: "Bench", muscleGroup: "Chest" })).toBe("Strength · Chest · weight × reps");
   });
 

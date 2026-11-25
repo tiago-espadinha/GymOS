@@ -14,6 +14,8 @@ import SetSteppers from "../SetSteppers";
 import EditSetPanel from "./EditSetPanel";
 import TimedSets from "./TimedSets";
 import "./ExerciseLogger.css";
+import { useUnitPrefs } from "../../../utils/unitPrefs";
+import { setFromDisplay, setToDisplay, storedWeight } from "../../../utils/units";
 
 interface ExerciseLoggerProps {
   exercise: ExerciseLog;
@@ -31,6 +33,7 @@ interface ExerciseLoggerProps {
 
 export function ExerciseLogger({ exercise, onChange, history, place, titleId, header, footer }: ExerciseLoggerProps) {
   const meta = getExerciseMeta(exercise);
+  const units = useUnitPrefs();
   const timed = meta.trackingType === "time";
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -40,18 +43,19 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, he
     return set ? { setId: set.id, fresh: false } : null;
   });
   // Unsaved stepper values; lost on reload by design.
-  const [draft, setDraft] = useState<SetDraft>(() => seedDraft(exercise, history));
-  // A logged set being edited, with its values as changed so far.
+  const [draft, setDraft] = useState<SetDraft>(() => seedDraft(exercise, history, units.weight));
+  // A logged set being edited, with its values as changed so far in the chosen units.
   const [editing, setEditing] = useState<{ index: number; draft: Set } | null>(null);
 
   const index = currentSetIndex(exercise);
   const { number, total } = currentSetNumber(exercise);
   const format = (s: Set) => {
-    const values = formatSet(s, exercise);
+    const values = formatSet(s, exercise, units);
     const rest = timed && s.restTaken ? `rest ${formatClock(Number(s.restTaken) * 1000)}` : "";
     return [values, rest].filter(Boolean).join(" · ") || NO_VALUES;
   };
-  const draftSet = (d: SetDraft): Set => ({ id: "", ...d });
+  // The steppers show the chosen unit; the row and the logged check read it back as stored kg.
+  const draftSet = (d: SetDraft): Set => ({ id: "", weight: storedWeight(d.weight, units.weight), reps: d.reps });
 
   // Only one rest at a time: end the previous one so it cannot linger on the strip.
   const startRest = (setId: string) => {
@@ -91,7 +95,7 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, he
 
   const setDone = () => {
     handOffFocus.current = true;
-    const logged = logDraft(exercise, draft);
+    const logged = logDraft(exercise, draft, units.weight);
     onChange(logged.exercise);
     startRest(logged.setId);
   };
@@ -105,9 +109,12 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, he
     onChange({ ...exercise, sets: exercise.sets.filter((_, j) => j !== i) });
   };
 
+  // The edited set in storage units; untouched fields keep their stored values.
+  const editedSet = editing && setFromDisplay(editing.draft, exercise.sets[editing.index], units, meta.distanceUnit);
+
   const saveEdit = () => {
-    if (!editing) return;
-    onChange({ ...exercise, sets: exercise.sets.map((s, i) => (i === editing.index ? { ...s, ...editing.draft } : s)) });
+    if (!editing || !editedSet) return;
+    onChange({ ...exercise, sets: exercise.sets.map((s, i) => (i === editing.index ? { ...s, ...editedSet } : s)) });
     setEditing(null);
   };
 
@@ -139,12 +146,12 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, he
     : rest
       ? `Next · Set ${number} of ${total}`
       : `Set ${number} of ${total}`;
-  const startEdit = (i: number) => setEditing({ index: i, draft: exercise.sets[i] });
-  const editingRow = editing && { index: editing.index, label: format(editing.draft) };
+  const startEdit = (i: number) => setEditing({ index: i, draft: setToDisplay(exercise.sets[i], units, meta.distanceUnit) });
+  const editingRow = editing && editedSet && { index: editing.index, label: format(editedSet) };
   // A timed set needs a time; a distance alone is not a set.
   const canSave = editing !== null && (timed ? Number(editing.draft.duration) > 0 : isLoggedSet(editing.draft));
 
-  const lastTime = !editing && !rest && lastTimeLabel(exercise, history);
+  const lastTime = !editing && !rest && lastTimeLabel(exercise, history, units);
   const restIndex = rest ? exercise.sets.findIndex((s) => s.id === rest.setId) : -1;
   // A hold's block sits above its title, so a timed exercise places the heading itself.
   const headingInHold = timed && !rest && !editing;
@@ -239,7 +246,7 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, he
           index={editing.index}
           timed={timed}
           trackWeight={meta.trackWeight}
-          distanceUnit={meta.trackDistance ? meta.distanceUnit : undefined}
+          distanceUnit={meta.trackDistance ? units.distance : undefined}
           canSave={canSave}
           onChange={(d) => setEditing({ ...editing, draft: d })}
           onSave={saveEdit}

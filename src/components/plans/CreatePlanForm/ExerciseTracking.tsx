@@ -1,6 +1,8 @@
 import { SegmentedControl, Switch } from "../../shared";
 import { ExerciseMeta } from "../../../utils/metrics";
 import { Exercise } from "../../../types";
+import { useUnitPrefs } from "../../../utils/unitPrefs";
+import { weightLabel } from "../../../utils/units";
 
 interface ExerciseTrackingProps {
   meta: ExerciseMeta;
@@ -12,13 +14,14 @@ const GOAL_OPTIONS: { value: "longer" | "shorter"; label: string }[] = [
   { value: "shorter", label: "Shorter" },
 ];
 
-/** What else a set records: weight for reps, distance for cardio (km, or mi if the exercise stored it), or which time is better. */
+/** What else a set records: weight for reps, distance for cardio (in the units chosen in Settings), or which time is better. */
 export function ExerciseTracking({ meta, set }: ExerciseTrackingProps) {
   const { category, trackWeight, trackDistance } = meta;
+  const units = useUnitPrefs();
 
   if (meta.trackingType === "reps") {
     return (
-      <Switch label="Track weight" description="Log kg with each set" checked={trackWeight}
+      <Switch label="Track weight" description={`Log ${weightLabel(units.weight)} with each set`} checked={trackWeight}
         onChange={(on) => set({ trackWeight: on })} />
     );
   }
@@ -26,7 +29,7 @@ export function ExerciseTracking({ meta, set }: ExerciseTrackingProps) {
   return (
     <>
       {category === "cardio" && (
-        <Switch label="Track distance" description={`Log ${meta.distanceUnit} with each set`} checked={trackDistance}
+        <Switch label="Track distance" description={`Log ${units.distance} with each set`} checked={trackDistance}
           onChange={(on) => set({ trackDistance: on })} />
       )}
       {!trackDistance && (

@@ -85,3 +85,8 @@
   font-size: var(--text-stepper-long);
   line-height: calc(var(--text-stepper) * var(--leading-stepper));
 }
+
+/* Five characters, such as "220.5" in lb. */
+.stepper-block__input--xlong {
+  font-size: var(--text-stepper-xlong);
+}

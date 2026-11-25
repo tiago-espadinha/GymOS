@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { formatDateFull } from "../../../utils/date";
 import { newestFirst, sessionCells, sessionStats, sessionSummary } from "../../../utils/sessions";
 import { WorkoutSession } from "../../../types";
+import { useUnitPrefs } from "../../../utils/unitPrefs";
 
 const RECENT_COUNT = 6;
 
@@ -14,6 +15,7 @@ interface RecentSessionsProps {
 }
 
 export function RecentSessions({ sessions, onEdit, justSaved, empty }: RecentSessionsProps) {
+  const { weight } = useUnitPrefs();
   const recent = newestFirst(sessions).slice(0, RECENT_COUNT);
   return (
     <section aria-labelledby="logHomeRecentTitle" className={recent.length ? "logHomeRecent" : "logHomeRecent logHomeRecent--empty"}>
@@ -36,7 +38,7 @@ export function RecentSessions({ sessions, onEdit, justSaved, empty }: RecentSes
             const when = formatDateFull(s.date);
             const saved = s.id === justSaved?.id;
             const stats = sessionStats(s);
-            const cells = sessionCells(stats, s.notes);
+            const cells = sessionCells(stats, s.notes, weight);
             return (
               <li key={s.id} className={saved ? "logHomeItem logHomeItem--saved" : "logHomeItem"}>
                 <div className="logHomeItemText">
@@ -45,7 +47,7 @@ export function RecentSessions({ sessions, onEdit, justSaved, empty }: RecentSes
                     <span className="logHomeItemTitle">{s.planName}</span>
                     <span className="logHomeItemMeta">{when}</span>
                   </span>
-                  <span className="logHomeItemMeta logHomeItemSummary">{sessionSummary(stats, s.notes)}</span>
+                  <span className="logHomeItemMeta logHomeItemSummary">{sessionSummary(stats, s.notes, weight)}</span>
                   {/* Wide only: the summary as table cells. */}
                   <span className="logHomeItemCell">{cells.sets}</span>
                   <span className="logHomeItemCell">{cells.volume}</span>

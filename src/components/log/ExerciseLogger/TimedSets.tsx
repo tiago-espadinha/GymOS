@@ -7,6 +7,8 @@ import { NO_VALUES, currentSetNumber } from "../../../utils/sessionList";
 import { currentSetIndex, virtualSetId } from "../../../utils/setModel";
 import TimedSetBlock from "../TimedSetBlock";
 import SetsTable from "../SetsTable";
+import { useUnitPrefs } from "../../../utils/unitPrefs";
+import { storedDistance } from "../../../utils/units";
 
 interface TimedSetsProps {
   exercise: ExerciseLog;
@@ -27,6 +29,7 @@ interface TimedSetsProps {
 export function TimedSets(props: TimedSetsProps) {
   const { exercise, onChange, resting, editing } = props;
   const { category, trackDistance, distanceUnit } = getExerciseMeta(exercise);
+  const units = useUnitPrefs();
   // Isometric holds and loaded carries chain into a rest before the next set;
   // steady-state cardio usually doesn't. The switch lets the person override it.
   const [chainRest, setChainRest] = useState(category !== "cardio");
@@ -39,7 +42,7 @@ export function TimedSets(props: TimedSetsProps) {
   const holdDone = (seconds: number, distance: string) => {
     const id = hold.id === virtualSetId(exercise) ? generateId() : hold.id;
     const logged: Set = { ...hold, id, duration: String(seconds), completed: true };
-    if (parseFloat(distance) > 0) logged.distance = distance;
+    if (parseFloat(distance) > 0) logged.distance = storedDistance(distance, units.distance, distanceUnit);
     onChange({
       ...exercise,
       sets: index < exercise.sets.length ? exercise.sets.map((s, i) => (i === index ? logged : s)) : [...exercise.sets, logged],
@@ -61,7 +64,7 @@ export function TimedSets(props: TimedSetsProps) {
         initialTargetSec={lastHeldSec || DEFAULT_PRESETS[category].work[0]}
         chainRest={chainRest}
         onChainRestChange={setChainRest}
-        distanceUnit={trackDistance ? distanceUnit : undefined}
+        distanceUnit={trackDistance ? units.distance : undefined}
         resting={resting}
         hidden={Boolean(editing)}
         heading={props.heading}

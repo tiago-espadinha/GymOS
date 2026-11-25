@@ -43,6 +43,7 @@
   --leading-screen-title: 0.9;
   --text-stepper: 60px;
   --text-stepper-long: 36px; /* a value like 37.5 in a half-width stepper */
+  --text-stepper-xlong: 28px; /* a value like 220.5 (lb) in a half-width stepper */
   --leading-stepper: 0.95;
   --text-section-title: 44px;
   --text-section-title-lg: 52px;

@@ -6,6 +6,8 @@ import { isLoggedSet, ActiveSession } from "../../../utils/activeSession";
 import DateSheet from "../DateSheet";
 import DeleteSessionSheet from "../DeleteSessionSheet";
 import "./FinishScreen.css";
+import { useUnitPrefs } from "../../../utils/unitPrefs";
+import { kgTo, weightLabel } from "../../../utils/units";
 
 interface FinishScreenProps {
   session: ActiveSession;
@@ -32,13 +34,14 @@ export function FinishScreen({ session, onNotes, onDate, onSave, saveFailures, o
   const [open, setOpen] = useState<"date" | "delete" | null>(null);
   const editing = Boolean(session.editingId);
   const saveFailed = saveFailures > 0;
+  const units = useUnitPrefs();
   const totals = sessionTotals(session.exercises);
   const rows = session.exercises.filter((ex) => ex.sets.some(isLoggedSet));
   const stats = [
     { value: totals.exercises, label: totals.exercises === 1 ? "exercise" : "exercises" },
     { value: totals.sets, label: totals.sets === 1 ? "set" : "sets" },
     ...(totals.volume > 0
-      ? [{ value: Math.round(totals.volume).toLocaleString("en-US"), label: "kg moved" }]
+      ? [{ value: Math.round(kgTo(totals.volume, units.weight)).toLocaleString("en-US"), label: `${weightLabel(units.weight)} moved` }]
       : []),
   ];
 
@@ -76,7 +79,7 @@ export function FinishScreen({ session, onNotes, onDate, onSave, saveFailures, o
         {rows.map((ex) => (
           <li key={ex.id} className="finishRow">
             <span className="finishRowName">{ex.name}</span>
-            <span className="finishRowSets">{exerciseSummary(ex)}</span>
+            <span className="finishRowSets">{exerciseSummary(ex, units)}</span>
           </li>
         ))}
       </ul>
