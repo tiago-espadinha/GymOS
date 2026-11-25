@@ -17,6 +17,7 @@ export { SetTicks } from './SetTicks';
 export { ListRow } from './ListRow';
 export { TabBar } from './TabBar';
 export { Sheet } from './Sheet';
+export { ConfirmSheet } from './ConfirmSheet';
 export { Toast } from './Toast';
 export { Switch } from './Switch';
 export { WarningIcon } from './WarningIcon';
