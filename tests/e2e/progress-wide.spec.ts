@@ -114,10 +114,10 @@ test.describe('at 1280', () => {
     await expect(page.getByRole('button', { name: 'Log', exact: true })).toHaveAttribute('aria-current', 'page')
   })
 
-  test('the Progress title shrinks to the pane label, as Plans does', async ({ page }) => {
+  test('the Stats title shrinks to the pane label, as Plans does', async ({ page }) => {
     await open(page)
     const size = (el: Element) => getComputedStyle(el).fontSize
-    const progress = await pane(page).getByRole('heading', { name: 'Progress', level: 1 }).evaluate(size)
+    const progress = await pane(page).getByRole('heading', { name: 'Stats', level: 1 }).evaluate(size)
     await page.getByRole('navigation', { name: 'Main' }).getByText('Plans').click()
     const plans = await page.getByRole('heading', { name: '1 Plan', level: 1 }).evaluate(size)
     expect(progress).toBe(plans)
@@ -132,7 +132,7 @@ test.describe('at 1280', () => {
     await expect(pane(page).getByRole('button', { name: 'Settings' })).toBeFocused()
   })
 
-  test('Progress with data has no detectable WCAG A/AA violations', async ({ page }) => {
+  test('Stats with data has no detectable WCAG A/AA violations', async ({ page }) => {
     await open(page)
     expect((await axe(page)).violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([])
   })

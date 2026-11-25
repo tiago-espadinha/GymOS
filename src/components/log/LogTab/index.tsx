@@ -178,7 +178,7 @@ export function LogTab({
           text={
             editingId
               ? "Your changes are lost. The saved session stays as it was."
-              : "The sets you logged are lost. Nothing is saved to Log or Progress."
+              : "The sets you logged are lost. Nothing is saved to Log or Stats."
           }
           confirmLabel={editingId ? "Discard changes" : "Discard session"}
           onConfirm={discardSession}

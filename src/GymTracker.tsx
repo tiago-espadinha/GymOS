@@ -13,7 +13,7 @@ import "./GymTracker.css";
 const TABS = [
   { id: "plans", label: "Plans" },
   { id: "log", label: "Log" },
-  { id: "progress", label: "Progress" },
+  { id: "progress", label: "Stats" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];

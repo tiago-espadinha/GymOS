@@ -109,7 +109,7 @@
   --width-sheet: 560px;
   --width-wide: 1200px;
   --width-pane: 440px; /* the fixed left pane of a wide two-pane screen */
-  --size-chart-wide: 300px; /* Progress chart beside the exercise list */
+  --size-chart-wide: 300px; /* Stats chart beside the exercise list */
   --width-start-wide: 280px; /* Start beside ⋯ in a wide detail pane */
   --gutter-wide: 40px;
   --width-timer-split: 60vw; /* a wide session's timer, full height on the left */

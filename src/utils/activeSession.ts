@@ -4,7 +4,7 @@ import { generateId } from "./id";
 export const ACTIVE_SESSION_KEY = "gym:activeSession";
 
 // A session that has been started but not saved yet. Kept apart from
-// `gym:sessions` so unfinished work never reaches Progress or the CSV export.
+// `gym:sessions` so unfinished work never reaches Stats or the CSV export.
 export interface ActiveSession {
   planId: string;
   planName: string;

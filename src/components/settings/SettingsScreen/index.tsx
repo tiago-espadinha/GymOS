@@ -24,7 +24,7 @@ function DeviceCount({ n, noun }: { n: number; noun: string }) {
   );
 }
 
-/** Data, language, units and appearance on one screen, opened from Progress or an empty-state import link. */
+/** Data, language, units and appearance on one screen, opened from Stats or an empty-state import link. */
 export function SettingsScreen({ plans, sessions, setPlans, setSessions, onClose }: SettingsScreenProps) {
   const title = useRef<HTMLHeadingElement>(null);
   const units = useUnitPrefs();

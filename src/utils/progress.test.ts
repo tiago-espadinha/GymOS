@@ -157,7 +157,7 @@ describe('analyseProgress', () => {
 })
 
 describe('exerciseHistory', () => {
-  it('counts only sessions that chart a value, so it agrees with the Progress screen', () => {
+  it('counts only sessions that chart a value, so it agrees with the Stats screen', () => {
     const row = { id: 'r', name: 'Row', muscleGroup: '' }
     const sessions = [
       session('2026-04-01', 'Row', [{ weight: '50', reps: '10' }]),

@@ -55,11 +55,11 @@ test.beforeEach(async ({ page }) => {
     [plan, [session('2026-01-01'), session('2026-01-08')]] as const,
   )
   await page.goto('/')
-  await page.getByText('Progress', { exact: true }).first().click()
+  await page.getByText('Stats', { exact: true }).first().click()
   await page.getByRole('button', { name: 'Settings' }).click()
 })
 
-test('opens from Progress with the device counts, and Close returns to the Settings button', async ({ page }) => {
+test('opens from Stats with the device counts, and Close returns to the Settings button', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeFocused()
   await expect(page.locator('.dataCount')).toHaveText(['1 plan', '2 sessions'])
   await expect(page.getByText('Bring in a CSV exported from GymOS')).toBeVisible()
@@ -116,7 +116,7 @@ test('a chosen file shows what was found, and Add keeps existing data', async ({
   expect(after.sessions.map((s) => s.date)).toEqual(['2026-01-01', '2026-01-08', '2026-02-01'])
 
   await page.reload()
-  await page.getByText('Progress', { exact: true }).first().click()
+  await page.getByText('Stats', { exact: true }).first().click()
   await page.getByRole('button', { name: 'Settings' }).click()
   await expect(page.locator('.dataCount')).toHaveText(['2 plans', '3 sessions'])
 })
@@ -164,7 +164,7 @@ test('a file that is not an export shows the error and changes no data', async (
   await expect(page.getByRole('button', { name: 'Choose another file' })).toBeVisible()
 })
 
-test('after an import, See progress closes Settings and Import another file opens the chooser', async ({ page }) => {
+test('after an import, See stats closes Settings and Import another file opens the chooser', async ({ page }) => {
   await chooseFile(page, 'gym.csv', importCsv)
   await page.getByRole('button', { name: /Add to my data/ }).click()
 
@@ -174,7 +174,7 @@ test('after an import, See progress closes Settings and Import another file open
   await page.getByRole('button', { name: /Add to my data/ }).click()
   await expect(page.getByText('Nothing new: every plan and session was already here.')).toBeVisible()
 
-  await page.getByRole('button', { name: 'See progress' }).click()
+  await page.getByRole('button', { name: 'See stats' }).click()
   await expect(page.getByRole('heading', { name: 'Settings' })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Settings' })).toBeFocused()
 })
@@ -189,7 +189,7 @@ test('the Settings screen has no detectable WCAG A/AA violations in each import 
   await expect(page.getByRole('button', { name: /Add to my data/ })).toBeVisible()
   expect(await scan()).toEqual([])
   await page.getByRole('button', { name: /Add to my data/ }).click()
-  await expect(page.getByRole('button', { name: 'See progress' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'See stats' })).toBeVisible()
   expect(await scan()).toEqual([])
   await chooseFile(page, 'notes.csv', 'name,weight\nRow,60')
   await expect(page.getByRole('heading', { name: "Can't import this file" })).toBeVisible()

@@ -14,7 +14,7 @@ test('the app reloads with no network after a first visit', async ({ page, conte
   await expect(page.getByRole('navigation', { name: 'Main' }).getByRole('button')).toHaveText([
     'Plans',
     'Log',
-    'Progress',
+    'Stats',
   ])
   const loadedFaces = await page.evaluate(() =>
     document.fonts.load('900 1em "Big Shoulders Display"').then((faces) => faces.length),

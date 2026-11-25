@@ -208,7 +208,7 @@ export function ProgressTab({
 
   const header = (
     <header className="progressHeader">
-      <h1 className="progressTitle">Progress</h1>
+      <h1 className="progressTitle">Stats</h1>
       <button type="button" className="progressSettings" ref={settingsButton} onClick={() => setShowSettings(true)}>
         Settings
       </button>
