@@ -24,7 +24,7 @@ export function PlanDetail({ id, plan, sessions, today, onStart, onMore }: PlanD
       <h2 id={titleId} className="planDetail__name">{plan.name}</h2>
       <p className="planDetail__meta">{planSummary(plan)}</p>
       <div className="planDetail__actions">
-        <PrimaryButton tone="lime" onClick={() => onStart(plan)} aria-label={`Start ${plan.name}`}>
+        <PrimaryButton tone="accent" onClick={() => onStart(plan)} aria-label={`Start ${plan.name}`}>
           Start
         </PrimaryButton>
         <button

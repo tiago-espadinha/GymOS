@@ -34,7 +34,7 @@
   outline-offset: 2px;
 }
 
-.pill-button--lime {
+.pill-button--accent {
   background: var(--color-accent);
   color: var(--color-on-accent);
 }

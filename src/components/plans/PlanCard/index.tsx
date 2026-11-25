@@ -17,7 +17,7 @@ export function PlanCard({ plan, onStart, onMore }: PlanCardProps) {
         <span className="planRow__name">{plan.name}</span>
         <span className="planRow__meta">{planSummary(plan)}</span>
       </span>
-      <PillButton variant="lime" onClick={() => onStart(plan)} aria-label={`Start ${plan.name}`}>
+      <PillButton variant="accent" onClick={() => onStart(plan)} aria-label={`Start ${plan.name}`}>
         Start
       </PillButton>
       <button

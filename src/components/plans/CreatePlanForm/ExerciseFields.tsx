@@ -56,7 +56,7 @@ export function ExerciseFields({ exercise, number, invalid, onChange, onRemove }
           onChange={(g) => set({ muscleGroup: g })} />
         <div className="exerciseGroup">
           <span className="exerciseGroupLabel" aria-hidden="true">Measured in</span>
-          <SegmentedControl label="Measured in" tone="lime" options={TRACKING_OPTIONS} value={meta.trackingType}
+          <SegmentedControl label="Measured in" tone="accent" options={TRACKING_OPTIONS} value={meta.trackingType}
             onChange={(t) => set({ trackingType: t })} />
         </div>
       </div>

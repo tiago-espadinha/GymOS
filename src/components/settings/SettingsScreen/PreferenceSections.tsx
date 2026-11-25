@@ -50,7 +50,7 @@ export function PreferenceSections() {
           <SettingRow label="Weight">
             <SegmentedControl
               label="Weight unit"
-              tone="lime"
+              tone="accent"
               options={[{ value: "kg", label: "kg" }, { value: "lbs", label: "lb" }]}
               value={units.weight}
               onChange={(weight) => choose({ ...units, weight })}
@@ -59,7 +59,7 @@ export function PreferenceSections() {
           <SettingRow label="Distance">
             <SegmentedControl
               label="Distance unit"
-              tone="lime"
+              tone="accent"
               options={[{ value: "km", label: "km" }, { value: "mi", label: "mi" }]}
               value={units.distance}
               onChange={(distance) => choose({ ...units, distance })}

@@ -39,8 +39,8 @@
 
 /*
  * A squared block, not a pill: the segment radius, a square thumb and the state
- * printed inside the track. Off: outlined, grey thumb left, "OFF" muted. On: lime, the thumb
- * moves right and "ON" reads black on lime.
+ * printed inside the track. Off: outlined, grey thumb left, "OFF" muted. On: accent, the thumb
+ * moves right and "ON" reads black on the accent.
  */
 .switch__track {
   flex: none;

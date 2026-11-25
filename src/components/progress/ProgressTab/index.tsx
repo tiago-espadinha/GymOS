@@ -121,7 +121,7 @@ function EmptyExercise({
         Nothing logged yet
       </Heading>
       <p className="progressNoSessionsText">{where} Log it in a session and your last, best and trend show up here.</p>
-      <PrimaryButton tone="lime" onClick={onGoToLog}>
+      <PrimaryButton tone="accent" onClick={onGoToLog}>
         Go to Log
       </PrimaryButton>
     </section>

@@ -2,13 +2,13 @@ import type { ButtonHTMLAttributes } from 'react';
 import './PillButton.css';
 
 /**
- * lime: filled lime (Start)
+ * accent: filled in the accent colour (Start)
  * white: filled white (+ Create New)
  * outline-white: outlined white (Finish)
  * outline-black: outlined black, for use on a filled block
  * outline-danger: outlined in the danger colour (Delete)
  */
-export type PillVariant = 'lime' | 'white' | 'outline-white' | 'outline-black' | 'outline-danger';
+export type PillVariant = 'accent' | 'white' | 'outline-white' | 'outline-black' | 'outline-danger';
 
 interface PillButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'style'> {
