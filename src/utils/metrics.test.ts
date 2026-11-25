@@ -55,3 +55,13 @@ describe('computeMetric (strength)', () => {
     expect(computeMetric(sets([{ weight: '', reps: '' }]), strength, 'average')).toBeNull()
   })
 })
+
+describe('getExerciseMeta distance unit', () => {
+  it('uses km when the exercise stores no unit, as new plans do', () => {
+    expect(getExerciseMeta({ category: 'cardio' }).distanceUnit).toBe('km')
+  })
+
+  it('keeps a stored mi, so distances already logged in miles are not relabelled', () => {
+    expect(getExerciseMeta({ category: 'cardio', distanceUnit: 'mi' }).distanceUnit).toBe('mi')
+  })
+})

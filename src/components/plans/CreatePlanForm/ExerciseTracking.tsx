@@ -7,16 +7,12 @@ interface ExerciseTrackingProps {
   set: (changes: Partial<Exercise>) => void;
 }
 
-const UNIT_OPTIONS: { value: "km" | "mi"; label: string }[] = [
-  { value: "km", label: "km" },
-  { value: "mi", label: "mi" },
-];
 const GOAL_OPTIONS: { value: "longer" | "shorter"; label: string }[] = [
   { value: "longer", label: "Longer" },
   { value: "shorter", label: "Shorter" },
 ];
 
-/** What else a set records: weight for reps, distance and its unit for cardio, or which time is better. */
+/** What else a set records: weight for reps, distance for cardio (km, or mi if the exercise stored it), or which time is better. */
 export function ExerciseTracking({ meta, set }: ExerciseTrackingProps) {
   const { category, trackWeight, trackDistance } = meta;
 
@@ -30,16 +26,10 @@ export function ExerciseTracking({ meta, set }: ExerciseTrackingProps) {
   return (
     <>
       {category === "cardio" && (
-        <Switch label="Track distance" description="Log how far with each set" checked={trackDistance}
+        <Switch label="Track distance" description={`Log ${meta.distanceUnit} with each set`} checked={trackDistance}
           onChange={(on) => set({ trackDistance: on })} />
       )}
-      {trackDistance ? (
-        <div className="exerciseRow">
-          <span className="exerciseGroupLabel" aria-hidden="true">Distance unit</span>
-          <SegmentedControl label="Distance unit" tone="lime" options={UNIT_OPTIONS}
-            value={meta.distanceUnit} onChange={(u) => set({ distanceUnit: u })} />
-        </div>
-      ) : (
+      {!trackDistance && (
         <div className="exerciseRow">
           <span className="exerciseGroupLabel" aria-hidden="true">Better when the time is</span>
           <SegmentedControl label="Better when the time is" options={GOAL_OPTIONS}
