@@ -94,7 +94,7 @@ test('the plan picker lists active plans only, keyboard first, and the pick is w
 
 test('the plan name is never taller than two hero lines, with its chevron at the right edge, centred on it', async ({ page }) => {
   await openLog(page)
-  for (const name of ['Push day', 'Hypertrophyblockweekone', 'Upper body hypertrophy block', 'Full body strength and conditioning week one', 'Twelve week powerbuilding programme with deload and peaking phases for meet day']) {
+  for (const name of ['Push day', 'Hypertrophyblockweekone', 'Upper body hypertrophy block', 'Lower body power', 'Full body strength and conditioning week one', 'Twelve week powerbuilding programme with deload and peaking phases for meet day']) {
     await page.evaluate((n) => {
       const p = JSON.parse(localStorage.getItem('gym:plans')!)
       p[0].name = n
@@ -116,12 +116,22 @@ test('the plan name is never taller than two hero lines, with its chevron at the
         centred: Math.abs((icon.top + icon.bottom) / 2 - (text.top + text.bottom) / 2) <= 1,
         fits: block.scrollWidth <= block.clientWidth,
         heroHeight: (() => {
+          const el = headline as HTMLElement
           const root = getComputedStyle(document.documentElement)
-          const twoHeroLines = 2 * parseFloat(root.getPropertyValue('--text-hero')) * parseFloat(root.getPropertyValue('--leading-hero'))
-          const lines = Math.round(headline.scrollHeight / parseFloat(getComputedStyle(headline).lineHeight))
-          if ((headline as HTMLElement).dataset.fit === '0') return lines <= 2 && text.height <= twoHeroLines + 1
-          // Smaller type: three lines fill exactly the height of two hero lines.
-          return text.height <= twoHeroLines + 1 && (lines < 3 || Math.abs(text.height - twoHeroLines) <= 1)
+          const hero = parseFloat(root.getPropertyValue('--text-hero'))
+          const twoHeroLines = 2 * hero * parseFloat(root.getPropertyValue('--leading-hero'))
+          const height = () => {
+            const lineHeight = parseFloat(getComputedStyle(el).lineHeight)
+            return Math.round(el.scrollHeight / lineHeight) * lineHeight
+          }
+          if (text.height > twoHeroLines + 1) return false
+          const size = parseFloat(getComputedStyle(el).fontSize)
+          if (size >= hero || 'clamp' in el.dataset) return true
+          // The largest size that fits: one pixel more would overflow the height.
+          el.style.fontSize = `${size + 1}px`
+          const bigger = height()
+          el.style.fontSize = `${size}px`
+          return bigger > twoHeroLines + 0.5
         })(),
       }
     })
