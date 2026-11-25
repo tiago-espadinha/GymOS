@@ -111,7 +111,7 @@ test('ranges with no sessions are disabled and fall back to All', async ({ page 
   await expect(range(page, '1M')).toBeDisabled()
   await expect(range(page, '3M')).toBeDisabled()
   await expect(range(page, 'All')).toHaveAttribute('aria-pressed', 'true')
-  await expect(caption(page).locator('span').nth(1)).toHaveText('1 session')
+  await expect(caption(page).locator('.progressCount')).toHaveText('1 session')
 })
 
 test('an exercise without sessions shows the board empty state and Go to Log opens Log', async ({ page }) => {
@@ -171,6 +171,21 @@ test('a latest PR is labelled on the chart and replaces Best with NEW PR', async
   await expect(page.locator('.progressStatKicker').nth(1)).toHaveText('New PR')
   await expect(page.getByText(/^Up 5\.0 kg\/rep on your previous best \(60\.0, /)).toBeVisible()
   await expect(page.locator('.progressChart')).toHaveAttribute('aria-label', /the latest one a PR$/)
+})
+
+test('every session gets a node, distinct from PR rings and the latest point', async ({ page }) => {
+  // Lat pulldown: six sessions, one PR (57), the latest (40) not a PR.
+  const nodes = page.locator('.progressChart [data-kind]')
+  await expect(nodes).toHaveCount(6)
+  await expect(page.locator('.progressChart [data-kind="session"]')).toHaveCount(4)
+  await expect(page.locator('.progressChart [data-kind="pr"]')).toHaveCount(1)
+  await expect(page.locator('.progressChart [data-kind="last"]')).toHaveCount(1)
+  // A plain node is a solid dot; a PR is a hollow ring, so they differ by shape as well as colour.
+  await expect(page.locator('.progressChart [data-kind="session"]').first()).toHaveAttribute('fill', 'var(--color-text)')
+  await expect(page.locator('.progressChart [data-kind="pr"]')).toHaveAttribute('fill', 'var(--color-bg)')
+  await expect(page.locator('.progressLegendSession')).toHaveText('Session')
+  await range(page, '5S').click()
+  await expect(nodes).toHaveCount(5)
 })
 
 test('e1RM explains itself under the metric control', async ({ page }) => {

@@ -294,21 +294,32 @@ export function ProgressTab({
               description={chartDescription(METRIC_LABELS[metric], selected.name, points, prCount)}
             />
             <figcaption className="progressCaption">
-              <span>{monthYear(points[0].date)}</span>
-              {prCount > 0 && (
-                <span className="progressLegend">
-                  <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
-                    <circle cx="7" cy="7" r="5" fill="var(--color-bg)" stroke="var(--color-accent)" strokeWidth="3" />
-                  </svg>
-                  PR
+              <span className="progressCaptionRow">
+                <span>{monthYear(points[0].date)}</span>
+                <span className="progressCount">
+                  {points.length === series.length
+                    ? `${series.length} session${series.length === 1 ? "" : "s"}`
+                    : `last ${points.length} of ${series.length} sessions`}
                 </span>
-              )}
-              <span>
-                {points.length === series.length
-                  ? `${series.length} session${series.length === 1 ? "" : "s"}`
-                  : `last ${points.length} of ${series.length} sessions`}
+                <span>{monthYear(points[points.length - 1].date)}</span>
               </span>
-              <span>{monthYear(points[points.length - 1].date)}</span>
+              {/* Its own line, so a partial range's longer count still fits a phone row. */}
+              <span className="progressKey">
+                <span className="progressLegendSession">
+                  <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+                    <circle cx="7" cy="7" r="4" fill="var(--color-text)" />
+                  </svg>
+                  Session
+                </span>
+                {prCount > 0 && (
+                  <span className="progressLegend">
+                    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+                      <circle cx="7" cy="7" r="5" fill="var(--color-bg)" stroke="var(--color-accent)" strokeWidth="3" />
+                    </svg>
+                    PR
+                  </span>
+                )}
+              </span>
             </figcaption>
           </figure>
 
