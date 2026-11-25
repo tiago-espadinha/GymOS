@@ -5,8 +5,8 @@ interface SegmentedControlProps<T extends string> {
   options: { value: T; label: string }[];
   value: T;
   onChange: (value: T) => void;
-  /** white by default; lime marks the unit of measure. */
-  tone?: 'white' | 'lime';
+  /** white by default; accent marks the unit of measure. */
+  tone?: 'white' | 'accent';
 }
 
 export function SegmentedControl<T extends string>({
@@ -20,7 +20,7 @@ export function SegmentedControl<T extends string>({
     <div
       role="group"
       aria-label={label}
-      className={`segmented${tone === 'lime' ? ' segmented--lime' : ''}`}
+      className={`segmented${tone === 'accent' ? ' segmented--accent' : ''}`}
     >
       {options.map((option) => (
         <button

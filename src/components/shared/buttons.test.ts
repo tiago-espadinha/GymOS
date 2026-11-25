@@ -14,7 +14,7 @@ describe('PrimaryButton', () => {
     expect(render(createElement(PrimaryButton, null, 'Next'))).toContain('primary-button--light')
   })
 
-  it.each(['dark', 'lime'] as const)('takes its colours from the %s tone', (tone) => {
+  it.each(['dark', 'accent'] as const)('takes its colours from the %s tone', (tone) => {
     expect(render(createElement(PrimaryButton, { tone }, 'Go'))).toContain(
       `primary-button--${tone}`,
     )
@@ -27,7 +27,7 @@ describe('PrimaryButton', () => {
 })
 
 describe('PillButton', () => {
-  it.each(['lime', 'white', 'outline-white', 'outline-black', 'outline-danger'] as const)(
+  it.each(['accent', 'white', 'outline-white', 'outline-black', 'outline-danger'] as const)(
     'renders the %s variant',
     (variant) => {
       expect(render(createElement(PillButton, { variant }, 'Go'))).toContain(

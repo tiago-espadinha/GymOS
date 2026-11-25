@@ -76,18 +76,18 @@ describe('SegmentedControl', () => {
     expect(html).toMatch(/aria-pressed="true"[^>]*>KG/)
   })
 
-  it('switches the selected colour to lime for the unit of measure', () => {
+  it('switches the selected colour to the accent for the unit of measure', () => {
     const html = renderToStaticMarkup(
       createElement(SegmentedControl, {
         label: 'Unit',
         options,
         value: 'kg',
         onChange: noop,
-        tone: 'lime',
+        tone: 'accent',
       }),
     )
-    expect(html).toContain('segmented--lime')
-    expect(cssOf('SegmentedControl')).toContain('.segmented--lime')
+    expect(html).toContain('segmented--accent')
+    expect(cssOf('SegmentedControl')).toContain('.segmented--accent')
   })
 
   it('has 44px segments with a focus ring', () => {

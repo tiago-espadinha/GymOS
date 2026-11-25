@@ -35,7 +35,7 @@
   color: var(--color-accent);
 }
 
-.primary-button--lime {
+.primary-button--accent {
   background: var(--color-accent);
   color: var(--color-on-accent);
 }
