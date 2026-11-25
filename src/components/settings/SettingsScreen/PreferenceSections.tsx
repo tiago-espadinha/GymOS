@@ -1,5 +1,6 @@
 import { useId, useState, type ReactNode } from "react";
 import { SaveFailedAlert, SegmentedControl } from "../../shared";
+import { AccentPicker } from "./AccentPicker";
 import { saveUnitPrefs, useUnitPrefs, type UnitPreferences } from "../../../utils/unitPrefs";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -73,7 +74,7 @@ export function PreferenceSections() {
       </Section>
 
       <Section title="Appearance">
-        <p className="settingsPlaceholder">Accent colour choices arrive in a later update.</p>
+        <AccentPicker />
       </Section>
     </>
   );

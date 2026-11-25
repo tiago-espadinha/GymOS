@@ -14,8 +14,14 @@
   --color-text: #ffffff;
   --color-text-muted: #b4b4b4;
   --color-text-dim: #8a8a8a; /* 24px and larger only */
-  --color-accent: #c6ff3d;
-  --color-on-accent: #000000;
+  /* Accent options (Settings > Appearance); the root's data-accent picks one, lime by default */
+  --accent-lime: #c6ff3d;
+  --accent-amber: #ffb21a;
+  --accent-cyan: #3de0ff;
+  --accent-violet: #b98cff;
+  --accent-red: #ff4040;
+  --color-accent: var(--accent-lime);
+  --color-on-accent: #000000; /* black on every accent option */
   --color-inverse: #ffffff;
   --color-on-inverse: #000000;
   --color-danger: #ff8a7a;
@@ -131,6 +137,22 @@
   --motion-press: 100ms;
   --motion-fill: 1s;
   --ease-fill: linear;
+}
+
+:root[data-accent="amber"] {
+  --color-accent: var(--accent-amber);
+}
+
+:root[data-accent="cyan"] {
+  --color-accent: var(--accent-cyan);
+}
+
+:root[data-accent="violet"] {
+  --color-accent: var(--accent-violet);
+}
+
+:root[data-accent="red"] {
+  --color-accent: var(--accent-red);
 }
 
 @media (prefers-reduced-motion: reduce) {

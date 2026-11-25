@@ -8,6 +8,10 @@ import './styles/tokens.css'
 import './styles/textLink.css'
 import './index.css'
 import App from './App.tsx'
+import { applyAccent, loadAccent } from './utils/accentPrefs'
+
+// Before the first paint, so a chosen accent never flashes lime.
+applyAccent(loadAccent())
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
