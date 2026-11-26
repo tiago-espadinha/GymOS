@@ -86,7 +86,6 @@ export function ExerciseScreen({
       disabled={finish.disabled}
     >
       <span className="exerciseNextCardText">
-        <span className="exerciseNextCardLabel">Last exercise</span>{" "}
         <span className="exerciseNextCardName">
           Finish<span className="visuallyHidden"> session</span>
         </span>
@@ -118,7 +117,7 @@ export function ExerciseScreen({
             {segments}
           </div>
         )}
-        footer={<div className="exerciseScreenFoot">{card}</div>}
+        footer={card}
       />
     </section>
   );

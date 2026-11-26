@@ -277,11 +277,14 @@ test('one segment per exercise jumps to it; the next card names the next exercis
   await expect(segments.nth(2)).toHaveAttribute('aria-current', 'step')
   // The last exercise ends on Finish, disabled until a set is logged.
   await expect(page.getByRole('button', { name: /^Next / })).toHaveCount(0)
-  await expect(page.getByRole('button', { name: 'Last exercise Finish session' })).toBeDisabled()
+  const finish = page.getByRole('button', { name: 'Finish session', exact: true })
+  await expect(finish).toBeDisabled()
+  // Only FINISH: no "Last exercise" kicker and no target.
+  await expect(finish).toHaveText('Finish session→')
 
   // A done exercise's segment reads as done.
   await logSet(page, '10', '12')
-  await expect(page.getByRole('button', { name: 'Last exercise Finish session' })).toBeEnabled()
+  await expect(finish).toBeEnabled()
   await segments.nth(0).click()
   await expect(title).toHaveText('Bench press')
   await expect(segments.nth(2)).toHaveAccessibleName('Lateral raise, exercise 3 of 3, done')

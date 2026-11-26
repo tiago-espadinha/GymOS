@@ -115,13 +115,16 @@ for (const [accent, rgb] of Object.entries(accents)) {
       await expect(labels.nth(1)).toHaveCSS('color', rgb)
     })
 
-    test('hold: Start hold stays white, Stop and log fills with the accent, then the Last exercise kicker is the accent', async ({ page }) => {
+    test('hold: Start hold stays white, Stop and log fills with the accent; the FINISH card has no kicker and is muted until a set', async ({ page }) => {
       await open(page, accent)
       await page.getByRole('button', { name: /^Plank/ }).click()
-      const kicker = screen(page, 'Plank').locator('.exerciseNextCardLabel')
-      await expect(kicker).toHaveText('Last exercise')
-      // Finish is disabled until a set is logged, and its kicker stays muted until then.
-      await expect(kicker).toHaveCSS('color', MUTED)
+      const finish = screen(page, 'Plank').getByRole('button', { name: 'Finish session', exact: true })
+      await expect(finish.locator('.exerciseNextCardLabel')).toHaveCount(0)
+      await expect(finish).toHaveText('Finish session→')
+      // Finish is disabled, and muted, until a set is logged.
+      await expect(finish).toBeDisabled()
+      await expect(finish).toHaveCSS('color', MUTED)
+      await expect(finish).toHaveCSS('border-color', LINE_STRONG)
 
       const start = button(page, 'Start hold')
       await expect(start).toHaveCSS('background-color', WHITE)
@@ -133,10 +136,14 @@ for (const [accent, rgb] of Object.entries(accents)) {
       await expect(stop).toHaveCSS('color', BLACK)
       await axe(page)
       await stop.click()
-      await expect(kicker).toHaveCSS('color', rgb)
+      // Outlined white once enabled, while other exercises have no set.
+      await expect(finish).toBeEnabled()
+      await expect(finish).toHaveCSS('color', WHITE)
+      await expect(finish).toHaveCSS('border-color', WHITE)
+      await expect(finish).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
     })
 
-    test('once every exercise has a set, Finish fills white and its kicker turns black', async ({ page }) => {
+    test('once every exercise has a set, Finish fills white with black text', async ({ page }) => {
       await open(page, accent)
       for (const name of [/^Bench Press/, /^Incline DB Press/]) {
         await page.getByRole('button', { name }).click()
@@ -150,7 +157,7 @@ for (const [accent, rgb] of Object.entries(accents)) {
       await button(page, 'Stop and log').click()
       const card = screen(page, 'Plank').locator('.exerciseNextCard--allDone')
       await expect(card).toHaveCSS('background-color', WHITE)
-      await expect(card.locator('.exerciseNextCardLabel')).toHaveCSS('color', BLACK)
+      await expect(card.locator('.exerciseNextCardName')).toHaveCSS('color', BLACK)
     })
   })
 }
