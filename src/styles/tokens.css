@@ -98,6 +98,8 @@
   --size-tick-w: 8px;
   --size-tick-h: 28px;
   --size-topbar: 72px;
+  --size-segment-bar: 6px; /* an exercise's bar in a session's segments */
+  --size-segment-bar-current: 10px;
 
   /*
    * Layout widths. Media queries cannot read custom properties, so a query

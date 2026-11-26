@@ -20,7 +20,7 @@ interface SessionListProps {
   header: ReactNode;
   /** Shown below the rows, with the list only. */
   actions: ReactNode;
-  /** Finish on each exercise screen at wide widths; the list's own is in the header. */
+  /** Finish on the last exercise screen's bottom card; the list's own is in the header. */
   finish: FinishAction;
   /** The exercise shown as a full screen, or null for the list; kept by the parent across the Done screen. */
   openId: string | null;
@@ -79,23 +79,26 @@ export function SessionList({ planName, exercises, onChangeExercise, sessions, e
           {actions}
         </>
       )}
-      {exercises.map((ex, i) => (
-        <ExerciseScreen
-          key={ex.id}
-          exercise={ex}
-          position={i + 1}
-          count={exercises.length}
-          planName={planName}
-          next={exercises[i + 1]}
-          history={history.get(ex.name) ?? []}
-          hidden={ex.id !== openId}
-          titleId={titleId(ex.id)}
-          onChange={onChangeExercise}
-          onAllExercises={() => onOpen(null)}
-          onNext={() => onOpen(exercises[i + 1].id)}
-          finish={finish}
-        />
-      ))}
+      {exercises.map((ex, i) => {
+        const next = exercises[i + 1];
+        return (
+          <ExerciseScreen
+            key={ex.id}
+            exercise={ex}
+            exercises={exercises}
+            planName={planName}
+            history={history.get(ex.name) ?? []}
+            next={next}
+            nextHistory={next ? (history.get(next.name) ?? []) : []}
+            hidden={ex.id !== openId}
+            titleId={titleId(ex.id)}
+            onChange={onChangeExercise}
+            onAllExercises={() => onOpen(null)}
+            onOpen={onOpen}
+            finish={finish}
+          />
+        );
+      })}
     </div>
   );
 }

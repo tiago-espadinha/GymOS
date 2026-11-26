@@ -222,22 +222,61 @@ test('rows are numbered and at least 44px; a row opens its exercise as a full sc
   await expect(title).toHaveText('Cable row')
   await expect(title).toBeFocused()
   const screen = page.getByRole('region', { name: 'Cable row' })
-  await expect(screen.getByText('Set 1 of 1')).toBeVisible()
-  await expect(screen.getByText('Push day · exercise 2 of 3')).toBeVisible()
+  // Top right: the plan name over the set count.
+  await expect(screen.locator('.exerciseScreenPlace')).toHaveText(/^Push day\s*Set 1 of 1$/)
   await expect(weight(page)).toBeVisible()
   // The list is gone while the exercise is open.
-  await expect(row(page, 'Bench press')).toHaveCount(0)
+  await expect(page.locator('.sessionListRows')).toHaveCount(0)
+})
+
+test('one segment per exercise jumps to it; the next card names the next exercise and its target', async ({ page }) => {
+  await row(page, 'Bench press').click()
+  const segments = page.getByRole('navigation', { name: 'Exercises' }).getByRole('button')
+  await expect(segments).toHaveCount(3)
+  await expect(segments.nth(0)).toHaveAccessibleName('Bench press, exercise 1 of 3')
+  await expect(segments.nth(0)).toHaveAttribute('aria-current', 'step')
+  for (const s of await segments.all()) expect((await s.boundingBox())!.height).toBeGreaterThanOrEqual(44)
+  expect((await page.getByRole('button', { name: 'All exercises' }).boundingBox())!.height).toBeGreaterThanOrEqual(44)
+
+  // Last time's Cable row was 12, 12 and 10 reps, so the target is the set count.
+  const next = page.getByRole('button', { name: /^Next Cable row/ })
+  await expect(next).toHaveText(/Cable row\s*3 sets/)
+  expect((await next.boundingBox())!.height).toBeGreaterThanOrEqual(44)
+  await expect(page.getByRole('button', { name: /Finish session/ })).toHaveCount(0)
+
+  await segments.nth(2).click()
+  const title = page.getByRole('heading', { level: 1 })
+  await expect(title).toHaveText('Lateral raise')
+  await expect(title).toBeFocused()
+  await expect(segments.nth(2)).toHaveAttribute('aria-current', 'step')
+  // The last exercise ends on Finish, disabled until a set is logged.
+  await expect(page.getByRole('button', { name: /^Next / })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Last exercise Finish session' })).toBeDisabled()
+
+  // A done exercise's segment reads as done.
+  await logSet(page, '10', '12')
+  await expect(page.getByRole('button', { name: 'Last exercise Finish session' })).toBeEnabled()
+  await segments.nth(0).click()
+  await expect(title).toHaveText('Bench press')
+  await expect(segments.nth(2)).toHaveAccessibleName('Lateral raise, exercise 3 of 3, done')
+  await axe(page)
+
+  // The segments' hit areas reach down, not up: the bottom edge of All exercises is still All exercises.
+  const back = page.getByRole('button', { name: 'All exercises' })
+  const { height } = (await back.boundingBox())!
+  await back.click({ position: { x: 8, y: height - 2 } })
+  await expect(page.locator('.sessionListRows')).toBeVisible()
 })
 
 test('All exercises returns to the list with focus on that row; Next opens the next exercise', async ({ page }) => {
   await row(page, 'Bench press').click()
-  await page.getByRole('button', { name: 'Next exercise: Cable row' }).click()
+  await page.getByRole('button', { name: /^Next Cable row/ }).click()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Cable row')
   await expect(page.getByRole('heading', { level: 1 })).toBeFocused()
 
-  await page.getByRole('button', { name: 'Next exercise: Lateral raise' }).click()
+  await page.getByRole('button', { name: /^Next Lateral raise/ }).click()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Lateral raise')
-  await expect(page.getByRole('button', { name: /^Next exercise/ })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /^Next / })).toHaveCount(0)
 
   await allExercises(page)
   await expect(row(page, 'Lateral raise')).toBeFocused()
@@ -266,7 +305,7 @@ test('a rest keeps running on the list; the strip shows it and opens that exerci
 test('the strip shows on another exercise while a rest runs', async ({ page }) => {
   await row(page, 'Bench press').click()
   await logSet(page, '60', '8')
-  await page.getByRole('button', { name: 'Next exercise: Cable row' }).click()
+  await page.getByRole('button', { name: /^Next Cable row/ }).click()
   await expect(strip(page)).toContainText('Bench press')
 })
 

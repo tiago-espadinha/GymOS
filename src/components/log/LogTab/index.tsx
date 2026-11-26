@@ -69,17 +69,12 @@ export function LogTab({
 
   // Starting or ending a session removes the button that was focused, so move
   // focus to the title instead of letting it fall back to the top of the page.
-  // Back to logging returns to the Finish pill that opened the Done screen.
+  // Back to logging returns to the Finish that opened the Done screen.
   const mounted = useRef(false);
   // The id of the Finish that opened the Done screen, while going back to it.
   const backFromFinish = useRef<string | null>(null);
   useEffect(() => {
-    if (backFromFinish.current) {
-      const pressed = document.getElementById(backFromFinish.current);
-      pressed?.focus();
-      // An exercise's Finish is hidden below the wide breakpoint, so fall back to the list's.
-      if (document.activeElement !== pressed) document.getElementById(FINISH_ID)?.focus();
-    }
+    if (backFromFinish.current) document.getElementById(backFromFinish.current)?.focus();
     else if (mounted.current || inSession) titleRef.current?.focus();
     backFromFinish.current = null;
     mounted.current = true;
@@ -196,7 +191,7 @@ export function LogTab({
           saveFailures={saveFailures}
           onDownload={downloadSession}
           onBack={() => {
-            // An exercise's Finish at wide widths, else the list's.
+            // The last exercise's Finish card, else the list's.
             backFromFinish.current = openId ? exerciseFinishId(openId) : FINISH_ID;
             setSaveFailures(0);
             setFinishing(false);
