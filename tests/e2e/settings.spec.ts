@@ -46,6 +46,23 @@ test('Settings opens from Stats with Data, Language, Units and Appearance in ord
   await expect(page.getByRole('group', { name: 'Distance unit' }).getByRole('button', { name: 'km' })).toHaveAttribute('aria-pressed', 'true')
 })
 
+test('Settings ends with About: the mark, the name and where data lives', async ({ page }) => {
+  await openSettings(page)
+  const about = page.locator('.settingsAbout')
+  await expect(about).toHaveText('GymOSData stays on this device')
+  expect(await page.locator('.dataScreen > *').last().getAttribute('class')).toBe('settingsAbout')
+  const mark = (await about.locator('.brandMark').boundingBox())!
+  expect(mark).toMatchObject({ width: 48, height: 48 })
+
+  // The last tick follows the chosen accent.
+  const lastTickFill = () => about.locator('.brandMark__tick--on').evaluate((el) => getComputedStyle(el).fill)
+  const lime = await lastTickFill()
+  await accentGroup(page).getByRole('button', { name: 'Amber' }).click()
+  const amber = await lastTickFill()
+  expect(amber).not.toBe(lime)
+  expect(amber).toBe(await page.locator('.accentSwatch--amber').evaluate((el) => getComputedStyle(el).backgroundColor))
+})
+
 test('the Plans empty-state import link opens Settings', async ({ page }) => {
   await page.evaluate(() => {
     localStorage.setItem('gym:plans', '[]')

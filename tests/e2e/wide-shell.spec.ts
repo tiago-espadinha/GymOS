@@ -27,6 +27,7 @@ test.describe('tablet, 768 wide', () => {
     expect(bar.x).toBe(84)
     expect(bar.y + bar.height).toBe(1024)
     await expect(page.getByText('GymOS', { exact: true })).toBeHidden()
+    await expect(page.locator('.shellBar__mark')).toBeHidden()
     for (const tab of ['Plans', 'Log', 'Stats']) {
       await nav(page).getByRole('button', { name: tab }).click()
       expect(await box(page, '.mainContent')).toMatchObject({ x: 84, width: 600 })
@@ -53,8 +54,12 @@ test.describe('wide, 1280', () => {
     expect((await log.boundingBox())!.height).toBeGreaterThanOrEqual(44)
 
     // The bar's content sits in the 1200 frame: 40 in from each side at 1280.
+    // The mark leads, 40 square and centred in the bar, then the wordmark 12 after it.
+    const mark = await box(page, '.shellBar__mark')
+    expect(mark).toMatchObject({ x: 40, width: 40, height: 40 })
+    expect(mark.y + mark.height / 2).toBe((72 - 1) / 2) // centred above the 1 hairline
     const wordmark = (await page.getByText('GymOS', { exact: true }).boundingBox())!
-    expect(wordmark.x).toBe(40)
+    expect(wordmark.x).toBe(92)
     const last = (await nav(page).getByRole('button', { name: 'Stats' }).boundingBox())!
     expect(last.x + last.width).toBe(1240)
   })
@@ -109,6 +114,7 @@ test.describe('wide, 1280', () => {
     await page.getByRole('button', { name: 'Start Push day' }).click()
     await expect(nav(page)).toHaveCount(0)
     await expect(page.getByText('GymOS', { exact: true })).toHaveCount(0)
+    await expect(page.locator('.brandMark')).toHaveCount(0)
     expect(await box(page, '.mainContent')).toMatchObject({ x: 340, width: 600 })
   })
 

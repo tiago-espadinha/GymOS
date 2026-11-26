@@ -16,7 +16,7 @@
   margin: 0 auto;
 }
 
-.shellBar__wordmark {
+.shellBar__brand {
   display: none;
 }
 
@@ -64,9 +64,19 @@
     background: var(--color-bg);
   }
 
+  .shellBar__brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .shellBar__mark {
+    width: var(--size-brand-bar);
+    height: var(--size-brand-bar);
+  }
+
   .shellBar__wordmark {
-    display: block;
-    align-self: center;
+    margin: 0;
     font-family: var(--font-display);
     font-weight: var(--weight-display);
     font-size: var(--text-wordmark);
