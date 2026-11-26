@@ -125,7 +125,7 @@
 
 .planDetail__number {
   font-size: var(--text-set-label);
-  color: var(--color-text-muted);
+  color: var(--color-accent);
 }
 
 .planDetail__exerciseName {
