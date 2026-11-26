@@ -138,6 +138,13 @@
   --motion-press: 100ms;
   --motion-fill: 1s;
   --ease-fill: linear;
+  --motion-wave: 2.4s; /* one wavelength of the timer fill's edge passing by */
+  --size-wave-length: 160px;
+  --size-wave-height: 14px; /* crest to trough */
+  --size-wave-length-wide: 320px;
+  --size-wave-height-wide: 24px;
+  /* One wavelength of the edge, opaque below the curve; tiled sideways. */
+  --mask-wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M0 8Q50-8 100 8T200 8V16H0Z'/%3E%3C/svg%3E");
 }
 
 :root[data-accent="amber"] {

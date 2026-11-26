@@ -17,11 +17,11 @@ export default defineConfig({
     // The timer specs again at desktop width, where the session splits around the timer.
     {
       name: 'wide-chromium',
-      testMatch: /(rest-timer|timed-set|rest-cleanup)\.spec\.ts/,
+      testMatch: /(rest-timer|timed-set|rest-cleanup|timer-wave)\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } },
     },
-    // The date picker again in WebKit, the engine where the native date input showed no placeholder.
-    { name: 'mobile-webkit', testMatch: /date-picker\.spec\.ts/, use: { ...devices['iPhone 13'] } },
+    // The date picker and the timer's wave mask again in WebKit (Safari: native date placeholder, CSS masks).
+    { name: 'mobile-webkit', testMatch: /(date-picker|timer-wave)\.spec\.ts/, use: { ...devices['iPhone 13'] } },
   ],
   webServer: {
     command: `npm run build && npm run preview -- --port ${port} --strictPort`,

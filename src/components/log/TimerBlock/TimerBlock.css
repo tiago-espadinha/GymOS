@@ -18,6 +18,41 @@
   transition: height var(--motion-fill) var(--ease-fill);
 }
 
+/*
+ * While the fill grows, its top edge is a wave travelling sideways. The wave is a
+ * mask, so the troughs cut the fill and its copy of the numeral alike and show the
+ * plain face underneath: the numeral stays whole at every point of the edge.
+ */
+.timerBlock--filling .timerBlockFill {
+  /* A mask reads only alpha: any opaque colour keeps the fill below the wave. */
+  mask-image: var(--mask-wave), linear-gradient(var(--color-bg) 0 0);
+  /*
+   * Chromium blends a repeated tile's top and bottom rows: the wave starts 1px above
+   * the fill, and the solid layer overlaps its last row by 1px (hence +2px). A fill
+   * shorter than the wave gets a squashed wave rather than separate crests.
+   */
+  mask-size:
+    var(--size-wave-length) min(var(--size-wave-height), 100%),
+    100% calc(100% - min(var(--size-wave-height), 100%) + 2px);
+  mask-position: 0 -1px, 0 100%;
+  mask-repeat: repeat-x, no-repeat;
+  animation: timerBlockWave var(--motion-wave) linear infinite;
+}
+
+@keyframes timerBlockWave {
+  to {
+    mask-position: var(--size-wave-length) -1px, 0 100%;
+  }
+}
+
+/* Reduced motion: no wave; the flat fill steps once a second (tokens.css). */
+@media (prefers-reduced-motion: reduce) {
+  .timerBlock--filling .timerBlockFill {
+    mask-image: none;
+    animation: none;
+  }
+}
+
 .timerBlockFace {
   position: absolute;
   left: 0;
@@ -157,6 +192,8 @@
 @media (min-width: 1024px) {
   .exerciseScreen .timerBlock {
     --size-timer-block-fit: 100dvh;
+    --size-wave-length: var(--size-wave-length-wide);
+    --size-wave-height: var(--size-wave-height-wide);
     position: fixed;
     top: 0;
     left: 0;
@@ -199,5 +236,22 @@
   .exerciseScreen .timerBlockButton {
     min-height: var(--size-action);
     font-size: var(--text-button);
+  }
+}
+
+/*
+ * Wide keyframes of their own: crossing the breakpoint mid-rest (an iPad turning)
+ * swaps the animation and restarts it, rather than trusting every engine to
+ * re-read a custom property inside running keyframes.
+ */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .exerciseScreen .timerBlock--filling .timerBlockFill {
+    animation-name: timerBlockWaveWide;
+  }
+}
+
+@keyframes timerBlockWaveWide {
+  to {
+    mask-position: var(--size-wave-length-wide) -1px, 0 100%;
   }
 }

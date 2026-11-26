@@ -53,6 +53,7 @@ export function RestBlock({ setId, setNumber, meta, timed = false, category, aut
       countdown={formatRestClock(Math.max(0, targetMs - elapsedMs), overtimeMs)}
       caption={over ? `${formattedTarget} done` : `Target ${formattedTarget}`}
       fillPct={over ? 100 : Math.round(progress * 1000) / 10}
+      filling={isRunning && !over}
       status={over ? "Rest over" : "Rest started"}
     >
       {/* Past the target a shorter rest means nothing, so −step goes. */}
