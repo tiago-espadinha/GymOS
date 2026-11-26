@@ -1,3 +1,22 @@
+/* "‹ Session": back to the list, or the last exercise's Finish card. */
+.finishBack {
+  min-height: var(--size-control);
+  margin-bottom: var(--space-2);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-body);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.finishBack:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
 .finishHero {
   display: flex;
   flex-direction: column;
@@ -141,24 +160,4 @@
   font-size: var(--text-body);
   line-height: 1.4;
   resize: vertical;
-}
-
-/* Destructive: danger label only, apart from the other exits. */
-.finishDelete {
-  align-self: center;
-  min-height: var(--size-control);
-  margin-top: var(--space-3);
-  padding: 0 var(--space-4);
-  border: 0;
-  background: none;
-  color: var(--color-danger);
-  font-family: inherit;
-  font-size: var(--text-secondary);
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.finishDelete:focus-visible {
-  outline: var(--border-focus);
-  outline-offset: 2px;
 }

@@ -15,15 +15,7 @@ export const formatDateShort = (d: string): string => {
   return `${date.getMonth() + 1}/${date.getDate()}`;
 };
 
-// "SUN 15 NOV", the kicker on the Finish screen.
-export const formatDateKicker = (d: string): string => {
-  return new Date(d + 'T12:00:00')
-    .toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
-    .replace(',', '')
-    .toUpperCase();
-};
-
-// "Sun 15 Nov", the meta line above the session list.
+// "Sun 15 Nov": every date on the session screens (list, session sheet, Done).
 export const formatDateMeta = (d: string): string => {
   return new Date(d + 'T12:00:00')
     .toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
@@ -125,7 +117,6 @@ export default {
   today,
   formatDate,
   formatDateShort,
-  formatDateKicker,
   formatDateMeta,
   formatDayMonth,
   formatDateStat,

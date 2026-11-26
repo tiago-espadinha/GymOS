@@ -107,7 +107,7 @@ test.describe('wide session, 1280', () => {
     expect(main).toMatchObject({ x: 340, width: 600 })
 
     // Back returns to the exercise and its Finish; the other exercise keeps its stepper values.
-    await page.getByRole('button', { name: 'Back to logging' }).click()
+    await page.getByRole('button', { name: 'Session', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'Plank' })).toBeVisible()
     await expect(finish).toBeFocused()
     await page.getByRole('button', { name: /^Machine row, exercise 1 of 2/ }).click()

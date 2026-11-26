@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
-import { finishButton, logSet } from './log-set'
+import { discardSession, finishButton, logSet } from './log-set'
 
 const plan = {
   id: 'p1',
@@ -26,10 +26,11 @@ const logBench = async (page: Page) => {
   await page.getByRole('button', { name: 'All exercises' }).click()
 }
 
-test('Finish is disabled until a set is logged, and an empty session can be cancelled', async ({ page }) => {
+test('Finish is disabled until a set is logged, and an empty session is discarded without asking', async ({ page }) => {
   await expect(finishButton(page)).toBeDisabled()
   await expect(page.getByText('Log a set to finish.')).toBeVisible()
-  await page.getByRole('button', { name: 'Cancel' }).click()
+  await discardSession(page)
+  await expect(page.getByRole('alertdialog')).toHaveCount(0)
   await expect(page.getByRole('heading', { name: 'Log', exact: true })).toBeVisible()
 })
 
@@ -52,11 +53,11 @@ test('kg moved is left out when nothing was lifted', async ({ page }) => {
   await expect(page.locator('.finishStat')).toHaveText(['exercise1', 'set1'])
 })
 
-test('Back to logging keeps the logged set and the notes', async ({ page }) => {
+test('‹ Session keeps the logged set and the notes', async ({ page }) => {
   await logBench(page)
   await finishButton(page).click()
   await page.getByLabel('Notes · optional').fill('Felt strong')
-  await page.getByRole('button', { name: 'Back to logging' }).click()
+  await page.getByRole('button', { name: 'Session', exact: true }).click()
   await expect(finishButton(page)).toBeFocused()
   await finishButton(page).click()
   await expect(page.getByLabel('Notes · optional')).toHaveValue('Felt strong')

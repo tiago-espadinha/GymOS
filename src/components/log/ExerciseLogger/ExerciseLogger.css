@@ -46,8 +46,9 @@
   font-weight: 700;
 }
 
+/* Cancel only closes the panel, so it stays quiet. */
 .exerciseLoggerCancel {
-  color: var(--color-text);
+  color: var(--color-text-muted);
   font-weight: 600;
 }
 

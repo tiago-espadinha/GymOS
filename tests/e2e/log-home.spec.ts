@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
-import { finishButton, logSet } from './log-set'
+import { finishButton, logSet, sessionActions } from './log-set'
 
 const plans = [
   { id: 'p1', name: 'Push day', desc: '', exercises: [{ id: 'e1', name: 'Bench press', muscleGroup: 'Chest' }] },
@@ -175,28 +175,32 @@ test('Edit opens the saved session and is at least 44px tall', async ({ page }) 
   const edit = page.getByRole('button', { name: /^Edit Session 0/ })
   expect((await edit.boundingBox())?.height).toBeGreaterThanOrEqual(44)
   await edit.click()
-  await expect(page.getByText(/^Editing session · /)).toBeVisible()
+  await expect(page.getByText(/^Editing · Mon 16 Nov · \d+ sets?$/)).toBeVisible()
+  await expect(page.locator('.logTabEditing')).toHaveCount(0)
   await expect(finishButton(page)).toBeVisible()
 })
 
-test('editing a saved session: plan title, date sheet, multi-line notes and Update session', async ({ page }) => {
+test('editing a saved session: plan title, date sheet, multi-line notes and Save changes', async ({ page }) => {
   await openLog(page)
   await page.getByRole('button', { name: /^Edit Session 0/ }).click()
   await expect(page.getByLabel('Another day')).toHaveCount(0)
   await finishButton(page).click()
   await expect(page.getByRole('heading', { name: 'Session 0', level: 1 })).toBeFocused()
   const date = page.getByRole('button', { name: /^Session date: / })
-  await expect(date).toHaveText(/Saved 16 Nov 2026/)
-  await expect(page.getByRole('button', { name: 'Back to logging' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Discard changes' })).toBeVisible()
+  await expect(date).toHaveText(/Session date: Mon 16 Nov/)
+  // Done is a save step: back on top, one primary, no other exits.
+  await expect(page.getByRole('button', { name: 'Session', exact: true })).toBeVisible()
+  for (const gone of ['Back to logging', 'Cancel', 'Discard changes', 'Delete session', 'Update session']) {
+    await expect(page.getByRole('button', { name: gone })).toHaveCount(0)
+  }
   await date.click()
   const sheet = page.getByRole('dialog', { name: 'Session date' })
   await sheet.getByLabel('Another day').fill('10/11/2026')
   await sheet.getByRole('button', { name: 'Close' }).click()
-  await expect(date).toHaveText(/Saved 10 Nov 2026/)
+  await expect(date).toHaveText(/Session date: Tue 10 Nov/)
   await expect(date).toBeFocused()
   await page.getByLabel('Notes · optional').fill('Felt strong\nGrip gave out on the last set.')
-  await page.getByRole('button', { name: 'Update session' }).click()
+  await page.getByRole('button', { name: 'Save changes' }).click()
   // Recent is in date order, so the backdated session moves below 11-15 Nov. It stays above
   // Session 6, which has the same date, because it comes first in storage (the more recent save).
   await expect(page.getByRole('region', { name: 'Recent sessions' }).getByRole('listitem').last()).toContainText(
@@ -221,23 +225,24 @@ test('a new session has no date field on Finish', async ({ page }) => {
   await expect(page.getByLabel('Session date')).toHaveCount(0)
 })
 
-test('Recent rows offer Edit only; Delete session on the editing Finish confirms in a danger sheet', async ({ page }) => {
+test('Recent rows offer Edit only; Delete session in the session sheet confirms in a danger sheet', async ({ page }) => {
   await openLog(page)
   const rows = page.getByRole('region', { name: 'Recent sessions' }).getByRole('listitem')
   await expect(rows.first().getByRole('button')).toHaveText(['Edit'])
   await page.getByRole('button', { name: /^Edit Session 0/ }).click()
-  await finishButton(page).click()
-  await expect(page.getByRole('button', { name: 'Delete session' })).toBeVisible()
+  await sessionActions(page).click()
+  const sheet = page.getByRole('dialog', { name: 'Session 0' })
+  const del = sheet.getByRole('button', { name: /^Delete session/ })
 
-  await page.getByRole('button', { name: 'Delete session' }).click()
-  const confirm = page.getByRole('alertdialog', { name: 'Delete Session 0, 16 Nov 2026?' })
+  await del.click()
+  const confirm = page.getByRole('alertdialog', { name: 'Delete Session 0, Mon 16 Nov?' })
   await expect(confirm.getByRole('button', { name: 'Keep it' })).toBeFocused()
   await axe(page)
   await confirm.getByRole('button', { name: 'Keep it' }).click()
   await expect(confirm).toHaveCount(0)
-  await expect(page.getByRole('heading', { name: 'Session 0', level: 1 })).toBeVisible()
+  await expect(del).toBeFocused()
 
-  await page.getByRole('button', { name: 'Delete session' }).click()
+  await del.click()
   await confirm.getByRole('button', { name: 'Delete session' }).click()
   await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible()
   await expect(page.getByRole('status').filter({ hasText: 'Session 0 session deleted' })).toHaveCount(1)

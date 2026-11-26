@@ -1,9 +1,9 @@
 import { ConfirmSheet } from "../../shared";
-import { formatDateFull } from "../../../utils/date";
+import { formatDateMeta } from "../../../utils/date";
 
 interface DeleteSessionSheetProps {
   planName: string;
-  /** The session's date as the editing kicker shows it. */
+  /** The session's date, shown as the session screens show it. */
   date: string;
   onDelete: () => void;
   onClose: () => void;
@@ -14,7 +14,7 @@ export function DeleteSessionSheet({ planName, date, onDelete, onClose }: Delete
   return (
     <ConfirmSheet
       kicker="Delete for good"
-      title={`Delete ${planName}, ${formatDateFull(date)}?`}
+      title={`Delete ${planName}, ${formatDateMeta(date)}?`}
       text="The session and its sets are removed from Log and Stats and can't be restored."
       confirmLabel="Delete session"
       onConfirm={onDelete}

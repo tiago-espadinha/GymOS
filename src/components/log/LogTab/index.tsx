@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { ConfirmSheet, PillButton, PrimaryButton } from "../../shared";
-import { today, formatDate, formatDateMeta } from "../../../utils/date";
+import { PillButton } from "../../shared";
+import { today, formatDateMeta } from "../../../utils/date";
 import { ExerciseLog, TrainingPlan, WorkoutSession } from "../../../types";
 import {
   ActiveSession,
@@ -18,6 +18,7 @@ import { allExercisesDone } from "../../../utils/setModel";
 import FinishScreen from "../FinishScreen";
 import LogHome from "../LogHome";
 import SessionList from "../SessionList";
+import SessionSheet from "../SessionSheet";
 import "./LogTab.css";
 import { useUnitPrefs } from "../../../utils/unitPrefs";
 
@@ -62,14 +63,14 @@ export function LogTab({
   const [openId, setOpenId] = useState<string | null>(null);
   // Refused Saves in a row on the Done screen; 0 once a save lands or Done closes.
   const [saveFailures, setSaveFailures] = useState(0);
-  const [confirmingDiscard, setConfirmingDiscard] = useState(false);
+  const [actionsOpen, setActionsOpen] = useState(false);
 
   const titleRef = useRef<HTMLHeadingElement>(null);
   const inSession = Boolean(session);
 
   // Starting or ending a session removes the button that was focused, so move
   // focus to the title instead of letting it fall back to the top of the page.
-  // Back to logging returns to the Finish that opened the Done screen.
+  // ‹ Session returns to the Finish that opened the Done screen.
   const mounted = useRef(false);
   // The id of the Finish that opened the Done screen, while going back to it.
   const backFromFinish = useRef<string | null>(null);
@@ -97,13 +98,8 @@ export function LogTab({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const cancelSession = () => {
-    if (session && hasLoggedSets(session)) setConfirmingDiscard(true);
-    else discardSession();
-  };
-
   const discardSession = () => {
-    setConfirmingDiscard(false);
+    setActionsOpen(false);
     if (session) clearSessionRests(session.exercises);
     setSaveFailures(0);
     setFinishing(false);
@@ -144,6 +140,7 @@ export function LogTab({
     clearSessionRests(session.exercises);
     setJustSaved(null);
     setDeleted(`${session.planName} session deleted`);
+    setActionsOpen(false);
     setSaveFailures(0);
     setFinishing(false);
     onEnd();
@@ -167,18 +164,13 @@ export function LogTab({
         {justSaved ? `${justSaved.planName} session ${justSaved.updated ? "updated" : "saved"}` : deleted}
       </div>
 
-      {session && confirmingDiscard && (
-        <ConfirmSheet
-          kicker="Discard"
-          title={editingId ? "Discard your changes?" : "Discard this session?"}
-          text={
-            editingId
-              ? "Your changes are lost. The saved session stays as it was."
-              : "The sets you logged are lost. Nothing is saved to Log or Stats."
-          }
-          confirmLabel={editingId ? "Discard changes" : "Discard session"}
-          onConfirm={discardSession}
-          onClose={() => setConfirmingDiscard(false)}
+      {session && actionsOpen && (
+        <SessionSheet
+          session={session}
+          onDate={(date) => onUpdate({ date })}
+          onDiscard={discardSession}
+          onDelete={deleteSession}
+          onClose={() => setActionsOpen(false)}
         />
       )}
 
@@ -196,22 +188,9 @@ export function LogTab({
             setSaveFailures(0);
             setFinishing(false);
           }}
-          onCancel={cancelSession}
-          onDelete={deleteSession}
         />
       ) : (
         <>
-          {session?.editingId && (
-            <div className="logTabEditing">
-              <div className="logTabEditingText">
-                <span>✏</span>
-                <span>
-                  Editing session · {session.planName} · {formatDate(session.date)}
-                </span>
-              </div>
-            </div>
-          )}
-
           {session ? (
             <SessionList
               planName={session.planName}
@@ -225,48 +204,54 @@ export function LogTab({
               header={
                 <header className="logTabHeader">
                   <div className="logTabHeading">
-                    <span className="logTabMeta">
+                    <span className={editingId ? "logTabKicker" : "logTabMeta"}>
+                      {editingId && "Editing · "}
                       {formatDateMeta(session.date)} · {loggedSets} {loggedSets === 1 ? "set" : "sets"}
                     </span>
                     <h1 className="logTabSessionTitle" ref={titleRef} tabIndex={-1}>
                       {session.planName}
                     </h1>
                   </div>
-                  <PillButton
-                    id={FINISH_ID}
-                    variant={allDone ? "white" : "outline-white"}
-                    onClick={() => setFinishing(true)}
-                    disabled={!canFinish}
-                    aria-label="Finish session"
-                  >
-                    Finish
-                  </PillButton>
+                  <div className="logTabHeaderActions">
+                    <button
+                      type="button"
+                      className="logTabMore"
+                      aria-label="Session actions"
+                      aria-haspopup="dialog"
+                      onClick={() => setActionsOpen(true)}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <circle cx="5" cy="12" r="2" />
+                        <circle cx="12" cy="12" r="2" />
+                        <circle cx="19" cy="12" r="2" />
+                      </svg>
+                    </button>
+                    <PillButton
+                      id={FINISH_ID}
+                      variant={allDone ? "white" : "outline-white"}
+                      onClick={() => setFinishing(true)}
+                      disabled={!canFinish}
+                      aria-label="Finish session"
+                    >
+                      Finish
+                    </PillButton>
+                  </div>
                 </header>
               }
               actions={
                 <>
-                  {!canFinish && (
-                    <div className="logTabActions">
-                      <span className="logTabHint">Log a set to finish.</span>
-                      <button type="button" className="textLink" onClick={cancelSession}>
-                        Cancel
-                      </button>
-                    </div>
-                  )}
+                  {!canFinish && <p className="logTabHint">Log a set to finish.</p>}
                   {/* The status stays mounted so "all done" is announced when it appears. */}
-                  <div className={`logTabDoneBar${allDone ? "" : " logTabDoneBar--empty"}`}>
-                    <span role="status" className="logTabDoneStatus">
-                      {allDone && (
-                        <>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <path d="M4 12l5 5L20 6" />
-                          </svg>
-                          All {session.exercises.length} exercises done
-                        </>
-                      )}
-                    </span>
-                    {allDone && <PrimaryButton onClick={() => setFinishing(true)}>Finish session</PrimaryButton>}
-                  </div>
+                  <p role="status" className="logTabDoneStatus">
+                    {allDone && (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M4 12l5 5L20 6" />
+                        </svg>
+                        All {session.exercises.length} exercises done
+                      </>
+                    )}
+                  </p>
                 </>
               }
             />
