@@ -50,7 +50,7 @@ Storage reads and writes are wrapped in `try`/`catch`. A read failure returns no
 
 ## Offline and install
 
-`public/manifest.webmanifest` lets the app be added to a home screen. Both typefaces come from npm packages and are served from the app's own origin, and no code requests another origin. A service worker makes the app reload with no network after a first visit. `build/serviceWorker.ts` is a small Vite plugin that writes `sw.js` at build time:
+`public/manifest.webmanifest` lets the app be added to a home screen. Its icons come from one mark, `public/icon.svg` (four set ticks, the last in the default accent), which also serves as the favicon; `node build/make-icons.mjs` renders the 192, 512, maskable 512 and 180 apple-touch PNGs from it. Inside the app the same mark is the `BrandMark` component, filled from tokens so its last tick follows the chosen accent; it shows in the wide top bar and at the end of Settings, never on session screens. Both typefaces come from npm packages and are served from the app's own origin, and no code requests another origin. A service worker makes the app reload with no network after a first visit. `build/serviceWorker.ts` is a small Vite plugin that writes `sw.js` at build time:
 
 - It lists every built file and public asset to precache, and names the cache after a hash of their content.
 - On install, the worker caches that list.
