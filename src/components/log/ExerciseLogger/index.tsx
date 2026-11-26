@@ -173,7 +173,7 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, he
   );
 
   return (
-    <div className="exerciseLogger" ref={rootRef}>
+    <div className={`exerciseLogger${rest && !editing ? " exerciseLogger--resting" : ""}`} ref={rootRef}>
       {!editing && header}
       {!timed && !rest && <IdleRest setNumber={number} category={meta.category} />}
       {rest && (

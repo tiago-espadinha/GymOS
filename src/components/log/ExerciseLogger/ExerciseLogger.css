@@ -103,7 +103,8 @@
 /*
  * Wide: this column is the right of the split (TimerBlock.css holds the left).
  * The name keeps its screen-title size during a rest, the steppers stack and the
- * main button stays at the bottom of the window.
+ * main button stays at the bottom of the window. During a rest there is no
+ * Set done, so the steppers take its place, level with End rest.
  */
 @media (min-width: 1024px) {
   .exerciseLoggerTitle,
@@ -116,7 +117,8 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .exerciseLogger > .primary-button {
+  .exerciseLogger > .primary-button,
+  .exerciseLogger--resting > .setSteppers {
     position: sticky;
     bottom: var(--gutter-wide);
     margin-top: auto;

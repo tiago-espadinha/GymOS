@@ -44,6 +44,13 @@ const expectSplit = async (page: Page, label: RegExp) => {
   for (const b of await timerBlock(page).locator('.timerBlockButton').all()) expect((await box(b)).height).toBe(64)
 }
 
+// With no Set done during a rest, the steppers end level with End rest, not mid-column.
+const expectStepperLevelWithEndRest = async (page: Page) => {
+  const steppers = await box(page.locator('.exerciseScreen:not([hidden]) .exerciseLogger > .setSteppers'))
+  const end = await box(button(page, 'End rest'))
+  expect(steppers.y + steppers.height).toBeCloseTo(end.y + end.height, 0)
+}
+
 test.describe('wide session, 1280', () => {
   test.use({ viewport: { width: 1280, height: 800 }, isMobile: false, hasTouch: false })
 
@@ -77,6 +84,7 @@ test.describe('wide session, 1280', () => {
     await restStarted(page)
     await expectSplit(page, /^Rest\s*Set 1/)
     await expect(button(page, 'End rest')).toBeVisible()
+    await expectStepperLevelWithEndRest(page)
     await page.clock.fastForward(75_000)
     await expectSplit(page, /Rest over/)
     await expect(page.getByRole('timer', { name: /^Rest over/ })).toContainText('+0:15')
@@ -132,6 +140,23 @@ test.describe('wide session, 1280', () => {
     await expect(button(page, 'Cancel')).toBeVisible()
   })
 
+  test('a hold that ends during an edit leaves the edit panel in place', async ({ page }) => {
+    await open(page, /^Plank/)
+    await button(page, 'Start hold').click()
+    await page.clock.fastForward(15_000)
+    await restStarted(page)
+    await button(page, 'End rest').click()
+    await button(page, 'Start hold').click()
+    await page.getByRole('button', { name: 'Edit set 1' }).click()
+    await page.clock.fastForward(20_000)
+    await restStarted(page)
+    const steppers = page.locator('.exerciseScreen:not([hidden]) .exerciseLogger > .setSteppers')
+    await expect(steppers).not.toHaveCSS('position', 'sticky')
+    const save = await box(button(page, 'Save set 1'))
+    const s = await box(steppers)
+    expect(save.y).toBeGreaterThan(s.y + s.height)
+  })
+
   test('the session list keeps the 600 column', async ({ page }) => {
     await open(page, /^Machine row/)
     await button(page, 'All exercises').click()
@@ -154,6 +179,16 @@ test.describe('wide session, other sizes', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(1024)
     const done = await box(button(page, 'Set done'))
     expect(done.y + done.height).toBeLessThanOrEqual(768)
+  })
+
+  test('1024×768: during a rest the steppers end level with End rest', async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 768 })
+    await open(page, /^Machine row/)
+    await logSet(page, '35', '12')
+    await restStarted(page)
+    await expectStepperLevelWithEndRest(page)
+    expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(768)
+    expect(await axe(page)).toEqual([])
   })
 
   test('1920×1080: the countdown reaches 400', async ({ page }) => {
