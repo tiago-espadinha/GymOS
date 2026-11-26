@@ -280,7 +280,7 @@ test('one segment per exercise jumps to it; the next card names the next exercis
   const finish = page.getByRole('button', { name: 'Finish session', exact: true })
   await expect(finish).toBeDisabled()
   // Only FINISH: no "Last exercise" kicker and no target.
-  await expect(finish).toHaveText('Finish session→')
+  await expect(finish).toHaveText('Finish session')
 
   // A done exercise's segment reads as done.
   await logSet(page, '10', '12')

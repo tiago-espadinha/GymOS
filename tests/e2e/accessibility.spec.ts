@@ -25,10 +25,10 @@ test('New plan form, with errors, a removed exercise and the muscle group sheet,
     expect(results.violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([])
   }
   await page.goto('/')
-  await page.getByRole('button', { name: '+ Create New' }).click()
+  await page.getByRole('button', { name: 'Create New' }).click()
   await page.getByRole('group', { name: 'Category', exact: true }).getByRole('button', { name: 'Cardio' }).click()
-  await page.getByRole('button', { name: '+ Add exercise' }).click()
-  await page.getByRole('button', { name: '+ Add exercise' }).click()
+  await page.getByRole('button', { name: 'Add exercise' }).click()
+  await page.getByRole('button', { name: 'Add exercise' }).click()
   await page.getByRole('button', { name: 'Remove exercise 3' }).click()
   await page.getByRole('button', { name: 'Save plan' }).click()
   await expect(page.getByRole('alert')).toBeVisible()

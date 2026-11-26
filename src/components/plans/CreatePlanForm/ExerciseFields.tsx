@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { SegmentedControl, Select, WarningIcon } from "../../shared";
+import { Icon, SegmentedControl, Select } from "../../shared";
 import { MUSCLE_GROUPS } from "../../../constants/muscleGroups";
 import { EXERCISE_CATEGORIES, CATEGORY_LABELS } from "../../../constants/exerciseTypes";
 import { getExerciseMeta } from "../../../utils/metrics";
@@ -43,7 +43,7 @@ export function ExerciseFields({ exercise, number, invalid, onChange, onRemove }
           onChange={(e) => set({ name: e.target.value })}
         />
       </div>
-      {invalid && <p id={errorId} className="exerciseError exerciseCardError"><WarningIcon />{EXERCISE_NAME_ERROR}</p>}
+      {invalid && <p id={errorId} className="exerciseError exerciseCardError"><Icon name="warning" />{EXERCISE_NAME_ERROR}</p>}
 
       <div className="exerciseGroup">
         <span className="exerciseGroupLabel" aria-hidden="true">Category</span>

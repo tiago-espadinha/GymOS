@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { PillButton } from "../../shared";
+import { Icon, PillButton } from "../../shared";
 import { today, formatDateMeta } from "../../../utils/date";
 import { ExerciseLog, TrainingPlan, WorkoutSession } from "../../../types";
 import {
@@ -220,11 +220,7 @@ export function LogTab({
                       aria-haspopup="dialog"
                       onClick={() => setActionsOpen(true)}
                     >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <circle cx="5" cy="12" r="2" />
-                        <circle cx="12" cy="12" r="2" />
-                        <circle cx="19" cy="12" r="2" />
-                      </svg>
+                      <Icon name="more" size="md" />
                     </button>
                     <PillButton
                       id={FINISH_ID}
@@ -245,9 +241,7 @@ export function LogTab({
                   <p role="status" className="logTabDoneStatus">
                     {allDone && (
                       <>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                          <path d="M4 12l5 5L20 6" />
-                        </svg>
+                        <Icon name="check" />
                         All {session.exercises.length} exercises done
                       </>
                     )}

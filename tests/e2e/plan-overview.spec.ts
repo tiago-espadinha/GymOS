@@ -37,7 +37,7 @@ const back = (page: Page) => page.getByRole('button', { name: 'Back to Plans' })
 const axe = (page: Page) => new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
 
 async function createPlan(page: Page, name: string) {
-  await page.getByRole('button', { name: '+ Create New' }).first().click()
+  await page.getByRole('button', { name: 'Create New' }).first().click()
   await page.getByLabel('Name', { exact: true }).fill(name)
   await page.getByLabel('Description · optional').fill('Two rounds')
   await page.getByLabel('Exercise 1 name').fill('Row')

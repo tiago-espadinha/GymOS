@@ -1,28 +1,11 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { Icon } from "../../shared";
 
 interface MetricInfoProps {
   /** The metric control; the info button sits at the end of its row. */
   children: ReactNode;
   label: string;
   text: string;
-}
-
-function InfoIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" focusable="false">
-      <circle cx="11" cy="11" r="10" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="11" cy="6.5" r="1.25" fill="currentColor" />
-      <path d="M11 9.5v6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" focusable="false">
-      <path d="M3 3l12 12M15 3L3 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
 }
 
 /**
@@ -96,7 +79,7 @@ export function MetricInfo({ children, label, text }: MetricInfoProps) {
             setOpen(!open);
           }}
         >
-          <InfoIcon />
+          <Icon name="info" size="lg" />
         </button>
       </div>
       <div id={panelId} className="progressInfoPanel" hidden={!open}>
@@ -110,7 +93,7 @@ export function MetricInfo({ children, label, text }: MetricInfoProps) {
             aria-label={`Close ${label} info`}
             onClick={() => close(true)}
           >
-            <CloseIcon />
+            <Icon name="close" size="md" />
           </button>
         </div>
         <p>{text}</p>

@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
-import { CheckIcon, Sheet, moveListboxFocus } from "../../shared";
+import { Icon, moveListboxFocus, Sheet } from "../../shared";
 import { Exercise, WorkoutSession } from "../../../types";
 import { exerciseHistory } from "../../../utils/progress";
 import { formatDayMonth, today } from "../../../utils/date";
@@ -63,10 +63,7 @@ export function ExerciseSearch({ exercises, sessions, selected, onPick, listLabe
     <>
       <div className="exercisePicker__head">
         <label className="exercisePicker__field">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="exercisePicker__icon">
-            <circle cx="11" cy="11" r="7" />
-            <path d="M20 20l-4-4" />
-          </svg>
+          <Icon name="search" size="md" />
           <input
             type="search"
             aria-label="Search exercises"
@@ -115,7 +112,7 @@ export function ExerciseSearch({ exercises, sessions, selected, onPick, listLabe
                   <span className="exercisePicker__name">{name}</span>
                   <span className="exercisePicker__meta">{historyText(history.get(name)!, todayStr)}</span>
                 </span>
-                {isSelected && <CheckIcon />}
+                {isSelected && <Icon name="check" />}
               </button>
             );
           })}

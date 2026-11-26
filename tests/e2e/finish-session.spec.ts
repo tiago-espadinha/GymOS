@@ -53,7 +53,7 @@ test('kg moved is left out when nothing was lifted', async ({ page }) => {
   await expect(page.locator('.finishStat')).toHaveText(['exercise1', 'set1'])
 })
 
-test('‹ Session keeps the logged set and the notes', async ({ page }) => {
+test('Back to Session keeps the logged set and the notes', async ({ page }) => {
   await logBench(page)
   await finishButton(page).click()
   await page.getByLabel('Notes · optional').fill('Felt strong')

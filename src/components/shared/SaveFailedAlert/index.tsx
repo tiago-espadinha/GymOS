@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { WarningIcon } from "../WarningIcon";
+import { Icon } from "../Icon";
 import "./SaveFailedAlert.css";
 
 interface SaveFailedAlertProps {
@@ -12,7 +12,7 @@ export function SaveFailedAlert({ children }: SaveFailedAlertProps) {
   return (
     <div role="alert" className="save-failed">
       <p className="save-failed__title">
-        <WarningIcon />
+        <Icon name="warning" />
         Not saved
       </p>
       <p className="save-failed__text">{children}</p>

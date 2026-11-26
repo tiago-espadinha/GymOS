@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { CheckIcon, PrimaryButton } from "../../shared";
+import { Icon, PrimaryButton } from "../../shared";
 import { ExerciseLog, Set } from "../../../types";
 import { getExerciseMeta } from "../../../utils/metrics";
 import { isLoggedSet } from "../../../utils/activeSession";
@@ -183,7 +183,7 @@ export function ExerciseLogger({ exercise, onChange, history, titleId, header, f
 
       {timed && rest && restIndex >= 0 && (
         <p className="exerciseLoggerLogged">
-          <CheckIcon />
+          <Icon name="check" />
           Set {restIndex + 1} logged · {formatClock(Number(exercise.sets[restIndex].duration) * 1000)}
         </p>
       )}

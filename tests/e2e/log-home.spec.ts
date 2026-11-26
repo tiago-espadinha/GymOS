@@ -292,14 +292,14 @@ test.describe('empty', () => {
       [p, s],
     )
 
-  test('with no data, + New plan opens New plan and Import it opens Data', async ({ page }) => {
+  test('with no data, New plan opens New plan and Import it opens Data', async ({ page }) => {
     await seed(page, [], [])
     await openLog(page)
     await expect(page.getByRole('heading', { name: 'No sessions yet' })).toBeVisible()
     await expect(page.getByRole('region', { name: 'Recent sessions' })).toHaveCount(0)
     await expect(page.getByRole('button', { name: 'Start', exact: true })).toHaveCount(0)
     await axe(page)
-    await page.getByRole('button', { name: '+ New plan' }).click()
+    await page.getByRole('button', { name: 'New plan' }).click()
     await expect(page.getByLabel('Name', { exact: true })).toBeVisible()
     await page.getByRole('button', { name: 'Cancel' }).click()
     await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Log' }).click()

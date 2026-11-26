@@ -1,4 +1,4 @@
-import { WarningIcon } from "../../shared";
+import { Icon } from "../../shared";
 import { Exercise } from "../../../types";
 import { EXERCISE_NAME_ERROR } from "./buildPlan";
 import { describeExercise } from "./describeExercise";
@@ -29,15 +29,12 @@ export function ExerciseSummary({ exercise, number, invalid, onExpand }: Exercis
           {name || `Exercise ${number}`}
         </span>
         {invalid ? (
-          <span className="exerciseError"><WarningIcon />{EXERCISE_NAME_ERROR}</span>
+          <span className="exerciseError"><Icon name="warning" />{EXERCISE_NAME_ERROR}</span>
         ) : (
           <span className="exerciseSummaryMeta">{describeExercise(exercise, distance)}</span>
         )}
       </span>
-      <svg className="exerciseSummaryChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
-        <path d="M6 9l6 6 6-6" />
-      </svg>
+      <Icon name="chevron-down" className="exerciseSummaryChevron" />
     </button>
   );
 }

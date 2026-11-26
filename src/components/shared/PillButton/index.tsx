@@ -3,7 +3,7 @@ import './PillButton.css';
 
 /**
  * accent: filled in the accent colour (Start)
- * white: filled white (+ Create New)
+ * white: filled white (Create New)
  * outline-white: outlined white (Finish)
  * outline-black: outlined black, for use on a filled block
  * outline-danger: outlined in the danger colour (Delete)

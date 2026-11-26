@@ -30,9 +30,9 @@ for (const width of [375, 768, 1280]) {
   })
 }
 
-test('with no data, + New plan opens the new-plan form and Import opens the Settings tab and the file picker', async ({ page }) => {
+test('with no data, New plan opens the new-plan form and Import opens the Settings tab and the file picker', async ({ page }) => {
   await openStats(page, [])
-  await page.getByRole('button', { name: '+ New plan' }).click()
+  await page.getByRole('button', { name: 'New plan' }).click()
   await expect(page.getByPlaceholder('e.g. Push Day')).toBeVisible()
   await page.getByRole('button', { name: 'Cancel' }).click()
   await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Stats' }).click()

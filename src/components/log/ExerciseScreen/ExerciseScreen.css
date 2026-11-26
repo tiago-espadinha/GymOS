@@ -26,6 +26,9 @@
 }
 
 .exerciseScreenBack {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
   min-height: var(--size-control);
   padding: 0;
   border: 0;
@@ -153,14 +156,6 @@
   font-size: var(--text-small);
   font-weight: 500;
   color: var(--color-text-muted);
-}
-
-.exerciseNextCardArrow {
-  flex: none;
-  font-family: var(--font-display);
-  font-weight: var(--weight-display);
-  font-size: var(--text-row-number);
-  line-height: 1;
 }
 
 .exerciseNextCard--finish {

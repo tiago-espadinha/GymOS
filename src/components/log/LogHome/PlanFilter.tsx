@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import { CheckIcon, Sheet, moveListboxFocus } from "../../shared";
+import { Icon, moveListboxFocus, Sheet } from "../../shared";
 import "../PlanPicker/PlanPicker.css";
 
 export const ALL = "all";
@@ -21,14 +21,6 @@ interface PlanFilterProps {
 }
 
 const sessionsLabel = (n: number) => `${n} ${n === 1 ? "session" : "sessions"}`;
-
-function FilterIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-      <path d="M3 5h18l-7 8.5V20l-4-2v-4.5z" />
-    </svg>
-  );
-}
 
 /**
  * The Recent filter: an icon button that opens a full-screen listbox of plans, the
@@ -55,7 +47,7 @@ export function PlanFilter({ plans, total, value, onChange }: PlanFilterProps) {
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
       >
-        <FilterIcon />
+        <Icon name="filter" size="md" />
         {active && (
           <span className="logHomeFilterName">{active.name}</span>
         )}
@@ -88,7 +80,7 @@ export function PlanFilter({ plans, total, value, onChange }: PlanFilterProps) {
                     <span className="planPicker__name">{option.name}</span>
                     <span className="planPicker__meta">{sessionsLabel(option.count)}</span>
                   </span>
-                  {selected && <CheckIcon />}
+                  {selected && <Icon name="check" />}
                 </button>
               );
             })}

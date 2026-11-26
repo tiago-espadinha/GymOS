@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { ChevronIcon } from "../../shared";
+import { Icon, type IconName } from "../../shared";
 import { addDays, addMonths, formatDateSpoken, formatMonthYear, monthWeeks } from "../../../utils/date";
 
 /** A month touches at most six Monday-first weeks. */
@@ -68,6 +68,7 @@ export function Calendar({ value, min, max, onPick }: CalendarProps) {
       <div className="calendar__head">
         <MonthStep
           label="Previous month"
+          icon="chevron-left"
           blocked={month <= min.slice(0, 7)}
           onStep={() => go(addMonths(focused, -1), false)}
         />
@@ -76,6 +77,7 @@ export function Calendar({ value, min, max, onPick }: CalendarProps) {
         </h3>
         <MonthStep
           label="Next month"
+          icon="chevron-right"
           blocked={month >= max.slice(0, 7)}
           onStep={() => go(addMonths(focused, 1), false)}
         />
@@ -154,16 +156,16 @@ function Day({ date, chosen, focused, today, outside, onPick, onFocus }: DayProp
 }
 
 /** aria-disabled, not disabled: a focused button that becomes disabled drops focus to the page. */
-function MonthStep({ label, blocked, onStep }: { label: string; blocked: boolean; onStep: () => void }) {
+function MonthStep({ label, icon, blocked, onStep }: { label: string; icon: IconName; blocked: boolean; onStep: () => void }) {
   return (
     <button
       type="button"
-      className={`calendar__step calendar__step--${label.startsWith("Next") ? "next" : "prev"}`}
+      className="calendar__step"
       aria-label={label}
       aria-disabled={blocked || undefined}
       onClick={() => !blocked && onStep()}
     >
-      <ChevronIcon />
+      <Icon name={icon} />
     </button>
   );
 }

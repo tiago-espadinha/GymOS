@@ -65,9 +65,9 @@ test.describe('with plans', () => {
     await expect(page.getByRole('button', { name: /^Bench press/ })).toBeVisible()
   })
 
-  test('+ Create New replaces the list and hides the tab bar until Cancel', async ({ page }) => {
+  test('Create New replaces the list and hides the tab bar until Cancel', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: '+ Create New' }).click()
+    await page.getByRole('button', { name: 'Create New' }).click()
     await expect(page.getByPlaceholder('e.g. Push Day')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Plans', level: 1 })).toHaveCount(0)
     await expect(tabBar(page)).toHaveCount(0)
@@ -188,11 +188,11 @@ test.describe('empty', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Plans')
     await expect(page.locator('.plansTabHeader')).toHaveCount(0)
     await expect(page.getByRole('heading', { name: 'No plans yet' })).toBeVisible()
-    await expect(page.getByRole('button', { name: '+ Create New' })).toHaveCount(1)
+    await expect(page.getByRole('button', { name: 'Create New' })).toHaveCount(1)
     await page.getByRole('button', { name: 'Have a CSV backup? Import it' }).click()
     await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible()
     await tabBar(page).getByText('Plans').click()
-    await page.getByRole('button', { name: '+ Create New' }).click()
+    await page.getByRole('button', { name: 'Create New' }).click()
     await expect(page.getByPlaceholder('e.g. Push Day')).toBeVisible()
   })
 
@@ -207,7 +207,7 @@ test.describe('empty', () => {
   test('Cancel on the new-plan form from the empty state focuses the hidden Plans title', async ({ page }) => {
     await seed(page, [])
     await page.goto('/')
-    await page.getByRole('button', { name: '+ Create New' }).click()
+    await page.getByRole('button', { name: 'Create New' }).click()
     await page.getByRole('button', { name: 'Cancel' }).click()
     await expect(page.getByRole('heading', { name: 'Plans', level: 1 })).toBeFocused()
   })
