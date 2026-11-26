@@ -20,7 +20,7 @@
   color: var(--color-on-accent);
 }
 
-.planActions__archive {
+.planActions__row {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -36,17 +36,26 @@
   cursor: pointer;
 }
 
-.planActions__archive:focus-visible {
+.planActions__row:focus-visible {
   outline: var(--border-focus);
   outline-offset: 2px;
 }
 
-.planActions__archiveLabel {
+.planActions__label {
   font-size: var(--text-body-lg);
   font-weight: 700;
 }
 
-.planActions__archiveHint {
+/* Edit is the safe, common action, so it carries the accent. */
+.planActions__row--edit {
+  border-color: var(--color-accent);
+}
+
+.planActions__row--edit .planActions__label {
+  color: var(--color-accent);
+}
+
+.planActions__hint {
   font-size: var(--text-small);
   font-weight: 500;
   color: var(--color-text-muted);
