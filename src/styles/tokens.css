@@ -88,6 +88,7 @@
   --size-action: 64px;
   --size-action-primary: 72px;
   --size-row-summary: 56px;
+  --size-table-action: 77px; /* the sets table's action column, wide enough for its Editing tag */
   --size-row: 72px;
   --size-row-lg: 84px;
   --size-stepper: 96px;

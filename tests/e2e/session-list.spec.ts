@@ -121,7 +121,8 @@ test('the all-done list has no detectable WCAG A/AA violations', async ({ page }
 
 test('the exercise screen shows last time and seeds the steppers from it, then from the last logged set', async ({ page }) => {
   await row(page, 'Cable row').click()
-  await expect(page.getByText('Last time 35 kg × 12, 12, 10')).toBeVisible()
+  await expect(sets(page).first()).toContainText(/Last time 35 kg × 12\s*Today 35 kg × 12/)
+  await expect(page.getByText('Last time 35 kg × 12, 12, 10')).toHaveCount(0)
   await expect(weight(page)).toHaveValue('35')
   await expect(reps(page)).toHaveValue('12')
 
@@ -136,6 +137,32 @@ test('the exercise screen shows last time and seeds the steppers from it, then f
   await expect(sets(page).first()).toContainText('37.5 kg × 11')
   await expect(sets(page).nth(1)).toContainText('Now')
   await expect(weight(page)).toHaveValue('37.5')
+})
+
+test('the Last column pairs each set with last time, and a done set is edited from the table', async ({ page }) => {
+  await row(page, 'Cable row').click()
+  const table = page.getByRole('list', { name: 'Sets' })
+  await expect(table).toHaveText(/^Set\s*Last\s*Today/)
+  for (const r of ['12', '12', '10', '8']) {
+    await reps(page).fill(r)
+    await page.getByRole('button', { name: 'Set done' }).click()
+    await page.getByRole('button', { name: 'End rest' }).click()
+  }
+  // Last time had three sets: the fourth and the next one have nothing to pair with.
+  await expect(sets(page).nth(2)).toContainText('Last time 35 kg × 10')
+  await expect(sets(page).nth(3).locator('.setsTableLast')).toHaveText('Last time —')
+  await expect(sets(page).nth(4)).toContainText('Now')
+
+  await page.getByRole('button', { name: 'Edit set 2' }).click()
+  await page.getByRole('button', { name: 'Increase Weight' }).click()
+  const edited = sets(page).nth(1)
+  await expect(edited).toHaveAttribute('aria-current', 'step')
+  await expect(edited).toContainText(/Set 2\s*Last time 35 kg × 12\s*Today → 37.5 kg × 12\s*Editing/)
+  await expect(sets(page).filter({ hasText: 'Now' })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Save set 2' }).click()
+  await expect(sets(page).nth(1)).toContainText(/Last time 35 kg × 12\s*Today 37.5 kg × 12/)
+  await expect(page.getByRole('button', { name: 'Edit set 2' })).toBeFocused()
+  await axe(page)
 })
 
 test('typed values are accepted, and a comma reads as a decimal point', async ({ page }) => {
@@ -171,7 +198,7 @@ test('editing a done set changes it, Finish totals follow and it survives a relo
   await expect(weight(page)).toBeFocused()
   await weight(page).fill('62.5')
   await reps(page).fill('10')
-  await expect(sets(page).first()).toContainText('60 kg × 8 → 62.5 kg × 10')
+  await expect(sets(page).first()).toContainText(/Set 1\s*→ 62.5 kg × 10/)
   await expect(sets(page).first()).toContainText('Editing')
   await page.getByRole('button', { name: 'Save set 1' }).click()
   await expect(page.getByRole('button', { name: 'Edit set 1' })).toBeFocused()

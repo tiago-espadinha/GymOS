@@ -19,6 +19,7 @@ interface TimedSetsProps {
   /** The logged set being edited; the hold block steps aside meanwhile. */
   editing: { index: number; label: string } | null;
   format: (set: Set) => string;
+  lastTime: ((index: number) => string) | null;
   onRest: (setId: string) => void;
   onEndRest: () => void;
   onEdit: (index: number) => void;
@@ -80,6 +81,7 @@ export function TimedSets(props: TimedSetsProps) {
           draftLabel={NO_VALUES}
           editing={editing}
           format={props.format}
+          lastTime={props.lastTime}
           onEdit={props.onEdit}
           onRemove={props.onRemove}
         />

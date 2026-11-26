@@ -1,43 +1,57 @@
+/* Rows share the table's columns (subgrid), so Last and Today line up row to row. */
 .setsTable {
-  display: flex;
-  flex-direction: column;
+  /* A fixed action column, so the columns hold still when a row changes state. */
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) var(--size-table-action);
+  column-gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
-  border-radius: var(--radius-surface);
-  overflow: hidden;
-  background: var(--color-surface);
+  border-top: var(--border-hairline);
+}
+
+.setsTable--last {
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.1fr) var(--size-table-action);
+}
+
+.setsTableHead,
+.setsTableRow {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+}
+
+.setsTableHead {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-small);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }
 
 .setsTableRow {
-  display: grid;
-  grid-template-columns: var(--size-row-summary) 1fr auto;
-  align-items: center;
   min-height: var(--size-row-summary);
-  padding: 0 var(--space-2) 0 var(--space-4);
+  padding: 0 0 0 var(--space-2);
   border-bottom: var(--border-hairline);
 }
 
-.setsTableRow:last-child {
-  border-bottom: 0;
-}
-
 .setsTableRow--inverted {
+  padding-right: var(--space-2);
+  border-radius: var(--radius-nested);
+  border-bottom-color: transparent;
   background: var(--color-inverse);
   color: var(--color-on-inverse);
-  border-bottom-color: transparent;
-}
-
-.setsTableRow--pending {
-  padding-right: 0;
 }
 
 /* 24px display type, so the dim grey keeps its contrast. */
 .setsTableLabel {
+  min-width: 1ch;
   font-family: var(--font-display);
   font-weight: var(--weight-display);
   font-size: var(--text-set-label);
-  text-transform: uppercase;
   color: var(--color-text-dim);
 }
 
@@ -45,13 +59,27 @@
   color: inherit;
 }
 
+.setsTableLast,
+.setsTableValues {
+  font-size: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.setsTableLast {
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.setsTableRow--inverted .setsTableLast {
+  color: inherit;
+}
+
 .setsTableValues {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-body);
+  gap: var(--space-1);
   font-weight: 700;
-  font-variant-numeric: tabular-nums;
 }
 
 .setsTableValues--done {
@@ -63,8 +91,13 @@
   color: var(--color-text-muted);
 }
 
+.setsTableTag,
+.setsTableEdit,
+.setsTableRemove {
+  justify-self: end;
+}
+
 .setsTableTag {
-  padding-right: var(--space-2);
   font-size: var(--text-small);
   font-weight: 700;
   letter-spacing: var(--tracking-label);
@@ -81,10 +114,10 @@
 }
 
 .setsTableEdit {
-  padding: 0 var(--space-3);
+  padding: 0 var(--space-2);
   color: var(--color-text);
-  font-size: var(--text-secondary);
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: 700;
   text-decoration: underline;
 }
 

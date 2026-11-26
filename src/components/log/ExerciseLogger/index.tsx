@@ -4,7 +4,7 @@ import { ExerciseLog, Set } from "../../../types";
 import { getExerciseMeta } from "../../../utils/metrics";
 import { isLoggedSet } from "../../../utils/activeSession";
 import { restTimerId } from "../../../utils/restTimers";
-import { NO_VALUES, currentSetNumber, formatSet, lastTimeLabel } from "../../../utils/sessionList";
+import { NO_VALUES, currentSetNumber, formatSet, lastTimeValue } from "../../../utils/sessionList";
 import { SetDraft, currentSetIndex, logDraft, seedDraft } from "../../../utils/setModel";
 import { clearTimer, formatClock, readElapsedMs, readRunningTimer } from "../../../hooks/useTimer";
 import RestBlock from "../RestBlock";
@@ -149,18 +149,15 @@ export function ExerciseLogger({ exercise, onChange, history, titleId, header, f
   // A timed set needs a time; a distance alone is not a set.
   const canSave = editing !== null && (timed ? Number(editing.draft.duration) > 0 : isLoggedSet(editing.draft));
 
-  const lastTime = !editing && !rest && lastTimeLabel(exercise, history, units);
+  const lastTime = history.length > 0 ? (i: number) => lastTimeValue(exercise, history, i, units) : null;
   const restIndex = rest ? exercise.sets.findIndex((s) => s.id === rest.setId) : -1;
   // A hold's block sits above its title, so a timed exercise places the heading itself.
   const headingInHold = timed && !rest && !editing;
 
   const heading = (
-    <div className="exerciseLoggerHeading">
-      <h1 id={titleId} className={`exerciseLoggerTitle${rest ? " exerciseLoggerTitle--resting" : ""}`} tabIndex={-1}>
-        {exercise.name}
-      </h1>
-      {lastTime && <span className="exerciseLoggerLastTime">{lastTime}</span>}
-    </div>
+    <h1 id={titleId} className={`exerciseLoggerTitle${rest ? " exerciseLoggerTitle--resting" : ""}`} tabIndex={-1}>
+      {exercise.name}
+    </h1>
   );
 
   return (
@@ -200,6 +197,7 @@ export function ExerciseLogger({ exercise, onChange, history, titleId, header, f
           heading={headingInHold && heading}
           editing={editingRow}
           format={format}
+          lastTime={lastTime}
           onRest={startRest}
           onEndRest={endRestNow}
           onEdit={startEdit}
@@ -214,6 +212,7 @@ export function ExerciseLogger({ exercise, onChange, history, titleId, header, f
               draftLabel={format(draftSet(draft))}
               editing={editingRow}
               format={format}
+              lastTime={lastTime}
               onEdit={startEdit}
               onRemove={removeSet}
             />

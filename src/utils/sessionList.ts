@@ -75,19 +75,6 @@ export function rowSubtitle(exercise: ExerciseLog, history: Set[], units: UnitPr
   return history.length > 0 ? `Last ${formatSet(history[0], exercise, units)}` : "Not logged recently";
 }
 
-// "Last time 35 kg × 12, 12, 10", naming the weight once when every set shares it.
-export function lastTimeLabel(exercise: ExerciseLog, history: Set[], units: UnitPreferences = DEFAULT_UNIT_PREFS): string {
-  if (history.length === 0) return "";
-  const meta = getExerciseMeta(exercise);
-  const weight = history[0].weight;
-  const shared =
-    meta.trackingType === "reps" && parseFloat(weight) > 0 && history.every((s) => s.weight === weight && parseInt(s.reps) > 0);
-  const values = shared
-    ? `${weightText(weight, units.weight)} ${weightLabel(units.weight)} × ${history.map((s) => s.reps).join(", ")}`
-    : history.map((s) => formatSet(s, exercise, units)).join(", ");
-  return `Last time ${values}`;
-}
-
 // The sets table's Last cell: last time's set at the same position, in the chosen units;
 // a dash where last time had fewer sets.
 export function lastTimeValue(exercise: ExerciseLog, history: Set[], index: number, units: UnitPreferences = DEFAULT_UNIT_PREFS): string {
