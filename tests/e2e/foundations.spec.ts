@@ -44,3 +44,30 @@ test('theme colour and manifest background are black', async ({ page, request })
   expect(manifest.background_color).toBe('#000000')
   expect(manifest.theme_color).toBe('#000000')
 })
+
+test('every icon the page and manifest name is served at its stated size', async ({ page, request }) => {
+  await page.goto('/')
+  const links = await page.locator('link[rel="icon"], link[rel="apple-touch-icon"]').evaluateAll((els) =>
+    els.map((el) => el.getAttribute('href')!),
+  )
+  expect(links).toEqual(['/icon.svg', '/apple-touch-icon.png'])
+
+  const manifest = await (await request.get('/manifest.webmanifest')).json()
+  const icons: { src: string; sizes: string; purpose: string }[] = manifest.icons
+  expect(icons.map((icon) => `${icon.sizes} ${icon.purpose}`)).toEqual([
+    'any any',
+    '192x192 any',
+    '512x512 any',
+    '512x512 maskable',
+  ])
+
+  // A PNG states its width and height in the IHDR chunk, bytes 16 to 24.
+  const pngSize = (body: Buffer) => `${body.readUInt32BE(16)}x${body.readUInt32BE(20)}`
+  for (const icon of icons) {
+    const response = await request.get('/' + icon.src)
+    expect(response.status(), icon.src).toBe(200)
+    if (icon.src.endsWith('.png')) expect(pngSize(await response.body()), icon.src).toBe(icon.sizes)
+  }
+  const touch = await request.get('/apple-touch-icon.png')
+  expect(pngSize(await touch.body())).toBe('180x180')
+})
