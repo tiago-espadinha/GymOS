@@ -88,6 +88,13 @@ export function lastTimeLabel(exercise: ExerciseLog, history: Set[], units: Unit
   return `Last time ${values}`;
 }
 
+// The sets table's Last cell: last time's set at the same position, in the chosen units;
+// a dash where last time had fewer sets.
+export function lastTimeValue(exercise: ExerciseLog, history: Set[], index: number, units: UnitPreferences = DEFAULT_UNIT_PREFS): string {
+  const then = history[index];
+  return (then && formatSet(then, exercise, units)) || NO_VALUES;
+}
+
 // The next-up card's target, e.g. "3 × 10" from last time; progress once the exercise has a set.
 export function nextTarget(exercise: ExerciseLog, history: Set[]): string {
   const { done, total } = exerciseProgress(exercise);
