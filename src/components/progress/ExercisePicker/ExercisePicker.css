@@ -25,15 +25,6 @@
   border-color: var(--color-accent);
 }
 
-.exercisePicker__icon {
-  flex: none;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
 .exercisePicker__field input {
   flex: 1;
   min-width: 0;

@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { CheckIcon, Sheet, moveListboxFocus } from "../../shared";
+import { Icon, moveListboxFocus, Sheet } from "../../shared";
 import { planTrainedSummary } from "../../../utils/plans";
 import { today } from "../../../utils/date";
 import { TrainingPlan, WorkoutSession } from "../../../types";
@@ -48,7 +48,7 @@ export function PlanPicker({ plans, sessions, selectedId, hasArchived, onPick, o
                 <span className="planPicker__name">{plan.name}</span>
                 <span className="planPicker__meta">{planTrainedSummary(plan, sessions, todayStr, "last")}</span>
               </span>
-              {selected && <CheckIcon />}
+              {selected && <Icon name="check" />}
             </button>
           );
         })}

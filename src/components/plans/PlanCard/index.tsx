@@ -1,4 +1,4 @@
-import { PillButton } from "../../shared";
+import { Icon, PillButton } from "../../shared";
 import { planSummary } from "../../../utils/plans";
 import { TrainingPlan } from "../../../types";
 import "./PlanCard.css";
@@ -29,11 +29,7 @@ export function PlanCard({ plan, onOpen, onStart, onMore }: PlanCardProps) {
         aria-haspopup="dialog"
         onClick={() => onMore(plan)}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <circle cx="5" cy="12" r="2" />
-          <circle cx="12" cy="12" r="2" />
-          <circle cx="19" cy="12" r="2" />
-        </svg>
+        <Icon name="more" size="md" />
       </button>
     </li>
   );

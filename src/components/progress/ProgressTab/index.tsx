@@ -1,5 +1,5 @@
 import { useId, useMemo, useState } from "react";
-import { ChevronIcon, ChipGroup, EmptyState, PrimaryButton, SegmentedControl } from "../../shared";
+import { ChipGroup, EmptyState, Icon, PrimaryButton, SegmentedControl } from "../../shared";
 import { TrainingPlan, WorkoutSession, Exercise } from "../../../types";
 import { formatClock } from "../../../hooks/useTimer";
 import { formatDateStat, formatDayMonth, today } from "../../../utils/date";
@@ -350,7 +350,7 @@ export function ProgressTab({
         onClick={() => setPicking(true)}
       >
         <span className="progressPickerName">{selected.name}</span>
-        <ChevronIcon className="progressPickerChevron" />
+        <Icon name="chevron-down" className="progressPickerChevron" />
       </button>
       {picking && (
         <ExercisePicker

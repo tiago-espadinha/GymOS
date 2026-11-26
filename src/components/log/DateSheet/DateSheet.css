@@ -133,14 +133,6 @@
   cursor: pointer;
 }
 
-.calendar__step--prev svg {
-  transform: rotate(90deg);
-}
-
-.calendar__step--next svg {
-  transform: rotate(-90deg);
-}
-
 .calendar__step[aria-disabled='true'] {
   border-color: var(--color-line);
   color: var(--color-line-empty);

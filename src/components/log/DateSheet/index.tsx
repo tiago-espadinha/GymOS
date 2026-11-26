@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import { CheckIcon, Sheet } from "../../shared";
+import { Icon, Sheet } from "../../shared";
 import {
   dayBefore,
   formatDateMeta,
@@ -84,7 +84,7 @@ export function DateSheet({ value, onChange, onClose }: DateSheetProps) {
                 <span className="dateSheet__label">{q.label}</span>
                 <span className="dateSheet__date">{formatDateMeta(q.date)}</span>
               </span>
-              {pressed && <CheckIcon />}
+              {pressed && <Icon name="check" />}
             </button>
           );
         })}

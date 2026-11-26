@@ -1,4 +1,4 @@
-import { CheckIcon } from "../../shared";
+import { Icon } from "../../shared";
 import { planSummary } from "../../../utils/plans";
 import { TrainingPlan } from "../../../types";
 import "../PlanCard/PlanCard.css";
@@ -27,7 +27,7 @@ export function PlanSelectRow({ plan, selected, controls, onSelect }: PlanSelect
           <span className="planRow__name">{plan.name}</span>
           <span className="planRow__meta">{planSummary(plan)}</span>
         </span>
-        {selected && <CheckIcon />}
+        {selected && <Icon name="check" />}
       </button>
     </li>
   );

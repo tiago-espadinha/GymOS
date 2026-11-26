@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckIcon, SaveFailedAlert } from "../../shared";
+import { Icon, SaveFailedAlert } from "../../shared";
 import { ACCENTS, saveAccent, useAccent, type AccentId } from "../../../utils/accentPrefs";
 
 /** A row of accent swatches. A choice the browser refuses to store is undone, so the screen shows what is stored. */
@@ -26,7 +26,7 @@ export function AccentPicker() {
             aria-pressed={id === accent}
             onClick={() => choose(id)}
           >
-            {id === accent && <CheckIcon />}
+            {id === accent && <Icon name="check" />}
           </button>
         ))}
       </div>

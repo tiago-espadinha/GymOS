@@ -82,6 +82,12 @@
 
   /* Sizes */
   --size-control: 44px; /* minimum hit area */
+  --size-icon-sm: 16px; /* icon inline with text */
+  --size-icon-md: 20px; /* icon in a control */
+  --size-icon-lg: 24px; /* icon on its own */
+  --size-icon-xl: 28px; /* icon beside display type */
+  --stroke-icon: 2.5; /* the icon set's one stroke, on its 24 grid */
+  --stroke-icon-dot: 4; /* a dot (⋯, the info i) as a round cap */
   --size-chip: 48px;
   --size-field: 52px;
   --size-field-lg: 56px;

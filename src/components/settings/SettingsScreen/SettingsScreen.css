@@ -120,10 +120,6 @@
   font-weight: 700;
 }
 
-.importKicker svg {
-  flex: none;
-}
-
 .importKicker--accent {
   color: var(--color-accent);
 }

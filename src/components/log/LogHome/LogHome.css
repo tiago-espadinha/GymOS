@@ -101,13 +101,6 @@ span.logHomeLead {
   line-clamp: 3;
 }
 
-.logHomePlanChevron {
-  flex-shrink: 0;
-  width: var(--space-7);
-  height: var(--space-7);
-  stroke-width: 3;
-}
-
 .logHomeChoice:focus-visible,
 .logHomePlan:focus-visible,
 .logHomeChangePlan:focus-visible {
@@ -186,10 +179,6 @@ span.logHomeLead {
   font-size: var(--text-small);
   font-weight: 700;
   cursor: pointer;
-}
-
-.logHomeFilterButton svg {
-  flex: none;
 }
 
 .logHomeFilterButton--active {

@@ -1,4 +1,4 @@
-import { PillButton, PrimaryButton } from "../../shared";
+import { Icon, PillButton, PrimaryButton } from "../../shared";
 import { describeExercise } from "../CreatePlanForm/describeExercise";
 import { planDetailKicker, planSummary } from "../../../utils/plans";
 import { TrainingPlan, WorkoutSession } from "../../../types";
@@ -30,10 +30,7 @@ export function PlanDetail({ id, plan, sessions, today, saved = false, onBack, o
       {onBack && (
         <div className="planDetail__top">
           <button type="button" className="planDetail__back" aria-label="Back to Plans" onClick={onBack}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"
-              strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
-              <path d="M15 6l-6 6 6 6" />
-            </svg>
+            <Icon name="chevron-left" />
             Plans
           </button>
           {saved && <PillButton variant="white" onClick={onBack}>Done</PillButton>}
@@ -59,11 +56,7 @@ export function PlanDetail({ id, plan, sessions, today, saved = false, onBack, o
           aria-haspopup="dialog"
           onClick={() => onMore(plan)}
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-            <circle cx="5" cy="12" r="2" />
-            <circle cx="12" cy="12" r="2" />
-            <circle cx="19" cy="12" r="2" />
-          </svg>
+          <Icon name="more" size="md" />
         </button>
       </div>
       <Label className="planDetail__label">Exercises</Label>

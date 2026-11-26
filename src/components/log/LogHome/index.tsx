@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ChevronIcon, EmptyState, PrimaryButton } from "../../shared";
+import { EmptyState, Icon, PrimaryButton } from "../../shared";
 import { formatDateMeta, today } from "../../../utils/date";
 import { defaultPlan, planPreview, planTrainedSummary } from "../../../utils/plans";
 import { TrainingPlan, WorkoutSession } from "../../../types";
@@ -73,13 +73,13 @@ export function LogHome({ plans, sessions, date, onDateChange, onStart, onEdit, 
             <button type="button" className="logHomeChoice" aria-haspopup="dialog" onClick={() => setOpen("date")}>
               <span className="visuallyHidden">Session date: </span>
               {formatDateMeta(date)}
-              <ChevronIcon />
+              <Icon name="chevron-down" />
             </button>
           </div>
           <button type="button" className="logHomePlan" aria-haspopup="dialog" onClick={() => setOpen("plan")}>
             <span className="visuallyHidden">Training plan: </span>
             <PlanName name={plan.name} />
-            <ChevronIcon className="logHomePlanChevron" />
+            <Icon name="chevron-down" size="xl" className="logHomePlanChevron" />
           </button>
           <span className="logHomeLead">{planTrainedSummary(plan, sessions, today())}</span>
           {/* Wide only: Change plan beside Start. */}

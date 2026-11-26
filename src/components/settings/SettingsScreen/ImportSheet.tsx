@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { CheckIcon, PrimaryButton, Sheet, WarningIcon } from "../../shared";
+import { Icon, PrimaryButton, Sheet } from "../../shared";
 import { CSVImport } from "../../../utils/csv";
 import { foundText } from "./importSummary";
 import { ImportStep } from "./readImport";
@@ -46,7 +46,7 @@ export function ImportSheet({ step, deletes, onAdd, onReplace, onChooseFile, onS
         <>
           {/* An error is an icon and words, never colour alone. */}
           <h2 id={titleId} className="sheet__kicker sheet__kicker--danger importKicker importTitle" tabIndex={-1} data-autofocus>
-            <WarningIcon />
+            <Icon name="warning" />
             Can't import this file
           </h2>
           <p className="importFile">{step.fileName}</p>
@@ -60,7 +60,7 @@ export function ImportSheet({ step, deletes, onAdd, onReplace, onChooseFile, onS
       {step.kind === "done" && (
         <>
           <span className="sheet__kicker importKicker importKicker--accent">
-            <CheckIcon />
+            <Icon name="check" />
             Imported
           </span>
           <h2 id={titleId} className="sheet__title importTitle" tabIndex={-1} data-autofocus>Backup restored</h2>

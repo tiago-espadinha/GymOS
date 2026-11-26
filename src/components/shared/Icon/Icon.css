@@ -1,0 +1,30 @@
+.icon {
+  flex: none;
+  width: var(--size-icon-sm);
+  height: var(--size-icon-sm);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--stroke-icon);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon--md {
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
+}
+
+.icon--lg {
+  width: var(--size-icon-lg);
+  height: var(--size-icon-lg);
+}
+
+.icon--xl {
+  width: var(--size-icon-xl);
+  height: var(--size-icon-xl);
+}
+
+/* A dot is a zero-length stroke; this makes it the weight of a ⋯ or the i's tittle. */
+.icon__dot {
+  stroke-width: var(--stroke-icon-dot);
+}

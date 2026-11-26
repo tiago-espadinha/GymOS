@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Field, PrimaryButton, SaveFailedAlert, Toast, WarningIcon } from "../../shared";
+import { Field, Icon, PrimaryButton, SaveFailedAlert, Toast } from "../../shared";
 import { TrainingPlan } from "../../../types";
 import { buildPlan, errorCount, validatePlan } from "./buildPlan";
 import { ExerciseFields } from "./ExerciseFields";
@@ -90,7 +90,7 @@ export function CreatePlanForm({ onSave, onCancel }: CreatePlanFormProps) {
             );
           })}
         </ul>
-        {errors?.exercises && <p className="exerciseError"><WarningIcon />{errors.exercises}</p>}
+        {errors?.exercises && <p className="exerciseError"><Icon name="warning" />{errors.exercises}</p>}
         <button type="button" className="createPlanFormAdd" data-add-exercise onClick={list.add}>+ Add exercise</button>
       </section>
 
@@ -101,7 +101,7 @@ export function CreatePlanForm({ onSave, onCancel }: CreatePlanFormProps) {
         )}
         {count > 0 && (
           <p role="alert" className="createPlanFormSummary">
-            <WarningIcon />
+            <Icon name="warning" />
             {count === 1 ? "1 thing to fix before saving" : `${count} things to fix before saving`}
           </p>
         )}

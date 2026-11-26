@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { ChevronIcon, PrimaryButton, SaveFailedAlert } from "../../shared";
+import { Icon, PrimaryButton, SaveFailedAlert } from "../../shared";
 import { formatDateMeta } from "../../../utils/date";
 import { exerciseSummary, sessionTotals } from "../../../utils/sessionList";
 import { isLoggedSet, ActiveSession } from "../../../utils/activeSession";
@@ -53,7 +53,7 @@ export function FinishScreen({ session, onNotes, onDate, onSave, saveFailures, o
             <button type="button" className="finishDate" aria-haspopup="dialog" onClick={() => setDateOpen(true)}>
               <span className="visuallyHidden">Session date: </span>
               {formatDateMeta(session.date)}
-              <ChevronIcon />
+              <Icon name="chevron-down" />
             </button>
           </p>
         ) : (

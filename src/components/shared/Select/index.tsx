@@ -1,7 +1,6 @@
 import { useId, useState } from 'react';
 import { Sheet } from '../Sheet';
-import { CheckIcon } from '../CheckIcon';
-import { ChevronIcon } from '../ChevronIcon';
+import { Icon } from '../Icon';
 import { moveListboxFocus } from './listbox';
 import './Select.css';
 
@@ -38,7 +37,7 @@ export function Select({ label, value, options, onChange }: SelectProps) {
         onClick={() => setOpen(true)}
       >
         <span id={valueId} className="select__value">{value}</span>
-        <ChevronIcon className="select__chevron" />
+        <Icon name="chevron-down" className="select__chevron" />
       </button>
 
       {open && (
@@ -57,7 +56,7 @@ export function Select({ label, value, options, onChange }: SelectProps) {
                 onClick={() => pick(option)}
               >
                 {option}
-                {option === value && <CheckIcon />}
+                {option === value && <Icon name="check" />}
               </button>
             ))}
           </div>

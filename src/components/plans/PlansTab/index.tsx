@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { EmptyState, PillButton, Toast } from '../../shared';
+import { EmptyState, Icon, PillButton, Toast } from '../../shared';
 import CreatePlanForm from '../CreatePlanForm';
 import PlanCard from '../PlanCard';
 import ArchivedPlanRow from '../ArchivedPlanRow';
@@ -151,10 +151,7 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
         onClick={() => setArchivedOpen(!archivedOpen)}
       >
         <span>Archived · {archivedPlans.length}</span>
-        <svg className="archivedChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M6 9l6 6 6-6" />
-        </svg>
+        <Icon name="chevron-down" className="archivedChevron" />
       </button>
       <ul id={archivedListId} className="plansTabList" role="list" hidden={!archivedOpen}>
         {archivedPlans.map((p) => (
