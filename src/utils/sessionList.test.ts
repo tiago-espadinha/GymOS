@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ExerciseLog, Set } from "../types";
-import { NO_VALUES, currentExerciseId, currentSetNumber, exerciseProgress, exerciseSummary, lastTimeLabel, lastValues, rowSubtitle, sessionTotals } from "./sessionList";
+import { NO_VALUES, currentExerciseId, currentSetNumber, exerciseProgress, exerciseSummary, lastTimeLabel, lastValues, nextTarget, rowSubtitle, sessionTotals } from "./sessionList";
 
 const set = (over: Partial<Set> = {}): Set => ({ id: Math.random().toString(), weight: "", reps: "", ...over });
 
@@ -150,5 +150,32 @@ describe("lastTimeLabel", () => {
   it("names the shared weight in lb", () => {
     const history = ["12", "10"].map((reps) => set({ weight: "61.23496995", reps }));
     expect(lastTimeLabel(exercise([]), history, { weight: "lbs", distance: "km" })).toBe("Last time 135 lb × 12, 10");
+  });
+});
+
+describe("nextTarget", () => {
+  it("counts last time's sets over their shared reps", () => {
+    const history = ["10", "10", "10"].map((reps) => set({ weight: "60", reps }));
+    expect(nextTarget(exercise([set()]), history)).toBe("3 × 10");
+  });
+
+  it("counts sets alone when the reps differ", () => {
+    const history = [set({ reps: "10" }), set({ reps: "8" })];
+    expect(nextTarget(exercise([set()]), history)).toBe("2 sets");
+  });
+
+  it("reads a shared time for a timed exercise", () => {
+    const history = [set({ duration: "45" }), set({ duration: "45" })];
+    expect(nextTarget(exercise([set()], { trackingType: "time" }), history)).toBe("2 × 00:45");
+  });
+
+  it("shows progress once a set is logged", () => {
+    const history = [set({ reps: "10" })];
+    expect(nextTarget(exercise([set({ reps: "10" }), set()]), history)).toBe("1 of 2 done");
+    expect(nextTarget(exercise([set({ reps: "10" })]), history)).toBe("Done");
+  });
+
+  it("is empty without history", () => {
+    expect(nextTarget(exercise([set()]), [])).toBe("");
   });
 });
