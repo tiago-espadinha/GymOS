@@ -3,7 +3,6 @@ export { Input } from './Input';
 export { Select } from './Select';
 export { moveListboxFocus } from './Select/listbox';
 export { Label } from './Label';
-export { NumericInput } from './NumericInput';
 export { Badge } from './Badge';
 export { Divider } from './Divider';
 export { Search } from './Search';
