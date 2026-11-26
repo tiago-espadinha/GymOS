@@ -13,11 +13,19 @@
   max-height: 90vh;
   margin: 0 auto;
   overflow-y: auto;
+  /* A swipe past the end of the sheet stops here instead of chaining to the page. */
+  overscroll-behavior: contain;
   padding: var(--space-6) var(--gutter) var(--space-7);
   border-radius: var(--radius-surface) var(--radius-surface) 0 0;
   background: var(--color-surface);
   color: var(--color-text);
   font-family: var(--font-body);
+}
+
+/* The page under an open sheet can't scroll: a sheet with nothing to scroll would
+   otherwise hand every swipe to the page (WebKit and Chromium alike). */
+:root.sheetOpen {
+  overflow: hidden;
 }
 
 .sheet--full {

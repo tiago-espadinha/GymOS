@@ -15,6 +15,9 @@ interface SheetProps {
   children: ReactNode;
 }
 
+// Open sheets, so a sheet stacked on another doesn't unlock the page when it closes.
+let openSheets = 0;
+
 const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
 
 /** a is b, or a comes before b in the document (a containing b counts). */
@@ -43,7 +46,9 @@ function keepTabInside(sheet: HTMLElement, e: KeyboardEvent<HTMLElement>) {
  * the rest of the page is made inert while it is open, a tap outside only closes
  * it, Tab stays inside it, and focus returns to the control that opened it when
  * that control is still on the page. The control marked data-autofocus, else the
- * first control, gets focus on open, so put the safe choice first.
+ * first control, gets focus on open, so put the safe choice first. The page
+ * behind doesn't scroll while a sheet is open, even when a swipe runs past the
+ * end of the sheet's own content.
  */
 export function Sheet({ labelledBy, describedBy, role = 'dialog', onClose, full, children }: SheetProps) {
   const ref = useRef<HTMLElement>(null);
@@ -64,6 +69,9 @@ export function Sheet({ labelledBy, describedBy, role = 'dialog', onClose, full,
         madeInert.push(el);
       }
     }
+
+    openSheets += 1;
+    document.documentElement.classList.add('sheetOpen');
 
     (sheet.querySelector<HTMLElement>('[data-autofocus]') ?? sheet.querySelector<HTMLElement>(FOCUSABLE) ?? sheet).focus();
 
@@ -91,6 +99,8 @@ export function Sheet({ labelledBy, describedBy, role = 'dialog', onClose, full,
       document.removeEventListener('pointerdown', onPointerDown, true);
       document.removeEventListener('click', onClick, true);
       madeInert.forEach((el) => (el.inert = false));
+      openSheets -= 1;
+      if (openSheets === 0) document.documentElement.classList.remove('sheetOpen');
       if (opener?.isConnected) opener.focus();
     };
   }, []);
