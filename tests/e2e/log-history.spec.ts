@@ -90,7 +90,7 @@ test('a filter pages on its own and resets the list to six when changed', async 
 test('Edit works on an older session reached through Show more', async ({ page }) => {
   await showMore(page).click()
   await rows(page).nth(15).getByRole('button', { name: /^Edit / }).click()
-  await expect(page.getByText(/^Editing session · /)).toBeVisible()
+  await expect(page.getByText(/^Editing · [A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2} · \d+ sets?$/)).toBeVisible()
 })
 
 test('Log home with the filter and Show more passes axe', async ({ page }) => {

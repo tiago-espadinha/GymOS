@@ -45,14 +45,14 @@ const expectSplit = async (page: Page, label: RegExp) => {
   for (const b of await timerBlock(page).locator('.timerBlockButton').all()) expect((await box(b)).height).toBe(64)
 }
 
-// With no Set done during a rest, the steppers pin to the bottom above the next card,
+// With no Set done during a rest, the steppers sit straight above the next card,
 // and the card ends level with End rest, not mid-column.
 const expectStepperLevelWithEndRest = async (page: Page) => {
-  const steppers = await box(page.locator('.exerciseScreen:not([hidden]) .exerciseLogger > .setSteppers'))
+  const steppers = await box(page.locator('.exerciseScreen:not([hidden]) .exerciseLoggerStack > .setSteppers'))
   const card = await box(nextCard(page))
   const end = await box(button(page, 'End rest'))
   expect(card.y + card.height).toBeCloseTo(end.y + end.height, 0)
-  expect(card.y - (steppers.y + steppers.height)).toBeCloseTo(16, 0)
+  expect(card.y - (steppers.y + steppers.height)).toBeCloseTo(12, 0)
 }
 
 test.describe('wide session, 1280', () => {
@@ -76,7 +76,7 @@ test.describe('wide session, 1280', () => {
     const done = await box(button(page, 'Set done'))
     const card = await box(page.getByRole('button', { name: /^Next Plank/ }))
     expect(card.y + card.height).toBe(760)
-    expect(card.y - (done.y + done.height)).toBe(16)
+    expect(card.y - (done.y + done.height)).toBe(12)
     expect(done.x + done.width).toBe(1240)
     await expect(button(page, 'All exercises')).toBeVisible()
     // Finish is on the last exercise only.
@@ -97,7 +97,7 @@ test.describe('wide session, 1280', () => {
     expect(await axe(page)).toEqual([])
 
     await page.getByRole('button', { name: /^Next Plank/ }).click()
-    const finish = page.getByRole('button', { name: 'Last exercise Finish session' })
+    const finish = page.getByRole('button', { name: 'Finish session', exact: true })
     const card = await box(finish)
     expect(card.y + card.height).toBe(760)
     await finish.click()
@@ -107,7 +107,7 @@ test.describe('wide session, 1280', () => {
     expect(main).toMatchObject({ x: 340, width: 600 })
 
     // Back returns to the exercise and its Finish; the other exercise keeps its stepper values.
-    await page.getByRole('button', { name: 'Back to logging' }).click()
+    await page.getByRole('button', { name: 'Session', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'Plank' })).toBeVisible()
     await expect(finish).toBeFocused()
     await page.getByRole('button', { name: /^Machine row, exercise 1 of 2/ }).click()
@@ -161,7 +161,7 @@ test.describe('wide session, 1280', () => {
     await page.getByRole('button', { name: 'Edit set 1' }).click()
     await page.clock.fastForward(20_000)
     await restStarted(page)
-    const steppers = page.locator('.exerciseScreen:not([hidden]) .exerciseLogger > .setSteppers')
+    const steppers = page.locator('.exerciseScreen:not([hidden]) .exerciseLoggerStack > .setSteppers')
     await expect(steppers).not.toHaveCSS('position', 'sticky')
     const save = await box(button(page, 'Save set 1'))
     const s = await box(steppers)

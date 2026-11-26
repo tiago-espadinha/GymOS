@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
+import { discardSession } from './log-set'
 import { restStarted } from './rest-started'
 
 const plan = {
@@ -322,7 +323,7 @@ test('editing a saved timed session keeps its last set and offers the next hold'
   await button(page, 'Stop and log').click()
   await button(page, 'End rest').click()
   await button(page, 'All exercises').click()
-  await page.getByRole('button', { name: 'Finish session' }).first().click()
+  await page.getByRole('button', { name: 'Finish session' }).click()
   await page.getByRole('button', { name: 'Save session' }).click()
   // Imported or older sets carry no "completed" flag.
   await page.evaluate(() => {
@@ -337,12 +338,11 @@ test('editing a saved timed session keeps its last set and offers the next hold'
   await expect(hold(page)).toBeVisible()
 })
 
-test('cancelling a session forgets a hold in progress', async ({ page }) => {
+test('discarding a session forgets a hold in progress', async ({ page }) => {
   await button(page, 'Start hold').click()
   await page.clock.fastForward(3_000)
   await button(page, 'All exercises').click()
-  page.once('dialog', (d) => d.accept())
-  await page.getByRole('button', { name: 'Cancel' }).click()
+  await discardSession(page)
   const keys = await page.evaluate(() => Object.keys(localStorage).filter((k) => k.endsWith('-work')))
   expect(keys).toEqual([])
 })

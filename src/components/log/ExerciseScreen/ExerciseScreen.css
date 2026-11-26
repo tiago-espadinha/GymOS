@@ -2,8 +2,13 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  /* Fill the viewport inside the shell's vertical padding, so the footer sits at the bottom. */
+  /* Fill the viewport inside the shell's vertical padding, so the bottom stack sits at the bottom. */
   min-height: calc(100dvh - 80px);
+}
+
+/* A rest strip above the exercise takes its height from the screen, so the bottom stack stays in view. */
+.sessionList:has(> .restStrip) > .exerciseScreen {
+  min-height: calc(100dvh - 80px - var(--size-row-summary));
 }
 
 .exerciseScreen[hidden] {
@@ -99,11 +104,6 @@
   background: var(--color-accent);
 }
 
-/* The next exercise, or Finish on the last one, at the bottom. */
-.exerciseScreenFoot {
-  margin-top: auto;
-}
-
 .exerciseNextCard {
   display: flex;
   align-items: center;
@@ -172,19 +172,10 @@
   color: var(--color-bg);
 }
 
-.exerciseNextCard--allDone .exerciseNextCardLabel {
-  color: var(--color-bg);
-}
-
 .exerciseNextCard:disabled {
   border-color: var(--color-line-strong);
   color: var(--color-text-muted);
   cursor: not-allowed;
-}
-
-/* A disabled Finish keeps its kicker muted, so nothing on it reads as live. */
-.exerciseNextCard:disabled .exerciseNextCardLabel {
-  color: inherit;
 }
 
 .exerciseScreenBack:focus-visible,
@@ -198,6 +189,10 @@
   .exerciseScreen {
     min-height: calc(100dvh - 40px);
   }
+
+  .sessionList:has(> .restStrip) > .exerciseScreen {
+    min-height: calc(100dvh - 40px - var(--size-row-summary));
+  }
 }
 
 /* Wide: the window less the shell's padding, so the split fits it without scrolling. */
@@ -206,19 +201,7 @@
     min-height: calc(100dvh - var(--space-7) - var(--gutter-wide));
   }
 
-  /*
-   * The logger pins its main action (Set done, or the steppers during a rest) to the
-   * bottom; the card pins below it, level with End rest, instead of splitting the space.
-   */
-  .exerciseLogger:has(> .primary-button) > .exerciseScreenFoot,
-  .exerciseLogger--resting:has(> .setSteppers) > .exerciseScreenFoot {
-    position: sticky;
-    bottom: var(--gutter-wide);
-    margin-top: 0;
-  }
-
-  .exerciseScreen .exerciseLogger > .primary-button,
-  .exerciseScreen .exerciseLogger--resting > .setSteppers {
-    bottom: calc(var(--gutter-wide) + var(--size-row) + var(--space-4));
+  .sessionList:has(> .restStrip) > .exerciseScreen {
+    min-height: calc(100dvh - var(--space-7) - var(--gutter-wide) - var(--size-row-summary));
   }
 }

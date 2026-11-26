@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Locator, type Page } from '@playwright/test'
-import { finishButton, logSet } from './log-set'
+import { discardSession, finishButton, logSet, sessionActions } from './log-set'
 
 const plans = [
   { id: 'p1', name: 'Push day', desc: '', exercises: [{ id: 'e1', name: 'Bench press', muscleGroup: 'Chest' }] },
@@ -113,25 +113,28 @@ test('discarding a session with logged sets asks in an in-app sheet', async ({ p
   await page.getByRole('button', { name: /^Bench press/ }).click()
   await logSet(page, '60', '8')
   await page.getByRole('button', { name: 'All exercises' }).click()
-  await finishButton(page).click()
 
-  const cancel = page.getByRole('button', { name: 'Cancel' })
-  await cancel.click()
+  await sessionActions(page).click()
+  const sheet = page.getByRole('dialog', { name: 'Push day' })
+  const discard = sheet.getByRole('button', { name: 'Discard session' })
+  await discard.click()
   const confirm = page.getByRole('alertdialog', { name: 'Discard this session?' })
   await expect(confirm).toBeVisible()
   await expect(confirm.getByRole('button', { name: 'Keep it' })).toBeFocused()
   await axe(page)
 
+  // Backing out of the confirm returns to its row in the session sheet.
   await confirm.getByRole('button', { name: 'Keep it' }).click()
   await expect(confirm).toHaveCount(0)
-  await expect(cancel).toBeFocused()
+  await expect(discard).toBeFocused()
 
-  await cancel.click()
+  await discard.click()
   await page.keyboard.press('Escape')
   await expect(confirm).toHaveCount(0)
+  await expect(discard).toBeFocused()
   await expect(page.getByRole('navigation', { name: 'Main' })).toHaveCount(0)
 
-  await cancel.click()
+  await discard.click()
   await confirm.getByRole('button', { name: 'Discard session' }).click()
   await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Log', exact: true })).toBeFocused()
@@ -148,8 +151,8 @@ test('discarding changes to a saved session asks, then keeps the saved one', asy
   await page.getByRole('button', { name: 'Save session' }).click()
 
   await page.getByRole('button', { name: /^Edit Push day/ }).click()
-  await finishButton(page).click()
-  await page.getByRole('button', { name: 'Discard changes' }).click()
+  await sessionActions(page).click()
+  await page.getByRole('dialog').getByRole('button', { name: 'Discard changes' }).click()
   const confirm = page.getByRole('alertdialog', { name: 'Discard your changes?' })
   await expect(confirm).toContainText('The saved session stays as it was.')
   await confirm.getByRole('button', { name: 'Discard changes' }).click()
@@ -158,10 +161,10 @@ test('discarding changes to a saved session asks, then keeps the saved one', asy
   expect(stored).toHaveLength(1)
 })
 
-test('cancelling a session with nothing logged does not ask', async ({ page }) => {
+test('discarding a session with nothing logged does not ask', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('button', { name: 'Start Push day' }).click()
-  await page.getByRole('button', { name: 'Cancel' }).click()
+  await discardSession(page)
   await expect(page.getByRole('alertdialog')).toHaveCount(0)
   await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible()
 })

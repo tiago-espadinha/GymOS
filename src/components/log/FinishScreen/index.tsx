@@ -1,10 +1,9 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { ChevronIcon, PrimaryButton, SaveFailedAlert } from "../../shared";
-import { formatDateFull, formatDateKicker } from "../../../utils/date";
+import { formatDateMeta } from "../../../utils/date";
 import { exerciseSummary, sessionTotals } from "../../../utils/sessionList";
 import { isLoggedSet, ActiveSession } from "../../../utils/activeSession";
 import DateSheet from "../DateSheet";
-import DeleteSessionSheet from "../DeleteSessionSheet";
 import "./FinishScreen.css";
 import { useUnitPrefs } from "../../../utils/unitPrefs";
 import { kgTo, weightLabel } from "../../../utils/units";
@@ -19,19 +18,16 @@ interface FinishScreenProps {
   saveFailures: number;
   /** Saves the unsaved session as a CSV file, offered after a failed save. */
   onDownload: () => void;
+  /** "‹ Session": back to where Finish was pressed. */
   onBack: () => void;
-  /** Cancel for a new session, Discard changes for an edited one. */
-  onCancel: () => void;
-  /** Deletes the saved session being edited, after the confirm sheet. */
-  onDelete: () => void;
 }
 
-export function FinishScreen({ session, onNotes, onDate, onSave, saveFailures, onDownload, onBack, onCancel, onDelete }: FinishScreenProps) {
+export function FinishScreen({ session, onNotes, onDate, onSave, saveFailures, onDownload, onBack }: FinishScreenProps) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => titleRef.current?.focus(), []);
 
   const notesId = useId();
-  const [open, setOpen] = useState<"date" | "delete" | null>(null);
+  const [dateOpen, setDateOpen] = useState(false);
   const editing = Boolean(session.editingId);
   const saveFailed = saveFailures > 0;
   const units = useUnitPrefs();
@@ -47,19 +43,22 @@ export function FinishScreen({ session, onNotes, onDate, onSave, saveFailures, o
 
   return (
     <div>
+      <button type="button" className="finishBack" onClick={onBack}>
+        <span aria-hidden="true">‹ </span>Session
+      </button>
       <section className="finishHero" aria-labelledby="finishTitle">
         {editing ? (
           <p className="finishKicker">
             Editing ·{" "}
-            <button type="button" className="finishDate" aria-haspopup="dialog" onClick={() => setOpen("date")}>
+            <button type="button" className="finishDate" aria-haspopup="dialog" onClick={() => setDateOpen(true)}>
               <span className="visuallyHidden">Session date: </span>
-              Saved {formatDateFull(session.date)}
+              {formatDateMeta(session.date)}
               <ChevronIcon />
             </button>
           </p>
         ) : (
           <p className="finishKicker">
-            {session.planName} · {formatDateKicker(session.date)}
+            {session.planName} · {formatDateMeta(session.date)}
           </p>
         )}
         <h1 id="finishTitle" className="finishTitle" ref={titleRef} tabIndex={-1}>
@@ -106,35 +105,16 @@ export function FinishScreen({ session, onNotes, onDate, onSave, saveFailures, o
           />
         </div>
         <PrimaryButton onClick={onSave}>
-          {saveFailed ? "Try again" : editing ? "Update session" : "Save session"}
+          {saveFailed ? "Try again" : editing ? "Save changes" : "Save session"}
         </PrimaryButton>
         {saveFailed && (
           <button type="button" className="finishDownload" onClick={onDownload}>
             Download this session (CSV)
           </button>
         )}
-        <button type="button" className="textLink" onClick={onBack}>
-          Back to logging
-        </button>
-        <button type="button" className="textLink" onClick={onCancel}>
-          {editing ? "Discard changes" : "Cancel"}
-        </button>
-        {editing && (
-          <button type="button" className="finishDelete" onClick={() => setOpen("delete")}>
-            Delete session
-          </button>
-        )}
       </div>
 
-      {open === "date" && <DateSheet value={session.date} onChange={onDate} onClose={() => setOpen(null)} />}
-      {open === "delete" && (
-        <DeleteSessionSheet
-          planName={session.planName}
-          date={session.date}
-          onDelete={onDelete}
-          onClose={() => setOpen(null)}
-        />
-      )}
+      {dateOpen && <DateSheet value={session.date} onChange={onDate} onClose={() => setDateOpen(false)} />}
     </div>
   );
 }

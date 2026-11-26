@@ -4,7 +4,6 @@ import {
   addMonths,
   dayBefore,
   formatDateFull,
-  formatDateKicker,
   formatDateMeta,
   formatDateSpoken,
   formatDateStat,
@@ -14,12 +13,6 @@ import {
   monthWeeks,
   parseDayMonthYear,
 } from "./date";
-
-describe("formatDateKicker", () => {
-  it("reads as weekday, day and month in capitals", () => {
-    expect(formatDateKicker("2026-11-15")).toBe("SUN 15 NOV");
-  });
-});
 
 describe("formatDateStat", () => {
   it("leaves out the year within the current year", () => {

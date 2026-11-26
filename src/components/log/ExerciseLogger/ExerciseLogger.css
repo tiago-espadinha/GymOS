@@ -46,8 +46,9 @@
   font-weight: 700;
 }
 
+/* Cancel only closes the panel, so it stays quiet. */
 .exerciseLoggerCancel {
-  color: var(--color-text);
+  color: var(--color-text-muted);
   font-weight: 600;
 }
 
@@ -66,27 +67,23 @@
   font-weight: 700;
 }
 
+/* Steppers, Set done and the next card (or the edit panel): pushed to the bottom by the free space above. */
+.exerciseLoggerStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: auto;
+}
+
 /*
  * Wide: this column is the right of the split (TimerBlock.css holds the left).
- * The name keeps its screen-title size during a rest, the steppers stack and the
- * main button stays at the bottom of the window. During a rest there is no
- * Set done, so the steppers take its place, level with End rest.
+ * The name keeps its screen-title size during a rest; the stack stays in flow,
+ * steppers side by side, so it ends level with End rest when the column has room.
  */
 @media (min-width: 1024px) {
   .exerciseLoggerTitle,
   .exerciseLoggerTitle--resting {
     font-size: var(--text-screen-title);
     line-height: var(--leading-screen-title);
-  }
-
-  .exerciseLogger .setSteppers {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .exerciseLogger > .primary-button,
-  .exerciseLogger--resting > .setSteppers {
-    position: sticky;
-    bottom: var(--gutter-wide);
-    margin-top: auto;
   }
 }

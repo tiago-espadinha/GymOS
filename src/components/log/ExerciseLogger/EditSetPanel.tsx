@@ -19,7 +19,7 @@ interface EditSetPanelProps {
   onCancel: () => void;
 }
 
-// Outlined steppers for a logged set, then Save, Delete and Cancel.
+// Outlined steppers for a logged set, then Save, with Cancel left and Delete right.
 export function EditSetPanel({ set, index, timed, trackWeight, distanceUnit, canSave, onChange, onSave, onDelete, onCancel }: EditSetPanelProps) {
   const n = index + 1;
   return (
@@ -47,11 +47,11 @@ export function EditSetPanel({ set, index, timed, trackWeight, distanceUnit, can
         Save set {n}
       </PrimaryButton>
       <div className="exerciseLoggerEditActions">
-        <button type="button" className="exerciseLoggerDelete" onClick={onDelete}>
-          Delete set {n}
-        </button>
         <button type="button" className="exerciseLoggerCancel" onClick={onCancel}>
           Cancel
+        </button>
+        <button type="button" className="exerciseLoggerDelete" onClick={onDelete}>
+          Delete set {n}
         </button>
       </div>
     </>

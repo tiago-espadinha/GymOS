@@ -18,16 +18,14 @@
   overflow-wrap: anywhere;
 }
 
+/* Title left, ⋯ and Finish right; when a name leaves no room the pills wrap under it, so words never split. */
 .logTabHeader {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
   gap: var(--space-3);
   padding: var(--space-6) 0 var(--space-4);
-}
-
-.logTabHeader > .pill-button {
-  flex-shrink: 0;
 }
 
 .logTabHeading {
@@ -43,69 +41,58 @@
   color: var(--color-text-muted);
 }
 
-.logTabEditing {
-  background: var(--color-surface);
-  border: var(--border-hairline);
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.logTabEditingText {
-  font-size: 12px;
-  color: var(--color-text);
+/* Editing a saved session: the meta line becomes an accent kicker in place of a banner. */
+.logTabKicker {
+  font-size: var(--text-small);
   font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-accent);
 }
 
-@media (max-width: 600px) {
-  .logTabActions {
-    justify-content: center;
-  }
+.logTabHeaderActions {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-2);
+  margin-left: auto;
 }
 
-.logTabActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
+/* The ⋯ for the session sheet: a 44 outlined pill like Finish, in the quieter line colour. */
+.logTabMore {
+  display: inline-flex;
   align-items: center;
-  margin-top: var(--space-5);
+  justify-content: center;
+  width: var(--size-control);
+  height: var(--size-control);
+  padding: 0;
+  border: var(--border-chip);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.logTabMore:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
 }
 
 .logTabHint {
+  margin: var(--space-5) 0 0;
   font-size: var(--text-secondary);
   color: var(--color-text-muted);
-}
-
-/* Sticky at the bottom of the list once every exercise is done, as on the Done screen. */
-.logTabDoneBar {
-  position: sticky;
-  bottom: 0;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  margin-top: var(--space-5);
-  padding: var(--space-4) 0 var(--space-5);
-  border-top: var(--border-hairline);
-  background: var(--color-bg);
-}
-
-.logTabDoneBar--empty {
-  margin: 0;
-  padding: 0;
-  border: 0;
+  text-align: center;
 }
 
 .logTabDoneStatus {
   display: flex;
+  margin: var(--space-4) 0 0;
   align-items: center;
   gap: var(--space-2);
   font-size: var(--text-body);
   font-weight: 700;
+}
+
+.logTabDoneStatus:empty {
+  margin: 0;
 }

@@ -92,7 +92,7 @@ test('with no rest running the strip is hidden, also after a rest is skipped', a
   await expect(strip(page)).toHaveCount(0)
 })
 
-test('once every exercise has a logged set: filled Finish, an "All 3 exercises done" status and a Finish session bar', async ({ page }) => {
+test('once every exercise has a logged set: filled Finish and an "All 3 exercises done" status line, no second Finish', async ({ page }) => {
   await expect(page.getByText('All 3 exercises done')).toHaveCount(0)
   for (const name of ['Bench press', 'Cable row', 'Lateral raise']) {
     await row(page, name).click()
@@ -102,9 +102,8 @@ test('once every exercise has a logged set: filled Finish, an "All 3 exercises d
   await expect(page.locator('[aria-current="true"]')).toHaveCount(0)
   await expect(page.getByRole('status').filter({ hasText: 'All 3 exercises done' })).toBeVisible()
   await expect(page.locator('#logTabFinish')).toHaveClass(/pill-button--white/)
-  const bar = page.getByRole('button', { name: 'Finish session' }).last()
-  expect((await bar.boundingBox())?.height).toBeGreaterThanOrEqual(72)
-  await bar.click()
+  await expect(page.getByRole('button', { name: /Finish/ })).toHaveCount(1)
+  await page.locator('#logTabFinish').click()
   await expect(page.getByRole('heading', { name: 'Done' })).toBeVisible()
 })
 
@@ -278,11 +277,14 @@ test('one segment per exercise jumps to it; the next card names the next exercis
   await expect(segments.nth(2)).toHaveAttribute('aria-current', 'step')
   // The last exercise ends on Finish, disabled until a set is logged.
   await expect(page.getByRole('button', { name: /^Next / })).toHaveCount(0)
-  await expect(page.getByRole('button', { name: 'Last exercise Finish session' })).toBeDisabled()
+  const finish = page.getByRole('button', { name: 'Finish session', exact: true })
+  await expect(finish).toBeDisabled()
+  // Only FINISH: no "Last exercise" kicker and no target.
+  await expect(finish).toHaveText('Finish session→')
 
   // A done exercise's segment reads as done.
   await logSet(page, '10', '12')
-  await expect(page.getByRole('button', { name: 'Last exercise Finish session' })).toBeEnabled()
+  await expect(finish).toBeEnabled()
   await segments.nth(0).click()
   await expect(title).toHaveText('Bench press')
   await expect(segments.nth(2)).toHaveAccessibleName('Lateral raise, exercise 3 of 3, done')

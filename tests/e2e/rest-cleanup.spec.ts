@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { finishButton, logSet } from './log-set'
+import { discardSession, finishButton, logSet } from './log-set'
 
 const plan = {
   id: 'p1',
@@ -34,10 +34,9 @@ test('saving a session clears its rests, so editing it later shows none', async 
   await expect(timer(page)).toHaveCount(0)
 })
 
-test('cancelling a session clears its rests', async ({ page }) => {
+test('discarding a session clears its rests', async ({ page }) => {
   await logAndRest(page)
-  await finishButton(page).click()
-  await page.getByRole('button', { name: 'Cancel' }).click()
+  await discardSession(page)
   await page.getByRole('alertdialog').getByRole('button', { name: 'Discard session' }).click()
   await expect(page.getByRole('alertdialog')).toHaveCount(0)
   const keys = await page.evaluate(() => Object.keys(localStorage).filter((k) => k.endsWith('-rest')))

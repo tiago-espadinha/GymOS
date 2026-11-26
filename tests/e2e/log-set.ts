@@ -8,5 +8,14 @@ export const logSet = async (page: Page, weight: string, reps: string) => {
   await page.getByRole('button', { name: 'Set done' }).click()
 }
 
-// The header pill; once every exercise is done the bottom bar adds a second one.
-export const finishButton = (page: Page) => page.getByRole('button', { name: 'Finish session' }).first()
+// The session list's header pill.
+export const finishButton = (page: Page) => page.getByRole('button', { name: 'Finish session' })
+
+// The ⋯ beside Finish, which opens the session sheet.
+export const sessionActions = (page: Page) => page.getByRole('button', { name: 'Session actions' })
+
+// From the session list: ⋯, then Discard session. With sets logged a confirm opens next.
+export const discardSession = async (page: Page) => {
+  await sessionActions(page).click()
+  await page.getByRole('dialog').getByRole('button', { name: 'Discard session' }).click()
+}

@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
-import { finishButton, logSet } from './log-set'
+import { discardSession, finishButton, logSet } from './log-set'
 
 const plan = {
   id: 'p1',
@@ -45,11 +45,11 @@ test('starting a plan hides the tabs; saving brings them back on Log', async ({ 
   await expect(page.getByText('Session saved')).toBeVisible()
 })
 
-test('cancelling an empty session brings the tabs back', async ({ page }) => {
+test('discarding an empty session brings the tabs back', async ({ page }) => {
   await page.goto('/')
   await startPlan(page)
   await expect(tabBar(page)).toHaveCount(0)
-  await page.getByRole('button', { name: 'Cancel' }).click()
+  await discardSession(page)
   await expect(tabBar(page)).toBeVisible()
 })
 
@@ -101,7 +101,7 @@ test('editing a saved session updates it in place, also after a reload', async (
   await page.getByRole('button', { name: 'Save set 1' }).click()
   await page.getByRole('button', { name: 'All exercises' }).click()
   await finishButton(page).click()
-  await page.getByRole('button', { name: 'Update session' }).click()
+  await page.getByRole('button', { name: 'Save changes' }).click()
   await expect(tabBar(page)).toBeVisible()
   await expect(page.getByRole('status').filter({ hasText: 'Push day session updated' })).toHaveCount(1)
   await expect(page.getByRole('listitem').first()).toContainText('Just updatedPush day')
@@ -111,18 +111,18 @@ test('editing a saved session updates it in place, also after a reload', async (
   expect(stored[0].exercises[0].sets[0].weight).toBe('55')
 })
 
-test('cancelling a session with logged sets asks first', async ({ page }) => {
+test('discarding a session with logged sets asks first', async ({ page }) => {
   await page.goto('/')
   await startPlan(page)
   await openBench(page)
   await logSet(page, '60', '8')
   await page.getByRole('button', { name: 'All exercises' }).click()
-  await finishButton(page).click()
   const confirm = page.getByRole('alertdialog', { name: 'Discard this session?' })
-  await page.getByRole('button', { name: 'Cancel' }).click()
+  await discardSession(page)
   await confirm.getByRole('button', { name: 'Keep it' }).click()
+  await page.keyboard.press('Escape')
   await expect(tabBar(page)).toHaveCount(0)
-  await page.getByRole('button', { name: 'Cancel' }).click()
+  await discardSession(page)
   await confirm.getByRole('button', { name: 'Discard session' }).click()
   await expect(tabBar(page)).toBeVisible()
 })
@@ -131,6 +131,6 @@ test('focus moves to the title when a session starts and ends', async ({ page })
   await page.goto('/')
   await startPlan(page)
   await expect(page.getByRole('heading', { name: 'Push day' })).toBeFocused()
-  await page.getByRole('button', { name: 'Cancel' }).click()
+  await discardSession(page)
   await expect(page.getByRole('heading', { name: 'Log', exact: true })).toBeFocused()
 })

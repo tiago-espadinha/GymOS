@@ -161,7 +161,7 @@ export function ExerciseLogger({ exercise, onChange, history, titleId, header, f
   );
 
   return (
-    <div className={`exerciseLogger${rest && !editing ? " exerciseLogger--resting" : ""}`} ref={rootRef}>
+    <div className="exerciseLogger" ref={rootRef}>
       {/* Above a hold the block already names the set. */}
       {header(headingInHold ? "" : kicker, Boolean(rest) && !editing)}
       {!timed && !rest && <IdleRest setNumber={number} category={meta.category} />}
@@ -204,49 +204,49 @@ export function ExerciseLogger({ exercise, onChange, history, titleId, header, f
           onRemove={removeSet}
         />
       ) : (
-        <>
-          {!rest && (
-            <SetsTable
-              sets={exercise.sets}
-              currentIndex={index}
-              draftLabel={format(draftSet(draft))}
-              editing={editingRow}
-              format={format}
-              lastTime={lastTime}
-              onEdit={startEdit}
-              onRemove={removeSet}
-            />
-          )}
-          {!editing && (
-            <>
-              <SetSteppers draft={draft} onChange={setDraft} trackWeight={meta.trackWeight} />
-              {/* Only End rest moves on from a rest; the steppers stay to set up the next set. */}
-              {!rest && (
-                <PrimaryButton tone="accent" onClick={setDone} disabled={!isLoggedSet(draftSet(draft))} data-set-done>
-                  Set done
-                </PrimaryButton>
-              )}
-            </>
-          )}
-        </>
+        !rest && (
+          <SetsTable
+            sets={exercise.sets}
+            currentIndex={index}
+            draftLabel={format(draftSet(draft))}
+            editing={editingRow}
+            format={format}
+            lastTime={lastTime}
+            onEdit={startEdit}
+            onRemove={removeSet}
+          />
+        )
       )}
 
-      {editing && (
-        <EditSetPanel
-          set={editing.draft}
-          index={editing.index}
-          timed={timed}
-          trackWeight={meta.trackWeight}
-          distanceUnit={meta.trackDistance ? units.distance : undefined}
-          canSave={canSave}
-          onChange={(d) => setEditing({ ...editing, draft: d })}
-          onSave={saveEdit}
-          onDelete={deleteEdit}
-          onCancel={() => setEditing(null)}
-        />
-      )}
-
-      {!editing && footer}
+      {/* One stack at the bottom, in the page's flow: a long table pushes it down rather than under it. */}
+      <div className="exerciseLoggerStack">
+        {!timed && !editing && (
+          <>
+            <SetSteppers draft={draft} onChange={setDraft} trackWeight={meta.trackWeight} />
+            {/* Only End rest moves on from a rest; the steppers stay to set up the next set. */}
+            {!rest && (
+              <PrimaryButton tone="accent" onClick={setDone} disabled={!isLoggedSet(draftSet(draft))} data-set-done>
+                Set done
+              </PrimaryButton>
+            )}
+          </>
+        )}
+        {editing && (
+          <EditSetPanel
+            set={editing.draft}
+            index={editing.index}
+            timed={timed}
+            trackWeight={meta.trackWeight}
+            distanceUnit={meta.trackDistance ? units.distance : undefined}
+            canSave={canSave}
+            onChange={(d) => setEditing({ ...editing, draft: d })}
+            onSave={saveEdit}
+            onDelete={deleteEdit}
+            onCancel={() => setEditing(null)}
+          />
+        )}
+        {!editing && footer}
+      </div>
     </div>
   );
 }
