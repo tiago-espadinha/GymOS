@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { newestFirst, sessionCells, sessionStats, sessionSummary } from "./sessions";
+import { newestFirst, sessionCells, sessionPlanKey, sessionPlans, sessionStats, sessionSummary } from "./sessions";
 import { WorkoutSession } from "../types";
 
 const session = (sets: { weight: string; reps: string }[][]): WorkoutSession => ({
@@ -78,5 +78,37 @@ describe("newestFirst", () => {
     const stored = [dated("second", "2026-05-08"), dated("first", "2026-05-08"), dated("older", "2026-05-01")];
     expect(newestFirst(stored).map((s) => s.id)).toEqual(["second", "first", "older"]);
     expect(stored.map((s) => s.id)).toEqual(["second", "first", "older"]);
+  });
+});
+
+describe("sessionPlans", () => {
+  const planned = (id: string, date: string, planId: string, planName: string): WorkoutSession => ({
+    ...session([]),
+    id,
+    date,
+    planId,
+    planName,
+  });
+
+  it("lists each plan once, by its latest session, under the name it was last saved with", () => {
+    const stored = [
+      planned("a", "2026-05-01", "p1", "Push"),
+      planned("b", "2026-05-08", "p2", "Legs"),
+      planned("c", "2026-05-10", "p1", "Push Day"),
+    ];
+    expect(sessionPlans(stored)).toEqual([
+      { key: "p1", name: "Push Day" },
+      { key: "p2", name: "Legs" },
+    ]);
+  });
+
+  it("groups imported sessions without a plan id by their plan name", () => {
+    const stored = [planned("a", "2026-05-01", "", "Back"), planned("b", "2026-05-02", "", "Back")];
+    expect(sessionPlans(stored)).toEqual([{ key: "name:Back", name: "Back" }]);
+    expect(sessionPlanKey(stored[0])).toBe(sessionPlanKey(stored[1]));
+  });
+
+  it("is empty without sessions", () => {
+    expect(sessionPlans([])).toEqual([]);
   });
 });

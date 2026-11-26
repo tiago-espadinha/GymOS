@@ -40,3 +40,19 @@ export function sessionSummary(stats: { sets: number; volume: number }, notes = 
 export function newestFirst(sessions: WorkoutSession[]): WorkoutSession[] {
   return sessions.toSorted((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
 }
+
+// Imported sessions may have no plan id, so their saved plan name groups them instead.
+export function sessionPlanKey(session: WorkoutSession): string {
+  return session.planId || `name:${session.planName}`;
+}
+
+// The plans that have saved sessions, by their latest session, named as last saved.
+// Archived and deleted plans count: the filter lists history, not the current plans.
+export function sessionPlans(sessions: WorkoutSession[]): { key: string; name: string }[] {
+  const plans = new Map<string, string>();
+  for (const session of newestFirst(sessions)) {
+    const key = sessionPlanKey(session);
+    if (!plans.has(key)) plans.set(key, session.planName);
+  }
+  return [...plans].map(([key, name]) => ({ key, name }));
+}
