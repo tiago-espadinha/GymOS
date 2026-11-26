@@ -163,13 +163,13 @@ test.describe('narrowest wide, 1024', () => {
 test.describe('below wide, 768', () => {
   test.use({ viewport: { width: 768, height: 1024 } })
 
-  test('Log home keeps the phone column without the wide-only parts', async ({ page }) => {
+  test('Log home keeps the phone column without the wide-only parts, count included', async ({ page }) => {
     await seed(page, [back], sessions)
     await page.goto('/')
     await expect(newSession(page).getByRole('button', { name: 'Start', exact: true })).toBeVisible()
     await expect(newSession(page).getByRole('list')).toBeHidden()
     await expect(newSession(page).getByRole('button', { name: 'Change plan' })).toBeHidden()
-    await expect(recent(page).getByText('6 of 8')).toBeHidden()
+    await expect(recent(page).getByText('6 of 8')).toBeVisible()
     expect(await page.locator('.mainContent').boundingBox()).toMatchObject({ x: 84, width: 600 })
   })
 })
