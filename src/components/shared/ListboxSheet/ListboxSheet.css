@@ -1,3 +1,4 @@
+/* Class names keep the planPicker block, which e2e specs select on. */
 .planPicker__head {
   display: flex;
   align-items: center;
