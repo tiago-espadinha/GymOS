@@ -3,7 +3,8 @@ import { logSet } from './log-set'
 import { restStarted } from './rest-started'
 
 // While a rest or hold runs, the fill's top edge is a travelling wave (a mask on
-// the fill); empty, full, paused and reduced-motion fills stay flat.
+// the fill) that also rises and falls; empty, full, paused and reduced-motion
+// fills stay flat.
 
 const shown = (page: Page, selector: string) => page.locator(`.exerciseScreen:not([hidden]) ${selector}`)
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true })
@@ -11,22 +12,42 @@ const button = (page: Page, name: string) => page.getByRole('button', { name, ex
 const fillState = (page: Page) =>
   shown(page, '.timerBlockFill').evaluate((el) => ({
     mask: getComputedStyle(el).maskImage,
-    // The height transition is an animation too; count only the wave.
-    animations: el.getAnimations().filter((a) => (a as CSSAnimation).animationName?.startsWith('timerBlockWave')).length,
+    // The height transition is an animation too; keep only the wave's.
+    durations: el
+      .getAnimations()
+      .filter((a) => (a as CSSAnimation).animationName?.startsWith('timerBlockWave'))
+      .map((a) => Number(a.effect?.getTiming().duration)),
     share: el.getBoundingClientRect().height / el.parentElement!.getBoundingClientRect().height,
   }))
 
 const expectWave = async (page: Page) => {
   await expect(shown(page, '.timerBlock')).toHaveClass(/timerBlock--filling/)
   await expect.poll(async () => (await fillState(page)).mask).toContain('url(')
-  await expect.poll(async () => (await fillState(page)).animations).toBe(1)
+  // Travel and swell: two periods, neither a whole multiple of the other, so the
+  // edge does not repeat on the travel's beat.
+  await expect.poll(async () => (await fillState(page)).durations.length).toBe(2)
+  const [travel, swell] = (await fillState(page)).durations
+  expect(travel % swell).toBeGreaterThan(0)
+  // The swell blends the wave's height rather than stepping between two values.
+  const heights = await shown(page, '.timerBlockFill').evaluate((el) => {
+    const swell = el.getAnimations().find((a) => (a as CSSAnimation).animationName?.startsWith('timerBlockWaveSwell'))!
+    const at = (share: number) => {
+      swell.currentTime = Number(swell.effect!.getTiming().duration) * share
+      return getComputedStyle(el).maskSize
+    }
+    swell.pause()
+    const sizes = [at(0), at(0.25), at(0.5)]
+    swell.play()
+    return sizes
+  })
+  expect(new Set(heights).size).toBe(3)
 }
 
 const expectFlat = async (page: Page) => {
   await expect(shown(page, '.timerBlock')).not.toHaveClass(/timerBlock--filling/)
   // WebKit can report an empty mask for a moment after the class changes.
   await expect.poll(async () => (await fillState(page)).mask).toBe('none')
-  await expect.poll(async () => (await fillState(page)).animations).toBe(0)
+  await expect.poll(async () => (await fillState(page)).durations.length).toBe(0)
 }
 
 const start = async (page: Page, plan: object, name: string, exercise: RegExp) => {
@@ -66,7 +87,7 @@ test.describe('rest', () => {
     await expect.poll(async () => (await fillState(page)).share).toBeGreaterThan(0.1)
     const state = await fillState(page)
     expect(state.mask).toBe('none')
-    expect(state.animations).toBe(0)
+    expect(state.durations).toHaveLength(0)
     expect(await shown(page, '.timerBlockFill').evaluate((el) => getComputedStyle(el).transitionDuration)).toBe('0s')
   })
 })

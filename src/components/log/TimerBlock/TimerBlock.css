@@ -36,12 +36,27 @@
     100% calc(100% - min(var(--size-wave-height), 100%) + 2px);
   mask-position: 0 -1px, 0 100%;
   mask-repeat: repeat-x, no-repeat;
-  animation: timerBlockWave var(--motion-wave) linear infinite;
+  /*
+   * The tile travels sideways while the wave rises and falls on a period that is
+   * not a fraction of the travel, so the edge never settles into a visible loop.
+   */
+  animation:
+    timerBlockWave var(--motion-wave) linear infinite,
+    timerBlockWaveSwell var(--motion-wave-swell) ease-in-out infinite;
 }
 
 @keyframes timerBlockWave {
   to {
     mask-position: var(--size-wave-length) -1px, 0 100%;
+  }
+}
+
+/* The crest stays at the fill's top; the troughs rise to 65% and sink back. */
+@keyframes timerBlockWaveSwell {
+  50% {
+    mask-size:
+      var(--size-wave-length) min(calc(var(--size-wave-height) * 0.65), 100%),
+      100% calc(100% - min(calc(var(--size-wave-height) * 0.65), 100%) + 2px);
   }
 }
 
@@ -246,12 +261,20 @@
  */
 @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
   .exerciseScreen .timerBlock--filling .timerBlockFill {
-    animation-name: timerBlockWaveWide;
+    animation-name: timerBlockWaveWide, timerBlockWaveSwellWide;
   }
 }
 
 @keyframes timerBlockWaveWide {
   to {
     mask-position: var(--size-wave-length-wide) -1px, 0 100%;
+  }
+}
+
+@keyframes timerBlockWaveSwellWide {
+  50% {
+    mask-size:
+      var(--size-wave-length-wide) min(calc(var(--size-wave-height-wide) * 0.65), 100%),
+      100% calc(100% - min(calc(var(--size-wave-height-wide) * 0.65), 100%) + 2px);
   }
 }

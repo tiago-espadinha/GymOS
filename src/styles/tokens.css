@@ -143,13 +143,19 @@
   --motion-press: 100ms;
   --motion-fill: 1s;
   --ease-fill: linear;
-  --motion-wave: 2.4s; /* one wavelength of the timer fill's edge passing by */
-  --size-wave-length: 160px;
-  --size-wave-height: 14px; /* crest to trough */
-  --size-wave-length-wide: 320px;
-  --size-wave-height-wide: 24px;
-  /* One wavelength of the edge, opaque below the curve; tiled sideways. */
-  --mask-wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M0 8Q50-8 100 8T200 8V16H0Z'/%3E%3C/svg%3E");
+  --motion-wave: 7.2s; /* one tile of the timer fill's edge passing by (phone about 67px/s, wide 133) */
+  --motion-wave-swell: 3.7s; /* the wave's rise and fall; not a fraction of --motion-wave */
+  --size-wave-length: 480px; /* one tile: three uneven crests */
+  --size-wave-height: 16px; /* the tile; the curve spans its middle 12/16 */
+  --size-wave-length-wide: 960px;
+  --size-wave-height-wide: 28px;
+  /*
+   * One tile of the edge, opaque below the curve; tiled sideways. The curve is
+   * sin(3t) + 0.45 sin(2t + 1.1) + 0.2 sin(5t + 2.3) drawn as cubic segments with
+   * matching slopes, so it has no corners (the seam included). It keeps 2/16 clear
+   * above and below so the mask's 1px seam offsets never flatten a crest or trough.
+   */
+  --mask-wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 16' preserveAspectRatio='none'%3E%3Cpath d='M0 4.77C5.56 4.08 11.11 3.51 16.67 3.08C22.22 2.65 27.78 2.35 33.33 2.18C38.89 2.01 44.44 1.96 50 2.03C55.56 2.1 61.11 2.3 66.67 2.64C72.22 2.97 77.78 3.46 83.33 4.09C88.89 4.73 94.44 5.53 100 6.43C105.56 7.34 111.11 8.35 116.67 9.34C122.22 10.34 127.78 11.32 133.33 12.11C138.89 12.9 144.44 13.51 150 13.8C155.56 14.09 161.11 14.06 166.67 13.71C172.22 13.35 177.78 12.66 183.33 11.75C188.89 10.85 194.44 9.74 200 8.61C205.56 7.48 211.11 6.35 216.67 5.39C222.22 4.44 227.78 3.66 233.33 3.16C238.89 2.66 244.44 2.43 250 2.44C255.56 2.46 261.11 2.71 266.67 3.09C272.22 3.48 277.78 3.99 283.33 4.51C288.89 5.04 294.44 5.57 300 6.06C305.56 6.55 311.11 6.98 316.67 7.36C322.22 7.73 327.78 8.05 333.33 8.32C338.89 8.6 344.44 8.83 350 9C355.56 9.18 361.11 9.3 366.67 9.32C372.22 9.35 377.78 9.27 383.33 9.07C388.89 8.87 394.44 8.53 400 8.08C405.56 7.63 411.11 7.06 416.67 6.48C422.22 5.91 427.78 5.31 433.33 4.85C438.89 4.39 444.44 4.06 450 3.98C455.56 3.89 461.11 4.05 466.67 4.47C472.22 4.88 477.78 5.55 483.33 6.35C488.89 7.15 494.44 8.08 500 8.96C505.56 9.84 511.11 10.66 516.67 11.25C522.22 11.85 527.78 12.21 533.33 12.28C538.89 12.35 544.44 12.12 550 11.65C555.56 11.19 561.11 10.49 566.67 9.68C572.22 8.88 577.78 7.99 583.33 7.13C588.89 6.27 594.44 5.46 600 4.77V16H0Z'/%3E%3C/svg%3E");
 }
 
 :root[data-accent="amber"] {
