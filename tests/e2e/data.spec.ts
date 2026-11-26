@@ -55,19 +55,13 @@ test.beforeEach(async ({ page }) => {
     [plan, [session('2026-01-01'), session('2026-01-08')]] as const,
   )
   await page.goto('/')
-  await page.getByText('Stats', { exact: true }).first().click()
   await page.getByRole('button', { name: 'Settings' }).click()
 })
 
-test('opens from Stats with the device counts, and Close returns to the Settings button', async ({ page }) => {
-  await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeFocused()
+test('the Settings tab shows the device counts and no import choices', async ({ page }) => {
   await expect(page.locator('.dataCount')).toHaveText(['1 Plan', '2 Sessions'])
   await expect(page.getByText('Bring in a CSV exported from GymOS')).toBeVisible()
   await expect(page.getByRole('button', { name: /Add to my data|Replace my data/ })).toHaveCount(0)
-
-  await page.getByRole('button', { name: 'Close' }).click()
-  await expect(page.getByRole('button', { name: 'Settings' })).toBeFocused()
-  await expect(page.getByRole('heading', { name: 'Settings' })).toHaveCount(0)
 })
 
 test('Export CSV downloads the data in the export format', async ({ page }) => {
@@ -116,8 +110,7 @@ test('a chosen file shows what was found, and Add keeps existing data', async ({
   expect(after.sessions.map((s) => s.date)).toEqual(['2026-01-01', '2026-01-08', '2026-02-01'])
 
   await page.reload()
-  await page.getByText('Stats', { exact: true }).first().click()
-  await page.getByRole('button', { name: 'Settings' }).click()
+  await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible()
   await expect(page.locator('.dataCount')).toHaveText(['2 Plans', '3 Sessions'])
 })
 
@@ -164,7 +157,7 @@ test('a file that is not an export shows the error and changes no data', async (
   await expect(page.getByRole('button', { name: 'Choose another file' })).toBeVisible()
 })
 
-test('after an import, See stats closes Settings and Import another file opens the chooser', async ({ page }) => {
+test('after an import, See stats switches to Stats and Import another file opens the chooser', async ({ page }) => {
   await chooseFile(page, 'gym.csv', importCsv)
   await page.getByRole('button', { name: /Add to my data/ }).click()
 
@@ -176,7 +169,7 @@ test('after an import, See stats closes Settings and Import another file opens t
 
   await page.getByRole('button', { name: 'See stats' }).click()
   await expect(page.getByRole('heading', { name: 'Settings' })).toHaveCount(0)
-  await expect(page.getByRole('button', { name: 'Settings' })).toBeFocused()
+  await expect(page.getByRole('button', { name: 'Stats', exact: true })).toHaveAttribute('aria-current', 'page')
 })
 
 test('the Settings screen has no detectable WCAG A/AA violations in each import state', async ({ page }) => {

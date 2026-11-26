@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { CheckIcon, WarningIcon } from "../../shared";
 import { TrainingPlan, WorkoutSession } from "../../../types";
 import { CSVImport, importFromCSV } from "../../../utils/csv";
@@ -12,6 +12,9 @@ interface ImportCardProps {
   setSessions: (sessions: WorkoutSession[]) => void;
   /** See stats: leaves Settings. */
   onSeeProgress: () => void;
+  /** Open the file picker on mount, still inside the tap that asked for it. */
+  pickOnOpen: boolean;
+  onPicked: () => void;
 }
 
 type ImportState =
@@ -67,7 +70,7 @@ function ImportChoices({ onAdd, onReplace, onCancel, deletes }: ImportChoicesPro
   );
 }
 
-export function ImportCard({ plans, sessions, setPlans, setSessions, onSeeProgress }: ImportCardProps) {
+export function ImportCard({ plans, sessions, setPlans, setSessions, onSeeProgress, pickOnOpen, onPicked }: ImportCardProps) {
   const [state, setState] = useState<ImportState>({ kind: "idle" });
   const fileInput = useRef<HTMLInputElement>(null);
   const kickerId = useId();
@@ -80,6 +83,12 @@ export function ImportCard({ plans, sessions, setPlans, setSessions, onSeeProgre
   };
 
   const chooseFile = () => fileInput.current?.click();
+
+  useEffect(() => {
+    if (!pickOnOpen) return;
+    onPicked();
+    fileInput.current?.click();
+  }, [pickOnOpen, onPicked]);
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

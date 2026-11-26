@@ -28,7 +28,7 @@ test.describe('tablet, 768 wide', () => {
     expect(bar.y + bar.height).toBe(1024)
     await expect(page.getByText('GymOS', { exact: true })).toBeHidden()
     await expect(page.locator('.shellBar__mark')).toBeHidden()
-    for (const tab of ['Plans', 'Log', 'Stats']) {
+    for (const tab of ['Plans', 'Log', 'Stats', 'Settings']) {
       await nav(page).getByRole('button', { name: tab }).click()
       expect(await box(page, '.mainContent')).toMatchObject({ x: 84, width: 600 })
     }
@@ -43,7 +43,7 @@ test.describe('wide, 1280', () => {
     const bar = await box(page, '.shellBar')
     expect(bar).toMatchObject({ x: 0, y: 0, width: 1280, height: 72 })
     await expect(page.getByText('GymOS', { exact: true })).toBeVisible()
-    await expect(nav(page).getByRole('button')).toHaveText(['Plans', 'Log', 'Stats'])
+    await expect(nav(page).getByRole('button')).toHaveText(['Plans', 'Log', 'Stats', 'Settings'])
 
     const log = nav(page).getByRole('button', { name: 'Log' })
     await log.click()
@@ -60,7 +60,7 @@ test.describe('wide, 1280', () => {
     expect(mark.y + mark.height / 2).toBe((72 - 1) / 2) // centred above the 1 hairline
     const wordmark = (await page.getByText('GymOS', { exact: true }).boundingBox())!
     expect(wordmark.x).toBe(92)
-    const last = (await nav(page).getByRole('button', { name: 'Stats' }).boundingBox())!
+    const last = (await nav(page).getByRole('button', { name: 'Settings' }).boundingBox())!
     expect(last.x + last.width).toBe(1240)
   })
 
@@ -75,8 +75,7 @@ test.describe('wide, 1280', () => {
 
   test('screens without a wide layout keep the 600 column; sheets stay 560', async ({ page }) => {
     await page.goto('/')
-    await nav(page).getByRole('button', { name: 'Stats' }).click()
-    await page.getByRole('button', { name: 'Settings' }).click()
+    await nav(page).getByRole('button', { name: 'Settings' }).click()
     await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible()
     expect(await box(page, '.mainContent')).toMatchObject({ x: 340, width: 600 })
     await nav(page).getByRole('button', { name: 'Plans' }).click()

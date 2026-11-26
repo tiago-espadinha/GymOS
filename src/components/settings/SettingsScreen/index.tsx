@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from "react";
+import { useId } from "react";
 import { BrandMark, PrimaryButton } from "../../shared";
 import { TrainingPlan, WorkoutSession } from "../../../types";
 import { exportToCSV } from "../../../utils/csv";
@@ -13,7 +13,11 @@ interface SettingsScreenProps {
   sessions: WorkoutSession[];
   setPlans: (plans: TrainingPlan[]) => void;
   setSessions: (sessions: WorkoutSession[]) => void;
-  onClose: () => void;
+  /** Open the import file picker on arrival (the empty-state "Import it" link). */
+  pickImport: boolean;
+  onImportPicked: () => void;
+  /** Leaves Settings for the Stats tab after an import. */
+  onSeeStats: () => void;
 }
 
 function DeviceCount({ n, noun }: { n: number; noun: string }) {
@@ -24,28 +28,23 @@ function DeviceCount({ n, noun }: { n: number; noun: string }) {
   );
 }
 
-/** Data, language, units and appearance on one screen, opened from Stats or an empty-state import link. */
+/** The Settings tab: appearance, units, language and data, then About. */
 export function SettingsScreen({
   plans,
   sessions,
   setPlans,
   setSessions,
-  onClose,
+  pickImport,
+  onImportPicked,
+  onSeeStats,
 }: SettingsScreenProps) {
-  const title = useRef<HTMLHeadingElement>(null);
   const units = useUnitPrefs();
   const dataId = useId();
-  useEffect(() => title.current?.focus(), []);
 
   return (
     <div className="dataScreen">
       <header className="dataHeader">
-        <h1 ref={title} className="dataTitle" tabIndex={-1}>
-          Settings
-        </h1>
-        <button type="button" className="dataClose" onClick={onClose}>
-          Close
-        </button>
+        <h1 className="dataTitle">Settings</h1>
       </header>
 
       <PreferenceSections />
@@ -74,7 +73,9 @@ export function SettingsScreen({
           sessions={sessions}
           setPlans={setPlans}
           setSessions={setSessions}
-          onSeeProgress={onClose}
+          onSeeProgress={onSeeStats}
+          pickOnOpen={pickImport}
+          onPicked={onImportPicked}
         />
       </section>
 

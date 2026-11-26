@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { ChevronIcon, ChipGroup, EmptyState, PrimaryButton, SegmentedControl } from "../../shared";
 import { TrainingPlan, WorkoutSession, Exercise } from "../../../types";
 import { formatClock } from "../../../hooks/useTimer";
@@ -30,7 +30,6 @@ import {
   splitLabel,
 } from "../../../utils/progress";
 import { useMediaQuery, WIDE_QUERY } from "../../../hooks/useMediaQuery";
-import { SettingsScreen } from "../../settings";
 import { ExercisePicker, ExerciseSearch } from "../ExercisePicker";
 import { MetricInfo } from "./MetricInfo";
 import { ProgressChart } from "./ProgressChart";
@@ -39,13 +38,8 @@ import "./ProgressTab.css";
 interface ProgressTabProps {
   plans: TrainingPlan[];
   sessions: WorkoutSession[];
-  setPlans: (plans: TrainingPlan[]) => void;
-  setSessions: (sessions: WorkoutSession[]) => void;
   selectedExName: string;
   setSelectedExName: (name: string) => void;
-  /** Settings (data, language, units), opened from here or from an empty-state import link. */
-  showSettings: boolean;
-  setShowSettings: (open: boolean) => void;
   /** The empty states' way to log a session. */
   onGoToLog: () => void;
   /** The empty state's way to make a first plan. */
@@ -163,12 +157,8 @@ const tickFormatter = (meta: ExerciseMeta) => (v: number) =>
 export function ProgressTab({
   plans,
   sessions,
-  setPlans,
-  setSessions,
   selectedExName: storedExName,
   setSelectedExName,
-  showSettings,
-  setShowSettings,
   onGoToLog,
   onNewPlan,
   onImport,
@@ -176,17 +166,8 @@ export function ProgressTab({
   const [metricChoice, setMetric] = useState<MetricKind>(DEFAULT_METRIC);
   const [rangeChoice, setRange] = useState<TimeRange>("all");
   const [picking, setPicking] = useState(false);
-  const settingsButton = useRef<HTMLButtonElement>(null);
-  const returnFocus = useRef(false);
   const detailId = useId();
   const wide = useMediaQuery(WIDE_QUERY);
-
-  // Closing Settings puts focus back on the button that opened it.
-  useEffect(() => {
-    if (showSettings || !returnFocus.current) return;
-    returnFocus.current = false;
-    settingsButton.current?.focus();
-  }, [showSettings]);
 
   const exercises = useMemo(() => exercisesOf(plans, sessions), [plans, sessions]);
   // Fall back to the first exercise when the stored selection no longer exists.
@@ -212,25 +193,9 @@ export function ProgressTab({
   // The sheet is phone-only: a window that turns wide closes it, so it does not reopen when it narrows again.
   if (wide && picking) setPicking(false);
 
-  if (showSettings) {
-    const closeSettings = () => {
-      returnFocus.current = true;
-      setShowSettings(false);
-    };
-    return (
-      <SettingsScreen plans={plans} sessions={sessions} setPlans={setPlans} setSessions={setSessions} onClose={closeSettings} />
-    );
-  }
-
-  const settingsEntry = (
-    <button type="button" className="progressSettings" ref={settingsButton} onClick={() => setShowSettings(true)}>
-      Settings
-    </button>
-  );
   const header = (
     <header className="progressHeader">
       <h1 className="progressTitle">Stats</h1>
-      {settingsEntry}
     </header>
   );
 
@@ -239,10 +204,7 @@ export function ProgressTab({
     const hasPlans = plans.some((p) => !p.isArchived);
     return (
       <div className="progressTab">
-        <header className="progressHeader progressHeader--empty">
-          <h1 className="progressTitle visuallyHidden">Stats</h1>
-          {settingsEntry}
-        </header>
+        <h1 className="progressTitle visuallyHidden">Stats</h1>
         <EmptyState
           kicker="Stats"
           title="No stats yet"

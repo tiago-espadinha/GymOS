@@ -17,13 +17,6 @@
   border-bottom: var(--border-hairline);
 }
 
-/* Empty: only the Settings entry stays, at the right. */
-.progressHeader--empty {
-  justify-content: flex-end;
-  padding-bottom: 0;
-  border-bottom: 0;
-}
-
 /* The same screen title as Plans and Log. */
 .progressTitle {
   min-width: 0;
@@ -36,27 +29,6 @@
   text-transform: uppercase;
 }
 
-/* Typed, not an icon: type does the work of chrome. */
-.progressSettings {
-  min-height: var(--size-control);
-  padding: 0 var(--space-4);
-  border: var(--border-chip);
-  border-radius: var(--radius-pill);
-  background: none;
-  color: var(--color-text);
-  font-family: var(--font-body);
-  font-size: var(--text-small);
-  font-weight: 700;
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.progressSettings:hover {
-  border-color: var(--color-text-muted);
-}
-
-.progressSettings:focus-visible,
 .progressPicker:focus-visible {
   outline: var(--border-focus);
   outline-offset: 2px;
