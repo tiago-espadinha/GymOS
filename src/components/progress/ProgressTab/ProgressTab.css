@@ -296,6 +296,12 @@
   margin: 0;
 }
 
+/* Accent text is only allowed bold and 13px+ on black (DESIGN_DIRECTION colour rules). */
+.progressAnalysisFigure {
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
 .progressTooltip {
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-nested);

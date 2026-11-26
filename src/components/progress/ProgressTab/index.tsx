@@ -130,16 +130,24 @@ function EmptyExercise({
   );
 }
 
-function analysisLines(name: string, points: ProgressPoint[], higherIsBetter: boolean, describe: (n: number) => string) {
+/** A summary sentence split around its figure, so the figure can carry the accent. */
+type AnalysisLine = [before: string, figure: string, after: string];
+
+function analysisLines(
+  name: string,
+  points: ProgressPoint[],
+  higherIsBetter: boolean,
+  describe: (n: number) => string,
+): AnalysisLine[] {
   const { total, improvements, stagnations, delta } = analyseProgress(points, higherIsBetter);
-  const parts = [`${name} tracked across ${total} sessions.`];
-  if (improvements > 0) parts.push(`${improvements} personal record${improvements !== 1 ? "s" : ""} achieved.`);
-  if (stagnations > 0) parts.push(`${stagnations} stagnation point${stagnations !== 1 ? "s" : ""} detected.`);
+  const lines: AnalysisLine[] = [[`${name} tracked across `, `${total} sessions`, "."]];
+  if (improvements > 0) lines.push(["", `${improvements} personal record${improvements !== 1 ? "s" : ""}`, " achieved."]);
+  if (stagnations > 0) lines.push(["", `${stagnations} stagnation point${stagnations !== 1 ? "s" : ""}`, " detected."]);
   const gained = higherIsBetter ? delta > 0 : delta < 0;
-  if (delta === 0) parts.push("Performance has remained stable.");
-  else if (gained) parts.push(`Overall gain: ${describe(Math.abs(delta))}.`);
-  else parts.push(`Overall decline of ${describe(Math.abs(delta))} from first session.`);
-  return parts;
+  if (delta === 0) lines.push(["Performance has remained stable.", "", ""]);
+  else if (gained) lines.push(["Overall gain: ", describe(Math.abs(delta)), "."]);
+  else lines.push(["Overall decline of ", describe(Math.abs(delta)), " from first session."]);
+  return lines;
 }
 
 function chartDescription(metricLabel: string, name: string, points: ProgressPoint[], prCount: number) {
@@ -328,9 +336,15 @@ export function ProgressTab({
 
           {points.length > 1 && (
             <div className="progressAnalysis">
-              {analysisLines(selected.name, points, higherIsBetter, (n) => formatMetricNumber(n, meta, metric)).map((line) => (
-                <p key={line}>{line}</p>
-              ))}
+              {analysisLines(selected.name, points, higherIsBetter, (n) => formatMetricNumber(n, meta, metric)).map(
+                ([before, figure, after]) => (
+                  <p key={before + figure}>
+                    {before}
+                    {figure && <span className="progressAnalysisFigure">{figure}</span>}
+                    {after}
+                  </p>
+                ),
+              )}
             </div>
           )}
         </>
