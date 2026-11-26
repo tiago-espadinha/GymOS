@@ -32,6 +32,11 @@ describe('Sheet', () => {
     expect(css).not.toMatch(/box-shadow|rgba|opacity/)
   })
 
+  it('keeps a swipe inside it from scrolling the page behind', () => {
+    expect(css).toMatch(/\.sheet\s*{[^}]*overscroll-behavior: contain/)
+    expect(css).toMatch(/:root\.sheetOpen\s*{[^}]*overflow: hidden/)
+  })
+
   it('gives its Cancel a 44px hit area and a focus outline', () => {
     expect(css).toMatch(/\.sheet__cancel\s*{[^}]*min-height: var\(--size-control\)/)
     expect(css).toMatch(/\.sheet__cancel:focus-visible\s*{[^}]*outline: var\(--border-focus\)/)

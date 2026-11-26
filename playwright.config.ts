@@ -20,8 +20,8 @@ export default defineConfig({
       testMatch: /(rest-timer|timed-set|rest-cleanup|timer-wave)\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } },
     },
-    // The date picker and the timer's wave mask again in WebKit (Safari: native date placeholder, CSS masks).
-    { name: 'mobile-webkit', testMatch: /(date-picker|timer-wave)\.spec\.ts/, use: { ...devices['iPhone 13'] } },
+    // The date picker, the timer's wave mask and sheet scroll locking again in WebKit (Safari: native date placeholder, CSS masks, scroll chaining).
+    { name: 'mobile-webkit', testMatch: /(date-picker|timer-wave|picker-scroll)\.spec\.ts/, use: { ...devices['iPhone 13'] } },
   ],
   webServer: {
     command: `npm run build && npm run preview -- --port ${port} --strictPort`,
