@@ -120,11 +120,14 @@
   font-size: inherit;
 }
 
+/* The error kicker is the sheet's h2, so it undoes the heading face. */
 .importKicker {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   margin: 0;
+  font-family: inherit;
+  font-weight: 700;
 }
 
 .importKicker svg {
@@ -184,8 +187,11 @@
 }
 
 .importChoiceTitle {
-  font-size: var(--text-body-lg);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-set-label);
+  line-height: 1.1;
+  text-transform: uppercase;
 }
 
 .importChoiceHint {
