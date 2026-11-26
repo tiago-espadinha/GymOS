@@ -10,7 +10,7 @@ A phone-first gym tracker for logging a set and running a rest timer in a few ta
 
 ## Features
 
-- **Training plans**: create plans of strength, calisthenics and cardio exercises each with a muscle group and how it is tracked (reps, optional weight, time, optional distance); open a plan's overview to see its exercises in order; archive, restore and delete them.
+- **Training plans**: create plans of strength, calisthenics and cardio exercises each with a muscle group and how it is tracked (reps, optional weight, time, optional distance); open a plan's overview to see its exercises in order; edit a plan, with renamed exercises renamed in its past sessions too; archive, restore and delete them.
 - **Session logging**: start a plan, log weight and reps with large steppers, or time a hold or a cardio effort with optional distance. Edit or delete a logged set, back-date a session, and edit or delete a saved one.
 - **Rest and hold timers**: a rest starts when a set is logged and fills its timer block as it runs, its top edge a moving wave (flat with reduced motion), with buttons to add or take off time and to skip. A sound and vibration cue plays at the end. Timers survive switching exercises and reloading the page.
 - **Finish screen**: totals for the session, notes, then save. A newly saved session is first in Recent on the Log home.
