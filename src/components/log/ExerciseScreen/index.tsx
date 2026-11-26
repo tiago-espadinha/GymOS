@@ -1,6 +1,5 @@
-import { PillButton } from "../../shared";
 import { ExerciseLog, Set } from "../../../types";
-import { exerciseFinishId } from "../../../utils/sessionList";
+import { exerciseFinishId, exerciseProgress, nextTarget } from "../../../utils/sessionList";
 import ExerciseLogger from "../ExerciseLogger";
 import "./ExerciseScreen.css";
 
@@ -12,46 +11,89 @@ export interface FinishAction {
 
 interface ExerciseScreenProps {
   exercise: ExerciseLog;
-  /** The exercise's place in the session, from 1. */
-  position: number;
-  count: number;
-  planName: string;
+  /** Every exercise in the session, in order, for the segments. */
+  exercises: ExerciseLog[];
   /** The exercise after this one; none on the last. */
   next?: ExerciseLog;
+  planName: string;
   /** This exercise's sets from last time. */
   history: Set[];
+  /** The next exercise's sets from last time, for its target. */
+  nextHistory: Set[];
   /** Hidden screens stay mounted so a running rest or hold keeps its timer. */
   hidden: boolean;
   titleId: string;
   onChange: (exercise: ExerciseLog) => void;
   onAllExercises: () => void;
-  onNext: () => void;
-  /** The session's Finish, shown beside the navigation at wide widths. */
+  onOpen: (exerciseId: string) => void;
+  /** The session's Finish, on the last exercise's bottom card. */
   finish: FinishAction;
 }
 
 export function ExerciseScreen({
   exercise,
-  position,
-  count,
-  planName,
+  exercises,
   next,
+  planName,
   history,
+  nextHistory,
   hidden,
   titleId,
   onChange,
   onAllExercises,
-  onNext,
+  onOpen,
   finish,
 }: ExerciseScreenProps) {
-  const nextButton = next && (
+  const target = next && nextTarget(next, nextHistory);
+
+  const segments = (
+    <nav className="exerciseSegments" aria-label="Exercises">
+      {exercises.map((ex, i) => {
+        const { done, total } = exerciseProgress(ex);
+        const current = ex.id === exercise.id;
+        const finished = done > 0 && done === total;
+        return (
+          <button
+            key={ex.id}
+            type="button"
+            className={`exerciseSegment${current ? " exerciseSegment--current" : finished ? " exerciseSegment--done" : ""}`}
+            aria-label={`${ex.name}, exercise ${i + 1} of ${exercises.length}${finished ? ", done" : ""}`}
+            aria-current={current ? "step" : undefined}
+            onClick={() => onOpen(ex.id)}
+          />
+        );
+      })}
+    </nav>
+  );
+
+  const card = next ? (
+    <button type="button" className="exerciseNextCard" onClick={() => onOpen(next.id)}>
+      <span className="exerciseNextCardText">
+        <span className="exerciseNextCardLabel">Next</span>{" "}
+        <span className="exerciseNextCardName">{next.name}</span>
+      </span>
+      {target && <span className="exerciseNextCardTarget">{target}</span>}
+      <span className="exerciseNextCardArrow" aria-hidden="true">
+        →
+      </span>
+    </button>
+  ) : (
     <button
       type="button"
-      className="exerciseScreenNext"
-      aria-label={`Next exercise: ${next.name}`}
-      onClick={onNext}
+      id={exerciseFinishId(exercise.id)}
+      className={`exerciseNextCard exerciseNextCard--finish${finish.allDone ? " exerciseNextCard--allDone" : ""}`}
+      onClick={finish.onClick}
+      disabled={finish.disabled}
     >
-      {next.name} <span aria-hidden="true">→</span>
+      <span className="exerciseNextCardText">
+        <span className="exerciseNextCardLabel">Last exercise</span>{" "}
+        <span className="exerciseNextCardName">
+          Finish<span className="visuallyHidden"> session</span>
+        </span>
+      </span>
+      <span className="exerciseNextCardArrow" aria-hidden="true">
+        →
+      </span>
     </button>
   );
 
@@ -61,33 +103,22 @@ export function ExerciseScreen({
         exercise={exercise}
         onChange={onChange}
         history={history}
-        place={`${planName} · exercise ${position} of ${count}`}
         titleId={titleId}
-        header={
-          <div className="exerciseScreenTop">
-            <button type="button" className="exerciseScreenBack" onClick={onAllExercises}>
-              <span aria-hidden="true">← </span>All exercises
-            </button>
-            {nextButton}
-            <PillButton
-              id={exerciseFinishId(exercise.id)}
-              variant={finish.allDone ? "white" : "outline-white"}
-              onClick={finish.onClick}
-              disabled={finish.disabled}
-              aria-label="Finish session"
-            >
-              Finish
-            </PillButton>
+        header={(setLabel, resting) => (
+          <div>
+            <div className="exerciseScreenTop">
+              <button type="button" className="exerciseScreenBack" onClick={onAllExercises}>
+                <span aria-hidden="true">‹ </span>All exercises
+              </button>
+              <p className="exerciseScreenPlace">
+                <span className="exerciseScreenPlan">{planName}</span>
+                <span className={`exerciseScreenSet${resting ? " exerciseScreenSet--next" : ""}`}>{setLabel}</span>
+              </p>
+            </div>
+            {segments}
           </div>
-        }
-        footer={
-          <div className="exerciseScreenNav">
-            <button type="button" className="exerciseScreenBack" onClick={onAllExercises}>
-              All exercises
-            </button>
-            {nextButton}
-          </div>
-        }
+        )}
+        footer={<div className="exerciseScreenFoot">{card}</div>}
       />
     </section>
   );

@@ -10,42 +10,181 @@
   display: none;
 }
 
-.exerciseScreenNav {
-  margin-top: auto;
+/* Top: All exercises left, the plan name over the set count right, then the segments. */
+.exerciseScreenTop {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-3);
 }
 
-.exerciseScreenBack,
-.exerciseScreenNext {
+.exerciseScreenBack {
   min-height: var(--size-control);
   padding: 0;
   border: 0;
   background: none;
+  color: var(--color-text);
   font: inherit;
-  font-size: var(--text-secondary);
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: 700;
   cursor: pointer;
 }
 
-.exerciseScreenBack {
+.exerciseScreenPlace {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 0;
+  margin: 0;
+  text-align: right;
+  line-height: 1.15;
+}
+
+.exerciseScreenPlan {
+  max-width: 100%;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-tab);
+  line-height: 1;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exerciseScreenSet {
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
   color: var(--color-text-muted);
 }
 
-.exerciseScreenNext {
-  margin-left: auto;
-  color: var(--color-text);
-  text-align: right;
+/* During a rest the set count reads "Next · Set 2 of 4" in the rest colour. */
+.exerciseScreenSet--next {
+  color: var(--color-accent);
 }
 
-.exerciseScreenTop {
-  display: none;
+/* One segment per exercise: a bar inside a 44px hit area that reaches down into the gap below, not up over All exercises. */
+.exerciseSegments {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.exerciseSegment {
+  flex: 1;
+  min-width: 0;
+  height: var(--size-control);
+  margin-bottom: calc(-1 * var(--space-3));
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.exerciseSegment::before {
+  content: "";
+  display: block;
+  height: var(--size-segment-bar);
+  border-radius: var(--radius-pill);
+  background: var(--color-line-strong);
+}
+
+.exerciseSegment--done::before {
+  background: var(--color-text-muted);
+}
+
+.exerciseSegment--current::before {
+  height: var(--size-segment-bar-current);
+  background: var(--color-text);
+}
+
+/* The next exercise, or Finish on the last one, at the bottom. */
+.exerciseScreenFoot {
+  margin-top: auto;
+}
+
+.exerciseNextCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--size-row);
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-surface);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.exerciseNextCardText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.exerciseNextCardLabel {
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.exerciseNextCardName {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-row-title-lg);
+  line-height: 1;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exerciseNextCardTarget {
+  flex: none;
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.exerciseNextCardArrow {
+  flex: none;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-row-number);
+  line-height: 1;
+}
+
+.exerciseNextCard--finish {
+  border: var(--border-control);
+  background: transparent;
+}
+
+/* Every exercise has a set: Finish fills, as the list's does. */
+.exerciseNextCard--allDone {
+  background: var(--color-text);
+  color: var(--color-bg);
+}
+
+.exerciseNextCard--allDone .exerciseNextCardLabel {
+  color: var(--color-bg);
+}
+
+.exerciseNextCard:disabled {
+  border-color: var(--color-line-strong);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
 }
 
 .exerciseScreenBack:focus-visible,
-.exerciseScreenNext:focus-visible {
+.exerciseSegment:focus-visible,
+.exerciseNextCard:focus-visible {
   outline: var(--border-focus);
   outline-offset: 2px;
 }
@@ -56,25 +195,25 @@
   }
 }
 
-/* Wide: the navigation and Finish sit on top of the entry column, as on board C. */
+/* Wide: the window less the shell's padding, so the split fits it without scrolling. */
 @media (min-width: 1024px) {
-  /* The window less the shell's padding, so the split fits it without scrolling. */
   .exerciseScreen {
     min-height: calc(100dvh - var(--space-7) - var(--gutter-wide));
   }
 
-  .exerciseScreenTop {
-    display: flex;
-    align-items: center;
-    gap: var(--space-6);
+  /*
+   * The logger pins its main action (Set done, or the steppers during a rest) to the
+   * bottom; the card pins below it, level with End rest, instead of splitting the space.
+   */
+  .exerciseLogger:has(> .primary-button) > .exerciseScreenFoot,
+  .exerciseLogger--resting:has(> .setSteppers) > .exerciseScreenFoot {
+    position: sticky;
+    bottom: var(--gutter-wide);
+    margin-top: 0;
   }
 
-  .exerciseScreenTop .exerciseScreenBack {
-    color: var(--color-text);
-    font-weight: 700;
-  }
-
-  .exerciseScreenNav {
-    display: none;
+  .exerciseScreen .exerciseLogger > .primary-button,
+  .exerciseScreen .exerciseLogger--resting > .setSteppers {
+    bottom: calc(var(--gutter-wide) + var(--size-row) + var(--space-4));
   }
 }

@@ -27,6 +27,7 @@ const open = async (page: Page, exercise: RegExp) => {
 
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true })
 const timerBlock = (page: Page) => page.locator('.exerciseScreen:not([hidden]) .timerBlock').filter({ visible: true })
+const nextCard = (page: Page) => page.locator('.exerciseScreen:not([hidden]) .exerciseNextCard')
 const box = async (locator: Locator) => (await locator.boundingBox())!
 // axe needs the page's timers, so the clock runs from here on.
 const axe = async (page: Page) => {
@@ -44,11 +45,14 @@ const expectSplit = async (page: Page, label: RegExp) => {
   for (const b of await timerBlock(page).locator('.timerBlockButton').all()) expect((await box(b)).height).toBe(64)
 }
 
-// With no Set done during a rest, the steppers end level with End rest, not mid-column.
+// With no Set done during a rest, the steppers pin to the bottom above the next card,
+// and the card ends level with End rest, not mid-column.
 const expectStepperLevelWithEndRest = async (page: Page) => {
   const steppers = await box(page.locator('.exerciseScreen:not([hidden]) .exerciseLogger > .setSteppers'))
+  const card = await box(nextCard(page))
   const end = await box(button(page, 'End rest'))
-  expect(steppers.y + steppers.height).toBeCloseTo(end.y + end.height, 0)
+  expect(card.y + card.height).toBeCloseTo(end.y + end.height, 0)
+  expect(card.y - (steppers.y + steppers.height)).toBeCloseTo(16, 0)
 }
 
 test.describe('wide session, 1280', () => {
@@ -67,18 +71,20 @@ test.describe('wide session, 1280', () => {
 
     const title = await box(page.getByRole('heading', { name: 'Machine row' }))
     expect(title.x).toBe(808)
-    // The page fits the window, so Set done sits at the bottom without being stuck there.
+    // The page fits the window, so Set done and the next card sit at the bottom without being stuck there.
     expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(800)
     const done = await box(button(page, 'Set done'))
-    expect(done.y + done.height).toBe(760)
+    const card = await box(page.getByRole('button', { name: /^Next Plank/ }))
+    expect(card.y + card.height).toBe(760)
+    expect(card.y - (done.y + done.height)).toBe(16)
     expect(done.x + done.width).toBe(1240)
     await expect(button(page, 'All exercises')).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Next exercise: Plank' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Finish session' })).toBeDisabled()
+    // Finish is on the last exercise only.
+    await expect(page.getByRole('button', { name: /Finish session/ })).toHaveCount(0)
     expect(await axe(page)).toEqual([])
   })
 
-  test('rest and overtime fill the split; Finish on the exercise opens the Done screen', async ({ page }) => {
+  test('rest and overtime fill the split; Finish on the last exercise opens the Done screen', async ({ page }) => {
     await open(page, /^Machine row/)
     await logSet(page, '35', '12')
     await restStarted(page)
@@ -90,17 +96,22 @@ test.describe('wide session, 1280', () => {
     await expect(page.getByRole('timer', { name: /^Rest over/ })).toContainText('+0:15')
     expect(await axe(page)).toEqual([])
 
-    await page.getByRole('button', { name: 'Finish session' }).click()
+    await page.getByRole('button', { name: /^Next Plank/ }).click()
+    const finish = page.getByRole('button', { name: 'Last exercise Finish session' })
+    const card = await box(finish)
+    expect(card.y + card.height).toBe(760)
+    await finish.click()
     await expect(page.getByRole('button', { name: 'Save session' })).toBeVisible()
     await expect(page.locator('.timerBlock').filter({ visible: true })).toHaveCount(0)
     const main = await box(page.locator('.mainContent'))
     expect(main).toMatchObject({ x: 340, width: 600 })
 
-    // Back returns to the exercise, its stepper values and its Finish.
+    // Back returns to the exercise and its Finish; the other exercise keeps its stepper values.
     await page.getByRole('button', { name: 'Back to logging' }).click()
-    await expect(page.getByRole('heading', { name: 'Machine row' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Plank' })).toBeVisible()
+    await expect(finish).toBeFocused()
+    await page.getByRole('button', { name: /^Machine row, exercise 1 of 2/ }).click()
     await expect(page.getByRole('textbox', { name: 'Weight', exact: true })).toHaveValue('35')
-    await expect(page.getByRole('button', { name: 'Finish session' })).toBeFocused()
   })
 
   test('a hold splits when ready, running, paused, past target and in its chained rest', async ({ page }) => {

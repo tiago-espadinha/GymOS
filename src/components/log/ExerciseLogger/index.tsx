@@ -22,16 +22,14 @@ interface ExerciseLoggerProps {
   onChange: (exercise: ExerciseLog) => void;
   /** This exercise's logged sets from the most recent saved session that has it. */
   history: Set[];
-  /** e.g. "Back · exercise 2 of 7". */
-  place: string;
   titleId: string;
-  /** Wide-only navigation on top, hidden while a set is being edited. */
-  header: ReactNode;
-  /** Navigation at the bottom below the wide breakpoint, hidden while a set is being edited. */
+  /** Navigation on top, given the set count ("Set 2 of 4", "Edit set 1") and whether a rest is on. */
+  header: (setLabel: string, resting: boolean) => ReactNode;
+  /** Navigation at the bottom, hidden while a set is being edited. */
   footer: ReactNode;
 }
 
-export function ExerciseLogger({ exercise, onChange, history, place, titleId, header, footer }: ExerciseLoggerProps) {
+export function ExerciseLogger({ exercise, onChange, history, titleId, header, footer }: ExerciseLoggerProps) {
   const meta = getExerciseMeta(exercise);
   const units = useUnitPrefs();
   const timed = meta.trackingType === "time";
@@ -157,24 +155,18 @@ export function ExerciseLogger({ exercise, onChange, history, place, titleId, he
   const headingInHold = timed && !rest && !editing;
 
   const heading = (
-    <>
-      <div className={`exerciseLoggerKicker${rest ? " exerciseLoggerKicker--next" : ""}`}>
-        {/* Above a hold the block already names the set. */}
-        {!headingInHold && <span className="exerciseLoggerSet">{kicker}</span>}
-        {!rest && <span>{place}</span>}
-      </div>
-      <div className="exerciseLoggerHeading">
-        <h1 id={titleId} className={`exerciseLoggerTitle${rest ? " exerciseLoggerTitle--resting" : ""}`} tabIndex={-1}>
-          {exercise.name}
-        </h1>
-        {lastTime && <span className="exerciseLoggerLastTime">{lastTime}</span>}
-      </div>
-    </>
+    <div className="exerciseLoggerHeading">
+      <h1 id={titleId} className={`exerciseLoggerTitle${rest ? " exerciseLoggerTitle--resting" : ""}`} tabIndex={-1}>
+        {exercise.name}
+      </h1>
+      {lastTime && <span className="exerciseLoggerLastTime">{lastTime}</span>}
+    </div>
   );
 
   return (
     <div className={`exerciseLogger${rest && !editing ? " exerciseLogger--resting" : ""}`} ref={rootRef}>
-      {!editing && header}
+      {/* Above a hold the block already names the set. */}
+      {header(headingInHold ? "" : kicker, Boolean(rest) && !editing)}
       {!timed && !rest && <IdleRest setNumber={number} category={meta.category} />}
       {rest && (
         <RestBlock
