@@ -33,8 +33,12 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
   const [archivedOpen, setArchivedOpen] = useState(false);
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [archived, setArchived] = useState<TrainingPlan | null>(null);
-  // Wide only: the plan shown in the detail pane. Not stored; the first plan by default.
+  // The plan in the wide detail pane or the phone overview. Not stored; the first plan by default.
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Phone only: the selected plan's overview fills the screen instead of the list.
+  const [overview, setOverview] = useState(false);
+  // The plan just saved, whose overview says so until another plan is shown.
+  const [savedId, setSavedId] = useState<string | null>(null);
   const wide = useMediaQuery(WIDE_QUERY);
   const root = useRef<HTMLDivElement>(null);
   // Where focus goes after the next render, when the control that had it is gone.
@@ -54,10 +58,16 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
   const archivedPlans = plans.filter((p) => p.isArchived);
   const selected = activePlans.find((p) => p.id === selectedId) ?? activePlans[0];
 
-  // A refused write keeps the form open with what was entered.
+  // A refused write keeps the form open with what was entered; a kept one shows the plan's overview.
   const savePlan = (p: TrainingPlan) => {
     if (!commitPlans([...plans, p])) return false;
-    closeForm();
+    onCreatingChange(false);
+    setSelectedId(p.id);
+    setSavedId(p.id);
+    setOverview(!wide);
+    focusNext.current = '.planDetail__name';
+    // The form was likely scrolled down to Save; the confirmation sits at the top.
+    if (!wide) window.scrollTo({ top: 0 });
     return true;
   };
 
@@ -67,7 +77,27 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
     focusNext.current = '.plansTabTitle';
   };
 
+  const select = (plan: TrainingPlan) => {
+    setSelectedId(plan.id);
+    if (plan.id !== savedId) setSavedId(null);
+  };
+
+  const openOverview = (plan: TrainingPlan) => {
+    select(plan);
+    setOverview(true);
+    focusNext.current = '.planDetail__name';
+    window.scrollTo({ top: 0 });
+  };
+
+  const closeOverview = (plan: TrainingPlan) => {
+    setOverview(false);
+    setSavedId(null);
+    focusNext.current = `[data-plan-open="${CSS.escape(plan.id)}"]`;
+  };
+
   const archive = (plan: TrainingPlan) => {
+    setOverview(false);
+    setSavedId(null);
     if (plan.id === selected?.id) setSelectedId(neighbourOf(activePlans, plan.id)?.id ?? null);
     setPlans(archivePlan(plans, plan.id, todayStr));
     setOverlay(null);
@@ -76,6 +106,7 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
   };
 
   const restore = (plan: TrainingPlan) => {
+    setOverview(false);
     setPlans(restorePlan(plans, plan.id));
     setSelectedId(plan.id);
     setArchived((a) => (a?.id === plan.id ? null : a));
@@ -154,23 +185,28 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
   // Wide: the plans on the left, the chosen one in full on the right. One root in
   // both layouts, so an open sheet or toast survives crossing the breakpoint.
   const panes = wide && selected;
+  const phoneOverview = !wide && overview && selected;
 
   return (
     <div className={`plansTab${archived ? ' plansTab--toast' : ''}${panes ? ' plansTab--wide' : ''}`} ref={root}>
-      {panes ? (
+      {phoneOverview ? (
+        <PlanDetail id={detailId} plan={selected} sessions={sessions} today={todayStr} saved={selected.id === savedId}
+          onBack={() => closeOverview(selected)} onStart={onStartPlan}
+          onMore={(plan) => setOverlay({ kind: 'actions', plan })} />
+      ) : panes ? (
         <>
           <div className="plansPane">
             {header}
             <ul className="plansTabList" role="list">
               {activePlans.map((p) => (
                 <PlanSelectRow key={p.id} plan={p} selected={p.id === selected.id} controls={detailId}
-                  onSelect={(plan) => setSelectedId(plan.id)} />
+                  onSelect={select} />
               ))}
             </ul>
             {archivedSection}
           </div>
-          <PlanDetail id={detailId} plan={selected} sessions={sessions} today={todayStr} onStart={onStartPlan}
-            onMore={(plan) => setOverlay({ kind: 'actions', plan })} />
+          <PlanDetail id={detailId} plan={selected} sessions={sessions} today={todayStr} saved={selected.id === savedId}
+            onStart={onStartPlan} onMore={(plan) => setOverlay({ kind: 'actions', plan })} />
         </>
       ) : (
         <>
@@ -188,7 +224,8 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
           ) : (
             <ul className="plansTabList" role="list">
               {activePlans.map((p) => (
-                <PlanCard key={p.id} plan={p} onStart={onStartPlan} onMore={(plan) => setOverlay({ kind: 'actions', plan })} />
+                <PlanCard key={p.id} plan={p} onOpen={openOverview} onStart={onStartPlan}
+                  onMore={(plan) => setOverlay({ kind: 'actions', plan })} />
               ))}
             </ul>
           )}
