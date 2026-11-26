@@ -46,7 +46,7 @@
   font-weight: var(--weight-display);
   font-size: var(--text-row-number);
   line-height: 1;
-  color: var(--color-text-dim);
+  color: var(--color-accent);
 }
 
 .list-row--current .list-row__number {

@@ -96,7 +96,7 @@
 
 .exerciseSegment--current::before {
   height: var(--size-segment-bar-current);
-  background: var(--color-text);
+  background: var(--color-accent);
 }
 
 /* The next exercise, or Finish on the last one, at the bottom. */
@@ -132,7 +132,7 @@
   font-weight: 700;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: var(--color-accent);
 }
 
 .exerciseNextCardName {
@@ -180,6 +180,11 @@
   border-color: var(--color-line-strong);
   color: var(--color-text-muted);
   cursor: not-allowed;
+}
+
+/* A disabled Finish keeps its kicker muted, so nothing on it reads as live. */
+.exerciseNextCard:disabled .exerciseNextCardLabel {
+  color: inherit;
 }
 
 .exerciseScreenBack:focus-visible,

@@ -1,8 +1,8 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
 
-// Numbered exercise lists outside a session show their numbers in the accent.
-// Inside a session the accent means rest, so the session lists keep their dim numbers.
+// Numbered exercise lists show their numbers in the accent, in a session too,
+// where the current row is inverted white and keeps a black number.
 const plan = {
   id: 'p1',
   name: 'Push day',
@@ -14,7 +14,7 @@ const plan = {
 }
 
 const accents = { lime: 'rgb(198, 255, 61)', red: 'rgb(255, 64, 64)' }
-const DIM = 'rgb(138, 138, 138)'
+const BLACK = 'rgb(0, 0, 0)'
 const DANGER = 'rgb(255, 138, 122)'
 
 const open = async (page: Page, accent: string) => {
@@ -69,12 +69,14 @@ for (const [accent, rgb] of Object.entries(accents)) {
         await expect(numbers.nth(0)).toHaveCSS('color', rgb)
       })
 
-      test('inside a session the All exercises numbers stay dim', async ({ page }) => {
+      test('inside a session the All exercises numbers are the accent, the current row black', async ({ page }) => {
         await open(page, accent)
         await page.getByRole('button', { name: 'Start Push day' }).click()
-        const number = page.getByRole('button', { name: /^Overhead press/ }).locator('.list-row__number')
-        await expect(number).toHaveText('2')
-        await expect(number).toHaveCSS('color', DIM)
+        const number = (name: RegExp) => page.getByRole('button', { name }).locator('.list-row__number')
+        await expect(number(/^Overhead press/)).toHaveText('2')
+        await expect(number(/^Overhead press/)).toHaveCSS('color', rgb)
+        await expect(page.getByRole('button', { name: /^Bench press/ })).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+        await expect(number(/^Bench press/)).toHaveCSS('color', BLACK)
       })
     })
 
