@@ -188,19 +188,55 @@ test('every session gets a node, distinct from PR rings and the latest point', a
   await expect(nodes).toHaveCount(5)
 })
 
-test('the line and its nodes start right of the y-axis labels on every metric', async ({ page }) => {
+// Label boxes, and how close the line (sampled every 2px) and the nodes come to them.
+const labelClearance = (page: Page) =>
+  page.locator('.progressChart').first().evaluate((chart) => {
+    const labels = [...chart.querySelectorAll('.progressChartTick')].map((el) => el.getBoundingClientRect())
+    const path = chart.querySelector<SVGPathElement>('.recharts-line-curve')!
+    const ctm = path.getScreenCTM()!
+    const samples: Array<{ x: number; y: number; r: number }> = []
+    for (let d = 0; d <= path.getTotalLength(); d += 2) {
+      const p = path.getPointAtLength(d).matrixTransform(ctm)
+      samples.push({ x: p.x, y: p.y, r: 1.5 })
+    }
+    for (const node of chart.querySelectorAll('circle')) {
+      const b = node.getBoundingClientRect()
+      samples.push({ x: b.x + b.width / 2, y: b.y + b.height / 2, r: b.width / 2 })
+    }
+    const gap = (s: { x: number; y: number; r: number }, l: DOMRect) =>
+      Math.hypot(Math.max(l.left - s.x, 0, s.x - l.right), Math.max(l.top - s.y, 0, s.y - l.bottom)) - s.r
+    return { labels: labels.length, closest: Math.min(...samples.flatMap((s) => labels.map((l) => gap(s, l)))) }
+  })
+
+test('the line and its nodes keep clear of the y-axis labels on every metric, phone and wide', async ({ page }) => {
   await pick(page, 'Lat pulldown')
-  for (const name of ['Average', 'Peak', 'Total', 'e1RM']) {
-    await metric(page, name).click()
-    const labels = await page.locator('.progressChart .recharts-yAxis-tick-labels text').evaluateAll((els) =>
-      els.map((el) => el.getBoundingClientRect().right),
-    )
-    const nodes = await page.locator('.progressChart [data-kind] circle, .progressChart circle[data-kind]').evaluateAll((els) =>
-      els.map((el) => el.getBoundingClientRect().left),
-    )
-    expect(labels.length, name).toBeGreaterThan(0)
-    expect(Math.min(...nodes), name).toBeGreaterThan(Math.max(...labels))
+  for (const width of [412, 1280]) {
+    await page.setViewportSize({ width, height: 900 })
+    for (const name of ['Average', 'Peak', 'Total', 'e1RM']) {
+      await metric(page, name).click()
+      // The chart re-lays itself out after a resize; let it settle.
+      await expect(async () => {
+        const { labels, closest } = await labelClearance(page)
+        expect(labels, `${name} ${width}`).toBe(2)
+        expect(closest, `${name} ${width}`).toBeGreaterThanOrEqual(3)
+      }).toPass({ timeout: 3000 })
+    }
   }
+})
+
+test('on a phone the chart runs edge to edge and a rising line starts under the labels', async ({ page }) => {
+  await pick(page, 'Seated row')
+  const width = page.viewportSize()!.width
+  const chart = (await page.locator('.progressChart').boundingBox())!
+  expect(chart.x).toBe(0)
+  expect(chart.width).toBe(width)
+  const labelLeft = await page.locator('.progressChartTick').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().left))
+  for (const left of labelLeft) expect(left).toBeCloseTo(16, 0)
+  const centres = await page.locator('.progressChart circle').evaluateAll((els) =>
+    els.map((el) => { const b = el.getBoundingClientRect(); return b.x + b.width / 2 }),
+  )
+  expect(Math.min(...centres)).toBeCloseTo(16, 0)
+  expect(Math.max(...centres)).toBeCloseTo(width - 16, 0)
 })
 
 test('the info button explains the selected metric, by keyboard alone', async ({ page }) => {
