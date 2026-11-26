@@ -46,13 +46,13 @@
   color: var(--color-on-inverse);
 }
 
-/* 24px display type, so the dim grey keeps its contrast. */
+/* 24px display type in the accent; inverted rows (now, editing) keep it black. */
 .setsTableLabel {
   min-width: 1ch;
   font-family: var(--font-display);
   font-weight: var(--weight-display);
   font-size: var(--text-set-label);
-  color: var(--color-text-dim);
+  color: var(--color-accent);
 }
 
 .setsTableRow--inverted .setsTableLabel {

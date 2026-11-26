@@ -97,7 +97,7 @@ export function TimedSetBlock(props: TimedSetBlockProps) {
       {phase === "ready" ? (
         <PrimaryButton onClick={startNow}>{`Start ${name.toLowerCase()}${resting ? " now" : ""}`}</PrimaryButton>
       ) : (
-        <PrimaryButton onClick={finish} disabled={heldSec < 1}>
+        <PrimaryButton tone="accent" onClick={finish} disabled={heldSec < 1}>
           {phase === "running" ? "Stop and log" : `Stop and log ${formatClock(timer.elapsedMs)}`}
         </PrimaryButton>
       )}

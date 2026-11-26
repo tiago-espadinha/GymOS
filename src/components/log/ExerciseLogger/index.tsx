@@ -222,7 +222,7 @@ export function ExerciseLogger({ exercise, onChange, history, titleId, header, f
               <SetSteppers draft={draft} onChange={setDraft} trackWeight={meta.trackWeight} />
               {/* Only End rest moves on from a rest; the steppers stay to set up the next set. */}
               {!rest && (
-                <PrimaryButton onClick={setDone} disabled={!isLoggedSet(draftSet(draft))} data-set-done>
+                <PrimaryButton tone="accent" onClick={setDone} disabled={!isLoggedSet(draftSet(draft))} data-set-done>
                   Set done
                 </PrimaryButton>
               )}
