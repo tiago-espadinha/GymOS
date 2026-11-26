@@ -16,8 +16,8 @@ interface ConfirmSheetProps {
 
 /**
  * The app's confirm for a choice that can't be undone, in place of a browser
- * dialog. Keep it comes first, so it gets focus; the destructive choice is the
- * danger outline below it.
+ * dialog. Keep it gets focus, even when the text holds a link; the destructive
+ * choice is the danger outline below it.
  */
 export function ConfirmSheet({ kicker, title, text, confirmLabel, onConfirm, onClose }: ConfirmSheetProps) {
   const titleId = useId();
@@ -31,7 +31,7 @@ export function ConfirmSheet({ kicker, title, text, confirmLabel, onConfirm, onC
       <p id={bodyId} className="sheet__text">
         {text}
       </p>
-      <PrimaryButton tone="light" onClick={onClose}>
+      <PrimaryButton tone="light" onClick={onClose} data-autofocus>
         Keep it
       </PrimaryButton>
       <button type="button" className="sheet__danger" onClick={onConfirm}>

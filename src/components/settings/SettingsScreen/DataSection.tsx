@@ -4,6 +4,7 @@ import { CSVImport, exportToCSV } from "../../../utils/csv";
 import { downloadCSV } from "../../../utils/download";
 import { mergeImport } from "../../../utils/importData";
 import { useUnitPrefs } from "../../../utils/unitPrefs";
+import { DeleteAllData } from "./DeleteAllData";
 import { ImportSheet } from "./ImportSheet";
 import { ImportStep, readImport } from "./readImport";
 import { addedText, count, plansAndSessions } from "./importSummary";
@@ -24,9 +25,17 @@ export function DataSection({ plans, sessions, setPlans, setSessions, pickImport
   const units = useUnitPrefs();
   const headingId = useId();
   const fileInput = useRef<HTMLInputElement>(null);
-  // The id remounts the sheet on each step, so focus lands on that step's first control.
+  // The id remounts the sheet on each step, so focus moves to that step's heading.
   const [step, setStep] = useState<{ id: number; value: ImportStep } | null>(null);
   const show = (value: ImportStep) => setStep((prev) => ({ id: (prev?.id ?? 0) + 1, value }));
+  const importButton = useRef<HTMLButtonElement>(null);
+  // Delete all removes its own link, so focus goes to Import once the sheet has closed and the page is live again.
+  const focusImport = useRef(false);
+  useEffect(() => {
+    if (!focusImport.current) return;
+    focusImport.current = false;
+    importButton.current?.focus();
+  });
 
   const chooseFile = () => fileInput.current?.click();
 
@@ -59,7 +68,15 @@ export function DataSection({ plans, sessions, setPlans, setSessions, pickImport
     show({ kind: "done", message: `Replaced with ${plansAndSessions(data.plans.length, data.sessions.length)}.` });
   };
 
+  // Plans and sessions only: accent, units and other preferences stay.
+  const deleteAll = () => {
+    setPlans([]);
+    setSessions([]);
+    focusImport.current = true;
+  };
+
   const hasData = plans.length > 0 || sessions.length > 0;
+  const onDevice = plansAndSessions(plans.length, sessions.length);
 
   return (
     <section className="settingsSection" aria-labelledby={headingId}>
@@ -75,18 +92,19 @@ export function DataSection({ plans, sessions, setPlans, setSessions, pickImport
           <button type="button" className="dataCard__action" onClick={exportData}>
             Export
           </button>
-          <button type="button" className="dataCard__action" onClick={chooseFile}>
+          <button type="button" className="dataCard__action" ref={importButton} onClick={chooseFile}>
             Import
           </button>
         </div>
         <p className="settingsHint">Export saves a CSV. Import lets you add to or replace what's here.</p>
       </div>
+      {hasData && <DeleteAllData onDevice={onDevice} onExport={exportData} onDelete={deleteAll} />}
       <input ref={fileInput} type="file" accept=".csv,text/csv" onChange={handleFile} hidden />
       {step && (
         <ImportSheet
           key={step.id}
           step={step.value}
-          deletes={hasData ? plansAndSessions(plans.length, sessions.length) : null}
+          deletes={hasData ? onDevice : null}
           onAdd={add}
           onReplace={replace}
           onChooseFile={chooseFile}

@@ -221,3 +221,67 @@ test('the Settings tab and each import sheet have no detectable WCAG A/AA violat
   await expect(page.getByRole('heading', { name: "Can't import this file" })).toBeVisible()
   expect(await scan()).toEqual([])
 })
+
+const deleteLink = (page: Page) => page.getByRole('button', { name: 'Delete all data' })
+const confirm = (page: Page) => page.getByRole('alertdialog')
+
+test('Keep it, Escape and a tap outside leave the data and return focus to Delete all data', async ({ page }) => {
+  const before = await stored(page)
+
+  await deleteLink(page).click()
+  await expect(confirm(page)).toHaveAccessibleName('Delete all data?')
+  await expect(confirm(page)).toContainText('Delete for good')
+  await expect(confirm(page)).toContainText("1 plan and 2 sessions are removed from this device and can't be restored. Your accent and units stay.")
+  await expect(confirm(page).getByRole('button', { name: 'Keep it' })).toBeFocused()
+  await confirm(page).getByRole('button', { name: 'Keep it' }).click()
+  await expect(confirm(page)).toHaveCount(0)
+  await expect(deleteLink(page)).toBeFocused()
+
+  await deleteLink(page).click()
+  await page.keyboard.press('Escape')
+  await expect(confirm(page)).toHaveCount(0)
+  await expect(deleteLink(page)).toBeFocused()
+
+  await deleteLink(page).click()
+  await page.mouse.click(10, 10)
+  await expect(confirm(page)).toHaveCount(0)
+  await expect(deleteLink(page)).toBeFocused()
+
+  expect(await stored(page)).toEqual(before)
+})
+
+test('Export a backup first downloads the CSV and keeps the sheet open', async ({ page }) => {
+  await deleteLink(page).click()
+  const [download] = await Promise.all([page.waitForEvent('download'), confirm(page).getByRole('button', { name: 'Export a backup first' }).click()])
+  expect(download.suggestedFilename()).toMatch(/^gym_data_\d{4}-\d{2}-\d{2}\.csv$/)
+  await expect(confirm(page)).toBeVisible()
+})
+
+test('Delete everything empties plans and sessions and keeps accent and units', async ({ page }) => {
+  await page.getByRole('group', { name: 'Accent colour' }).getByRole('button', { name: 'Amber' }).click()
+  await page.getByRole('group', { name: 'Weight unit' }).getByRole('button', { name: 'lb', exact: true }).click()
+  const prefsBefore = await page.evaluate(() => ({ accent: localStorage.getItem('gym:accent'), units: localStorage.getItem('gym:unitPrefs') }))
+
+  await deleteLink(page).click()
+  await confirm(page).getByRole('button', { name: 'Delete everything' }).click()
+
+  await expect(confirm(page)).toHaveCount(0)
+  await expect(card(page).locator('.dataCard__counts')).toHaveText('0 plans · 0 sessions')
+  await expect(deleteLink(page)).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Import', exact: true })).toBeFocused()
+  expect(await stored(page)).toEqual({ plans: [], sessions: [] })
+  expect(await page.evaluate(() => ({ accent: localStorage.getItem('gym:accent'), units: localStorage.getItem('gym:unitPrefs') }))).toEqual(prefsBefore)
+  await expect(page.getByRole('group', { name: 'Accent colour' }).getByRole('button', { name: 'Amber' })).toHaveAttribute('aria-pressed', 'true')
+
+  await page.reload()
+  await expect(card(page).locator('.dataCard__counts')).toHaveText('0 plans · 0 sessions')
+  await page.getByRole('button', { name: 'Plans', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Have a CSV backup? Import it' })).toBeVisible()
+})
+
+test('the delete-all sheet has no detectable WCAG A/AA violations', async ({ page }) => {
+  await deleteLink(page).click()
+  await expect(confirm(page)).toBeVisible()
+  const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+  expect(violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([])
+})

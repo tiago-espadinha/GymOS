@@ -102,6 +102,24 @@
   opacity: 0.8;
 }
 
+/* Under the card, on its own: destructive, so the danger colour, and quiet, so a link. */
+.dataDelete {
+  align-self: flex-start;
+  padding: 0;
+  color: var(--color-danger);
+}
+
+.dataDelete:hover {
+  color: var(--color-danger);
+}
+
+.dataExportFirst {
+  min-height: 0;
+  padding: 0;
+  color: var(--color-text);
+  font-size: inherit;
+}
+
 .importKicker {
   display: flex;
   align-items: center;
