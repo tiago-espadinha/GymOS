@@ -61,7 +61,7 @@ test('with lb chosen, weights read and are entered in lb on every Log screen', a
   await page.getByRole('button', { name: 'Start Push day' }).click()
   await expect(page.getByRole('button', { name: /^Bench press/ })).toContainText('Last 220.5 lb × 5')
   await page.getByRole('button', { name: /^Bench press/ }).click()
-  await expect(page.getByText('Last time 220.5 lb × 5')).toBeVisible()
+  await expect(page.locator('.exerciseScreen:not([hidden]) .setsTableLast').first()).toHaveText('Last time 220.5 lb × 5')
 
   const weight = page.getByRole('textbox', { name: 'Weight', exact: true })
   await expect(weight).toHaveValue('220.5')
@@ -74,12 +74,12 @@ test('with lb chosen, weights read and are entered in lb on every Log screen', a
 
   await logSet(page, '135', '5')
   await page.getByRole('button', { name: 'End rest' }).click()
-  await expect(doneRows(page)).toHaveText('135 lb × 5')
+  await expect(doneRows(page)).toHaveText('Today 135 lb × 5')
   expect(Number((await activeSet(page, 'Bench press')).weight)).toBeCloseTo(61.23497, 5)
 
   await page.reload()
   await page.getByRole('button', { name: /^Bench press/ }).click()
-  await expect(doneRows(page)).toHaveText('135 lb × 5')
+  await expect(doneRows(page)).toHaveText('Today 135 lb × 5')
 
   await page.getByRole('button', { name: 'Edit set 1' }).click()
   await expect(page.getByRole('textbox', { name: 'Weight', exact: true })).toHaveValue('135')
@@ -117,7 +117,7 @@ test('with mi chosen, a km-stored 5 reads 3.11 mi and a typed distance is stored
   await page.getByRole('textbox', { name: 'Distance · set 1' }).fill('3.1')
   await page.clock.fastForward(30_000)
   await page.getByRole('button', { name: 'Stop and log', exact: true }).click()
-  await expect(doneRows(page)).toHaveText('00:30 · 3.1 mi')
+  await expect(doneRows(page)).toHaveText('Today 00:30 · 3.1 mi')
   expect(Number((await activeSet(page, 'Run')).distance)).toBeCloseTo(4.98897, 4)
 })
 
@@ -139,7 +139,7 @@ test('switching units mid-session changes what is shown, not what is stored', as
   await page.reload()
   await expect(page.getByRole('button', { name: /^Bench press/ })).toContainText('61.2 kg × 5')
   await page.getByRole('button', { name: /^Bench press/ }).click()
-  await expect(doneRows(page)).toHaveText('61.2 kg × 5')
+  await expect(doneRows(page)).toHaveText('Today 61.2 kg × 5')
   expect(
     await page.evaluate(() => ({
       active: localStorage.getItem('gym:activeSession'),

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ExerciseLog, Set } from "../types";
-import { NO_VALUES, currentExerciseId, currentSetNumber, exerciseProgress, exerciseSummary, lastTimeLabel, lastValues, nextTarget, rowSubtitle, sessionTotals } from "./sessionList";
+import { NO_VALUES, currentExerciseId, currentSetNumber, exerciseProgress, exerciseSummary, lastTimeValue, lastValues, nextTarget, rowSubtitle, sessionTotals } from "./sessionList";
 
 const set = (over: Partial<Set> = {}): Set => ({ id: Math.random().toString(), weight: "", reps: "", ...over });
 
@@ -132,24 +132,32 @@ describe("rowSubtitle", () => {
   });
 });
 
-describe("lastTimeLabel", () => {
-  it("names a shared weight once", () => {
-    const history = ["12", "12", "10"].map((reps) => set({ weight: "35", reps }));
-    expect(lastTimeLabel(exercise([]), history)).toBe("Last time 35 kg × 12, 12, 10");
+describe("lastTimeValue", () => {
+  const history = [set({ weight: "60", reps: "10" }), set({ weight: "57.5", reps: "8" })];
+
+  it("pairs each set with last time's set at the same position", () => {
+    const ex = exercise([]);
+    expect(lastTimeValue(ex, history, 0)).toBe("60 kg × 10");
+    expect(lastTimeValue(ex, history, 1)).toBe("57.5 kg × 8");
   });
 
-  it("lists each set when weights differ", () => {
-    const history = [set({ weight: "35", reps: "12" }), set({ weight: "37.5", reps: "10" })];
-    expect(lastTimeLabel(exercise([]), history)).toBe("Last time 35 kg × 12, 37.5 kg × 10");
+  it("shows a dash for sets beyond last time's", () => {
+    expect(lastTimeValue(exercise([]), history, 2)).toBe(NO_VALUES);
   });
 
-  it("is empty without history", () => {
-    expect(lastTimeLabel(exercise([]), [])).toBe("");
+  it("is a dash without history", () => {
+    expect(lastTimeValue(exercise([]), [], 0)).toBe(NO_VALUES);
   });
 
-  it("names the shared weight in lb", () => {
-    const history = ["12", "10"].map((reps) => set({ weight: "61.23496995", reps }));
-    expect(lastTimeLabel(exercise([]), history, { weight: "lbs", distance: "km" })).toBe("Last time 135 lb × 12, 10");
+  it("reads the stored kg in lb", () => {
+    const lb = [set({ weight: "61.23496995", reps: "12" })];
+    expect(lastTimeValue(exercise([]), lb, 0, { weight: "lbs", distance: "km" })).toBe("135 lb × 12");
+  });
+
+  it("formats a timed set with its distance in the chosen unit", () => {
+    const run = exercise([], { name: "Running", category: "cardio", trackingType: "time", trackDistance: true });
+    const timed = [set({ duration: "90", distance: "2" })];
+    expect(lastTimeValue(run, timed, 0, { weight: "kg", distance: "mi" })).toMatch(/^01:30 · 1\.2\d* mi$/);
   });
 });
 

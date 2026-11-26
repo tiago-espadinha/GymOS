@@ -5,12 +5,6 @@
   gap: var(--space-4);
 }
 
-.exerciseLoggerHeading {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
 .exerciseLoggerTitle {
   margin: 0;
   font-family: var(--font-display);
@@ -28,12 +22,6 @@
 
 .exerciseLoggerTitle:focus {
   outline: none;
-}
-
-.exerciseLoggerLastTime {
-  font-size: var(--text-secondary);
-  font-weight: 500;
-  color: var(--color-text-muted);
 }
 
 .exerciseLoggerEditActions {
