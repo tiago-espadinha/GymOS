@@ -120,6 +120,8 @@
   --gutter-timer: 48px; /* side padding inside that timer */
   --text-timer-wide: 400px; /* its numeral at most; it shrinks to fit the timer */
   --text-wordmark: 30px;
+  --size-brand-bar: 40px; /* the mark beside the wordmark in the wide bar */
+  --size-brand-about: 48px; /* the mark in Settings About */
 
   /* Radius */
   --radius-pill: 999px;

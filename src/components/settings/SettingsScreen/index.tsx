@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef } from "react";
-import { PrimaryButton } from "../../shared";
+import { BrandMark, PrimaryButton } from "../../shared";
 import { TrainingPlan, WorkoutSession } from "../../../types";
 import { exportToCSV } from "../../../utils/csv";
 import { downloadCSV } from "../../../utils/download";
@@ -65,6 +65,14 @@ export function SettingsScreen({ plans, sessions, setPlans, setSessions, onClose
       </section>
 
       <PreferenceSections />
+
+      <footer className="settingsAbout">
+        <BrandMark className="settingsAbout__mark" />
+        <div>
+          <p className="settingsAbout__name">GymOS</p>
+          <p className="settingsHint">Data stays on this device</p>
+        </div>
+      </footer>
     </div>
   );
 }

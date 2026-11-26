@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { PlansTab } from "./components/plans";
 import { LogTab } from "./components/log";
 import { ProgressTab } from "./components/progress";
-import { TabBar } from "./components/shared";
+import { BrandMark, TabBar } from "./components/shared";
 import { useActiveSession } from "./hooks/useActiveSession";
 import { fromPlan } from "./utils/activeSession";
 import { today } from "./utils/date";
@@ -143,7 +143,10 @@ export default function GymTracker() {
       {/* Bottom tab bar below 1024; the wordmark and top bar at wide widths. */}
       {showTabs && (
         <header className="shellBar">
-          <p className="shellBar__wordmark">GymOS</p>
+          <div className="shellBar__brand">
+            <BrandMark className="shellBar__mark" />
+            <p className="shellBar__wordmark">GymOS</p>
+          </div>
           <TabBar tabs={TABS} active={tab} onChange={changeTab} />
         </header>
       )}

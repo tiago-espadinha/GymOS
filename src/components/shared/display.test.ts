@@ -1,6 +1,7 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
+import { BrandMark } from './BrandMark'
 import { ListRow } from './ListRow'
 import { SetTicks } from './SetTicks'
 import { SaveFailedAlert } from './SaveFailedAlert'
@@ -24,6 +25,27 @@ describe('SetTicks', () => {
     expect(ticks).toContain('width: var(--size-tick-w)')
     expect(ticks).toContain('height: var(--size-tick-h)')
     expect(ticks).toMatch(/--done\s*{[^}]*background: currentColor/)
+  })
+})
+
+describe('BrandMark', () => {
+  const html = renderToStaticMarkup(createElement(BrandMark, { className: 'x' }))
+
+  it('draws four ticks with only the last one marked on', () => {
+    expect(html.match(/<rect/g)).toHaveLength(4)
+    expect(html.match(/brandMark__tick--on/g)).toHaveLength(1)
+    expect(html.slice(html.lastIndexOf('<rect'))).toContain('brandMark__tick--on')
+  })
+
+  it('is hidden from assistive technology, since the wordmark names the app', () => {
+    expect(html).toContain('aria-hidden="true"')
+  })
+
+  it('fills from tokens, so the last tick follows the chosen accent', () => {
+    const css = cssOf('BrandMark')
+    expect(css).toMatch(/__tick\s*{[^}]*fill: var\(--color-text\)/)
+    expect(css).toMatch(/--on\s*{[^}]*fill: var\(--color-accent\)/)
+    expect(css).not.toMatch(/#[0-9a-f]{3,6}\b/i)
   })
 })
 

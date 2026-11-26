@@ -1,0 +1,12 @@
+.brandMark {
+  display: block;
+  flex-shrink: 0;
+}
+
+.brandMark__tick {
+  fill: var(--color-text);
+}
+
+.brandMark__tick--on {
+  fill: var(--color-accent);
+}

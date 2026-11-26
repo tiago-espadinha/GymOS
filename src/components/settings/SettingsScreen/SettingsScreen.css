@@ -338,3 +338,26 @@
 .settingsRow .segmented__segment {
   min-width: var(--size-field-lg);
 }
+
+/* About: the brand at the screen's end, below every setting. */
+.settingsAbout {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding-top: var(--space-6);
+  border-top: var(--border-hairline);
+}
+
+.settingsAbout__mark {
+  width: var(--size-brand-about);
+  height: var(--size-brand-about);
+}
+
+.settingsAbout__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-row-title);
+  line-height: 1;
+  text-transform: uppercase;
+}
