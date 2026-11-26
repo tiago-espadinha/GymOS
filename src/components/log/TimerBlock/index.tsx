@@ -11,6 +11,8 @@ interface TimerBlockProps {
   /** The line under the countdown, e.g. "Target 01:30". */
   caption: string;
   fillPct: number;
+  /** The fill is growing (a running rest or hold): its top edge waves. */
+  filling?: boolean;
   // Announced when it changes, so it names phases, never seconds.
   status: string;
   children: ReactNode;
@@ -19,7 +21,7 @@ interface TimerBlockProps {
 // The block fills from the bottom as time passes. The countdown is drawn twice,
 // once on the empty part and once, inverted, on the filled part; the fill clips
 // the second copy, so the numeral stays readable without any blend mode.
-export function TimerBlock({ tone, label, setNumber, meta, countdown, caption, fillPct, status, children }: TimerBlockProps) {
+export function TimerBlock({ tone, label, setNumber, meta, countdown, caption, fillPct, filling = false, status, children }: TimerBlockProps) {
   // A live region only announces changes, so it is filled once the block has mounted.
   const [armed, setArmed] = useState(false);
   useEffect(() => {
@@ -38,8 +40,11 @@ export function TimerBlock({ tone, label, setNumber, meta, countdown, caption, f
     </>
   );
 
+  // Flat when empty or full, so a finished block is one solid colour.
+  const wave = filling && fillPct > 0 && fillPct < 100;
+
   return (
-    <section className={`timerBlock timerBlock--${tone}`} aria-label={`${label} timer`}>
+    <section className={`timerBlock timerBlock--${tone}${wave ? " timerBlock--filling" : ""}`} aria-label={`${label} timer`}>
       <div className="timerBlockFace" role="timer" aria-label={`${label}, ${countdown}`}>
         {face}
       </div>

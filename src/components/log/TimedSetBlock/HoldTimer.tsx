@@ -31,6 +31,7 @@ export function HoldTimer({ timer, name, setNumber, setTotal, onDiscard }: HoldT
       countdown={phase === "ready" ? formattedTarget : isComplete ? formatRestClock(0, overtimeMs) : formatClock(elapsedMs)}
       caption={phase === "ready" ? "" : isComplete ? `${formattedTarget} reached` : `of ${formattedTarget}`}
       fillPct={isComplete ? 100 : Math.round(progress * 1000) / 10}
+      filling={phase === "running"}
       status={phase === "ready" ? "" : phase === "over" ? "Target reached" : `${name} ${phase}`}
     >
       {phase === "running" && (
