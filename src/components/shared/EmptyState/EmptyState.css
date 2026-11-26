@@ -44,7 +44,6 @@
 }
 
 .emptyState__import {
-  align-self: flex-start;
   padding: 0;
   color: var(--color-text);
 }

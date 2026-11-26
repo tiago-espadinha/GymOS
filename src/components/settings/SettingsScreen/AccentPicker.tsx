@@ -13,7 +13,7 @@ export function AccentPicker() {
   return (
     <>
       <div className="settingsRow">
-        <span className="settingsRowLabel">Accent</span>
+        <span className="settingsRowLabel">Accent color</span>
         <span className="accentName">{current.name}</span>
       </div>
       <div role="group" aria-label="Accent colour" className="accentSwatches">
@@ -30,7 +30,6 @@ export function AccentPicker() {
           </button>
         ))}
       </div>
-      <p className="settingsHint">Used for rest, the main button and the active tab. Timed holds stay white.</p>
       {saveFailures > 0 && (
         <SaveFailedAlert key={saveFailures}>
           The browser refused to store your accent, so it was left as it was. Free some space and try again.
