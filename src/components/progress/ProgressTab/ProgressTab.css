@@ -94,9 +94,8 @@
 }
 
 .progressMetric {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  /* The info callout is placed against this block, over what follows it. */
+  position: relative;
 }
 
 .progressMetricRow {
@@ -121,17 +120,53 @@
   cursor: pointer;
 }
 
+.progressInfo:focus-visible,
+.progressInfoClose:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
 .progressInfo[aria-expanded='true'] {
   color: var(--color-text);
 }
 
+/* A callout floating over the figures and chart, so nothing below moves when it opens. */
 .progressInfoPanel {
+  position: absolute;
+  top: calc(100% + var(--space-3));
+  left: 0;
+  right: 0;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-4);
+  border-top: var(--border-callout);
   border-radius: var(--radius-surface);
   background: var(--color-surface);
+  animation: progressInfoReveal var(--motion-reveal) ease-out;
+}
+
+/* The notch on the selected segment; it slides when the metric changes. */
+.progressInfoNotch {
+  position: absolute;
+  /* Above the 4px accent top edge, its base resting on it. */
+  top: calc(-1 * var(--space-2) - 4px);
+  border: var(--space-2) solid transparent;
+  border-top: 0;
+  border-bottom-color: var(--color-accent);
+  transform: translateX(-50%);
+  transition: left var(--motion-reveal) ease-out;
+}
+
+/* Grows down from the notch; the clip reaches above the panel so the notch shows from the start. */
+@keyframes progressInfoReveal {
+  from {
+    clip-path: inset(calc(-1 * var(--space-5)) 0 100% 0);
+  }
+  to {
+    clip-path: inset(calc(-1 * var(--space-5)) 0 0 0);
+  }
 }
 
 .progressInfoPanel[hidden] {
@@ -143,6 +178,37 @@
   font-size: var(--text-body);
   font-weight: 500;
   line-height: var(--leading-body);
+}
+
+.progressInfoHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.progressInfoPanel .progressInfoKicker {
+  padding-top: var(--space-1);
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.progressInfoClose {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--size-control);
+  height: var(--size-control);
+  margin: calc(-1 * var(--space-3)) calc(-1 * var(--space-3)) calc(-1 * var(--space-3)) 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
 }
 
 .progressInfoPanel .progressInfoPR {

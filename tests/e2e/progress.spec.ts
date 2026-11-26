@@ -269,6 +269,101 @@ test('the info button explains the selected metric, by keyboard alone', async ({
   await expect(panel).toBeVisible()
 })
 
+const centreX = async (el: ReturnType<Page['locator']>) => {
+  const b = (await el.boundingBox())!
+  return b.x + b.width / 2
+}
+
+for (const [width, accent, rgb] of [
+  [375, 'lime', 'rgb(198, 255, 61)'],
+  [768, 'lime', 'rgb(198, 255, 61)'],
+  [1280, 'red', 'rgb(255, 64, 64)'],
+] as const) {
+  test(`the info callout floats over the chart with its notch on the selected metric at ${width}px (${accent})`, async ({ page }) => {
+    await page.evaluate((a) => localStorage.setItem('gym:accent', JSON.stringify(a)), accent)
+    await page.setViewportSize({ width, height: 900 })
+    await page.reload()
+    await page.getByText('Stats', { exact: true }).first().click()
+    const panel = page.locator('.progressInfoPanel')
+    const notch = page.locator('.progressInfoNotch')
+    const chart = page.locator('.progressFigure')
+    const before = [await figures(page).first().boundingBox(), await chart.boundingBox()]
+
+    await page.getByRole('button', { name: 'About Average' }).click()
+    await expect(panel).toBeVisible()
+    await expect(panel.getByText('About Average', { exact: true })).toBeVisible()
+    // Nothing below moves, and the callout lies over the figures.
+    expect([await figures(page).first().boundingBox(), await chart.boundingBox()]).toEqual(before)
+    const p = (await panel.boundingBox())!
+    expect(p.y + p.height).toBeGreaterThan(before[0]!.y)
+    await expect(notch).toHaveCSS('border-bottom-color', rgb)
+    await expect(panel).toHaveCSS('border-top-color', rgb)
+    expect(Math.abs((await centreX(notch)) - (await centreX(metric(page, 'Average'))))).toBeLessThan(1)
+
+    await metric(page, 'e1RM').click()
+    await expect(panel.getByText('About e1RM', { exact: true })).toBeVisible()
+    await expect(panel).toContainText('Epley')
+    await expect.poll(async () => Math.abs((await centreX(notch)) - (await centreX(metric(page, 'e1RM'))))).toBeLessThan(1)
+    // The e1RM figures differ, so compare its chart with the callout open and closed.
+    const open = await chart.boundingBox()
+    await page.keyboard.press('Escape')
+    expect(await chart.boundingBox()).toEqual(open)
+
+    // Reopened after a metric change while closed, the notch starts on the new segment.
+    await metric(page, 'Total').click()
+    await page.getByRole('button', { name: 'About Total' }).click()
+    expect(Math.abs((await centreX(notch)) - (await centreX(metric(page, 'Total'))))).toBeLessThan(1)
+  })
+}
+
+test('the info callout closes on its close button, a tap outside and a new exercise', async ({ page }) => {
+  const info = page.getByRole('button', { name: 'About Average' })
+  const panel = page.locator('.progressInfoPanel')
+
+  await info.click()
+  await page.keyboard.press('Tab')
+  const close = panel.getByRole('button', { name: 'Close Average info' })
+  await expect(close).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(panel).toBeHidden()
+  await expect(info).toBeFocused()
+
+  // A tap outside only closes: Settings does not open.
+  await info.click()
+  await page.getByRole('button', { name: 'Settings' }).click()
+  await expect(panel).toBeHidden()
+  await expect(page.getByRole('heading', { name: 'Settings' })).toHaveCount(0)
+  await expect(info).toHaveAttribute('aria-expanded', 'false')
+  await expect(page.getByRole('heading', { name: 'Stats', level: 1 })).toBeVisible()
+
+  // Tabbing on past the close button closes the callout, so focus never lands under it.
+  await info.click()
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Tab')
+  await expect(panel).toBeHidden()
+  await expect(page.locator('.progressInfoPanel :focus')).toHaveCount(0)
+
+  // From the keyboard the outside button still acts, and a new exercise starts with it closed.
+  await info.click()
+  await picker(page).focus()
+  await page.keyboard.press('Enter')
+  await expect(panel).toBeHidden()
+  await page.getByRole('dialog').getByRole('searchbox', { name: 'Search exercises' }).fill('Seated row')
+  await page.getByRole('option', { name: /^Seated row/i }).click()
+  await expect(page.getByRole('button', { name: 'About Average' })).toHaveAttribute('aria-expanded', 'false')
+  await expect(panel).toBeHidden()
+})
+
+test('the info callout grows in 150ms, and appears at once with reduced motion', async ({ page }) => {
+  const panel = page.locator('.progressInfoPanel')
+  await page.getByRole('button', { name: 'About Average' }).click()
+  await expect(panel).toHaveCSS('animation-duration', '0.15s')
+  await page.keyboard.press('Escape')
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.getByRole('button', { name: 'About Average' }).click()
+  await expect(panel).toHaveCSS('animation-duration', '0s')
+})
+
 test('Stats with data has no detectable WCAG A/AA violations', async ({ page }) => {
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([])

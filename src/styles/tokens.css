@@ -134,6 +134,7 @@
   --border-control: 2px solid var(--color-text);
   --border-chip: 2px solid var(--color-line-strong);
   --border-focus: 2px solid var(--color-accent);
+  --border-callout: 4px solid var(--color-accent); /* ties a callout to the control it explains */
   --border-tab-active: 4px solid var(--color-accent);
 
   /* Shadows: none in this direction */
@@ -141,6 +142,7 @@
 
   /* Motion (proposed; see DESIGN_DIRECTION.md) */
   --motion-press: 100ms;
+  --motion-reveal: 150ms; /* a callout growing from its anchor */
   --motion-fill: 1s;
   --ease-fill: linear;
   --motion-wave: 7.2s; /* one tile of the timer fill's edge passing by (phone about 67px/s, wide 133) */
@@ -177,6 +179,7 @@
 @media (prefers-reduced-motion: reduce) {
   :root {
     --motion-press: 0ms;
+    --motion-reveal: 0ms;
     --motion-fill: 0ms;
   }
 }

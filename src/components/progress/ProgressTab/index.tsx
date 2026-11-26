@@ -262,7 +262,7 @@ export function ProgressTab({
   const detail = (
     <>
       {figures && (
-        <MetricInfo label={METRIC_LABELS[metric]} text={metricInfo(resolveBranch(meta), metric, meta.timeGoal)}>
+        <MetricInfo key={selected.name} label={METRIC_LABELS[metric]} text={metricInfo(resolveBranch(meta), metric, meta.timeGoal)}>
           <SegmentedControl
             label="Metric"
             options={metricOptions.map((m) => ({ value: m, label: METRIC_LABELS[m] }))}
