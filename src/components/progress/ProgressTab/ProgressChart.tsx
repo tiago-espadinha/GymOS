@@ -1,4 +1,4 @@
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, getNiceTickValues } from "recharts";
 import { formatDate } from "../../../utils/date";
 import type { ProgressPoint } from "../../../utils/progress";
 
@@ -23,6 +23,22 @@ interface TooltipProps {
 
 // Beyond this many points the session dots shrink, so a long range still reads as a line.
 const DENSE_POINTS = 24;
+
+// The y labels sit inside the plot (mirrored), so the line starts past the widest one. The ticks
+// are computed here, not left to the axis, so the gutter is measured on the labels actually drawn.
+const TICK_COUNT = 3;
+const TICK_CHAR_PX = 9; // a 13px digit measures about 8.5px
+const TICK_INSET_PX = 8; // a mirrored label starts this far in (Recharts tick size 6 + margin 2)
+const TICK_GAP_PX = 8;
+
+function yTicks(points: ProgressPoint[]) {
+  const values = points.map((p) => p.value);
+  return getNiceTickValues([Math.min(...values), Math.max(...values)], TICK_COUNT);
+}
+
+function labelGutter(ticks: number[], formatTick: (value: number) => string) {
+  return TICK_INSET_PX + Math.max(...ticks.map((t) => formatTick(t).length)) * TICK_CHAR_PX + TICK_GAP_PX;
+}
 
 /**
  * A node per session: a white dot, a hollow accent ring on a PR, and a filled accent dot on the
@@ -62,17 +78,19 @@ function PointTooltip({ active, payload }: TooltipProps) {
 }
 
 export function ProgressChart({ points, description, formatTick }: ProgressChartProps) {
+  const ticks = yTicks(points);
   return (
     <div className="progressChart" role="img" aria-label={description}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={points} margin={{ top: 28, right: 10, bottom: 8, left: 8 }}>
           <CartesianGrid stroke="var(--color-line)" vertical={false} />
+          <XAxis dataKey="date" hide padding={{ left: labelGutter(ticks, formatTick), right: 0 }} />
           <YAxis
             mirror
             axisLine={false}
             tickLine={false}
-            tickCount={3}
-            domain={["auto", "auto"]}
+            ticks={ticks}
+            domain={[ticks[0], ticks[ticks.length - 1]]}
             tickFormatter={formatTick}
             tick={{ fill: "var(--color-text-muted)", fontSize: 13, dy: -10 }}
           />
