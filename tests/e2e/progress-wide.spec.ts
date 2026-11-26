@@ -65,11 +65,11 @@ test.describe('at 1280', () => {
     expect(Math.abs(a.y - b.y)).toBeLessThan(2)
   })
 
-  test('the chosen row is inverted with a check, and picking another updates the right pane', async ({ page }) => {
+  test('the chosen row fills with the accent and keeps a check, and picking another updates the right pane', async ({ page }) => {
     await open(page)
     await expect(option(page, 'Lat pulldown')).toHaveAttribute('aria-selected', 'true')
     await expect(option(page, 'Lat pulldown').locator('svg')).toHaveCount(1)
-    await expect(option(page, 'Lat pulldown')).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+    await expect(option(page, 'Lat pulldown')).toHaveCSS('background-color', 'rgb(198, 255, 61)')
     await expect(option(page, 'Lat pulldown')).toContainText('4 sessions · last')
     await expect(page.locator('.progressStatKicker').nth(1)).toHaveText('New PR')
     await expect(page.locator('.progressChartPR')).toHaveText('PR')

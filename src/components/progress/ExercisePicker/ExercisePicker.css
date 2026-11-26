@@ -97,10 +97,10 @@
   cursor: pointer;
 }
 
-/* Selected is inverted with a check mark, never colour alone. */
+/* Selected fills with the accent and keeps its check mark, never colour alone. */
 .exercisePicker__option[aria-selected='true'] {
-  background: var(--color-inverse);
-  color: var(--color-on-inverse);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 .exercisePicker__option:focus-visible {
@@ -109,7 +109,7 @@
 }
 
 .exercisePicker__option[aria-selected='true']:focus-visible {
-  outline-color: var(--color-on-inverse);
+  outline-color: var(--color-on-accent);
 }
 
 .exercisePicker__text {
@@ -138,5 +138,5 @@
 
 .exercisePicker__option[aria-selected='true'] .exercisePicker__meta {
   font-weight: 600;
-  color: var(--color-on-inverse);
+  color: var(--color-on-accent);
 }
