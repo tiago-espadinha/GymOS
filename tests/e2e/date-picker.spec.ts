@@ -194,3 +194,40 @@ test('the open picker fits the phone sheet: seven 44px day columns, nothing cut 
   expect(narrow).toBe(true)
   await page.screenshot({ path: testInfo.outputPath(`date-sheet-${testInfo.project.name}.png`) })
 })
+
+for (const width of [0, 1280]) {
+  test(`the grid keeps six week rows of space, so nothing in the sheet moves between months${width ? ` at ${width}px` : ''}`, async ({ page }) => {
+    if (width) await page.setViewportSize({ width, height: 800 })
+    await openSheet(page)
+    // The sheet sits on the bottom edge, so a shorter grid would move its top and every button above the grid.
+    const layout = () =>
+      sheet(page).evaluate((el) => ({
+        top: Math.round(el.getBoundingClientRect().top),
+        buttons: Array.from(el.querySelectorAll('button:not(.calendar__day)'), (b) => {
+          const r = b.getBoundingClientRect()
+          return `${b.textContent?.trim() || b.getAttribute('aria-label')} ${Math.round(r.left)},${Math.round(r.top)}`
+        }),
+      }))
+    // Weeks plus the weekday header: padding rows are hidden from screen readers.
+    const weeks = (n: number) => expect(grid(page).getByRole('row')).toHaveCount(n + 1)
+
+    await expect(grid(page)).toHaveAccessibleName('November 2026')
+    await weeks(6)
+    const sixRows = await layout()
+
+    await sheet(page).getByRole('button', { name: 'Previous month' }).click()
+    await expect(grid(page)).toHaveAccessibleName('October 2026')
+    await weeks(5)
+    expect(await layout()).toEqual(sixRows)
+
+    // 1 Feb 2021 is a Monday in a 28-day month: four rows.
+    await field(page).fill('01/02/2021')
+    await expect(grid(page)).toHaveAccessibleName('February 2021')
+    await weeks(4)
+    const fourRows = await layout()
+    expect(fourRows.top).toBe(sixRows.top)
+    // The chosen quick option changes, so compare positions, not labels.
+    expect(fourRows.buttons.map((b) => b.split(' ').pop())).toEqual(sixRows.buttons.map((b) => b.split(' ').pop()))
+    await axe(page)
+  })
+}

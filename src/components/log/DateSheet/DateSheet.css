@@ -171,6 +171,11 @@
   text-align: center;
 }
 
+/* The same height as a row of days. */
+.calendar__pad td {
+  height: var(--size-control);
+}
+
 /* Shrinks with its column below 7 × 44 (a 320 px phone) rather than overlapping. */
 .calendar__day {
   width: 100%;

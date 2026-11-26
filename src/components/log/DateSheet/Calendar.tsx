@@ -2,6 +2,8 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { ChevronIcon } from "../../shared";
 import { addDays, addMonths, formatDateSpoken, formatMonthYear, monthWeeks } from "../../../utils/date";
 
+/** A month touches at most six Monday-first weeks. */
+const MAX_WEEKS = 6;
 const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 interface CalendarProps {
@@ -59,6 +61,7 @@ export function Calendar({ value, min, max, onPick }: CalendarProps) {
   };
 
   const month = focused.slice(0, 7);
+  const weeks = monthWeeks(focused);
 
   return (
     <div className="calendar">
@@ -88,7 +91,7 @@ export function Calendar({ value, min, max, onPick }: CalendarProps) {
           </tr>
         </thead>
         <tbody>
-          {monthWeeks(focused).map((week, w) => (
+          {weeks.map((week, w) => (
             <tr key={`${month}-${w}`}>
               {week.map((date, d) =>
                 date ? (
@@ -106,6 +109,12 @@ export function Calendar({ value, min, max, onPick }: CalendarProps) {
                   <td key={`empty-${d}`} role="gridcell" />
                 ),
               )}
+            </tr>
+          ))}
+          {/* Every month takes six rows of space, so the sheet and its buttons never move. */}
+          {Array.from({ length: MAX_WEEKS - weeks.length }, (_, i) => (
+            <tr key={`pad-${i}`} className="calendar__pad" aria-hidden="true">
+              <td colSpan={7} />
             </tr>
           ))}
         </tbody>
