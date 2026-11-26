@@ -6,9 +6,11 @@
   min-height: calc(100dvh - 80px);
 }
 
-/* A rest strip above the exercise takes its height from the screen, so the bottom stack stays in view. */
+/* A rest strip above the exercise sits a gap clear of its header and takes its height and that gap
+   from the screen, so the bottom stack stays in view. */
 .sessionList:has(> .restStrip) > .exerciseScreen {
-  min-height: calc(100dvh - 80px - var(--size-row-summary));
+  margin-top: var(--space-4);
+  min-height: calc(100dvh - 80px - var(--size-row-summary) - var(--space-4));
 }
 
 .exerciseScreen[hidden] {
@@ -191,7 +193,7 @@
   }
 
   .sessionList:has(> .restStrip) > .exerciseScreen {
-    min-height: calc(100dvh - 40px - var(--size-row-summary));
+    min-height: calc(100dvh - 40px - var(--size-row-summary) - var(--space-4));
   }
 }
 
@@ -202,6 +204,6 @@
   }
 
   .sessionList:has(> .restStrip) > .exerciseScreen {
-    min-height: calc(100dvh - var(--space-7) - var(--gutter-wide) - var(--size-row-summary));
+    min-height: calc(100dvh - var(--space-7) - var(--gutter-wide) - var(--size-row-summary) - var(--space-4));
   }
 }
