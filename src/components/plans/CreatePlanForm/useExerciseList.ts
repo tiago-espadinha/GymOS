@@ -19,10 +19,11 @@ function makeExercise(): Exercise {
 /**
  * The form's exercises, with one expanded at a time and the last removal kept for Undo.
  * `focus` takes a selector for the control that should have focus after the next render.
+ * A new plan starts with one open blank exercise; an edited one with its own, all collapsed.
  */
-export function useExerciseList(focus: (selector: string) => void) {
-  const [exercises, setExercises] = useState<Exercise[]>(() => [makeExercise()]);
-  const [openId, setOpenId] = useState<string | null>(() => exercises[0].id);
+export function useExerciseList(focus: (selector: string) => void, initial?: Exercise[]) {
+  const [exercises, setExercises] = useState<Exercise[]>(() => initial ?? [makeExercise()]);
+  const [openId, setOpenId] = useState<string | null>(() => (initial ? null : exercises[0].id));
   const [removed, setRemoved] = useState<Removed | null>(null);
 
   const update = (updated: Exercise) => setExercises((all) => all.map((e) => (e.id === updated.id ? updated : e)));
