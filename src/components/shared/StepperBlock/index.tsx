@@ -1,3 +1,4 @@
+import { Icon } from '../Icon';
 import { stepValue } from './stepValue';
 import './StepperBlock.css';
 
@@ -39,7 +40,7 @@ export function StepperBlock({
         className="stepper-block__button"
         onClick={() => onChange(stepValue(value, -step, min))}
       >
-        −
+        <Icon name="minus" size="xl" />
       </button>
       {/* A typed field announces itself; only a read-only reading needs the live region. */}
       <div className="stepper-block__reading" aria-live={onType ? undefined : 'polite'}>
@@ -63,7 +64,7 @@ export function StepperBlock({
         className="stepper-block__button"
         onClick={() => onChange(stepValue(value, step, min))}
       >
-        +
+        <Icon name="plus" size="xl" />
       </button>
     </div>
   );

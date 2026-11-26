@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useId, type ReactNode } from 'react';
 import { PrimaryButton } from '../PrimaryButton';
 import './EmptyState.css';
 
@@ -7,7 +7,7 @@ interface EmptyStateProps {
   kicker: string;
   title: string;
   text: string;
-  action: string;
+  action: ReactNode;
   onAction: () => void;
   /** Pass only when the device holds no plans and no sessions. */
   onImport?: () => void;

@@ -137,7 +137,10 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
   ) : (
     <header className="plansTabHeader">
       <h1 className="plansTabTitle" tabIndex={-1}>{plansTitle(activePlans.length)}</h1>
-      <PillButton variant="white" onClick={() => onCreatingChange(true)}>+ Create New</PillButton>
+      <PillButton variant="white" onClick={() => onCreatingChange(true)}>
+        <Icon name="plus" />
+        Create New
+      </PillButton>
     </header>
   );
 
@@ -214,7 +217,7 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
               kicker="Plans"
               title="No plans yet"
               text="A plan is the list of exercises you repeat. Make one, then start it from here or from Log."
-              action="+ Create New"
+              action={<><Icon name="plus" />Create New</>}
               onAction={() => onCreatingChange(true)}
               onImport={onImport}
             />

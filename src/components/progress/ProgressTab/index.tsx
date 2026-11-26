@@ -213,7 +213,7 @@ export function ProgressTab({
               ? "Log your first session and the last, best and trend for each exercise show up here."
               : "Log a few sessions and the last, best and trend for each exercise show up here."
           }
-          action={hasPlans ? "Go to Log" : "+ New plan"}
+          action={hasPlans ? "Go to Log" : <><Icon name="plus" />New plan</>}
           onAction={hasPlans ? onGoToLog : onNewPlan}
           onImport={onImport}
         />

@@ -9,14 +9,13 @@
 }
 
 .stepper-block__button {
+  display: grid;
+  place-items: center;
   min-width: var(--size-control);
   min-height: calc(var(--size-control) * 2);
   border: 0;
   background: transparent;
   color: var(--color-text);
-  font-family: var(--font-display);
-  font-weight: var(--weight-display);
-  font-size: var(--text-section-title);
   cursor: pointer;
 }
 

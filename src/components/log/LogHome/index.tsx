@@ -102,7 +102,7 @@ export function LogHome({ plans, sessions, date, onDateChange, onStart, onEdit, 
               ? "Sessions start from a plan. Make one with the exercises you repeat."
               : "Sessions start from a plan. Make one, press Start, and every session you save lands here."
           }
-          action="+ New plan"
+          action={<><Icon name="plus" />New plan</>}
           onAction={onNewPlan}
           onImport={onImport}
         />

@@ -38,4 +38,22 @@ describe('Icon', () => {
       .map(([path]) => path)
     expect(drawn).toEqual([])
   })
+
+  it('leaves no typed glyph standing in for an icon', () => {
+    const code = (text: string) => text.replace(/\{?\/\*[\s\S]*?\*\/\}?|\/\/.*$/gm, '')
+    const glyphs = Object.entries(sources)
+      .filter(([path]) => !path.includes('.test.'))
+      .flatMap(([path, text]) => {
+        const src = code(text)
+        const found = [
+          ...(src.match(/[‹›✕✓⋯]/g) ?? []),
+          // A text node or line that is only an arrow, a plus or a minus.
+          ...(src.match(/(^|>)[ \t]*[+−→][ \t]*($|<)/gm) ?? []),
+          // A label led by a typed plus, as "+ New plan" was.
+          ...(src.match(/["'>]\+ [A-Z]/g) ?? []),
+        ]
+        return found.map((glyph) => `${path}: ${glyph.trim()}`)
+      })
+    expect(glyphs).toEqual([])
+  })
 })

@@ -44,7 +44,8 @@ export function FinishScreen({ session, onNotes, onDate, onSave, saveFailures, o
   return (
     <div>
       <button type="button" className="finishBack" onClick={onBack}>
-        <span aria-hidden="true">‹ </span>Session
+        <Icon name="chevron-left" />
+        Session
       </button>
       <section className="finishHero" aria-labelledby="finishTitle">
         {editing ? (

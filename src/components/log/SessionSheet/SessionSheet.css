@@ -50,6 +50,9 @@
 }
 
 .sessionSheet__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
   flex: none;
   font-family: var(--font-body);
   font-size: var(--text-small);

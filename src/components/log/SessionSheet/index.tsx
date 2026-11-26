@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import { ConfirmSheet, Sheet } from "../../shared";
+import { ConfirmSheet, Icon, Sheet } from "../../shared";
 import { formatDateMeta } from "../../../utils/date";
 import { ActiveSession, hasLoggedSets } from "../../../utils/activeSession";
 import { sessionTotals } from "../../../utils/sessionList";
@@ -61,7 +61,8 @@ export function SessionSheet({ session, onDate, onDiscard, onDelete, onClose }: 
             <button type="button" className="sessionSheet__row" aria-haspopup="dialog" onClick={() => setOpen("date")}>
               <span>Change date</span>
               <span className="sessionSheet__hint">
-                {date} <span aria-hidden="true">›</span>
+                {date}
+                <Icon name="chevron-right" />
               </span>
             </button>
           )}

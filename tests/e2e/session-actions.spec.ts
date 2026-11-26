@@ -131,7 +131,7 @@ test('editing: accent kicker instead of the banner; the sheet changes date, and 
   expect(stored[0].date).toBe('2026-11-09')
 })
 
-test('Done for a new session: ‹ Session on top, Save session the only action, and back returns focus to Finish', async ({ page }) => {
+test('Done for a new session: Session back link on top, Save session the only action, and back returns focus to Finish', async ({ page }) => {
   await startNew(page)
   await page.getByRole('button', { name: /^Bench Press/ }).click()
   await logSet(page, '60', '8')
@@ -143,7 +143,7 @@ test('Done for a new session: ‹ Session on top, Save session the only action, 
   const hero = await page.locator('.finishHero').boundingBox()
   expect((await back.boundingBox())!.y).toBeLessThan(hero!.y)
   // ‹ Session, then Save session: nothing else to press.
-  await expect(page.getByRole('main').getByRole('button')).toHaveText(['‹ Session', 'Save session'])
+  await expect(page.getByRole('main').getByRole('button')).toHaveText(['Session', 'Save session'])
   await axe(page)
 
   await back.click()

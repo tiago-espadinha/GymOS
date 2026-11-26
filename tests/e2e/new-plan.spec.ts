@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 
 const openForm = async (page: Page) => {
   await page.goto('/')
-  await page.getByRole('button', { name: '+ Create New' }).click()
+  await page.getByRole('button', { name: 'Create New' }).click()
 }
 
 const storedPlans = (page: Page) =>
@@ -12,7 +12,7 @@ const planName = (page: Page) => page.getByLabel('Name', { exact: true })
 const group = (page: Page, name: string) => page.getByRole('group', { name, exact: true })
 const choose = (page: Page, groupName: string, option: string) =>
   group(page, groupName).getByRole('button', { name: option, exact: true }).click()
-const addExercise = (page: Page) => page.getByRole('button', { name: '+ Add exercise' }).click()
+const addExercise = (page: Page) => page.getByRole('button', { name: 'Add exercise' }).click()
 const header = (page: Page, name: RegExp) => page.getByRole('button', { name, expanded: false })
 
 async function pickMuscle(page: Page, muscle: string) {
@@ -147,7 +147,7 @@ test('removing the first exercise focuses the next; removing the last focuses Ad
 
   await header(page, /^Curl/).click()
   await page.getByRole('button', { name: 'Remove exercise 1' }).click()
-  await expect(page.getByRole('button', { name: '+ Add exercise' })).toBeFocused()
+  await expect(page.getByRole('button', { name: 'Add exercise' })).toBeFocused()
 
   await planName(page).fill('Empty')
   await page.getByRole('button', { name: 'Save plan' }).click()

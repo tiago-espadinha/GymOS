@@ -1,5 +1,8 @@
 /* "‹ Session": back to the list, or the last exercise's Finish card. */
 .finishBack {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
   min-height: var(--size-control);
   margin-bottom: var(--space-2);
   padding: 0;

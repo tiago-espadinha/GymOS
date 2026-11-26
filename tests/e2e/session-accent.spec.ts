@@ -120,7 +120,7 @@ for (const [accent, rgb] of Object.entries(accents)) {
       await page.getByRole('button', { name: /^Plank/ }).click()
       const finish = screen(page, 'Plank').getByRole('button', { name: 'Finish session', exact: true })
       await expect(finish.locator('.exerciseNextCardLabel')).toHaveCount(0)
-      await expect(finish).toHaveText('Finish session→')
+      await expect(finish).toHaveText('Finish session')
       // Finish is disabled, and muted, until a set is logged.
       await expect(finish).toBeDisabled()
       await expect(finish).toHaveCSS('color', MUTED)

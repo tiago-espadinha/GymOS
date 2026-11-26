@@ -50,7 +50,7 @@ test.describe('at 1280', () => {
     expect(right.x + right.width).toBe(1240)
 
     await expect(pane(page).getByRole('heading', { level: 1 })).toHaveText('3 Plans')
-    await expect(pane(page).getByRole('button', { name: '+ Create New' })).toBeVisible()
+    await expect(pane(page).getByRole('button', { name: 'Create New' })).toBeVisible()
     await expect(row(page, 'Back')).toHaveAttribute('aria-current', 'true')
     await expect(row(page, 'Legs')).not.toHaveAttribute('aria-current')
 
@@ -171,9 +171,9 @@ test.describe('at 1280', () => {
     await expect(archivedToggle(page)).toBeVisible()
   })
 
-  test('+ Create New opens the form in the phone column and Cancel returns to the panes', async ({ page }) => {
+  test('Create New opens the form in the phone column and Cancel returns to the panes', async ({ page }) => {
     await open(page)
-    await pane(page).getByRole('button', { name: '+ Create New' }).click()
+    await pane(page).getByRole('button', { name: 'Create New' }).click()
     await expect(page.locator('.plansTab--wide')).toHaveCount(0)
     await page.getByRole('button', { name: 'Cancel' }).click()
     await expect(pane(page)).toBeVisible()

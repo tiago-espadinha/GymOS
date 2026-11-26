@@ -1,5 +1,6 @@
 import { ExerciseLog, Set } from "../../../types";
 import { exerciseFinishId, exerciseProgress, nextTarget } from "../../../utils/sessionList";
+import { Icon } from "../../shared";
 import ExerciseLogger from "../ExerciseLogger";
 import "./ExerciseScreen.css";
 
@@ -73,9 +74,7 @@ export function ExerciseScreen({
         <span className="exerciseNextCardName">{next.name}</span>
       </span>
       {target && <span className="exerciseNextCardTarget">{target}</span>}
-      <span className="exerciseNextCardArrow" aria-hidden="true">
-        →
-      </span>
+      <Icon name="arrow-right" size="lg" />
     </button>
   ) : (
     <button
@@ -90,9 +89,7 @@ export function ExerciseScreen({
           Finish<span className="visuallyHidden"> session</span>
         </span>
       </span>
-      <span className="exerciseNextCardArrow" aria-hidden="true">
-        →
-      </span>
+      <Icon name="arrow-right" size="lg" />
     </button>
   );
 
@@ -107,7 +104,8 @@ export function ExerciseScreen({
           <div>
             <div className="exerciseScreenTop">
               <button type="button" className="exerciseScreenBack" onClick={onAllExercises}>
-                <span aria-hidden="true">‹ </span>All exercises
+                <Icon name="chevron-left" />
+                All exercises
               </button>
               <p className="exerciseScreenPlace">
                 <span className="exerciseScreenPlan">{planName}</span>

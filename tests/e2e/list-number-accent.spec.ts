@@ -52,9 +52,9 @@ for (const [accent, rgb] of Object.entries(accents)) {
 
       test('the New plan form numbers open and collapsed exercises in the accent; an error stays red', async ({ page }) => {
         await open(page, accent)
-        await page.getByRole('button', { name: '+ Create New' }).first().click()
+        await page.getByRole('button', { name: 'Create New' }).first().click()
         await page.getByLabel('Exercise 1 name').fill('Squat')
-        await page.getByRole('button', { name: '+ Add exercise' }).click()
+        await page.getByRole('button', { name: 'Add exercise' }).click()
         const numbers = page.locator('.exerciseNumber')
         await expect(numbers).toHaveText(['1', '2'])
         await expect(numbers.nth(0)).toHaveCSS('color', rgb)

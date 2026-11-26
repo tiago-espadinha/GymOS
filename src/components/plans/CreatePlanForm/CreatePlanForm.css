@@ -280,6 +280,10 @@
 }
 
 .createPlanFormAdd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
   min-height: var(--size-field);
   border: 2px dashed var(--color-line-empty);
   border-radius: var(--radius-surface);

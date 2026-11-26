@@ -91,7 +91,10 @@ export function CreatePlanForm({ onSave, onCancel }: CreatePlanFormProps) {
           })}
         </ul>
         {errors?.exercises && <p className="exerciseError"><Icon name="warning" />{errors.exercises}</p>}
-        <button type="button" className="createPlanFormAdd" data-add-exercise onClick={list.add}>+ Add exercise</button>
+        <button type="button" className="createPlanFormAdd" data-add-exercise onClick={list.add}>
+          <Icon name="plus" />
+          Add exercise
+        </button>
       </section>
 
       <div className="createPlanFormBar">
