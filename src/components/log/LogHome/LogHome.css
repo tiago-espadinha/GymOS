@@ -137,10 +137,10 @@ span.logHomeLead {
   color: var(--color-text-muted);
 }
 
-/* Label and count, with the count over the Edit column. */
+/* Label, then the count and filter. */
 .logHomeRecentHead {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
   padding-right: var(--space-3);
@@ -152,21 +152,63 @@ span.logHomeLead {
   color: var(--color-text-muted);
 }
 
-/* Smaller than the Chip group (owner pick): small-pill height, one row that scrolls sideways. */
-.logHomeFilter .chip-group {
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  padding: var(--space-1) var(--space-4) var(--space-3);
-  scrollbar-width: none;
+/* Title and count keep one line; only the filter's plan name gives way. */
+.logHomeRecentHead > .logHomeLabel,
+.logHomeRecentCount {
+  flex: none;
+  white-space: nowrap;
 }
 
-.logHomeFilter .chip-group__chip {
-  flex: none;
-  min-height: var(--size-control);
-  padding: 0 var(--space-4);
+.logHomeRecentTools {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* With a filter on it fills with the accent and names the plan. */
+.logHomeFilterButton {
+  display: inline-flex;
+  flex: 0 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: var(--size-control);
+  max-width: 192px; /* about 14 characters of plan name */
+  height: var(--size-control);
+  padding: 0;
+  border: var(--border-chip);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-text);
+  font-family: var(--font-body);
   font-size: var(--text-small);
   font-weight: 700;
+  cursor: pointer;
+}
+
+.logHomeFilterButton svg {
+  flex: none;
+}
+
+.logHomeFilterButton--active {
+  padding: 0 var(--space-4) 0 var(--space-3);
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.logHomeFilterName {
+  min-width: 0;
+  overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.logHomeFilterButton:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
 }
 
 .logHomeMoreWrap {
@@ -407,7 +449,7 @@ span.logHomeLead {
 
   .logHomeRecentHead {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
     padding: 0 0 var(--space-4);
@@ -426,13 +468,6 @@ span.logHomeLead {
   .logHomeRecentCount {
     font-size: var(--text-secondary);
     font-weight: 500;
-  }
-
-  /* Room for every chip, so they wrap instead of scrolling and nothing clips the focus ring. */
-  .logHomeFilter .chip-group {
-    flex-wrap: wrap;
-    overflow: visible;
-    padding: 0 0 var(--space-4);
   }
 
   /* Under the table, sized to its label rather than the pane. */

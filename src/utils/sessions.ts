@@ -46,13 +46,16 @@ export function sessionPlanKey(session: WorkoutSession): string {
   return session.planId || `name:${session.planName}`;
 }
 
-// The plans that have saved sessions, by their latest session, named as last saved.
-// Archived and deleted plans count: the filter lists history, not the current plans.
-export function sessionPlans(sessions: WorkoutSession[]): { key: string; name: string }[] {
-  const plans = new Map<string, string>();
+// The plans that have saved sessions, by their latest session, named as last saved,
+// with how many sessions each has. Archived and deleted plans count: the filter lists
+// history, not the current plans.
+export function sessionPlans(sessions: WorkoutSession[]): { key: string; name: string; count: number }[] {
+  const plans = new Map<string, { key: string; name: string; count: number }>();
   for (const session of newestFirst(sessions)) {
     const key = sessionPlanKey(session);
-    if (!plans.has(key)) plans.set(key, session.planName);
+    const plan = plans.get(key);
+    if (plan) plan.count += 1;
+    else plans.set(key, { key, name: session.planName, count: 1 });
   }
-  return [...plans].map(([key, name]) => ({ key, name }));
+  return [...plans.values()];
 }

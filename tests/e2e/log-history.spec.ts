@@ -37,7 +37,14 @@ test.beforeEach(async ({ page }) => {
 
 const recent = (page: Page) => page.getByRole('region', { name: 'Recent sessions' })
 const rows = (page: Page) => recent(page).getByRole('listitem')
-const filter = (page: Page) => recent(page).getByRole('group', { name: 'Filter by plan' })
+const filter = (page: Page) => recent(page).getByRole('button', { name: /^Filter by plan/ })
+const sheet = (page: Page) => page.getByRole('dialog', { name: 'Filter by plan' })
+const option = (page: Page, name: string) => sheet(page).getByRole('option', { name: new RegExp(`^${name} `) })
+const pickPlan = async (page: Page, name: string) => {
+  await filter(page).click()
+  await option(page, name).click()
+  await expect(sheet(page)).toHaveCount(0)
+}
 const showMore = (page: Page) => recent(page).getByRole('button', { name: 'Show more' })
 
 test('Show more adds ten older sessions at a time, then says all are shown', async ({ page }) => {
@@ -58,33 +65,92 @@ test('Show more adds ten older sessions at a time, then says all are shown', asy
   await expect(rows(page).nth(16).getByRole('button', { name: /^Edit / })).toBeFocused()
 })
 
-test('the plan filter lists every plan with sessions, archived, deleted and imported ones too', async ({ page }) => {
-  const chips = filter(page).getByRole('button')
-  await expect(chips).toHaveText(['All', 'Push day', 'Legs', 'Old block', 'Back'])
-  await expect(chips.first()).toHaveAttribute('aria-pressed', 'true')
-  for (const chip of await chips.all()) expect((await chip.boundingBox())!.height).toBeGreaterThanOrEqual(44)
+test('the filter icon opens a sheet of every plan with sessions, archived, deleted and imported ones too', async ({ page }) => {
+  await expect(filter(page)).toHaveAccessibleName('Filter by plan')
+  const box = (await filter(page).boundingBox())!
+  expect(box.width).toBeGreaterThanOrEqual(44)
+  expect(box.height).toBeGreaterThanOrEqual(44)
 
-  await filter(page).getByRole('button', { name: 'Legs' }).click()
-  await expect(filter(page).getByRole('button', { name: 'Legs' })).toHaveAttribute('aria-pressed', 'true')
+  await filter(page).click()
+  const options = sheet(page).getByRole('option')
+  await expect(options.locator('.planPicker__name')).toHaveText(['All plans', 'Push day', 'Legs', 'Old block', 'Back'])
+  await expect(option(page, 'All plans')).toContainText('23 sessions')
+  await expect(option(page, 'Legs')).toContainText(`${count('Legs')} sessions`)
+  await expect(option(page, 'All plans')).toHaveAttribute('aria-selected', 'true')
+
+  await option(page, 'Legs').click()
+  await expect(sheet(page)).toHaveCount(0)
+  await expect(filter(page)).toHaveAccessibleName('Filter by plan, Legs')
+  await expect(filter(page)).toHaveText('Legs')
+  await expect(filter(page)).toBeFocused()
   await expect(rows(page)).toHaveCount(count('Legs'))
   for (const row of await rows(page).all()) await expect(row).toContainText('Legs')
   await expect(showMore(page)).toHaveCount(0)
 
-  await filter(page).getByRole('button', { name: 'Back' }).click()
+  await filter(page).click()
+  await expect(option(page, 'Legs')).toHaveAttribute('aria-selected', 'true')
+  await option(page, 'Back').click()
   await expect(rows(page)).toHaveCount(count('Back'))
 })
 
-test('a filter pages on its own and resets the list to six when changed', async ({ page }) => {
-  await filter(page).getByRole('button', { name: 'Push day' }).click()
+test('a filter pages on its own, and All plans clears it back to six', async ({ page }) => {
+  await pickPlan(page, 'Push day')
   await expect(rows(page)).toHaveCount(6)
   await expect(recent(page).getByText(`6 of ${count('Push day')}`)).toBeVisible()
   await showMore(page).click()
   await expect(rows(page)).toHaveCount(count('Push day'))
   await expect(recent(page).getByText(`All ${count('Push day')} shown`)).toBeVisible()
 
-  await filter(page).getByRole('button', { name: 'All' }).click()
+  await pickPlan(page, 'All plans')
+  await expect(filter(page)).toHaveAccessibleName('Filter by plan')
+  await expect(filter(page)).toHaveText('')
   await expect(rows(page)).toHaveCount(6)
   await expect(recent(page).getByText('6 of 23')).toBeVisible()
+})
+
+test('the filter works from the keyboard and returns focus to the icon', async ({ page }) => {
+  await filter(page).focus()
+  await page.keyboard.press('Enter')
+  await expect(option(page, 'All plans')).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(option(page, 'Push day')).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(sheet(page)).toHaveCount(0)
+  await expect(filter(page)).toBeFocused()
+  await expect(rows(page)).toHaveCount(6)
+
+  await page.keyboard.press('Space')
+  await page.keyboard.press('End')
+  await expect(option(page, 'Back')).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(sheet(page)).toHaveCount(0)
+  await expect(filter(page)).toBeFocused()
+  await expect(rows(page)).toHaveCount(count('Back'))
+
+  await page.keyboard.press('Enter')
+  await expect(option(page, 'Back')).toBeFocused()
+  await sheet(page).getByRole('button', { name: 'Close' }).click()
+  await expect(filter(page)).toBeFocused()
+  await expect(rows(page)).toHaveCount(count('Back'))
+})
+
+test('a long plan name truncates in the filter pill; the title and count stay on one line', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  const long = 'Legs and glutes heavy block'
+  await page.evaluate((name) => {
+    const s = JSON.parse(localStorage.getItem('gym:sessions')!)
+    localStorage.setItem('gym:sessions', JSON.stringify(s.map((x: { planName: string }) => (x.planName === 'Push day' ? { ...x, planName: name } : x))))
+  }, long)
+  await page.reload()
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Log' }).click()
+  await pickPlan(page, long)
+  await expect(filter(page)).toHaveAccessibleName(`Filter by plan, ${long}`)
+  const head = await recent(page).getByRole('heading', { name: 'Recent sessions' }).boundingBox()
+  const countText = await recent(page).getByText(/^\d+ of \d+/).boundingBox()
+  const pill = (await filter(page).boundingBox())!
+  expect(Math.abs(head!.height - countText!.height)).toBeLessThan(8)
+  expect(pill.x + pill.width).toBeLessThanOrEqual(375)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375)
 })
 
 test('Edit works on an older session reached through Show more', async ({ page }) => {
@@ -93,11 +159,19 @@ test('Edit works on an older session reached through Show more', async ({ page }
   await expect(page.getByText(/^Editing · [A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2} · \d+ sets?$/)).toBeVisible()
 })
 
-test('Log home with the filter and Show more passes axe', async ({ page }) => {
+const axe = async (page: Page) =>
+  expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()).violations).toEqual([])
+
+test('Log home with the filter and Show more passes axe, the filter sheet too', async ({ page }) => {
   await showMore(page).click()
   await expect(rows(page)).toHaveCount(16)
-  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
-  expect(results.violations).toEqual([])
+  await axe(page)
+  await filter(page).click()
+  await expect(sheet(page)).toBeVisible()
+  await axe(page)
+  await option(page, 'Old block').click()
+  await expect(filter(page)).toHaveAccessibleName('Filter by plan, Old block')
+  await axe(page)
 })
 
 test('one plan only: no filter, and six or fewer sessions: no count or Show more', async ({ page }) => {
@@ -116,17 +190,17 @@ test('one plan only: no filter, and six or fewer sessions: no count or Show more
 test.describe('wide, 1280', () => {
   test.use({ viewport: { width: 1280, height: 800 } })
 
-  test('chips sit under the Recent title and Show more under the table, label-sized', async ({ page }) => {
-    const title = await recent(page).getByRole('heading', { name: 'Recent sessions' }).boundingBox()
-    const chips = await filter(page).boundingBox()
-    const table = await recent(page).getByRole('list').boundingBox()
-    const more = await showMore(page).boundingBox()
-    expect(chips!.y).toBeGreaterThan(title!.y + title!.height - 1)
-    expect(table!.y).toBeGreaterThan(chips!.y + chips!.height - 1)
-    expect(more!.y).toBeGreaterThan(table!.y + table!.height - 1)
-    expect(more!.width).toBeLessThan(table!.width / 2)
-    // The chips wrap rather than scroll, so a focus ring is never clipped.
-    expect(await filter(page).evaluate((el) => getComputedStyle(el).overflowX)).toBe('visible')
+  test('the filter sits on the Recent title row at the table end, Show more under the table, label-sized', async ({ page }) => {
+    const title = (await recent(page).getByRole('heading', { name: 'Recent sessions' }).boundingBox())!
+    const icon = (await filter(page).boundingBox())!
+    const table = (await recent(page).getByRole('list').boundingBox())!
+    const more = (await showMore(page).boundingBox())!
+    expect(Math.abs(icon.y + icon.height / 2 - (title.y + title.height / 2))).toBeLessThan(4)
+    expect(icon.x).toBeGreaterThan(title.x + title.width)
+    expect(icon.x + icon.width).toBeLessThanOrEqual(table.x + table.width + 1)
+    expect(table.y).toBeGreaterThan(icon.y + icon.height - 1)
+    expect(more.y).toBeGreaterThan(table.y + table.height - 1)
+    expect(more.width).toBeLessThan(table.width / 2)
     await showMore(page).click()
     await expect(rows(page)).toHaveCount(16)
   })

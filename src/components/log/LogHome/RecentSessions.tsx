@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ChipGroup } from "../../shared";
 import { formatDateFull } from "../../../utils/date";
 import { newestFirst, sessionCells, sessionPlanKey, sessionPlans, sessionStats, sessionSummary } from "../../../utils/sessions";
 import { WorkoutSession } from "../../../types";
 import { useUnitPrefs } from "../../../utils/unitPrefs";
+import { ALL, PlanFilter } from "./PlanFilter";
 
 const RECENT_COUNT = 6;
 const MORE_COUNT = 10;
-const ALL = "all";
 
 interface RecentSessionsProps {
   sessions: WorkoutSession[];
@@ -86,23 +85,16 @@ export function RecentSessions({ sessions, onEdit, justSaved, empty }: RecentSes
         <h2 id="logHomeRecentTitle" className="logHomeLabel">
           Recent sessions
         </h2>
-        {hasMore && (
-          <span className="logHomeRecentCount">
-            {visible.length} of {matching.length}
-            <span className="visuallyHidden"> shown</span>
-          </span>
-        )}
+        <span className="logHomeRecentTools">
+          {hasMore && (
+            <span className="logHomeRecentCount">
+              {visible.length} of {matching.length}
+              <span className="visuallyHidden"> shown</span>
+            </span>
+          )}
+          {plans.length > 1 && <PlanFilter plans={plans} total={sessions.length} value={filter} onChange={pick} />}
+        </span>
       </div>
-      {plans.length > 1 && (
-        <div className="logHomeFilter">
-          <ChipGroup
-            label="Filter by plan"
-            options={[{ value: ALL, label: "All" }, ...plans.map((p) => ({ value: p.key, label: p.name }))]}
-            value={filter}
-            onChange={pick}
-          />
-        </div>
-      )}
       {visible.length === 0 ? (
         empty
       ) : (
