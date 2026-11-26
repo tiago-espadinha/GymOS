@@ -87,7 +87,7 @@
   font-weight: var(--weight-display);
   font-size: var(--text-row-title);
   line-height: 1;
-  color: var(--color-text-dim);
+  color: var(--color-accent);
 }
 
 /* Collapsed exercise */
@@ -149,10 +149,6 @@
   border: 2px solid transparent;
   border-radius: var(--radius-surface);
   background: var(--color-surface);
-}
-
-.exerciseCard .exerciseNumber {
-  color: var(--color-accent);
 }
 
 .exerciseSummary--error,
