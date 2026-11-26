@@ -1,6 +1,5 @@
-import { useId, useState } from "react";
-import { Icon, moveListboxFocus, Sheet } from "../../shared";
-import "../PlanPicker/PlanPicker.css";
+import { useState } from "react";
+import { Icon, ListboxSheet } from "../../shared";
 
 export const ALL = "all";
 
@@ -29,9 +28,12 @@ const sessionsLabel = (n: number) => `${n} ${n === 1 ? "session" : "sessions"}`;
  */
 export function PlanFilter({ plans, total, value, onChange }: PlanFilterProps) {
   const [open, setOpen] = useState(false);
-  const titleId = useId();
   const active = plans.find((p) => p.key === value);
-  const options = [{ key: ALL, name: "All plans", count: total }, ...plans];
+  const options = [{ key: ALL, name: "All plans", count: total }, ...plans].map((p) => ({
+    key: p.key,
+    name: p.name,
+    meta: sessionsLabel(p.count),
+  }));
 
   const pick = (key: string) => {
     onChange(key);
@@ -53,39 +55,13 @@ export function PlanFilter({ plans, total, value, onChange }: PlanFilterProps) {
         )}
       </button>
       {open && (
-        <Sheet full labelledBy={titleId} onClose={() => setOpen(false)}>
-          <header className="planPicker__head">
-            <h2 id={titleId} className="sheet__title sheet__title--lg">
-              Filter by plan
-            </h2>
-            <button type="button" className="sheet__cancel" onClick={() => setOpen(false)}>
-              Close
-            </button>
-          </header>
-          <div role="listbox" aria-labelledby={titleId} className="planPicker__list" onKeyDown={moveListboxFocus}>
-            {options.map((option) => {
-              const selected = option.key === value;
-              return (
-                <button
-                  key={option.key}
-                  type="button"
-                  role="option"
-                  aria-selected={selected}
-                  tabIndex={selected ? 0 : -1}
-                  data-autofocus={selected || undefined}
-                  className="planPicker__option"
-                  onClick={() => pick(option.key)}
-                >
-                  <span className="planPicker__text">
-                    <span className="planPicker__name">{option.name}</span>
-                    <span className="planPicker__meta">{sessionsLabel(option.count)}</span>
-                  </span>
-                  {selected && <Icon name="check" />}
-                </button>
-              );
-            })}
-          </div>
-        </Sheet>
+        <ListboxSheet
+          title="Filter by plan"
+          options={options}
+          selectedKey={value}
+          onPick={pick}
+          onClose={() => setOpen(false)}
+        />
       )}
     </>
   );
