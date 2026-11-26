@@ -17,7 +17,7 @@ const sessions = [
   },
 ]
 
-const tabs = ['Plans', 'Log', 'Stats']
+const tabs = ['Plans', 'Log', 'Stats', 'Settings']
 
 test('New plan form, with errors, a removed exercise and the muscle group sheet, has no detectable WCAG A/AA violations', async ({ page }) => {
   const axe = async () => {
