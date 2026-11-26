@@ -1,7 +1,11 @@
 import { useId, useState, type ReactNode } from "react";
 import { SaveFailedAlert, SegmentedControl } from "../../shared";
 import { AccentPicker } from "./AccentPicker";
-import { saveUnitPrefs, useUnitPrefs, type UnitPreferences } from "../../../utils/unitPrefs";
+import {
+  saveUnitPrefs,
+  useUnitPrefs,
+  type UnitPreferences,
+} from "../../../utils/unitPrefs";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   const id = useId();
@@ -15,7 +19,13 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function SettingRow({ label, children }: { label: string; children: ReactNode }) {
+function SettingRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
   return (
     <div className="settingsRow">
       <span className="settingsRowLabel">{label}</span>
@@ -39,10 +49,8 @@ export function PreferenceSections() {
 
   return (
     <>
-      <Section title="Language">
-        <SettingRow label="App language">
-          <span className="settingsRowValue">English</span>
-        </SettingRow>
+      <Section title="Appearance">
+        <AccentPicker />
       </Section>
 
       <Section title="Units">
@@ -51,7 +59,10 @@ export function PreferenceSections() {
             <SegmentedControl
               label="Weight unit"
               tone="accent"
-              options={[{ value: "kg", label: "kg" }, { value: "lbs", label: "lb" }]}
+              options={[
+                { value: "kg", label: "kg" },
+                { value: "lbs", label: "lb" },
+              ]}
               value={units.weight}
               onChange={(weight) => choose({ ...units, weight })}
             />
@@ -60,7 +71,10 @@ export function PreferenceSections() {
             <SegmentedControl
               label="Distance unit"
               tone="accent"
-              options={[{ value: "km", label: "km" }, { value: "mi", label: "mi" }]}
+              options={[
+                { value: "km", label: "km" },
+                { value: "mi", label: "mi" },
+              ]}
               value={units.distance}
               onChange={(distance) => choose({ ...units, distance })}
             />
@@ -68,13 +82,16 @@ export function PreferenceSections() {
         </div>
         {saveFailures > 0 && (
           <SaveFailedAlert key={saveFailures}>
-            The browser refused to store your unit choice, so it was left as it was. Free some space and try again.
+            The browser refused to store your unit choice, so it was left as it
+            was. Free some space and try again.
           </SaveFailedAlert>
         )}
       </Section>
 
-      <Section title="Appearance">
-        <AccentPicker />
+      <Section title="Language">
+        <SettingRow label="App language">
+          <span className="settingsRowValue">English</span>
+        </SettingRow>
       </Section>
     </>
   );

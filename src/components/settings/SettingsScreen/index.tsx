@@ -25,7 +25,13 @@ function DeviceCount({ n, noun }: { n: number; noun: string }) {
 }
 
 /** Data, language, units and appearance on one screen, opened from Stats or an empty-state import link. */
-export function SettingsScreen({ plans, sessions, setPlans, setSessions, onClose }: SettingsScreenProps) {
+export function SettingsScreen({
+  plans,
+  sessions,
+  setPlans,
+  setSessions,
+  onClose,
+}: SettingsScreenProps) {
   const title = useRef<HTMLHeadingElement>(null);
   const units = useUnitPrefs();
   const dataId = useId();
@@ -42,17 +48,25 @@ export function SettingsScreen({ plans, sessions, setPlans, setSessions, onClose
         </button>
       </header>
 
+      <PreferenceSections />
+
       <section className="settingsSection" aria-labelledby={dataId}>
         <h2 id={dataId} className="dataKicker">
           Data
         </h2>
         <div className="dataCounts">
-          <DeviceCount n={plans.length} noun="plan" />
-          <DeviceCount n={sessions.length} noun="session" />
+          <DeviceCount n={plans.length} noun="Plan" />
+          <DeviceCount n={sessions.length} noun="Session" />
         </div>
-        <PrimaryButton tone="light" onClick={() =>
-            downloadCSV(exportToCSV(plans, sessions, units), `gym_data_${new Date().toISOString().split("T")[0]}.csv`)
-          }>
+        <PrimaryButton
+          tone="light"
+          onClick={() =>
+            downloadCSV(
+              exportToCSV(plans, sessions, units),
+              `gym_data_${new Date().toISOString().split("T")[0]}.csv`,
+            )
+          }
+        >
           Export CSV
         </PrimaryButton>
         <ImportCard
@@ -63,8 +77,6 @@ export function SettingsScreen({ plans, sessions, setPlans, setSessions, onClose
           onSeeProgress={onClose}
         />
       </section>
-
-      <PreferenceSections />
 
       <footer className="settingsAbout">
         <BrandMark className="settingsAbout__mark" />

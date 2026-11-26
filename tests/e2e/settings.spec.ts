@@ -35,10 +35,10 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/')
 })
 
-test('Settings opens from Stats with Data, Language, Units and Appearance in order', async ({ page }) => {
+test('Settings opens from Stats with Appearance, Units, Language and Data in order', async ({ page }) => {
   await openSettings(page)
   await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeFocused()
-  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Data', 'Language', 'Units', 'Appearance'])
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Appearance', 'Units', 'Language', 'Data'])
 
   await expect(page.locator('.settingsRow').filter({ hasText: 'App language' })).toContainText('English')
 

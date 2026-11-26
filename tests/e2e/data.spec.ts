@@ -61,7 +61,7 @@ test.beforeEach(async ({ page }) => {
 
 test('opens from Stats with the device counts, and Close returns to the Settings button', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeFocused()
-  await expect(page.locator('.dataCount')).toHaveText(['1 plan', '2 sessions'])
+  await expect(page.locator('.dataCount')).toHaveText(['1 Plan', '2 Sessions'])
   await expect(page.getByText('Bring in a CSV exported from GymOS')).toBeVisible()
   await expect(page.getByRole('button', { name: /Add to my data|Replace my data/ })).toHaveCount(0)
 
@@ -110,7 +110,7 @@ test('a chosen file shows what was found, and Add keeps existing data', async ({
   await expect(page.getByText('Added 1 plan and 1 session. 1 session already here was skipped.')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Imported' })).toBeFocused()
   await expect(page.getByText('gym_data_2026-02-01.csv')).toBeVisible()
-  await expect(page.locator('.dataCount')).toHaveText(['2 plans', '3 sessions'])
+  await expect(page.locator('.dataCount')).toHaveText(['2 Plans', '3 Sessions'])
   const after = await stored(page)
   expect(after.plans.map((p) => p.name)).toEqual(['Pull day', 'Legs'])
   expect(after.sessions.map((s) => s.date)).toEqual(['2026-01-01', '2026-01-08', '2026-02-01'])
@@ -118,7 +118,7 @@ test('a chosen file shows what was found, and Add keeps existing data', async ({
   await page.reload()
   await page.getByText('Stats', { exact: true }).first().click()
   await page.getByRole('button', { name: 'Settings' }).click()
-  await expect(page.locator('.dataCount')).toHaveText(['2 plans', '3 sessions'])
+  await expect(page.locator('.dataCount')).toHaveText(['2 Plans', '3 Sessions'])
 })
 
 test('choosing a file with the button moves focus to the import heading', async ({ page }) => {
