@@ -90,21 +90,21 @@ describe("sessionPlans", () => {
     planName,
   });
 
-  it("lists each plan once, by its latest session, under the name it was last saved with", () => {
+  it("lists each plan once, by its latest session, under the name it was last saved with, with its session count", () => {
     const stored = [
       planned("a", "2026-05-01", "p1", "Push"),
       planned("b", "2026-05-08", "p2", "Legs"),
       planned("c", "2026-05-10", "p1", "Push Day"),
     ];
     expect(sessionPlans(stored)).toEqual([
-      { key: "p1", name: "Push Day" },
-      { key: "p2", name: "Legs" },
+      { key: "p1", name: "Push Day", count: 2 },
+      { key: "p2", name: "Legs", count: 1 },
     ]);
   });
 
   it("groups imported sessions without a plan id by their plan name", () => {
     const stored = [planned("a", "2026-05-01", "", "Back"), planned("b", "2026-05-02", "", "Back")];
-    expect(sessionPlans(stored)).toEqual([{ key: "name:Back", name: "Back" }]);
+    expect(sessionPlans(stored)).toEqual([{ key: "name:Back", name: "Back", count: 2 }]);
     expect(sessionPlanKey(stored[0])).toBe(sessionPlanKey(stored[1]));
   });
 
