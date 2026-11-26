@@ -70,8 +70,14 @@ test('the Plans empty-state import link opens the Settings tab and the file pick
   })
   await page.reload()
   await page.getByRole('button', { name: 'Plans', exact: true }).click()
-  await Promise.all([page.waitForEvent('filechooser'), page.getByRole('button', { name: 'Have a CSV backup? Import it' }).click()])
+  const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('button', { name: 'Have a CSV backup? Import it' }).click()])
   await expect(settingsTab(page)).toHaveAttribute('aria-current', 'page')
+
+  // The link is gone with the Plans tab, so closing the sheet returns focus to Import.
+  await chooser.setFiles({ name: 'notes.csv', mimeType: 'text/csv', buffer: Buffer.from('name,weight\nRow,60') })
+  await expect(page.getByRole('heading', { name: "Can't import this file" })).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('button', { name: 'Import', exact: true })).toBeFocused()
 
   // Leaving and coming back does not open the picker again.
   let reopened = false

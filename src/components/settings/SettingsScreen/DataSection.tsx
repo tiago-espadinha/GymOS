@@ -16,12 +16,12 @@ interface DataSectionProps {
   setSessions: (sessions: WorkoutSession[]) => void;
   /** Open the file picker on arrival, still inside the tap that asked for it. */
   pickImport: boolean;
-  onImportPicked: () => void;
+  onPickImportHandled: () => void;
   onSeeStats: () => void;
 }
 
 /** The backup card. It never changes during an import: each step opens in a sheet. */
-export function DataSection({ plans, sessions, setPlans, setSessions, pickImport, onImportPicked, onSeeStats }: DataSectionProps) {
+export function DataSection({ plans, sessions, setPlans, setSessions, pickImport, onPickImportHandled, onSeeStats }: DataSectionProps) {
   const units = useUnitPrefs();
   const headingId = useId();
   const fileInput = useRef<HTMLInputElement>(null);
@@ -41,9 +41,11 @@ export function DataSection({ plans, sessions, setPlans, setSessions, pickImport
 
   useEffect(() => {
     if (!pickImport) return;
-    onImportPicked();
+    onPickImportHandled();
+    // The link that asked is gone with the old tab, so the sheets return focus here.
+    importButton.current?.focus();
     fileInput.current?.click();
-  }, [pickImport, onImportPicked]);
+  }, [pickImport, onPickImportHandled]);
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

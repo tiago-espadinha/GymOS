@@ -199,7 +199,7 @@ export default function GymTracker() {
             setPlans={storePlans}
             setSessions={storeSessions}
             pickImport={pickImport}
-            onImportPicked={() => setPickImport(false)}
+            onPickImportHandled={() => setPickImport(false)}
             onSeeStats={() => changeTab("progress")}
           />
         )}
