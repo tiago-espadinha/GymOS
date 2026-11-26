@@ -24,37 +24,20 @@
   text-transform: uppercase;
 }
 
-.importCancel {
-  min-height: var(--size-control);
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--color-text-muted);
-  font-family: var(--font-body);
-  font-size: var(--text-secondary);
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.importCancel:hover {
-  color: var(--color-text);
-}
-
 .dataKicker:focus-visible,
-.importCancel:focus-visible,
+.dataCard__action:focus-visible,
 .importChoice:focus-visible,
-.importPick:focus-visible,
-.importAction:focus-visible {
+.importAnother:focus-visible {
   outline: var(--border-focus);
   outline-offset: 2px;
 }
 
-.dataKicker:focus:not(:focus-visible) {
+/* Headings take focus only so a sheet step is announced; they are not controls. */
+.importTitle:focus {
   outline: none;
 }
 
-.settingsSection,
-.importCard {
+.settingsSection {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -70,140 +53,97 @@
   color: var(--color-text-muted);
 }
 
-.dataCounts {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
-}
-
-.dataCount {
+/* The backup card: counts, then Export and Import as an equal pair. */
+.dataCard {
   display: flex;
   flex-direction: column;
-  margin: 0;
-  font-size: var(--text-secondary);
-  font-weight: 500;
-  color: var(--color-text-muted);
-}
-
-.dataCountFigure {
-  font-family: var(--font-display);
-  font-weight: var(--weight-display);
-  font-size: var(--text-count);
-  line-height: var(--leading-count);
-  color: var(--color-text);
-}
-
-.importCard {
   padding: var(--space-5);
-  border: 2px solid transparent;
   border-radius: var(--radius-surface);
   background: var(--color-surface);
 }
 
-.importCard--ready .importCardKicker,
-.importCard--done .importCardKicker {
-  color: var(--color-accent);
-}
-
-/* An error is an outline, an icon and text, never colour alone. */
-.importCard--error {
-  border-color: var(--color-danger);
-  background: var(--color-surface-inset);
-}
-
-.importCard--error .importCardKicker {
-  color: var(--color-danger);
-}
-
-.importCardKicker {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.importCardKicker svg {
-  flex: none;
-}
-
-.importCardBody {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.importCard--error .importCardBody,
-.importCard--done .importCardBody {
-  gap: var(--space-3);
-}
-
-.importCardBody p {
+.dataCard p {
   margin: 0;
 }
 
-.importCardFile {
-  font-size: var(--text-body-lg);
-  font-weight: 700;
-  overflow-wrap: anywhere;
+.dataCard .dataCard__counts {
+  margin: var(--space-2) 0 var(--space-4);
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-row-number);
+  line-height: 1;
+  text-transform: uppercase;
 }
 
-.importCardText,
-.importCardMessage {
-  font-size: var(--text-secondary);
-  font-weight: 500;
-  line-height: var(--leading-body);
-  color: var(--color-text-muted);
+.dataCard__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
 }
 
-.importCard--idle .importCardText {
-  font-size: var(--text-body);
-}
-
-.importCardMessage {
-  color: var(--color-text);
-}
-
-/* The no-file target: a dashed box rather than a pill, so it reads as a place for a file. */
-.importPick {
-  min-height: var(--size-action);
-  border: 2px dashed var(--color-line-empty);
-  border-radius: var(--radius-surface);
+.dataCard__action {
+  min-height: var(--size-field);
+  border: var(--border-control);
+  border-radius: var(--radius-pill);
   background: none;
   color: var(--color-text);
-  font-family: var(--font-body);
-  font-size: var(--text-body-lg);
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.importPick:hover {
-  border-color: var(--color-text-muted);
-}
-
-.importAction {
-  min-height: var(--size-field-lg);
-  border: 2px solid transparent;
-  border-radius: var(--radius-pill);
-  font-family: var(--font-body);
-  font-size: var(--text-body);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-set-label);
+  letter-spacing: var(--tracking-button);
+  text-transform: uppercase;
   cursor: pointer;
   transition: opacity var(--motion-press) linear;
 }
 
-.importAction:active,
-.importPick:active {
+.dataCard__action:active,
+.importAnother:active {
   opacity: 0.8;
 }
 
-.importAction--outline {
-  border-color: var(--color-text);
-  background: none;
-  color: var(--color-text);
+.importKicker {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
 }
 
-.importAction--accent {
-  background: var(--color-accent);
-  color: var(--color-on-accent);
+.importKicker svg {
+  flex: none;
+}
+
+.importKicker--accent {
+  color: var(--color-accent);
+}
+
+.importFile,
+.importMessage {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.importFile {
+  font-size: var(--text-body-lg);
+  font-weight: 700;
+}
+
+.importMessage {
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+}
+
+.importAnother {
+  min-height: var(--size-field-lg);
+  border: var(--border-control);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--text-body);
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .importChoice {
