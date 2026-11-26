@@ -1,6 +1,6 @@
 import { CSVImport } from "../../../utils/csv";
 
-const count = (n: number, noun: string) => `${n} ${noun}${n === 1 ? "" : "s"}`;
+export const count = (n: number, noun: string) => `${n} ${noun}${n === 1 ? "" : "s"}`;
 
 export const plansAndSessions = (plans: number, sessions: number) =>
   `${count(plans, "plan")} and ${count(sessions, "session")}`;

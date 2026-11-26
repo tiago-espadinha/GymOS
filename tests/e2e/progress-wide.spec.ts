@@ -53,7 +53,7 @@ test.describe('at 1280', () => {
     await expect(search(page)).not.toBeFocused()
     await expect(search(page)).toHaveAttribute('placeholder', 'Search exercises')
     await expect(pane(page).getByText('10 exercises')).toBeVisible()
-    await expect(pane(page).getByRole('button', { name: 'Settings' })).toBeVisible()
+    await expect(pane(page).getByRole('button', { name: 'Settings' })).toHaveCount(0)
     await expect(page.getByRole('heading', { level: 2, name: 'Lat pulldown' })).toBeVisible()
 
     const chart = (await page.locator('.progressChart').boundingBox())!
@@ -124,12 +124,14 @@ test.describe('at 1280', () => {
     expect(parseFloat(progress)).toBeLessThan(20)
   })
 
-  test('Settings opens and returns focus to its button', async ({ page }) => {
+  test('Settings is the fourth tab in the top bar, lit while open', async ({ page }) => {
     await open(page)
-    await pane(page).getByRole('button', { name: 'Settings' }).click()
+    const settings = page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Settings' })
+    await settings.click()
     await expect(pane(page)).toHaveCount(0)
-    await page.getByRole('button', { name: 'Close' }).click()
-    await expect(pane(page).getByRole('button', { name: 'Settings' })).toBeFocused()
+    await expect(settings).toHaveAttribute('aria-current', 'page')
+    await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Close' })).toHaveCount(0)
   })
 
   test('Stats with data has no detectable WCAG A/AA violations', async ({ page }) => {

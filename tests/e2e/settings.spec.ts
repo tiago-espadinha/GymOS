@@ -16,10 +16,8 @@ const sessions = [
 const raw = (page: Page) =>
   page.evaluate(() => ({ plans: localStorage.getItem('gym:plans'), sessions: localStorage.getItem('gym:sessions') }))
 
-const openSettings = async (page: Page) => {
-  await page.getByText('Stats', { exact: true }).first().click()
-  await page.getByRole('button', { name: 'Settings' }).click()
-}
+const settingsTab = (page: Page) => page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Settings' })
+const openSettings = (page: Page) => settingsTab(page).click()
 
 test.beforeEach(async ({ page }) => {
   // Seed once, so a reload keeps what the test changed.
@@ -35,9 +33,11 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/')
 })
 
-test('Settings opens from Stats with Appearance, Units, Language and Data in order', async ({ page }) => {
+test('Settings is a tab, lit while open, with Appearance, Units, Language and Data in order and no Close', async ({ page }) => {
   await openSettings(page)
-  await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeFocused()
+  await expect(settingsTab(page)).toHaveAttribute('aria-current', 'page')
+  await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Close' })).toHaveCount(0)
   await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Appearance', 'Units', 'Language', 'Data'])
 
   await expect(page.locator('.settingsRow').filter({ hasText: 'App language' })).toContainText('English')
@@ -63,15 +63,50 @@ test('Settings ends with About: the mark, the name and where data lives', async 
   expect(amber).toBe(await page.locator('.accentSwatch--amber').evaluate((el) => getComputedStyle(el).backgroundColor))
 })
 
-test('the Plans empty-state import link opens Settings', async ({ page }) => {
+test('the Plans empty-state import link opens the Settings tab and the file picker', async ({ page }) => {
   await page.evaluate(() => {
     localStorage.setItem('gym:plans', '[]')
     localStorage.setItem('gym:sessions', '[]')
   })
   await page.reload()
   await page.getByRole('button', { name: 'Plans', exact: true }).click()
-  await page.getByRole('button', { name: 'Have a CSV backup? Import it' }).click()
-  await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeFocused()
+  const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('button', { name: 'Have a CSV backup? Import it' }).click()])
+  await expect(settingsTab(page)).toHaveAttribute('aria-current', 'page')
+
+  // The link is gone with the Plans tab, so closing the sheet returns focus to Import.
+  await chooser.setFiles({ name: 'notes.csv', mimeType: 'text/csv', buffer: Buffer.from('name,weight\nRow,60') })
+  await expect(page.getByRole('heading', { name: "Can't import this file" })).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('button', { name: 'Import', exact: true })).toBeFocused()
+
+  // Leaving and coming back does not open the picker again.
+  let reopened = false
+  page.on('filechooser', () => (reopened = true))
+  await page.getByRole('button', { name: 'Plans', exact: true }).click()
+  await openSettings(page)
+  await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible()
+  expect(reopened).toBe(false)
+})
+
+test('the Stats screen has no Settings pill, and a session hides the Settings tab', async ({ page }) => {
+  await page.getByRole('button', { name: 'Stats', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Stats', level: 1 })).toBeVisible()
+  await expect(page.locator('.mainContent').getByRole('button', { name: 'Settings' })).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Plans', exact: true }).click()
+  await page.getByRole('button', { name: 'Start Pull day' }).click()
+  await expect(page.getByRole('navigation', { name: 'Main' })).toHaveCount(0)
+})
+
+test('the four tabs fit at 320 without overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 700 })
+  const tabs = page.getByRole('navigation', { name: 'Main' }).getByRole('button')
+  await expect(tabs).toHaveText(['Plans', 'Log', 'Stats', 'Settings'])
+  for (const tab of await tabs.all()) {
+    expect(await tab.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true)
+    expect(await tab.evaluate((el) => getComputedStyle(el).fontSize)).toBe('22px')
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320)
 })
 
 test('unit choices survive a reload and leave stored plans and sessions untouched', async ({ page }) => {

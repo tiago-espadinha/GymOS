@@ -24,9 +24,9 @@ const openBench = (page: import('@playwright/test').Page) =>
 
 const tabBar = (page: import('@playwright/test').Page) => page.getByRole('navigation', { name: 'Main' })
 
-test('browse mode shows the tab bar with Plans, Log and Stats', async ({ page }) => {
+test('browse mode shows the tab bar with Plans, Log, Stats and Settings', async ({ page }) => {
   await page.goto('/')
-  await expect(tabBar(page).getByRole('button')).toHaveText(['Plans', 'Log', 'Stats'])
+  await expect(tabBar(page).getByRole('button')).toHaveText(['Plans', 'Log', 'Stats', 'Settings'])
   await tabBar(page).getByRole('button', { name: 'Stats' }).click()
   await expect(tabBar(page).getByRole('button', { name: 'Stats' })).toHaveAttribute('aria-current', 'page')
 })

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { PlansTab } from "./components/plans";
 import { LogTab } from "./components/log";
 import { ProgressTab } from "./components/progress";
+import { SettingsScreen } from "./components/settings";
 import { BrandMark, TabBar } from "./components/shared";
 import { useActiveSession } from "./hooks/useActiveSession";
 import { fromPlan } from "./utils/activeSession";
@@ -14,6 +15,7 @@ const TABS = [
   { id: "plans", label: "Plans" },
   { id: "log", label: "Log" },
   { id: "progress", label: "Stats" },
+  { id: "settings", label: "Settings" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -27,7 +29,8 @@ export default function GymTracker() {
   const [loaded, setLoaded] = useState(false);
   const activeSession = useActiveSession();
   const [selectedExName, setSelectedExName] = useState<string>("");
-  const [showSettings, setShowSettings] = useState(false);
+  // Set by the empty-state import link: Settings opens the file picker once it shows.
+  const [pickImport, setPickImport] = useState(false);
   // New plan is modal-like: the tab bar hides and Cancel is the exit.
   const [creatingPlan, setCreatingPlan] = useState(false);
 
@@ -116,13 +119,13 @@ export default function GymTracker() {
   const showTabs = !session && !creatingPlan;
 
   const changeTab = (next: TabId) => {
-    setShowSettings(false);
+    setPickImport(false);
     setTab(next);
   };
 
-  const openSettings = () => {
-    setTab("progress");
-    setShowSettings(true);
+  const openImport = () => {
+    setTab("settings");
+    setPickImport(true);
   };
 
   const newPlan = () => {
@@ -131,7 +134,7 @@ export default function GymTracker() {
   };
 
   // Import is offered on an empty tab only while the device holds no plans and no sessions.
-  const importOffer = plans.length === 0 && sessions.length === 0 ? openSettings : undefined;
+  const importOffer = plans.length === 0 && sessions.length === 0 ? openImport : undefined;
 
   const endSession = () => {
     activeSession.end();
@@ -182,15 +185,22 @@ export default function GymTracker() {
           <ProgressTab
             plans={plans}
             sessions={sessions}
-            setPlans={storePlans}
-            setSessions={storeSessions}
             selectedExName={selectedExName}
             setSelectedExName={setSelectedExName}
-            showSettings={showSettings}
-            setShowSettings={setShowSettings}
             onGoToLog={() => changeTab("log")}
             onNewPlan={newPlan}
             onImport={importOffer}
+          />
+        )}
+        {visibleTab === "settings" && (
+          <SettingsScreen
+            plans={plans}
+            sessions={sessions}
+            setPlans={storePlans}
+            setSessions={storeSessions}
+            pickImport={pickImport}
+            onPickImportHandled={() => setPickImport(false)}
+            onSeeStats={() => changeTab("progress")}
           />
         )}
       </div>
