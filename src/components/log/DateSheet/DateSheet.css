@@ -14,11 +14,11 @@
   cursor: pointer;
 }
 
-/* Chosen is filled white with a check mark, never colour alone. */
+/* Chosen fills with the accent and keeps a check mark, never colour alone. */
 .dateSheet__option[aria-pressed='true'] {
-  border-color: var(--color-inverse);
-  background: var(--color-inverse);
-  color: var(--color-on-inverse);
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 .dateSheet__option:focus-visible {
@@ -44,7 +44,7 @@
 
 .dateSheet__option[aria-pressed='true'] .dateSheet__date {
   font-weight: 600;
-  color: var(--color-on-inverse);
+  color: var(--color-on-accent);
 }
 
 .dateSheet__quick {
@@ -187,15 +187,15 @@
   cursor: pointer;
 }
 
-/* Today is ringed; the chosen day is filled white, as the chosen option above. */
+/* Today is ringed; the chosen day fills with the accent, as the chosen option above. */
 .calendar__day[aria-current='date'] {
   border-color: var(--color-text-muted);
 }
 
 [aria-selected='true'] > .calendar__day {
-  border-color: var(--color-inverse);
-  background: var(--color-inverse);
-  color: var(--color-on-inverse);
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
   font-weight: 800;
 }
 
