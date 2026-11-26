@@ -244,6 +244,24 @@
   height: 170px; /* the board's chart height */
 }
 
+/* The y labels' text; the chart places them. */
+.progressChartTick {
+  fill: var(--color-text-muted);
+  font-size: var(--text-small);
+}
+
+/*
+ * Phone: the chart bleeds to the screen edges so the line gets the width; its labels and first
+ * and last points stay on the content edge. The chart reads --chart-bleed (keep it equal to the
+ * margin) to place them.
+ */
+@media (max-width: 600px) {
+  .progressChart {
+    --chart-bleed: var(--space-4);
+    margin-inline: calc(-1 * var(--space-4));
+  }
+}
+
 .progressCaption {
   display: flex;
   flex-direction: column;
