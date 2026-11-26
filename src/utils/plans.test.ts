@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   archivePlan,
   archivedSummary,
+  carryRenames,
   defaultPlan,
   deletePlan,
   lastTrained,
@@ -13,7 +14,9 @@ import {
   planTrainedSummary,
   planSummary,
   plansTitle,
+  renameNote,
   restorePlan,
+  updatePlan,
 } from "./plans";
 import { TrainingPlan, WorkoutSession } from "../types";
 
@@ -156,5 +159,77 @@ describe("Log home plan choice", () => {
     const q = plan(["B"], { id: "q" });
     // An imported newer session appended after a saved older one.
     expect(defaultPlan([p, q], [session("p", "2026-05-01"), session("q", "2026-05-10")])).toBe(q);
+  });
+});
+
+describe("editing a plan", () => {
+  const before: TrainingPlan = {
+    id: "p1",
+    name: "Push",
+    desc: "",
+    exercises: [
+      { id: "e1", name: "Bench press", muscleGroup: "Chest" },
+      { id: "e2", name: "Dips", muscleGroup: "Chest" },
+    ],
+  };
+  const logged = (id: string, planId: string, names: [string, string][]): WorkoutSession => ({
+    id,
+    planId,
+    planName: planId === "p1" ? "Push" : "Other",
+    date: "2026-11-01",
+    notes: "",
+    exercises: names.map(([exId, name]) => ({ id: exId, name, muscleGroup: "Chest", sets: [] })),
+  });
+  const renameBench = { ...before, exercises: [{ ...before.exercises[0], name: "Barbell bench" }, before.exercises[1]] };
+
+  it("replaces the plan in place, keeping its position and archive state", () => {
+    const archived = { ...before, isArchived: true, archivedAt: "2026-10-01" };
+    const other = { ...before, id: "p2", name: "Pull" };
+    const edited = { ...renameBench, name: "Push A" };
+    const next = updatePlan([other, archived], edited);
+    expect(next[0]).toBe(other);
+    expect(next[1]).toEqual({ ...edited, isArchived: true, archivedAt: "2026-10-01" });
+  });
+
+  it("carries an exercise rename into this plan's sessions only, matched by id", () => {
+    const own = logged("s1", "p1", [["e1", "Bench press"], ["e2", "Dips"]]);
+    const imported = logged("s2", "p1", [["x9", "Bench press"]]);
+    const otherPlan = logged("s3", "p2", [["e1", "Bench press"]]);
+    const { sessions, changed } = carryRenames([own, imported, otherPlan], before, renameBench);
+    expect(changed).toBe(1);
+    expect(sessions[0].exercises.map((e) => e.name)).toEqual(["Barbell bench", "Dips"]);
+    expect(sessions[0].planName).toBe("Push");
+    expect(sessions[1]).toBe(imported);
+    expect(sessions[2]).toBe(otherPlan);
+  });
+
+  it("carries a plan rename into every session of the plan", () => {
+    const a = logged("s1", "p1", [["e2", "Dips"]]);
+    const b = logged("s2", "p1", []);
+    const { sessions, changed } = carryRenames([a, b], before, { ...before, name: "Push A" });
+    expect(changed).toBe(2);
+    expect(sessions.map((s) => s.planName)).toEqual(["Push A", "Push A"]);
+    expect(sessions[0].exercises[0].name).toBe("Dips");
+  });
+
+  it("leaves past sessions alone when exercises are removed, added or retyped", () => {
+    const own = logged("s1", "p1", [["e1", "Bench press"], ["e2", "Dips"]]);
+    const after: TrainingPlan = {
+      ...before,
+      exercises: [{ ...before.exercises[0], muscleGroup: "Triceps" }, { id: "e3", name: "Fly", muscleGroup: "Chest" }],
+    };
+    const { sessions, changed } = carryRenames([own], before, after);
+    expect(changed).toBe(0);
+    expect(sessions[0]).toBe(own);
+  });
+
+  it("says what a rename does to history, or nothing when no session changes", () => {
+    expect(renameNote(before, renameBench, 6)).toBe("Bench press is now Barbell bench in 6 past sessions and in Stats.");
+    expect(renameNote(before, { ...before, name: "Push A" }, 1)).toBe("Push is now Push A in 1 past session.");
+    expect(renameNote(before, { ...renameBench, name: "Push A" }, 3)).toBe("2 renames carry into 3 past sessions and Stats.");
+    expect(renameNote(before, renameBench, 0)).toBeNull();
+    const cleared = { ...before, exercises: [{ ...before.exercises[0], name: "" }, before.exercises[1]] };
+    const own = logged("s1", "p1", [["e1", "Bench press"]]);
+    expect(renameNote(before, cleared, carryRenames([own], before, cleared).changed)).toBeNull();
   });
 });
