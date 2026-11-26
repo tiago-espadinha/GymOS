@@ -188,6 +188,21 @@ test('every session gets a node, distinct from PR rings and the latest point', a
   await expect(nodes).toHaveCount(5)
 })
 
+test('the line and its nodes start right of the y-axis labels on every metric', async ({ page }) => {
+  await pick(page, 'Lat pulldown')
+  for (const name of ['Average', 'Peak', 'Total', 'e1RM']) {
+    await metric(page, name).click()
+    const labels = await page.locator('.progressChart .recharts-yAxis-tick-labels text').evaluateAll((els) =>
+      els.map((el) => el.getBoundingClientRect().right),
+    )
+    const nodes = await page.locator('.progressChart [data-kind] circle, .progressChart circle[data-kind]').evaluateAll((els) =>
+      els.map((el) => el.getBoundingClientRect().left),
+    )
+    expect(labels.length, name).toBeGreaterThan(0)
+    expect(Math.min(...nodes), name).toBeGreaterThan(Math.max(...labels))
+  }
+})
+
 test('the info button explains the selected metric, by keyboard alone', async ({ page }) => {
   const info = page.getByRole('button', { name: 'About Average' })
   const panel = page.locator('.progressInfoPanel')
