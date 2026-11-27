@@ -101,8 +101,9 @@ test.describe('hold', () => {
   test('a hold waves only while it runs: flat when ready, paused or past its target', async ({ page }) => {
     await expectFlat(page)
     // A chained rest would log the hold at its target; this test needs it past the target.
-    await page.getByRole('switch', { name: /^Then rest/ }).click()
-    await expect(page.getByRole('switch', { name: /^Then rest/ })).toHaveAttribute('aria-checked', 'false')
+    await page.evaluate(() => localStorage.setItem('gym:timerPrefs', JSON.stringify({ restAfterHolds: false })))
+    await page.reload()
+    await page.getByRole('button', { name: /^Plank/ }).click()
     await button(page, 'Start hold').click()
     await page.clock.fastForward(5_000)
     await expectWave(page)

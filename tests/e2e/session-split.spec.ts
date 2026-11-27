@@ -37,12 +37,13 @@ const axe = async (page: Page) => {
   )
 }
 
-// The timer is the left 60% of the window at full height; its buttons are 64 tall.
-const expectSplit = async (page: Page, label: RegExp) => {
+// The timer is the left 60% of the window; its buttons are 64 tall. With buttons
+// below it the block stops short: 800 less 16 gap, 64 button and 40 gutter.
+const expectSplit = async (page: Page, label: RegExp, height = 800) => {
   await expect(timerBlock(page)).toHaveCount(1)
   await expect(timerBlock(page).locator('.timerBlockTop').first()).toContainText(label)
-  expect(await box(timerBlock(page))).toEqual({ x: 0, y: 0, width: 768, height: 800 })
-  for (const b of await timerBlock(page).locator('.timerBlockButton').all()) expect((await box(b)).height).toBe(64)
+  expect(await box(timerBlock(page))).toEqual({ x: 0, y: 0, width: 768, height })
+  for (const b of await page.locator('.timerUnit .timerBlockButton').filter({ visible: true }).all()) expect((await box(b)).height).toBe(64)
 }
 
 // With no Set done during a rest, the steppers sit straight above the next card,
@@ -60,7 +61,7 @@ test.describe('wide session, 1280', () => {
 
   test('a reps exercise splits: idle rest on the left, entry on the right, Set done at the bottom', async ({ page }) => {
     await open(page, /^Machine row/)
-    await expectSplit(page, /Rest\s*After set 1/)
+    await expectSplit(page, /Rest\s*After set 1/, 680)
     // Idle is not a running timer, so nothing is announced as one.
     await expect(page.getByRole('timer')).toHaveCount(0)
     await expect(timerBlock(page)).toContainText('Starts on Set done')
@@ -88,11 +89,11 @@ test.describe('wide session, 1280', () => {
     await open(page, /^Machine row/)
     await logSet(page, '35', '12')
     await restStarted(page)
-    await expectSplit(page, /^Rest\s*Set 1/)
+    await expectSplit(page, /^Rest\s*Set 1/, 680)
     await expect(button(page, 'End rest')).toBeVisible()
     await expectStepperLevelWithEndRest(page)
     await page.clock.fastForward(75_000)
-    await expectSplit(page, /Rest over/)
+    await expectSplit(page, /Rest over/, 680)
     await expect(page.getByRole('timer', { name: /^Rest over/ })).toContainText('+0:15')
     expect(await axe(page)).toEqual([])
 
@@ -119,21 +120,24 @@ test.describe('wide session, 1280', () => {
     await expectSplit(page, /Hold · ready/)
     await button(page, 'Start hold').click()
     await page.clock.fastForward(5_000)
-    await expectSplit(page, /^Hold\s*Set 1 of 1/)
+    await expectSplit(page, /^Hold\s*Set 1 of 1/, 680)
     await button(page, 'Pause').click()
-    await expectSplit(page, /Hold · paused/)
+    await expectSplit(page, /Hold · paused/, 680)
     await button(page, 'Resume').click()
     await page.clock.fastForward(10_000)
     // The rest is chained by default, so reaching the target starts it.
     await restStarted(page)
-    await expectSplit(page, /^Rest/)
+    await expectSplit(page, /^Rest/, 680)
     await expect(button(page, 'Start hold now')).toBeVisible()
 
     await button(page, 'End rest').click()
-    await page.getByRole('switch', { name: /^Then rest/ }).click()
+    // With "Rest after holds" off the hold runs past its target.
+    await page.evaluate(() => localStorage.setItem('gym:timerPrefs', JSON.stringify({ restAfterHolds: false })))
+    await page.reload()
+    await page.getByRole('button', { name: /^Plank/ }).click()
     await button(page, 'Start hold').click()
     await page.clock.fastForward(20_000)
-    await expectSplit(page, /Hold · past target/)
+    await expectSplit(page, /Hold · past target/, 680)
     await expect(page.getByRole('timer', { name: /^Hold/ })).toContainText('+0:05')
     const stop = await box(page.getByRole('button', { name: /^Stop and log/ }))
     expect(stop.x).toBe(808)
@@ -186,7 +190,8 @@ test.describe('wide session, other sizes', () => {
     const block = await box(timerBlock(page))
     expect(block.x).toBe(0)
     expect(block.width).toBeCloseTo(1024 * 0.6, 0)
-    expect(block.height).toBe(768)
+    // 768 less the strip kept for End rest (16 gap, 64 button, 40 gutter).
+    expect(block.height).toBe(648)
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(1024)
     const done = await box(button(page, 'Set done'))
     expect(done.y + done.height).toBeLessThanOrEqual(768)

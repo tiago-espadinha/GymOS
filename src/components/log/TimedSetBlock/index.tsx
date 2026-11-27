@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ChipGroup, PrimaryButton, Switch } from "../../shared";
+import { PrimaryButton } from "../../shared";
 import { formatClock, useTimer } from "../../../hooks/useTimer";
-import { DEFAULT_PRESETS, formatPresetLabel } from "../../../constants/timerPresets";
 import { holdTimerId } from "../../../utils/restTimers";
 import { ExerciseCategory } from "../../../types";
 import { HoldTimer } from "./HoldTimer";
 import { holdPhase } from "./holdPhase";
 import DistanceField from "./DistanceField";
+import TargetChoice from "./TargetChoice";
 import "./TimedSetBlock.css";
 
 interface TimedSetBlockProps {
@@ -17,7 +17,6 @@ interface TimedSetBlockProps {
   initialTargetSec: number;
   // When on, reaching the target ends the hold; when off the hold runs on as overtime.
   chainRest: boolean;
-  onChainRestChange: (on: boolean) => void;
   /** Set when the exercise tracks distance. */
   distanceUnit?: "km" | "mi";
   /** A chained rest is on screen: this hold waits under it, ready to start early. */
@@ -32,7 +31,7 @@ interface TimedSetBlockProps {
   onEndRest: () => void;
 }
 
-// One hold: the block, the target, the rest switch, the distance and the main button.
+// One hold: the block, the target, the distance and the main button.
 export function TimedSetBlock(props: TimedSetBlockProps) {
   const { setId, setNumber, setTotal, category, initialTargetSec, chainRest, distanceUnit, resting } = props;
   const timer = useTimer(holdTimerId(setId), initialTargetSec);
@@ -74,25 +73,7 @@ export function TimedSetBlock(props: TimedSetBlockProps) {
       {!resting && holdTimer}
       {props.heading}
       {timer.isComplete && <p className="timedSetHelp">Target reached. Keep going: the extra time counts.</p>}
-      {choosing && (
-        <div className="timedSetTarget">
-          <span className="timedSetLabel" aria-hidden="true">Target</span>
-          <ChipGroup
-            label="Target time"
-            options={DEFAULT_PRESETS[category].work.map((s) => ({ value: String(s), label: formatPresetLabel(s) }))}
-            value={String(targetSec)}
-            onChange={(v) => timer.setTargetSec(Number(v))}
-          />
-        </div>
-      )}
-      {choosing && !resting && (
-        <Switch
-          label={`Then rest ${formatClock(DEFAULT_PRESETS[category].rest[0] * 1000)}`}
-          description={`Rest starts when the ${name.toLowerCase()} ends`}
-          checked={chainRest}
-          onChange={props.onChainRestChange}
-        />
-      )}
+      {choosing && <TargetChoice category={category} targetSec={targetSec} onChange={timer.setTargetSec} />}
       {distanceUnit && !resting && <DistanceField setNumber={setNumber} unit={distanceUnit} value={distance} onChange={setDistance} />}
       {phase === "ready" ? (
         <PrimaryButton onClick={startNow}>{`Start ${name.toLowerCase()}${resting ? " now" : ""}`}</PrimaryButton>

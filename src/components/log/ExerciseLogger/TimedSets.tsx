@@ -1,5 +1,5 @@
-import { useState, type ReactNode } from "react";
-import { DEFAULT_PRESETS } from "../../../constants/timerPresets";
+import type { ReactNode } from "react";
+import { WORK_PRESETS } from "../../../constants/timerPresets";
 import { ExerciseLog, Set } from "../../../types";
 import { getExerciseMeta } from "../../../utils/metrics";
 import { generateId } from "../../../utils/id";
@@ -7,6 +7,7 @@ import { NO_VALUES, currentSetNumber } from "../../../utils/sessionList";
 import { currentSetIndex, virtualSetId } from "../../../utils/setModel";
 import TimedSetBlock from "../TimedSetBlock";
 import SetsTable from "../SetsTable";
+import { useTimerPrefs } from "../../../utils/timerPrefs";
 import { useUnitPrefs } from "../../../utils/unitPrefs";
 import { storedDistance } from "../../../utils/units";
 
@@ -31,9 +32,8 @@ export function TimedSets(props: TimedSetsProps) {
   const { exercise, onChange, resting, editing } = props;
   const { category, trackDistance, distanceUnit } = getExerciseMeta(exercise);
   const units = useUnitPrefs();
-  // Isometric holds and loaded carries chain into a rest before the next set;
-  // steady-state cardio usually doesn't. The switch lets the person override it.
-  const [chainRest, setChainRest] = useState(category !== "cardio");
+  // Holds and loaded carries chain into a rest unless Settings says not to; cardio never does.
+  const chainRest = useTimerPrefs().restAfterHolds && category !== "cardio";
 
   const index = currentSetIndex(exercise);
   const { number, total } = currentSetNumber(exercise);
@@ -62,9 +62,8 @@ export function TimedSets(props: TimedSetsProps) {
         setNumber={number}
         setTotal={total}
         category={category}
-        initialTargetSec={lastHeldSec || DEFAULT_PRESETS[category].work[0]}
+        initialTargetSec={lastHeldSec || WORK_PRESETS[category][0]}
         chainRest={chainRest}
-        onChainRestChange={setChainRest}
         distanceUnit={trackDistance ? units.distance : undefined}
         resting={resting}
         hidden={Boolean(editing)}

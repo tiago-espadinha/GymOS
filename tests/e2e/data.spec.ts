@@ -231,7 +231,7 @@ test('Keep it, Escape and a tap outside leave the data and return focus to Delet
   await deleteLink(page).click()
   await expect(confirm(page)).toHaveAccessibleName('Delete all data?')
   await expect(confirm(page)).toContainText('Delete for good')
-  await expect(confirm(page)).toContainText("1 plan and 2 sessions are removed from this device and can't be restored. Your accent and units stay.")
+  await expect(confirm(page)).toContainText("1 plan and 2 sessions are removed from this device and can't be restored. Your accent, units and timer settings stay.")
   await expect(confirm(page).getByRole('button', { name: 'Keep it' })).toBeFocused()
   await confirm(page).getByRole('button', { name: 'Keep it' }).click()
   await expect(confirm(page)).toHaveCount(0)

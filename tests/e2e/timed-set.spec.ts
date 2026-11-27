@@ -28,7 +28,13 @@ test.beforeEach(async ({ page }) => {
 const hold = (page: Page) => page.getByRole('timer', { name: /^Hold/ })
 const rest = (page: Page) => page.getByRole('timer', { name: /^Rest/ })
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true })
-const restSwitch = (page: Page) => page.getByRole('switch', { name: /^Then rest/ })
+const target = (page: Page) => page.getByRole('textbox', { name: 'Timer target' })
+// Turns "Rest after holds" off for this device and reopens the exercise.
+const restOff = async (page: Page) => {
+  await page.evaluate(() => localStorage.setItem('gym:timerPrefs', JSON.stringify({ restAfterHolds: false })))
+  await page.reload()
+  await page.getByRole('button', { name: /^Plank/ }).click()
+}
 // Hidden exercise screens stay mounted; these look at the one on screen.
 const shown = (page: Page, selector: string) => page.locator(`.exerciseScreen:not([hidden]) ${selector}`)
 // The face is drawn twice (plain and on the fill); the first is the plain one.
@@ -48,8 +54,9 @@ test('idle shows the category target (calisthenics: 15s) and Start hold begins t
   await expect(label(page)).toContainText('Hold · ready')
   await expect(label(page)).toContainText('Set 1 of 1')
   expect(await fillShare(page)).toBe(0)
-  await expect(shown(page, '.timerBlockControls').getByRole('button')).toHaveCount(0)
-  await expect(restSwitch(page)).toHaveAttribute('aria-checked', 'true')
+  await expect(shown(page, '.timerUnit').getByRole('button')).toHaveCount(0)
+  await expect(target(page)).toHaveCount(0)
+  await expect(page.getByRole('switch')).toHaveCount(0)
   await button(page, 'Start hold').click()
   await page.clock.fastForward(5_000)
   await expect(hold(page)).toContainText('00:05')
@@ -99,7 +106,7 @@ test('a target chip sets the target', async ({ page }) => {
 })
 
 test('with the rest off, past the target the block is full and the time held is logged', async ({ page }) => {
-  await restSwitch(page).click()
+  await restOff(page)
   await button(page, 'Start hold').click()
   await page.clock.fastForward(20_000)
   await expect(hold(page)).toContainText('+0:05')
@@ -109,7 +116,8 @@ test('with the rest off, past the target the block is full and the time held is 
   const fill = await shown(page, '.timerBlockFill').evaluate((el) => getComputedStyle(el).backgroundColor)
   expect(fill).toBe('rgb(255, 255, 255)')
   await expect(page.getByRole('group', { name: 'Target time' })).toHaveCount(0)
-  await expect(shown(page, '.timerBlockControls').getByRole('button')).toHaveText(['Pause'])
+  await expect(shown(page, '.timerActions').getByRole('button')).toHaveText(['Pause'])
+  await expect(target(page)).toHaveCount(0)
   await button(page, 'Stop and log 00:20').click()
   await expect(rest(page)).toHaveCount(0)
   await expect(logged(page)).toHaveText('00:20')
@@ -125,7 +133,7 @@ test('Pause stops the clock and Resume continues it; +step lengthens the target'
   await expect(hold(page)).toContainText('00:04')
   await button(page, 'Resume').click()
   await button(page, '+5s').click()
-  await expect(page.getByText('of 00:20').first()).toBeVisible()
+  await expect(target(page)).toHaveValue('00:20')
 })
 
 test('Stop on a paused hold drops it and goes back to ready', async ({ page }) => {
@@ -172,7 +180,6 @@ test('cardio: the distance has a label and is saved with the set on Stop and log
   await button(page, 'All exercises').click()
   await page.getByRole('button', { name: /^Rowing/ }).click()
   await expect(label(page)).toContainText('Effort · ready')
-  await expect(restSwitch(page)).toHaveAttribute('aria-checked', 'false')
   await button(page, 'Start effort').click()
   await expect(page.getByRole('group', { name: 'Target time' })).toHaveCount(0)
   const distance = page.getByRole('textbox', { name: 'Distance · set 1' })
@@ -184,6 +191,15 @@ test('cardio: the distance has a label and is saved with the set on Stop and log
   await button(page, 'Stop and log').click()
   await expect(logged(page)).toHaveText('00:30 · 1.2 km')
   await expect(page.getByRole('textbox', { name: 'Distance · set 2' })).toHaveValue('')
+})
+
+test('cardio never chains a rest: past its target the effort keeps counting', async ({ page }) => {
+  await button(page, 'All exercises').click()
+  await page.getByRole('button', { name: /^Rowing/ }).click()
+  await button(page, 'Start effort').click()
+  await page.clock.fastForward(305_000)
+  await expect(label(page)).toContainText('Effort · past target')
+  await expect(rest(page)).toHaveCount(0)
 })
 
 test('cardio: a logged distance and time can be edited and survive a reload', async ({ page }) => {
@@ -243,7 +259,7 @@ const axeStates: Record<string, (page: Page) => Promise<void>> = {
     await restStarted(page)
   },
   'past target': async (page) => {
-    await restSwitch(page).click()
+    await restOff(page)
     await button(page, 'Start hold').click()
     await page.clock.fastForward(20_000)
   },
@@ -351,7 +367,7 @@ test('the minus button stops at the smallest step so a hold always has a target'
   await button(page, 'Start hold').click()
   await button(page, '−5s').click()
   await button(page, '−5s').click()
-  await expect(page.getByText('of 00:05').first()).toBeVisible()
+  await expect(target(page)).toHaveValue('00:05')
   await expect(button(page, '−5s')).toBeDisabled()
 })
 
@@ -376,4 +392,58 @@ test('removing a logged hold never gives two sets the same id', async ({ page })
     JSON.parse(localStorage.getItem('gym:activeSession')!).exercises[0].sets.map((s: { id: string }) => s.id),
   )
   expect(new Set(ids).size).toBe(ids.length)
+})
+
+test('"Other" takes a typed target; typing a preset selects its chip, and tapping one closes the field', async ({ page }) => {
+  const chips = page.getByRole('group', { name: 'Target time' })
+  await expect(chips.getByRole('button')).toHaveText(['15s', '30s', '45s', '1m', 'Other'])
+  const other = page.getByRole('textbox', { name: 'Other target' })
+  await expect(other).toHaveCount(0)
+
+  await chips.getByRole('button', { name: 'Other' }).click()
+  await expect(other).toBeFocused()
+  await other.fill('115')
+  await other.press('Enter')
+  await expect(chips.getByRole('button', { name: 'Other' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(other).toHaveValue('01:15')
+  await expect(hold(page)).toContainText('01:15')
+
+  await other.fill('45')
+  await other.press('Enter')
+  await expect(chips.getByRole('button', { name: '45s' })).toHaveAttribute('aria-pressed', 'true')
+  await chips.getByRole('button', { name: '1m' }).click()
+  await expect(other).toHaveCount(0)
+
+  // Tapping Other and leaving without typing keeps the preset selected.
+  await chips.getByRole('button', { name: 'Other' }).click()
+  await other.blur()
+  await expect(chips.getByRole('button', { name: '1m' })).toHaveAttribute('aria-pressed', 'true')
+
+  // Typing the time already set selects its chip too.
+  await chips.getByRole('button', { name: 'Other' }).click()
+  await other.fill('100')
+  await other.press('Enter')
+  await expect(chips.getByRole('button', { name: '1m' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(other).toHaveValue('01:00')
+})
+
+test('a last hold that matches no chip is the next target, shown as Other', async ({ page }) => {
+  await button(page, 'Start hold').click()
+  await page.clock.fastForward(7_000)
+  await button(page, 'Stop and log').click()
+  await button(page, 'End rest').click()
+  const other = page.getByRole('textbox', { name: 'Other target' })
+  await expect(other).toHaveValue('00:07')
+  await expect(other).not.toBeFocused()
+  await expect(page.getByRole('group', { name: 'Target time' }).getByRole('button', { name: 'Other' })).toHaveAttribute('aria-pressed', 'true')
+})
+
+test('a target typed below the time held ends the hold and starts the rest', async ({ page }) => {
+  await button(page, 'Start hold').click()
+  await page.clock.fastForward(10_000)
+  await target(page).fill('5')
+  await expect(hold(page)).toContainText('00:10')
+  await target(page).press('Enter')
+  await expect(rest(page)).toBeVisible()
+  await expect(page.getByText('Set 1 logged · 00:10')).toBeVisible()
 })

@@ -33,12 +33,12 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/')
 })
 
-test('Settings is a tab, lit while open, with Appearance, Units, Language and Data in order and no Close', async ({ page }) => {
+test('Settings is a tab, lit while open, with Appearance, Units, Timers, Language and Data in order and no Close', async ({ page }) => {
   await openSettings(page)
   await expect(settingsTab(page)).toHaveAttribute('aria-current', 'page')
   await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Close' })).toHaveCount(0)
-  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Appearance', 'Units', 'Language', 'Data'])
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Appearance', 'Units', 'Timers', 'Language', 'Data'])
 
   await expect(page.locator('.settingsRow').filter({ hasText: 'App language' })).toContainText('English')
 

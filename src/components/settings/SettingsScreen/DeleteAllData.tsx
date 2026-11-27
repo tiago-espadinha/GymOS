@@ -22,7 +22,7 @@ export function DeleteAllData({ onDevice, onExport, onDelete }: DeleteAllDataPro
           title="Delete all data?"
           text={
             <>
-              {onDevice} are removed from this device and can't be restored. Your accent and units stay.{" "}
+              {onDevice} are removed from this device and can't be restored. Your accent, units and timer settings stay.{" "}
               <button type="button" className="textLink dataExportFirst" onClick={onExport}>
                 Export a backup first
               </button>

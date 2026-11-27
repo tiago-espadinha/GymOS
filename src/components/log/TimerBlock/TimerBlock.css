@@ -1,8 +1,23 @@
+/*
+ * The block and the buttons below it. With buttons the block gives up their
+ * height, so what follows the timer stays put as they come and go.
+ */
+.timerUnit {
+  --size-timer-block-height: var(--size-timer-block-fit);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+}
+
+.timerUnit--actions {
+  --size-timer-block-height: calc(var(--size-timer-block-fit) - var(--size-action) - var(--space-3));
+}
+
 .timerBlock {
   position: relative;
   box-sizing: border-box;
-  height: var(--size-timer-block-fit);
-  margin: 0 0 var(--space-4);
+  height: var(--size-timer-block-height);
   border-radius: var(--radius-surface);
   background: var(--color-fill-track);
   color: var(--color-text);
@@ -74,7 +89,7 @@
   right: 0;
   top: 0;
   box-sizing: border-box;
-  height: calc(var(--size-timer-block-fit) - var(--size-action) - var(--space-6));
+  height: calc(var(--size-timer-block-height) - var(--size-action) - var(--space-6));
   padding: var(--space-4) var(--space-4) 0;
   display: flex;
   flex-direction: column;
@@ -84,7 +99,7 @@
 .timerBlockFace--onFill {
   top: auto;
   bottom: 0;
-  height: var(--size-timer-block-fit);
+  height: var(--size-timer-block-height);
   padding-bottom: calc(var(--size-action) + var(--space-6));
 }
 
@@ -116,34 +131,86 @@
   text-transform: uppercase;
 }
 
+/* − target +, across the bottom of the block. */
 .timerBlockControls {
   position: absolute;
   z-index: 2;
   left: var(--space-4);
   right: var(--space-4);
   bottom: var(--space-4);
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr);
   gap: var(--space-2);
 }
 
-/* Black pills read on both the fill and the dark track. */
 .timerBlockButton {
-  flex: 1;
-  min-height: var(--size-control);
+  min-height: var(--size-field-lg);
   border: 0;
   border-radius: var(--radius-pill);
-  background: var(--color-bg);
   font-family: var(--font-display);
   font-weight: var(--weight-display);
   font-size: var(--text-row-title);
   letter-spacing: var(--tracking-button);
   text-transform: uppercase;
+  white-space: nowrap;
   cursor: pointer;
 }
 
-.timerBlockButton--wide {
-  flex: 2;
-  white-space: nowrap;
+/* Black pills and a black target box read on both the fill and the dark track. */
+.timerBlockControls .timerBlockButton {
+  background: var(--color-bg);
+}
+
+.timerTarget {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: var(--size-field-lg);
+  border-radius: var(--radius-nested);
+  background: var(--color-bg);
+  color: var(--color-text);
+  /* Outlined, unlike the pills, so it reads as a value you can set. */
+  outline: var(--border-control);
+  outline-offset: -2px;
+  cursor: text;
+}
+
+/* The ring sits inside the black box: an accent ring on the lime fill would not show. */
+.timerTarget:focus-within {
+  outline: var(--border-focus);
+  outline-offset: -5px;
+}
+
+.timerTarget .timeField {
+  line-height: 1;
+}
+
+.timerTarget .timeField:focus-visible {
+  outline: none;
+}
+
+.timerTargetCaption {
+  font-size: var(--text-small);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+/* Below the block, on the page: outlined white pills. */
+.timerActions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.timerActions .timerBlockButton {
+  flex: 1;
+  min-height: var(--size-action);
+  border: var(--border-control);
+  background: transparent;
+  color: var(--color-text);
 }
 
 .timerBlockButton:active {
@@ -169,7 +236,7 @@
   white-space: nowrap;
 }
 
-/* Rest is lime, a hold is white; the pills take the block's own colour. */
+/* Rest is lime, a hold is white; the pills in the block take its colour. */
 .timerBlock--rest .timerBlockFill {
   background: var(--color-fill-rest);
 }
@@ -195,39 +262,52 @@
 }
 
 /* Wide only: the rest to come, in place of the rest block before a set is done. */
-.timerBlock--idle {
+.timerUnit--idle {
   display: none;
 }
 
 /*
- * Wide (--breakpoint-wide): on an exercise screen the block is the left of the
- * window at full height, beside the entry column. Its faces are sized from --size-timer-block-fit, so
- * setting it keeps the fill's copy of the numeral in line with the plain one.
+ * Wide (--breakpoint-wide): on an exercise screen the timer is the left of the
+ * window at full height, beside the entry column. The buttons sit in a black
+ * strip under the block, ending level with the entry column's last card. The
+ * faces are sized from --size-timer-block-height, which keeps the fill's copy of the
+ * numeral in line with the plain one.
  */
 @media (min-width: 1024px) {
-  .exerciseScreen .timerBlock {
+  .exerciseScreen .timerUnit {
     --size-timer-block-fit: 100dvh;
-    --size-wave-length: var(--size-wave-length-wide);
-    --size-wave-height: var(--size-wave-height-wide);
     position: fixed;
     top: 0;
     left: 0;
     width: var(--width-timer-split);
+    height: 100dvh;
     margin: 0;
+    gap: var(--space-4);
+    background: var(--color-bg);
+  }
+
+  .exerciseScreen .timerUnit--idle {
+    display: flex;
+  }
+
+  .exerciseScreen .timerUnit--actions {
+    --size-timer-block-height: calc(100dvh - var(--size-action) - var(--gutter-wide) - var(--space-4));
+  }
+
+  .exerciseScreen .timerBlock {
+    --size-wave-length: var(--size-wave-length-wide);
+    --size-wave-height: var(--size-wave-height-wide);
+    flex: none;
     border-radius: 0;
   }
 
-  .exerciseScreen .timerBlock--idle {
-    display: block;
-  }
-
   .exerciseScreen .timerBlockFace {
-    height: calc(var(--size-timer-block-fit) - var(--size-action) - var(--gutter-wide) - var(--space-4));
+    height: calc(var(--size-timer-block-height) - var(--size-action) - var(--gutter-wide) - var(--space-4));
     padding: var(--gutter-wide) var(--gutter-timer) 0;
   }
 
   .exerciseScreen .timerBlockFace--onFill {
-    height: var(--size-timer-block-fit);
+    height: var(--size-timer-block-height);
     padding-bottom: calc(var(--size-action) + var(--gutter-wide) + var(--space-4));
   }
 
@@ -248,8 +328,19 @@
     gap: var(--space-3);
   }
 
-  .exerciseScreen .timerBlockButton {
+  .exerciseScreen .timerActions {
+    gap: var(--space-3);
+    padding: 0 var(--gutter-timer);
+  }
+
+  .exerciseScreen .timerBlockButton,
+  .exerciseScreen .timerActions .timerBlockButton,
+  .exerciseScreen .timerTarget {
     min-height: var(--size-action);
+  }
+
+  .exerciseScreen .timerBlockButton,
+  .exerciseScreen .timerTarget .timeField {
     font-size: var(--text-button);
   }
 }
