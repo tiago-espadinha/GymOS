@@ -1,5 +1,5 @@
 import { ExerciseLog, Set } from "../../../types";
-import { exerciseFinishId, exerciseProgress, nextTarget } from "../../../utils/sessionList";
+import { exerciseFinishId, exerciseProgress } from "../../../utils/sessionList";
 import { Icon } from "../../shared";
 import ExerciseLogger from "../ExerciseLogger";
 import "./ExerciseScreen.css";
@@ -19,8 +19,6 @@ interface ExerciseScreenProps {
   planName: string;
   /** This exercise's sets from last time. */
   history: Set[];
-  /** The next exercise's sets from last time, for its target. */
-  nextHistory: Set[];
   /** Hidden screens stay mounted so a running rest or hold keeps its timer. */
   hidden: boolean;
   titleId: string;
@@ -37,7 +35,6 @@ export function ExerciseScreen({
   next,
   planName,
   history,
-  nextHistory,
   hidden,
   titleId,
   onChange,
@@ -45,8 +42,6 @@ export function ExerciseScreen({
   onOpen,
   finish,
 }: ExerciseScreenProps) {
-  const target = next && nextTarget(next, nextHistory);
-
   const segments = (
     <nav className="exerciseSegments" aria-label="Exercises">
       {exercises.map((ex, i) => {
@@ -73,7 +68,6 @@ export function ExerciseScreen({
         <span className="exerciseNextCardLabel">Next</span>{" "}
         <span className="exerciseNextCardName">{next.name}</span>
       </span>
-      {target && <span className="exerciseNextCardTarget">{target}</span>}
       <Icon name="arrow-right" size="lg" />
     </button>
   ) : (

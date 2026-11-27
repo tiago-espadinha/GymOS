@@ -82,17 +82,5 @@ export function lastTimeValue(exercise: ExerciseLog, history: Set[], index: numb
   return (then && formatSet(then, exercise, units)) || NO_VALUES;
 }
 
-// The next-up card's target, e.g. "3 × 10" from last time; progress once the exercise has a set.
-export function nextTarget(exercise: ExerciseLog, history: Set[]): string {
-  const { done, total } = exerciseProgress(exercise);
-  if (done > 0) return done < total ? `${done} of ${total} done` : "Done";
-  if (history.length === 0) return "";
-  const timed = getExerciseMeta(exercise).trackingType === "time";
-  const values = history.map((s) => (timed ? Number(s.duration) : parseInt(s.reps)));
-  const shared = values[0] > 0 && values.every((v) => v === values[0]);
-  if (!shared) return `${history.length} set${history.length === 1 ? "" : "s"}`;
-  return `${history.length} × ${timed ? formatClock(values[0] * 1000) : values[0]}`;
-}
-
 /** The id of the last exercise screen's Finish card, so focus can return to it. */
 export const exerciseFinishId = (exerciseId: string) => `exerciseFinish-${exerciseId}`;
