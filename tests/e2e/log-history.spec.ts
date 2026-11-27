@@ -183,9 +183,46 @@ test('one plan only: no filter, and six or fewer sessions: no count or Show more
   await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Log' }).click()
   await expect(rows(page)).toHaveCount(5)
   await expect(filter(page)).toHaveCount(0)
+  const title = (await recent(page).getByRole('heading', { name: 'Recent sessions' }).boundingBox())!
+  const list = (await recent(page).getByRole('list').boundingBox())!
+  expect(list.y - (title.y + title.height)).toBeGreaterThanOrEqual(8)
   await expect(showMore(page)).toHaveCount(0)
   await expect(recent(page).getByText(/ of |shown/)).toHaveCount(0)
 })
+
+// Vertical centres of the funnel, the pill, the title's text and the count, in the Recent header.
+const headCentres = (page: Page) =>
+  recent(page).evaluate((region) => {
+    const cy = (r: DOMRect) => r.top + r.height / 2
+    const pill = region.querySelector('button[aria-haspopup]')!
+    const text = document.createRange()
+    text.selectNodeContents(region.querySelector('h2')!)
+    return {
+      funnel: cy(pill.querySelector('svg path')!.getBoundingClientRect()),
+      pill: cy(pill.getBoundingClientRect()),
+      title: cy(text.getBoundingClientRect()),
+      count: cy(region.querySelector('.logHomeRecentCount')!.getBoundingClientRect()),
+    }
+  })
+
+const expectLevel = async (page: Page, state: string) => {
+  const c = await headCentres(page)
+  // The cone carries the weight, so the funnel's box sits just below the pill's centre.
+  expect(c.funnel - c.pill, `${state} funnel`).toBeGreaterThan(0.5)
+  expect(c.funnel - c.pill, `${state} funnel`).toBeLessThanOrEqual(1)
+  expect(Math.abs(c.pill - c.title), `${state} title`).toBeLessThanOrEqual(1)
+  expect(Math.abs(c.pill - c.count), `${state} count`).toBeLessThanOrEqual(1)
+}
+
+for (const width of [375, 768, 1280]) {
+  test(`at ${width} the funnel sits optically centred in its pill, level with the title and count`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 })
+    await expectLevel(page, 'idle')
+    await filter(page).click()
+    await option(page, 'Push day').click()
+    await expectLevel(page, 'filtered')
+  })
+}
 
 test.describe('wide, 1280', () => {
   test.use({ viewport: { width: 1280, height: 800 } })
