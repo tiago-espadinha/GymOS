@@ -163,3 +163,9 @@ test('plan sheet: display rows with the hint under, no outline, and a secondary 
   expect(await style(sheet.getByRole('button', { name: 'Close' }))).toMatchObject(secondary)
   await axe(page)
 })
+
+test('secondary: Add exercise on the plan form', async ({ page }) => {
+  await page.getByRole('button', { name: 'Create New' }).click()
+  expect(await style(page.getByRole('button', { name: 'Add exercise' }))).toMatchObject(secondary)
+  await axe(page)
+})

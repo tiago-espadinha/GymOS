@@ -279,27 +279,6 @@
   outline-offset: 2px;
 }
 
-.createPlanFormAdd {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  min-height: var(--size-field);
-  border: 2px dashed var(--color-line-empty);
-  border-radius: var(--radius-surface);
-  background: none;
-  color: var(--color-text);
-  font-family: var(--font-body);
-  font-size: var(--text-secondary);
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.createPlanFormAdd:focus-visible {
-  outline: none;
-  border: var(--border-focus);
-}
-
 /* Sticky Save: black bar with a 1px line on top; the toast and error summary stack over the button. */
 .createPlanFormBar {
   position: sticky;
