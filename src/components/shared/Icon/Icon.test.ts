@@ -22,12 +22,14 @@ describe('Icon', () => {
     expect(render(createElement(Icon, { name: 'check', size: 'xl', className: 'x' }))).toContain('class="icon icon--xl x"')
   })
 
-  it('strokes with one token width, round caps and joins, in the current colour', () => {
+  it('strokes with one token width, flat ends and sharp corners, in the current colour', () => {
     const css = cssOf('Icon')
     const base = css.match(/\.icon\s*{([^}]*)}/)?.[1] ?? ''
-    for (const rule of ['fill: none', 'stroke: currentColor', 'stroke-width: var(--stroke-icon)', 'stroke-linecap: round', 'stroke-linejoin: round']) {
+    for (const rule of ['fill: none', 'stroke: currentColor', 'stroke-width: var(--stroke-icon)', 'stroke-linecap: butt', 'stroke-linejoin: miter']) {
       expect(base).toContain(rule)
     }
+    const fill = css.match(/\.icon__fill\s*{([^}]*)}/)?.[1] ?? ''
+    for (const rule of ['fill: currentColor', 'stroke: none']) expect(fill).toContain(rule)
     for (const size of ['sm', 'md', 'lg', 'xl']) expect(css).toContain(`var(--size-icon-${size})`)
   })
 
