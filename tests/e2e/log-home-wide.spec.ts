@@ -53,12 +53,11 @@ test.describe('wide, 1280', () => {
     const list = newSession(page).getByRole('list', { name: 'Back exercises' }).getByRole('listitem')
     await expect(list).toHaveText(names.slice(0, 4))
     await expect(newSession(page).getByText('+ 2 more', { exact: true })).toBeVisible()
+    // The name picks the plan, as on a phone, so START has the pane to itself.
+    await expect(newSession(page).getByRole('button', { name: 'Change plan' })).toHaveCount(0)
+    await expect(newSession(page).getByRole('button', { name: /^Training plan: / }).locator('svg')).toBeVisible()
     const start = (await newSession(page).getByRole('button', { name: 'Start', exact: true }).boundingBox())!
-    const change = (await newSession(page).getByRole('button', { name: 'Change plan' }).boundingBox())!
-    expect(start.height).toBe(72)
-    expect(change.height).toBe(72)
-    expect(change.y).toBe(start.y)
-    expect(change.x).toBeGreaterThan(start.x + start.width)
+    expect(start).toMatchObject({ x: left.x + 24, width: left.width - 48, height: 72 })
   })
 
   test('Recent sessions is a table of name, date, sets, volume, notes and Edit', async ({ page }) => {
@@ -85,7 +84,7 @@ test.describe('wide, 1280', () => {
   test('the plan picker and the date sheet open from the left pane', async ({ page }) => {
     await seed(page, [back, short], sessions)
     await page.goto('/')
-    await newSession(page).getByRole('button', { name: 'Change plan' }).click()
+    await newSession(page).getByRole('button', { name: /^Training plan: / }).click()
     // The picker is full screen; its list keeps the 600 column.
     const picker = page.getByRole('dialog')
     expect(await picker.getByRole('listbox').boundingBox()).toMatchObject({ x: 340, width: 600 })
@@ -147,15 +146,25 @@ test.describe('narrowest wide, 1024', () => {
     expect(edit.x + edit.width).toBe(984)
   })
 
-  test('Change plan shows a dark focus ring on the lime block', async ({ page }) => {
+  test('a long plan name keeps its chevron at the right edge of the pane', async ({ page }) => {
+    const long = { ...back, name: 'Upper body hypertrophy and conditioning block' }
+    await seed(page, [long], sessions)
+    await page.goto('/')
+    const block = (await newSession(page).boundingBox())!
+    const chevron = (await newSession(page).getByRole('button', { name: /^Training plan: / }).locator('svg').boundingBox())!
+    expect(chevron.x + chevron.width).toBe(block.x + block.width - 24)
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(1024)
+  })
+
+  test('the plan name shows a dark focus ring on the lime block', async ({ page }) => {
     await seed(page, [back], sessions)
     await page.goto('/')
-    const change = newSession(page).getByRole('button', { name: 'Change plan' })
-    await change.focus()
+    const name = newSession(page).getByRole('button', { name: /^Training plan: / })
+    await name.focus()
     await page.keyboard.press('Shift+Tab')
     await page.keyboard.press('Tab')
-    const ring = await change.evaluate((el) => [getComputedStyle(el).outlineStyle, getComputedStyle(el).outlineColor])
-    const onAccent = await change.evaluate((el) => getComputedStyle(el).color)
+    const ring = await name.evaluate((el) => [getComputedStyle(el).outlineStyle, getComputedStyle(el).outlineColor])
+    const onAccent = await name.evaluate((el) => getComputedStyle(el).color)
     expect(ring).toEqual(['solid', onAccent])
   })
 })
@@ -168,7 +177,6 @@ test.describe('below wide, 768', () => {
     await page.goto('/')
     await expect(newSession(page).getByRole('button', { name: 'Start', exact: true })).toBeVisible()
     await expect(newSession(page).getByRole('list')).toBeHidden()
-    await expect(newSession(page).getByRole('button', { name: 'Change plan' })).toBeHidden()
     await expect(recent(page).getByText('6 of 8')).toBeVisible()
     expect(await page.locator('.mainContent').boundingBox()).toMatchObject({ x: 84, width: 600 })
   })

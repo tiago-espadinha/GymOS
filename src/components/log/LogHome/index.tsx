@@ -79,19 +79,13 @@ export function LogHome({ plans, sessions, date, onDateChange, onStart, onEdit, 
           <button type="button" className="logHomePlan" aria-haspopup="dialog" onClick={() => setOpen("plan")}>
             <span className="visuallyHidden">Training plan: </span>
             <PlanName name={plan.name} />
-            <Icon name="chevron-down" size="xl" className="logHomePlanChevron" />
+            <Icon name="chevron-down" size="xl" />
           </button>
           <span className="logHomeLead">{planTrainedSummary(plan, sessions, today())}</span>
-          {/* Wide only: Change plan beside Start. */}
           <PlanPreview plan={plan} />
-          <div className="logHomeActions">
-            <PrimaryButton tone="dark" onClick={() => onStart(plan)}>
-              Start
-            </PrimaryButton>
-            <button type="button" className="logHomeChangePlan" aria-haspopup="dialog" onClick={() => setOpen("plan")}>
-              Change plan
-            </button>
-          </div>
+          <PrimaryButton tone="dark" onClick={() => onStart(plan)}>
+            Start
+          </PrimaryButton>
         </section>
       ) : (
         <EmptyState
