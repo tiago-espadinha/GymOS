@@ -28,6 +28,7 @@ test.beforeEach(async ({ page }) => {
 const hold = (page: Page) => page.getByRole('timer', { name: /^Hold/ })
 const rest = (page: Page) => page.getByRole('timer', { name: /^Rest/ })
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true })
+const target = (page: Page) => page.getByRole('textbox', { name: 'Timer target' })
 // Turns "Rest after holds" off for this device and reopens the exercise.
 const restOff = async (page: Page) => {
   await page.evaluate(() => localStorage.setItem('gym:timerPrefs', JSON.stringify({ restAfterHolds: false })))
@@ -53,7 +54,8 @@ test('idle shows the category target (calisthenics: 15s) and Start hold begins t
   await expect(label(page)).toContainText('Hold · ready')
   await expect(label(page)).toContainText('Set 1 of 1')
   expect(await fillShare(page)).toBe(0)
-  await expect(shown(page, '.timerBlockControls').getByRole('button')).toHaveCount(0)
+  await expect(shown(page, '.timerUnit').getByRole('button')).toHaveCount(0)
+  await expect(target(page)).toHaveCount(0)
   await expect(page.getByRole('switch')).toHaveCount(0)
   await button(page, 'Start hold').click()
   await page.clock.fastForward(5_000)
@@ -114,7 +116,8 @@ test('with the rest off, past the target the block is full and the time held is 
   const fill = await shown(page, '.timerBlockFill').evaluate((el) => getComputedStyle(el).backgroundColor)
   expect(fill).toBe('rgb(255, 255, 255)')
   await expect(page.getByRole('group', { name: 'Target time' })).toHaveCount(0)
-  await expect(shown(page, '.timerBlockControls').getByRole('button')).toHaveText(['Pause'])
+  await expect(shown(page, '.timerActions').getByRole('button')).toHaveText(['Pause'])
+  await expect(target(page)).toHaveCount(0)
   await button(page, 'Stop and log 00:20').click()
   await expect(rest(page)).toHaveCount(0)
   await expect(logged(page)).toHaveText('00:20')
@@ -130,7 +133,7 @@ test('Pause stops the clock and Resume continues it; +step lengthens the target'
   await expect(hold(page)).toContainText('00:04')
   await button(page, 'Resume').click()
   await button(page, '+5s').click()
-  await expect(page.getByText('of 00:20').first()).toBeVisible()
+  await expect(target(page)).toHaveValue('00:20')
 })
 
 test('Stop on a paused hold drops it and goes back to ready', async ({ page }) => {
@@ -364,7 +367,7 @@ test('the minus button stops at the smallest step so a hold always has a target'
   await button(page, 'Start hold').click()
   await button(page, '−5s').click()
   await button(page, '−5s').click()
-  await expect(page.getByText('of 00:05').first()).toBeVisible()
+  await expect(target(page)).toHaveValue('00:05')
   await expect(button(page, '−5s')).toBeDisabled()
 })
 
@@ -433,4 +436,14 @@ test('a last hold that matches no chip is the next target, shown as Other', asyn
   await expect(other).toHaveValue('00:07')
   await expect(other).not.toBeFocused()
   await expect(page.getByRole('group', { name: 'Target time' }).getByRole('button', { name: 'Other' })).toHaveAttribute('aria-pressed', 'true')
+})
+
+test('a target typed below the time held ends the hold and starts the rest', async ({ page }) => {
+  await button(page, 'Start hold').click()
+  await page.clock.fastForward(10_000)
+  await target(page).fill('5')
+  await expect(hold(page)).toContainText('00:10')
+  await target(page).press('Enter')
+  await expect(rest(page)).toBeVisible()
+  await expect(page.getByText('Set 1 logged · 00:10')).toBeVisible()
 })

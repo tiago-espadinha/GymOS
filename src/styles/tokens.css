@@ -102,6 +102,7 @@
   --size-timer-block: 47vh;
   --size-timer-block-min: 340px; /* keeps the block tall enough on short screens */
   --size-timer-block-fit: max(var(--size-timer-block), var(--size-timer-block-min));
+  --size-timer-block-height: var(--size-timer-block-fit); /* TimerBlock.css takes the buttons below it off this */
   --size-tick-w: 8px;
   --size-tick-h: 28px;
   --size-topbar: 72px;

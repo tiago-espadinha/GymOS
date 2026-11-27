@@ -13,16 +13,19 @@ interface IdleRestProps {
 export function IdleRest({ setNumber, category }: IdleRestProps) {
   const { restSec } = useTimerPrefs();
   return (
-    <section className="timerBlock timerBlock--rest timerBlock--idle" aria-label="Rest timer">
-      <div className="timerBlockFace">
-        <div className="timerBlockTop">
-          <span>Rest</span>
-          <span>After set {setNumber}</span>
+    // The empty strip below stands where End rest will be, so nothing moves when the rest starts.
+    <div className="timerUnit timerUnit--actions timerUnit--idle">
+      <section className="timerBlock timerBlock--rest" aria-label="Rest timer">
+        <div className="timerBlockFace">
+          <div className="timerBlockTop">
+            <span>Rest</span>
+            <span>After set {setNumber}</span>
+          </div>
+          <div className="timerBlockCountdown">{formatClock(restSec[category] * 1000)}</div>
+          <div className="timerBlockTarget">Starts on Set done</div>
         </div>
-        <div className="timerBlockCountdown">{formatClock(restSec[category] * 1000)}</div>
-        <div className="timerBlockTarget">Starts on Set done</div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }
 

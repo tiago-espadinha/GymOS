@@ -24,6 +24,7 @@ test.beforeEach(async ({ page }) => {
 
 const setDone = (page: Page) => page.getByRole('button', { name: 'Set done' })
 const timer = (page: Page) => page.getByRole('timer', { name: /^Rest/ })
+const target = (page: Page) => page.getByRole('textbox', { name: 'Timer target' })
 
 const logAndRest = async (page: Page) => {
   await logSet(page, '60', '8')
@@ -75,10 +76,10 @@ test('the block fills in step with the elapsed rest', async ({ page }) => {
 test('−15s and +15s move the target; End rest ends the rest', async ({ page }) => {
   await logAndRest(page)
   await page.getByRole('button', { name: '+15s' }).click()
-  await expect(page.getByText('Target 01:15').first()).toBeVisible()
+  await expect(target(page)).toHaveValue('01:15')
   await page.getByRole('button', { name: '−15s' }).click()
   await page.getByRole('button', { name: '−15s' }).click()
-  await expect(page.getByText('Target 00:45').first()).toBeVisible()
+  await expect(target(page)).toHaveValue('00:45')
   await page.getByRole('button', { name: 'End rest' }).click()
   await expect(timer(page)).toHaveCount(0)
   await expect(page.getByRole('button', { name: /^Rest/ })).toHaveCount(0)
@@ -91,7 +92,7 @@ test('a finished rest reads REST OVER, fills the block and counts up as +m:ss, h
   await page.clock.fastForward(15_000)
   await expect(timer(page)).toContainText('+0:15')
   await expect(page.getByRole('timer', { name: /^Rest over/ })).toBeVisible()
-  await expect(page.getByText('01:00 done').first()).toBeVisible()
+  await expect(target(page)).toHaveValue('01:00')
   await expect.poll(() => fillShare(page)).toBeCloseTo(1, 1)
   await expect(page.getByRole('button', { name: '−15s' })).toHaveCount(0)
   await expect(page.getByRole('button', { name: '+15s' })).toBeVisible()
@@ -129,7 +130,7 @@ test('stepping down to zero reads as a finished rest, not an empty one', async (
   await page.getByRole('button', { name: '−15s' }).click()
   await expect(page.getByRole('button', { name: '−15s' })).toHaveCount(0)
   for (let i = 0; i < 9; i++) await page.getByRole('button', { name: '−5s' }).click()
-  await expect(page.getByText('00:00 done').first()).toBeVisible()
+  await expect(target(page)).toHaveValue('00:00')
   await expect.poll(() => fillShare(page)).toBeCloseTo(1, 1)
   await page.clock.fastForward(1_000)
   await expect(page.getByRole('status').filter({ hasText: 'Rest' })).toHaveText('Rest over')
@@ -139,4 +140,21 @@ test('the phase is announced once the block is up', async ({ page }) => {
   await logAndRest(page)
   await page.clock.fastForward(500)
   await expect(page.getByRole('status').filter({ hasText: 'Rest' })).toHaveText('Rest started')
+})
+
+test('a typed target changes the rest, which keeps running; one already past ends it', async ({ page }) => {
+  await logAndRest(page)
+  await page.clock.fastForward(20_000)
+  await target(page).fill('130')
+  // Nothing applies until the field is left.
+  await expect(timer(page)).toContainText('00:40')
+  await target(page).press('Enter')
+  await expect(target(page)).toHaveValue('01:30')
+  await expect(timer(page)).toContainText('01:10')
+  await target(page).fill('0')
+  await target(page).blur()
+  await expect(target(page)).toHaveValue('01:30')
+  await target(page).fill('10')
+  await target(page).press('Enter')
+  await expect(page.getByRole('timer', { name: /^Rest over/ })).toContainText('+0:10')
 })

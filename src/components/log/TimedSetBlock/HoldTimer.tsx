@@ -1,6 +1,6 @@
 import { formatClock, formatRestClock, type TimerControls } from "../../../hooks/useTimer";
-import { getAdjustStepSec } from "../../../constants/timerPresets";
 import { TimerBlock, TimerButton } from "../TimerBlock";
+import { TargetRow } from "../TimerBlock/TargetRow";
 import { HoldPhase, holdPhase } from "./holdPhase";
 
 const SUFFIX: Record<HoldPhase, string> = { ready: " · ready", running: "", paused: " · paused", over: " · past target" };
@@ -15,11 +15,10 @@ interface HoldTimerProps {
   onDiscard: () => void;
 }
 
-// The white block of a hold. Ready has no buttons: the hold starts from the button below.
+// The white block of a hold. Ready has no buttons of its own: the hold starts from the main button.
 export function HoldTimer({ timer, name, setNumber, setTotal, onDiscard }: HoldTimerProps) {
-  const { isComplete, elapsedMs, targetMs, overtimeMs, progress, formattedTarget, start, pause, adjustTargetSec } = timer;
+  const { isComplete, elapsedMs, targetMs, overtimeMs, progress, formattedTarget, start, pause, adjustTargetSec, setTargetSec } = timer;
   const phase = holdPhase(timer);
-  const step = getAdjustStepSec(Math.round(targetMs / 1000));
 
   return (
     <TimerBlock
@@ -29,23 +28,24 @@ export function HoldTimer({ timer, name, setNumber, setTotal, onDiscard }: HoldT
       meta={`Set ${setNumber} of ${setTotal}`}
       // A hold shows the time held, the number Stop and log saves; ready shows the target.
       countdown={phase === "ready" ? formattedTarget : isComplete ? formatRestClock(0, overtimeMs) : formatClock(elapsedMs)}
-      caption={phase === "ready" ? "" : isComplete ? `${formattedTarget} reached` : `of ${formattedTarget}`}
+      // While it runs, the target row says what the target is.
+      caption={phase === "ready" || phase === "running" ? "" : isComplete ? `${formattedTarget} reached` : `of ${formattedTarget}`}
       fillPct={isComplete ? 100 : Math.round(progress * 1000) / 10}
       filling={phase === "running"}
       status={phase === "ready" ? "" : phase === "over" ? "Target reached" : `${name} ${phase}`}
+      actions={
+        phase === "paused" ? (
+          <>
+            <TimerButton onClick={onDiscard}>Stop</TimerButton>
+            <TimerButton onClick={start}>Resume</TimerButton>
+          </>
+        ) : (
+          phase !== "ready" && <TimerButton onClick={pause}>Pause</TimerButton>
+        )
+      }
     >
       {phase === "running" && (
-        <>
-          <TimerButton onClick={() => adjustTargetSec(-step)} disabled={targetMs / 1000 <= step}>−{step}s</TimerButton>
-          <TimerButton onClick={() => adjustTargetSec(step)}>+{step}s</TimerButton>
-        </>
-      )}
-      {(phase === "running" || phase === "over") && <TimerButton onClick={pause}>Pause</TimerButton>}
-      {phase === "paused" && (
-        <>
-          <TimerButton onClick={onDiscard}>Stop</TimerButton>
-          <TimerButton onClick={start}>Resume</TimerButton>
-        </>
+        <TargetRow targetMs={targetMs} keepAStep onAdjust={adjustTargetSec} onType={setTargetSec} />
       )}
     </TimerBlock>
   );

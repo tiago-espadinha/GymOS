@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { formatRestClock, useTimer } from "../../../hooks/useTimer";
-import { getAdjustStepSec } from "../../../constants/timerPresets";
 import { useTimerPrefs } from "../../../utils/timerPrefs";
 import { restTimerId } from "../../../utils/restTimers";
 import { ExerciseCategory } from "../../../types";
 import { TimerBlock, TimerButton } from "../TimerBlock";
+import { TargetRow } from "../TimerBlock/TargetRow";
 
 interface RestBlockProps {
   setId: string;
@@ -22,12 +22,11 @@ export function RestBlock({ setId, setNumber, meta, category, autoStart, onEnd }
   // A rest already stored keeps its own target; the length from Settings is for new ones.
   const { restSec } = useTimerPrefs();
   const {
-    isRunning, isComplete, elapsedMs, targetMs, overtimeMs, progress, formattedTarget,
-    start, reset, adjustTargetSec,
+    isRunning, isComplete, elapsedMs, targetMs, overtimeMs, progress,
+    start, reset, adjustTargetSec, setTargetSec,
   } = useTimer(restTimerId(setId), restSec[category]);
   // A target of 0 means the rest is already over (useTimer treats it as "no target").
   const over = isComplete || targetMs === 0;
-  const step = getAdjustStepSec(Math.round(targetMs / 1000));
 
   useEffect(() => {
     if (autoStart && !isRunning && elapsedMs === 0) start();
@@ -48,16 +47,14 @@ export function RestBlock({ setId, setNumber, meta, category, autoStart, onEnd }
       setNumber={setNumber}
       meta={meta}
       countdown={formatRestClock(Math.max(0, targetMs - elapsedMs), overtimeMs)}
-      caption={over ? `${formattedTarget} done` : `Target ${formattedTarget}`}
+      caption=""
       fillPct={over ? 100 : Math.round(progress * 1000) / 10}
       filling={isRunning && !over}
       status={over ? "Rest over" : "Rest started"}
+      // One label before and after the target, so the way out never moves or changes.
+      actions={<TimerButton onClick={end} endRest>End rest</TimerButton>}
     >
-      {/* Past the target a shorter rest means nothing, so −step goes. */}
-      {!over && <TimerButton onClick={() => adjustTargetSec(-step)}>−{step}s</TimerButton>}
-      <TimerButton onClick={() => adjustTargetSec(step)}>+{step}s</TimerButton>
-      {/* One label before and after the target, so the way out never moves or changes. */}
-      <TimerButton onClick={end} wide>End rest</TimerButton>
+      <TargetRow targetMs={targetMs} canShorten={!over} onAdjust={adjustTargetSec} onType={setTargetSec} />
     </TimerBlock>
   );
 }

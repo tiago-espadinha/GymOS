@@ -87,7 +87,7 @@ export function ExerciseLogger({ exercise, onChange, history, titleId, header, f
   useEffect(() => {
     if (!handOffFocus.current) return;
     handOffFocus.current = false;
-    const next = rest ? ".timerBlock--rest .timerBlockButton--wide" : "[data-set-done]";
+    const next = rest ? "[data-end-rest]" : "[data-set-done]";
     (rootRef.current?.querySelector<HTMLElement>(next) ?? document.getElementById(titleId))?.focus();
   }, [rest, titleId]);
 

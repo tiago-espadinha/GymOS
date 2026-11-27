@@ -167,3 +167,15 @@ test('with "Rest after holds" off in Settings, a hold runs past its target and s
   await expect(page.getByRole('timer', { name: /^Hold/ })).toContainText('+0:05')
   await expect(rest(page)).toHaveCount(0)
 })
+
+test('a tap on a rest field selects it, so typing replaces the time; the field is a 44px target with a ring', async ({ page }) => {
+  await page.goto('/')
+  await openSettings(page)
+  // A second tap on the focused field must select again (Safari drops the selection on mouseup).
+  await field(page, 'Strength').click()
+  await field(page, 'Strength').click()
+  await page.keyboard.type('200')
+  await expect(field(page, 'Strength')).toHaveValue('02:00')
+  expect((await field(page, 'Strength').boundingBox())!.height).toBeGreaterThanOrEqual(44)
+  await expect(field(page, 'Strength')).not.toHaveCSS('outline-style', 'none')
+})
