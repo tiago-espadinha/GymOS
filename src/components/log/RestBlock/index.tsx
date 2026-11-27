@@ -3,7 +3,8 @@ import { formatRestClock, useTimer } from "../../../hooks/useTimer";
 import { useTimerPrefs } from "../../../utils/timerPrefs";
 import { restTimerId } from "../../../utils/restTimers";
 import { ExerciseCategory } from "../../../types";
-import { TimerBlock, TimerButton } from "../TimerBlock";
+import { SecondaryButton } from "../../shared";
+import { TimerBlock } from "../TimerBlock";
 import { TargetRow } from "../TimerBlock/TargetRow";
 
 interface RestBlockProps {
@@ -52,7 +53,8 @@ export function RestBlock({ setId, setNumber, meta, category, autoStart, onEnd }
       filling={isRunning && !over}
       status={over ? "Rest over" : "Rest started"}
       // One label before and after the target, so the way out never moves or changes.
-      actions={<TimerButton onClick={end} endRest>End rest</TimerButton>}
+      // data-end-rest: Set done hands its focus to this button.
+      actions={<SecondaryButton onClick={end} data-end-rest>End rest</SecondaryButton>}
     >
       <TargetRow targetMs={targetMs} canShorten={!over} onAdjust={adjustTargetSec} onType={setTargetSec} />
     </TimerBlock>

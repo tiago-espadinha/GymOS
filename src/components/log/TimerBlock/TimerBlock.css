@@ -199,18 +199,14 @@
   text-transform: uppercase;
 }
 
-/* Below the block, on the page: outlined white pills. */
+/* Below the block, on the page: shared secondary buttons, side by side. */
 .timerActions {
   display: flex;
   gap: var(--space-2);
 }
 
-.timerActions .timerBlockButton {
+.timerActions > * {
   flex: 1;
-  min-height: var(--size-action);
-  border: var(--border-control);
-  background: transparent;
-  color: var(--color-text);
 }
 
 .timerBlockButton:active {
@@ -334,7 +330,6 @@
   }
 
   .exerciseScreen .timerBlockButton,
-  .exerciseScreen .timerActions .timerBlockButton,
   .exerciseScreen .timerTarget {
     min-height: var(--size-action);
   }

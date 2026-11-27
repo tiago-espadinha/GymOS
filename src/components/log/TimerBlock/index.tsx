@@ -15,7 +15,7 @@ interface TimerBlockProps {
   filling?: boolean;
   // Announced when it changes, so it names phases, never seconds.
   status: string;
-  /** The buttons below the block (End rest, Pause, Stop and Resume). */
+  /** The secondary buttons below the block (End rest, Pause, Stop and Resume). */
   actions?: ReactNode;
   /** The row inside the block, while the timer runs. */
   children?: ReactNode;
@@ -65,10 +65,10 @@ export function TimerBlock({ tone, label, setNumber, meta, countdown, caption, f
   );
 }
 
-export function TimerButton({ onClick, disabled, endRest, children }: { onClick: () => void; disabled?: boolean; endRest?: boolean; children: ReactNode }) {
+/** A step pill inside the block (− and +). */
+export function TimerButton({ onClick, disabled, children }: { onClick: () => void; disabled?: boolean; children: ReactNode }) {
   return (
-    // data-end-rest: Set done hands its focus to this button.
-    <button type="button" className="timerBlockButton" onClick={onClick} disabled={disabled} data-end-rest={endRest || undefined}>
+    <button type="button" className="timerBlockButton" onClick={onClick} disabled={disabled}>
       {children}
     </button>
   );
