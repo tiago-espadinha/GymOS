@@ -183,3 +183,35 @@ test('text: the plan overview and the session draw back the same way', async ({ 
   await page.getByRole('button', { name: /^Bench Press/ }).click()
   expect(plans).toEqual(await back(page.getByRole('button', { name: 'All exercises' })))
 })
+
+for (const width of [320, 360, 375]) {
+  test(`archived row at ${width}px: no word is split and no line starts on the dot`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 812 })
+    await page.getByRole('button', { name: /^Archived/ }).click()
+    const row = page.locator('.planRow--archived')
+    const broken = await row.locator('.planRow__name, .planRow__meta').evaluateAll((els) =>
+      els.flatMap((el) => {
+        const text = el.firstChild!
+        const lines = (from: number, to: number) => {
+          const range = document.createRange()
+          range.setStart(text, from)
+          range.setEnd(text, to)
+          return range.getClientRects()
+        }
+        // A word, or the dot with the word it is glued to, sits on one line.
+        return Array.from(el.textContent!.matchAll(/[^ ]+/g))
+          .filter((m) => new Set(Array.from(lines(m.index, m.index + m[0].length), (r) => Math.round(r.top))).size > 1)
+          .map((m) => m[0])
+      }),
+    )
+    // At 320 the long word alone is wider than the row, so only it may split.
+    expect(broken).toEqual(width === 320 ? ['hypertrophyaccumulation'] : [])
+    const outer = (await row.boundingBox())!
+    for (const name of [/^Restore/, /^Delete/]) {
+      const box = (await row.getByRole('button', { name }).boundingBox())!
+      expect(box.height).toBe(44)
+      expect(box.x + box.width).toBeLessThanOrEqual(outer.x + outer.width)
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width)
+  })
+}
