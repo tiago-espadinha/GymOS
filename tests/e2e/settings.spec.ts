@@ -109,6 +109,19 @@ test('the four tabs fit at 320 without overflow', async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320)
 })
 
+for (const [width, size] of [[320, '80px'], [375, '88px'], [768, '88px'], [1280, '88px']] as const) {
+  test(`the Settings title fits its column at ${width}`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 700 })
+    await openSettings(page)
+    // The fallback face is narrower, so measure the real one.
+    await page.evaluate(() => document.fonts.ready)
+    const title = page.getByRole('heading', { level: 1, name: 'Settings' })
+    expect(await title.evaluate((el) => getComputedStyle(el).fontSize)).toBe(size)
+    expect(await title.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true)
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width)
+  })
+}
+
 test('unit choices survive a reload and leave stored plans and sessions untouched', async ({ page }) => {
   const before = await raw(page)
   await openSettings(page)
