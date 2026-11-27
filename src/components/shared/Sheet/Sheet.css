@@ -132,7 +132,6 @@
 .sheet__meta {
   font-size: var(--text-secondary);
   font-weight: 600;
-  overflow-wrap: anywhere;
 }
 
 /* A title takes focus only so it is announced; it is not a control. */
@@ -196,8 +195,10 @@
   outline-offset: -2px;
 }
 
+/* Further in, so accent shows around the dark ring and it reads as a ring. */
 .sheet__row--accent:focus-visible {
   outline-color: var(--color-on-accent);
+  outline-offset: -6px;
 }
 
 .sheet__hint {
