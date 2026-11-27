@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ConfirmSheet, Field, Icon, PrimaryButton, SaveFailedAlert, Toast } from "../../shared";
+import { ConfirmSheet, Field, Icon, PrimaryButton, SaveFailedAlert, SecondaryButton, Toast } from "../../shared";
 import { TrainingPlan } from "../../../types";
 import { buildPlan, draftOf, errorCount, validatePlan } from "./buildPlan";
 import { ExerciseFields } from "./ExerciseFields";
@@ -104,10 +104,10 @@ export function CreatePlanForm({ plan, historyNote, onSave, onCancel }: CreatePl
           })}
         </ul>
         {errors?.exercises && <p className="exerciseError"><Icon name="warning" />{errors.exercises}</p>}
-        <button type="button" className="createPlanFormAdd" data-add-exercise onClick={list.add}>
-          <Icon name="plus" />
+        <SecondaryButton data-add-exercise onClick={list.add}>
+          <Icon name="plus" size="md" />
           Add exercise
-        </button>
+        </SecondaryButton>
       </section>
 
       <div className="createPlanFormBar">

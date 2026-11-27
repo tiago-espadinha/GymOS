@@ -141,3 +141,77 @@ test('secondary: Pause, then Stop and Resume, below a hold', async ({ page }) =>
     expect(await style(page.getByRole('button', { name, exact: true }))).toMatchObject(secondary)
   }
 })
+
+test('plan sheet: display rows with the hint under, no outline, and a secondary Close', async ({ page }) => {
+  await page.getByRole('button', { name: 'More actions for Push' }).click()
+  const sheet = page.getByRole('dialog', { name: 'Push' })
+  const outer = (await sheet.boundingBox())!
+  for (const [name, title] of [[/^Edit plan/, 'Edit plan'], [/^Archive plan/, 'Archive plan']] as const) {
+    const row = sheet.getByRole('button', { name })
+    const box = (await row.boundingBox())!
+    expect(box.x).toBe(outer.x)
+    expect(box.width).toBe(outer.width)
+    expect(await style(row)).toMatchObject({ face: display.face, letters: 'uppercase', size: '28px', colour: WHITE, fill: CLEAR })
+    await expect(row).toHaveCSS('border-top-width', '0px')
+    await expect(row).toHaveCSS('border-bottom-width', '1px')
+    const label = (await row.getByText(title, { exact: true }).boundingBox())!
+    const hint = (await row.locator('.sheet__hint').boundingBox())!
+    expect(hint.y).toBeGreaterThanOrEqual(label.y + label.height)
+    expect(hint.x + hint.width).toBeLessThanOrEqual(box.x + box.width)
+  }
+  await expect(sheet.getByRole('button').last()).toHaveText('Close')
+  expect(await style(sheet.getByRole('button', { name: 'Close' }))).toMatchObject(secondary)
+  await axe(page)
+})
+
+test('secondary: Add exercise on the plan form', async ({ page }) => {
+  await page.getByRole('button', { name: 'Create New' }).click()
+  expect(await style(page.getByRole('button', { name: 'Add exercise' }))).toMatchObject(secondary)
+  await axe(page)
+})
+
+test('text: the plan overview and the session draw back the same way', async ({ page }) => {
+  const back = (el: Locator) =>
+    el.evaluate((node) => {
+      const s = getComputedStyle(node)
+      const box = node.getBoundingClientRect()
+      return [box.x, box.height, s.fontFamily, s.fontSize, s.fontWeight, s.textTransform, s.letterSpacing, s.color, s.gap]
+    })
+  await page.getByRole('button', { name: /^Push/ }).click()
+  const plans = await back(page.getByRole('button', { name: 'Back to Plans' }))
+  await page.getByRole('button', { name: 'Start Push' }).click()
+  await page.getByRole('button', { name: /^Bench Press/ }).click()
+  expect(plans).toEqual(await back(page.getByRole('button', { name: 'All exercises' })))
+})
+
+for (const width of [320, 360, 375]) {
+  test(`archived row at ${width}px: no word is split and no line starts on the dot`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 812 })
+    await page.getByRole('button', { name: /^Archived/ }).click()
+    const row = page.locator('.planRow--archived')
+    const broken = await row.locator('.planRow__name, .planRow__meta').evaluateAll((els) =>
+      els.flatMap((el) => {
+        const text = el.firstChild!
+        const lines = (from: number, to: number) => {
+          const range = document.createRange()
+          range.setStart(text, from)
+          range.setEnd(text, to)
+          return range.getClientRects()
+        }
+        // A word, or the dot with the word it is glued to, sits on one line.
+        return Array.from(el.textContent!.matchAll(/[^ ]+/g))
+          .filter((m) => new Set(Array.from(lines(m.index, m.index + m[0].length), (r) => Math.round(r.top))).size > 1)
+          .map((m) => m[0])
+      }),
+    )
+    // At 320 the long word alone is wider than the row, so only it may split.
+    expect(broken).toEqual(width === 320 ? ['hypertrophyaccumulation'] : [])
+    const outer = (await row.boundingBox())!
+    for (const name of [/^Restore/, /^Delete/]) {
+      const box = (await row.getByRole('button', { name }).boundingBox())!
+      expect(box.height).toBe(44)
+      expect(box.x + box.width).toBeLessThanOrEqual(outer.x + outer.width)
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width)
+  })
+}

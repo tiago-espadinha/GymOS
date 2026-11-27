@@ -93,10 +93,10 @@ test.describe('with plans', () => {
     await expect(page.getByRole('button', { name: 'More actions for Push day' })).toBeFocused()
   })
 
-  test('Cancel and a tap outside close the sheet without archiving', async ({ page }) => {
+  test('Close and a tap outside close the sheet without archiving', async ({ page }) => {
     await page.goto('/')
     await openActions(page, 'Push day')
-    await page.getByRole('button', { name: 'Cancel' }).click()
+    await page.getByRole('button', { name: 'Close' }).click()
     await expect(page.getByRole('dialog')).toHaveCount(0)
     await openActions(page, 'Push day')
     await page.mouse.click(10, 10)

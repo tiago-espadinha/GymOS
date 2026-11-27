@@ -129,22 +129,19 @@
   min-height: var(--size-control);
 }
 
+/* The one back style, as in a session. */
 .planDetail__back {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
   min-height: var(--size-control);
-  margin-left: calc(-1 * var(--space-2));
-  padding: 0 var(--space-2);
+  padding: 0;
   border: 0;
-  border-radius: var(--radius-pill);
   background: none;
   color: var(--color-text);
-  font-family: inherit;
-  font-size: var(--text-small);
+  font: inherit;
+  font-size: var(--text-body);
   font-weight: 700;
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
   cursor: pointer;
 }
 

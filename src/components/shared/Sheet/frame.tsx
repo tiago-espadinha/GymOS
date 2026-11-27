@@ -32,14 +32,17 @@ export function SheetRows({ children }: { children: ReactNode }) {
 interface SheetRowProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'style' | 'title'> {
   title: string;
-  /** The muted words beside the title. */
+  /** The muted words beside the title, or under it with hintUnder. */
   hint?: ReactNode;
+  /** For a hint that is a sentence. */
+  hintUnder?: boolean;
   tone?: 'default' | 'danger';
 }
 
-export function SheetRow({ title, hint, tone = 'default', type = 'button', ...rest }: SheetRowProps) {
+export function SheetRow({ title, hint, hintUnder, tone = 'default', type = 'button', ...rest }: SheetRowProps) {
+  const layout = hintUnder ? ' sheet__row--under' : '';
   return (
-    <button {...rest} type={type} className={`sheet__row sheet__row--${tone}`}>
+    <button {...rest} type={type} className={`sheet__row sheet__row--${tone}${layout}`}>
       <span>{title}</span>
       {hint && <span className="sheet__hint">{hint}</span>}
     </button>
