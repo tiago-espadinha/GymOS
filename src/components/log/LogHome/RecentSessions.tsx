@@ -3,6 +3,7 @@ import { formatDateFull } from "../../../utils/date";
 import { newestFirst, sessionCells, sessionPlanKey, sessionPlans, sessionStats, sessionSummary } from "../../../utils/sessions";
 import { WorkoutSession } from "../../../types";
 import { useUnitPrefs } from "../../../utils/unitPrefs";
+import { SecondaryButton } from "../../shared";
 import { ALL, PlanFilter } from "./PlanFilter";
 
 const RECENT_COUNT = 6;
@@ -106,9 +107,7 @@ export function RecentSessions({ sessions, onEdit, justSaved, empty }: RecentSes
       )}
       {hasMore && (
         <div className="logHomeMoreWrap">
-          <button type="button" className="logHomeShowMore" onClick={showMore}>
-            Show more
-          </button>
+          <SecondaryButton onClick={showMore}>Show more</SecondaryButton>
         </div>
       )}
       {paged && !hasMore && <p className="logHomeEnd">All {matching.length} shown</p>}

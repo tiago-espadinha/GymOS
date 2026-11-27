@@ -224,3 +224,32 @@ test('secondary: the date sheet ends in Close under a 44 title', async ({ page }
   await expect(sheet.getByRole('heading', { name: 'Session date' })).toHaveCSS('font-size', '44px')
   await axe(page)
 })
+
+for (const width of [375, 1280]) {
+  test(`secondary: Show more at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 812 })
+    const sessions = Array.from({ length: 8 }, (_, i) => ({
+      id: `s${i}`,
+      planId: 'p1',
+      planName: 'Push',
+      date: `2026-11-${String(i + 1).padStart(2, '0')}`,
+      exercises: [{ ...exercise, sets: [{ weight: 60, reps: 8 }] }],
+    }))
+    await page.evaluate((s) => localStorage.setItem('gym:sessions', JSON.stringify(s)), sessions)
+    await page.reload()
+    await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Log' }).click()
+    const more = page.getByRole('button', { name: 'Show more' })
+    expect(await style(more)).toMatchObject(secondary)
+    // Full width on a phone, sized to its label under the wide table.
+    const share = (await more.boundingBox())!.width / (await page.locator('.logHomeList').boundingBox())!.width
+    if (width < 1024) expect(share).toBeGreaterThan(0.9)
+    else expect(share).toBeLessThan(0.5)
+    // Tabbed to, so the keyboard focus ring shows.
+    await more.focus()
+    await page.keyboard.press('Shift+Tab')
+    await page.keyboard.press('Tab')
+    await expect(more).toBeFocused()
+    await expect(more).toHaveCSS('outline-style', 'solid')
+    await axe(page)
+  })
+}

@@ -211,26 +211,6 @@ span.logHomeLead {
   padding: var(--space-4) 0 0;
 }
 
-.logHomeShowMore {
-  width: 100%;
-  min-height: var(--size-action);
-  border: var(--border-control);
-  border-radius: var(--radius-pill);
-  background: none;
-  color: var(--color-text);
-  font-family: var(--font-display);
-  font-weight: var(--weight-display);
-  font-size: var(--text-button);
-  letter-spacing: var(--tracking-button);
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.logHomeShowMore:focus-visible {
-  outline: var(--border-focus);
-  outline-offset: 2px;
-}
-
 .logHomeRecent > .logHomeEnd {
   margin: 0;
   padding: var(--space-3) 0;
@@ -467,9 +447,8 @@ span.logHomeLead {
   }
 
   /* Under the table, sized to its label rather than the pane. */
-  .logHomeShowMore {
+  .logHomeMoreWrap > .secondary-button {
     width: auto;
-    min-height: var(--size-field-lg);
     padding: 0 var(--space-7);
   }
 
