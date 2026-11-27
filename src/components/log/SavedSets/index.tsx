@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useRef } from "react";
-import { Icon } from "../../shared";
+import { Icon, SecondaryButton } from "../../shared";
 import { ExerciseLog, Set } from "../../../types";
 import { generateId } from "../../../utils/id";
 import { useUnitPrefs } from "../../../utils/unitPrefs";
@@ -35,7 +35,7 @@ export function SavedSets({ exercise, onChange, titleId, header, footer }: Saved
     removedAt.current = null;
     const root = rootRef.current;
     const buttons = root?.querySelectorAll<HTMLElement>(".savedSetsRemove");
-    (buttons?.[index] ?? buttons?.[index - 1] ?? root?.querySelector<HTMLElement>(".savedSetsAdd"))?.focus();
+    (buttons?.[index] ?? buttons?.[index - 1] ?? root?.querySelector<HTMLElement>("[data-add-set]"))?.focus();
   }, [sets.length]);
 
   return (
@@ -89,14 +89,13 @@ export function SavedSets({ exercise, onChange, titleId, header, footer }: Saved
       )}
 
       <div className="exerciseLoggerStack">
-        <button
-          type="button"
-          className="savedSetsAdd"
+        <SecondaryButton
+          data-add-set
           onClick={() => onChange({ ...exercise, sets: [...sets, copySet(sets.at(-1), generateId())] })}
         >
           <Icon name="plus" size="md" />
           Add set
-        </button>
+        </SecondaryButton>
         {footer}
       </div>
     </div>

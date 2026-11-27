@@ -3,6 +3,7 @@ import { renderToStaticMarkup as render } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { PillButton } from './PillButton'
 import { PrimaryButton } from './PrimaryButton'
+import { SecondaryButton } from './SecondaryButton'
 import { cssOf } from './testCss'
 
 describe('PrimaryButton', () => {
@@ -50,6 +51,29 @@ describe('PillButton', () => {
 
   it('uses the real disabled attribute', () => {
     expect(render(createElement(PillButton, { disabled: true }, 'Go'))).toContain('disabled=""')
+  })
+})
+
+describe('SecondaryButton', () => {
+  it('is a non-submitting button in the default tone unless told otherwise', () => {
+    const html = render(createElement(SecondaryButton, null, 'Add set'))
+    expect(html).toContain('type="button"')
+    expect(html).toContain('secondary-button--default')
+  })
+
+  it('has a danger tone that is outlined, never filled', () => {
+    expect(render(createElement(SecondaryButton, { tone: 'danger' }, 'Delete'))).toContain('secondary-button--danger')
+    expect(cssOf('SecondaryButton')).toMatch(/\.secondary-button--danger\s*{[^}]*color: var\(--color-danger\)/)
+    expect(cssOf('SecondaryButton')).not.toMatch(/\.secondary-button--danger\s*{[^}]*background/)
+  })
+
+  it('is 64px tall in display type, with a focus outline and a disabled style', () => {
+    const css = cssOf('SecondaryButton')
+    expect(css).toContain('min-height: var(--size-action)')
+    expect(css).toContain('font-family: var(--font-display)')
+    expect(css).toMatch(/:focus-visible\s*{[^}]*outline: var\(--border-focus\)/)
+    expect(css).toMatch(/:disabled\s*{[^}]*opacity: 0\.4/)
+    expect(render(createElement(SecondaryButton, { disabled: true }, 'Go'))).toContain('disabled=""')
   })
 })
 
