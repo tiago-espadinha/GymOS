@@ -3,7 +3,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-2);
   min-height: var(--size-row-lg);
   border-bottom: var(--border-hairline);
 }
@@ -57,28 +57,16 @@
   color: var(--color-text-muted);
 }
 
-.planRow__more {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--size-control);
-  height: var(--size-control);
-  padding: 0;
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: none;
-  color: var(--color-text-muted);
-  cursor: pointer;
-}
-
-.planRow__more:focus-visible {
-  outline: var(--border-focus);
-  outline-offset: -2px;
-}
-
 .planRow--archived {
-  gap: var(--space-2);
   min-height: var(--size-row);
+  padding-block: var(--space-2);
+}
+
+/* Restore and Delete take most of a phone's width, so the words beside them wrap. */
+.planRow--archived .planRow__name,
+.planRow--archived .planRow__meta {
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .planRow--archived .planRow__name {

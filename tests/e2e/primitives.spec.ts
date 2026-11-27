@@ -6,6 +6,8 @@ import { finishButton, logSet } from './log-set'
 const primitives = {
   PillButton: '.pill-button',
   PrimaryButton: '.primary-button',
+  SecondaryButton: '.secondary-button',
+  IconButton: '.icon-button',
   ChipGroup: '.chip-group__chip',
   SegmentedControl: '.segmented__segment',
   Field: '.field__input',
@@ -124,6 +126,7 @@ test('every shared primitive has a 44px hit area and a visible focus state', asy
   await page.getByRole('button', { name: /^Bench press/ }).click()
   await check(page, 'Exercise')
   await logSet(page, '60', '8')
+  await check(page, 'Resting')
   await page.getByRole('button', { name: 'All exercises' }).click()
   await finishButton(page).click()
   await check(page, 'Finish')

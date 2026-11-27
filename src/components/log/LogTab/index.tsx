@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Icon, PillButton } from "../../shared";
+import { Icon, IconButton, PillButton } from "../../shared";
 import { today, formatDateMeta } from "../../../utils/date";
 import { ExerciseLog, TrainingPlan, WorkoutSession } from "../../../types";
 import {
@@ -213,15 +213,12 @@ export function LogTab({
                     </h1>
                   </div>
                   <div className="logTabHeaderActions">
-                    <button
-                      type="button"
-                      className="logTabMore"
+                    <IconButton
+                      icon="more"
                       aria-label="Session actions"
                       aria-haspopup="dialog"
                       onClick={() => setActionsOpen(true)}
-                    >
-                      <Icon name="more" size="md" />
-                    </button>
+                    />
                     <PillButton
                       id={FINISH_ID}
                       variant={allDone ? "white" : "outline-white"}

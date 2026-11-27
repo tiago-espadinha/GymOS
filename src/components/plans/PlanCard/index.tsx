@@ -1,4 +1,4 @@
-import { Icon, PillButton } from "../../shared";
+import { IconButton, PillButton } from "../../shared";
 import { planSummary } from "../../../utils/plans";
 import { TrainingPlan } from "../../../types";
 import "./PlanCard.css";
@@ -21,16 +21,13 @@ export function PlanCard({ plan, onOpen, onStart, onMore }: PlanCardProps) {
       <PillButton variant="accent" onClick={() => onStart(plan)} aria-label={`Start ${plan.name}`}>
         Start
       </PillButton>
-      <button
-        type="button"
-        className="planRow__more"
+      <IconButton
+        icon="more"
         data-plan-actions={plan.id}
         aria-label={`More actions for ${plan.name}`}
         aria-haspopup="dialog"
         onClick={() => onMore(plan)}
-      >
-        <Icon name="more" size="md" />
-      </button>
+      />
     </li>
   );
 }

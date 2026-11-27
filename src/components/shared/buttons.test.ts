@@ -1,8 +1,10 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup as render } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
+import { IconButton } from './IconButton'
 import { PillButton } from './PillButton'
 import { PrimaryButton } from './PrimaryButton'
+import { SecondaryButton } from './SecondaryButton'
 import { cssOf } from './testCss'
 
 describe('PrimaryButton', () => {
@@ -36,11 +38,10 @@ describe('PillButton', () => {
     },
   )
 
-  it('has a compact size in body type that keeps the 44px hit area', () => {
-    expect(render(createElement(PillButton, { size: 'compact' }, 'Go'))).toContain('pill-button--compact')
-    expect(render(createElement(PillButton, null, 'Go'))).not.toContain('pill-button--compact')
-    expect(cssOf('PillButton')).toMatch(/\.pill-button--compact\s*{[^}]*font-family: var\(--font-body\)/)
-    expect(cssOf('PillButton')).not.toMatch(/\.pill-button--compact\s*{[^}]*min-height/)
+  it('is the compact role: display type at 24 on a 44px pill', () => {
+    expect(cssOf('PillButton')).toMatch(/\.pill-button\s*{[^}]*font-family: var\(--font-display\)/)
+    expect(cssOf('PillButton')).toMatch(/\.pill-button\s*{[^}]*font-size: var\(--text-button-compact\)/)
+    expect(cssOf('PillButton')).not.toContain('--font-body')
   })
 
   it('can be a submit button when asked', () => {
@@ -51,6 +52,48 @@ describe('PillButton', () => {
 
   it('uses the real disabled attribute', () => {
     expect(render(createElement(PillButton, { disabled: true }, 'Go'))).toContain('disabled=""')
+  })
+})
+
+describe('SecondaryButton', () => {
+  it('is a non-submitting button in the default tone unless told otherwise', () => {
+    const html = render(createElement(SecondaryButton, null, 'Add set'))
+    expect(html).toContain('type="button"')
+    expect(html).toContain('secondary-button--default')
+  })
+
+  it('has a danger tone that is outlined, never filled', () => {
+    expect(render(createElement(SecondaryButton, { tone: 'danger' }, 'Delete'))).toContain('secondary-button--danger')
+    expect(cssOf('SecondaryButton')).toMatch(/\.secondary-button--danger\s*{[^}]*color: var\(--color-danger\)/)
+    expect(cssOf('SecondaryButton')).not.toMatch(/\.secondary-button--danger\s*{[^}]*background/)
+  })
+
+  it('is 64px tall in display type, with a focus outline and a disabled style', () => {
+    const css = cssOf('SecondaryButton')
+    expect(css).toContain('min-height: var(--size-action)')
+    expect(css).toContain('font-family: var(--font-display)')
+    expect(css).toMatch(/:focus-visible\s*{[^}]*outline: var\(--border-focus\)/)
+    expect(css).toMatch(/:disabled\s*{[^}]*opacity: 0\.4/)
+    expect(render(createElement(SecondaryButton, { disabled: true }, 'Go'))).toContain('disabled=""')
+  })
+})
+
+describe('IconButton', () => {
+  it('is a named, non-submitting button around a hidden icon', () => {
+    const html = render(createElement(IconButton, { icon: 'more', 'aria-label': 'Session actions' }))
+    expect(html).toContain('type="button"')
+    expect(html).toContain('aria-label="Session actions"')
+    expect(html).toContain('aria-hidden="true"')
+    expect(html).toContain('icon-button--default')
+  })
+
+  it('is a 44 circle, or 72 beside a primary, with a grey outline and a focus ring', () => {
+    const css = cssOf('IconButton')
+    expect(css).toMatch(/\.icon-button\s*{[^}]*width: var\(--size-control\)/)
+    expect(css).toMatch(/\.icon-button--large\s*{[^}]*width: var\(--size-action-primary\)/)
+    expect(css).toMatch(/\.icon-button\s*{[^}]*border: var\(--border-chip\)/)
+    expect(css).toMatch(/:focus-visible\s*{[^}]*outline: var\(--border-focus\)/)
+    expect(css).toMatch(/:disabled\s*{[^}]*opacity: 0\.4/)
   })
 })
 

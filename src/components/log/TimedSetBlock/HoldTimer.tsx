@@ -1,5 +1,6 @@
 import { formatClock, formatRestClock, type TimerControls } from "../../../hooks/useTimer";
-import { TimerBlock, TimerButton } from "../TimerBlock";
+import { SecondaryButton } from "../../shared";
+import { TimerBlock } from "../TimerBlock";
 import { TargetRow } from "../TimerBlock/TargetRow";
 import { HoldPhase, holdPhase } from "./holdPhase";
 
@@ -36,11 +37,11 @@ export function HoldTimer({ timer, name, setNumber, setTotal, onDiscard }: HoldT
       actions={
         phase === "paused" ? (
           <>
-            <TimerButton onClick={onDiscard}>Stop</TimerButton>
-            <TimerButton onClick={start}>Resume</TimerButton>
+            <SecondaryButton onClick={onDiscard}>Stop</SecondaryButton>
+            <SecondaryButton onClick={start}>Resume</SecondaryButton>
           </>
         ) : (
-          phase !== "ready" && <TimerButton onClick={pause}>Pause</TimerButton>
+          phase !== "ready" && <SecondaryButton onClick={pause}>Pause</SecondaryButton>
         )
       }
     >

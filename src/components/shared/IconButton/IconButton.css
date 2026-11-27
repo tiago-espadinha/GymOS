@@ -1,0 +1,34 @@
+.icon-button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-control);
+  height: var(--size-control);
+  padding: 0;
+  border: var(--border-chip);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: opacity var(--motion-press) linear;
+}
+
+.icon-button--large {
+  width: var(--size-action-primary);
+  height: var(--size-action-primary);
+}
+
+.icon-button:active:not(:disabled) {
+  opacity: 0.8;
+}
+
+.icon-button:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+.icon-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import { ConfirmSheet, Icon, Sheet } from "../../shared";
+import { ConfirmSheet, Icon, SecondaryButton, Sheet, SheetHead, SheetRow, SheetRows } from "../../shared";
 import { formatDateMeta } from "../../../utils/date";
 import { ActiveSession, hasLoggedSets } from "../../../utils/activeSession";
 import { sessionTotals } from "../../../utils/sessionList";
@@ -7,7 +7,6 @@ import { useUnitPrefs } from "../../../utils/unitPrefs";
 import { kgTo, weightLabel } from "../../../utils/units";
 import DateSheet from "../DateSheet";
 import DeleteSessionSheet from "../DeleteSessionSheet";
-import "./SessionSheet.css";
 
 interface SessionSheetProps {
   session: ActiveSession;
@@ -49,47 +48,39 @@ export function SessionSheet({ session, onDate, onDiscard, onDelete, onClose }: 
   return (
     <>
       <Sheet labelledBy={titleId} onClose={onClose}>
-        <div className="sessionSheet__head">
-          <span className="sheet__kicker">{editing ? `Editing · saved ${date}` : `Session · ${date}`}</span>
-          <h2 id={titleId} className="sheet__title">
-            {session.planName}
-          </h2>
-          <span className="sessionSheet__meta">{summary}</span>
-        </div>
-        <div className="sessionSheet__rows">
+        <SheetHead
+          titleId={titleId}
+          tone="accent"
+          kicker={editing ? `Editing · saved ${date}` : `Session · ${date}`}
+          title={session.planName}
+          meta={summary}
+        />
+        <SheetRows>
           {editing && (
-            <button type="button" className="sessionSheet__row" aria-haspopup="dialog" onClick={() => setOpen("date")}>
-              <span>Change date</span>
-              <span className="sessionSheet__hint">
-                {date}
-                <Icon name="chevron-right" />
-              </span>
-            </button>
+            <SheetRow
+              title="Change date"
+              hint={
+                <>
+                  {date}
+                  <Icon name="chevron-right" />
+                </>
+              }
+              aria-haspopup="dialog"
+              onClick={() => setOpen("date")}
+            />
           )}
-          <button
-            type="button"
-            className={`sessionSheet__row${editing ? "" : " sessionSheet__row--danger"}`}
+          <SheetRow
+            title={editing ? "Discard changes" : "Discard session"}
+            hint={editing ? "saved session stays" : "nothing is saved"}
+            tone={editing ? "default" : "danger"}
             aria-haspopup={asksFirst ? "dialog" : undefined}
             onClick={discard}
-          >
-            <span>{editing ? "Discard changes" : "Discard session"}</span>
-            <span className="sessionSheet__hint">{editing ? "saved session stays" : "nothing is saved"}</span>
-          </button>
+          />
           {editing && (
-            <button
-              type="button"
-              className="sessionSheet__row sessionSheet__row--danger"
-              aria-haspopup="dialog"
-              onClick={() => setOpen("delete")}
-            >
-              <span>Delete session</span>
-              <span className="sessionSheet__hint">for good</span>
-            </button>
+            <SheetRow title="Delete session" hint="for good" tone="danger" aria-haspopup="dialog" onClick={() => setOpen("delete")} />
           )}
-        </div>
-        <button type="button" className="sessionSheet__close" onClick={onClose}>
-          Close
-        </button>
+        </SheetRows>
+        <SecondaryButton onClick={onClose}>Close</SecondaryButton>
       </Sheet>
 
       {open === "date" && <DateSheet value={session.date} onChange={onDate} onClose={() => setOpen(null)} />}

@@ -58,26 +58,6 @@
   margin-left: auto;
 }
 
-/* The ⋯ for the session sheet: a 44 outlined pill like Finish, in the quieter line colour. */
-.logTabMore {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--size-control);
-  height: var(--size-control);
-  padding: 0;
-  border: var(--border-chip);
-  border-radius: var(--radius-pill);
-  background: none;
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-.logTabMore:focus-visible {
-  outline: var(--border-focus);
-  outline-offset: 2px;
-}
-
 .logTabHint {
   margin: var(--space-5) 0 0;
   font-size: var(--text-secondary);

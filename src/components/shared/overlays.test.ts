@@ -1,6 +1,7 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup as render } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
+import { SheetHead, SheetRow } from './Sheet/frame'
 import { Toast } from './Toast'
 import { cssOf } from './testCss'
 
@@ -40,6 +41,28 @@ describe('Sheet', () => {
   it('gives its Cancel a 44px hit area and a focus outline', () => {
     expect(css).toMatch(/\.sheet__cancel\s*{[^}]*min-height: var\(--size-control\)/)
     expect(css).toMatch(/\.sheet__cancel:focus-visible\s*{[^}]*outline: var\(--border-focus\)/)
+  })
+})
+
+describe('Sheet frame', () => {
+  const css = cssOf('Sheet')
+
+  it('names the sheet by its title, under a kicker', () => {
+    const html = render(createElement(SheetHead, { titleId: 't', kicker: 'Plan', title: 'Push day', meta: '3 exercises', tone: 'accent' }))
+    expect(html).toContain('sheet__head--accent')
+    expect(html).toMatch(/Plan<\/span><h2 id="t" class="sheet__title">Push day<\/h2>/)
+    expect(html).toContain('3 exercises')
+  })
+
+  it('draws rows edge to edge in display type, danger in the danger colour', () => {
+    const html = render(createElement(SheetRow, { title: 'Delete session', hint: 'for good', tone: 'danger' }))
+    expect(html).toContain('type="button"')
+    expect(html).toContain('sheet__row--danger')
+    expect(css).toMatch(/\.sheet__rows\s*{[^}]*margin: 0 calc\(-1 \* var\(--gutter\)\)/)
+    expect(css).toMatch(/\.sheet__row\s*{[^}]*border-bottom: var\(--border-hairline\)/)
+    expect(css).toMatch(/\.sheet__row\s*{[^}]*font-family: var\(--font-display\)/)
+    expect(css).toMatch(/\.sheet__row--danger\s*{[^}]*color: var\(--color-danger\)/)
+    expect(css).toMatch(/\.sheet__row:focus-visible\s*{[^}]*outline: var\(--border-focus\)/)
   })
 })
 

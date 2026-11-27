@@ -43,7 +43,7 @@ const expectSplit = async (page: Page, label: RegExp, height = 800) => {
   await expect(timerBlock(page)).toHaveCount(1)
   await expect(timerBlock(page).locator('.timerBlockTop').first()).toContainText(label)
   expect(await box(timerBlock(page))).toEqual({ x: 0, y: 0, width: 768, height })
-  for (const b of await page.locator('.timerUnit .timerBlockButton').filter({ visible: true }).all()) expect((await box(b)).height).toBe(64)
+  for (const b of await page.locator('.timerUnit button').filter({ visible: true }).all()) expect((await box(b)).height).toBe(64)
 }
 
 // With no Set done during a rest, the steppers sit straight above the next card,
