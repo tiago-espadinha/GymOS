@@ -19,11 +19,6 @@
   text-transform: uppercase;
 }
 
-.dataCard__action:focus-visible {
-  outline: var(--border-focus);
-  outline-offset: 2px;
-}
-
 .settingsSection {
   display: flex;
   flex-direction: column;
@@ -63,25 +58,6 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
   margin-bottom: var(--space-3);
-}
-
-.dataCard__action {
-  min-height: var(--size-field);
-  border: var(--border-control);
-  border-radius: var(--radius-pill);
-  background: none;
-  color: var(--color-text);
-  font-family: var(--font-display);
-  font-weight: var(--weight-display);
-  font-size: var(--text-set-label);
-  letter-spacing: var(--tracking-button);
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: opacity var(--motion-press) linear;
-}
-
-.dataCard__action:active {
-  opacity: 0.8;
 }
 
 /* Under the card, on its own: destructive, so the danger colour, and quiet, so a link. */

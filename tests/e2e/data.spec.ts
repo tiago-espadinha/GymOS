@@ -78,7 +78,7 @@ test('the Data card shows the counts, Export and Import as a pair, and no import
     ['Export', 'Import'].map(async (name) => (await card(page).getByRole('button', { name }).boundingBox())!),
   )
   expect(exp.width).toBe(imp.width)
-  expect(exp.height).toBe(52)
+  expect(exp.height).toBe(64)
   await expect(card(page)).toContainText("Export saves a CSV. Import lets you add to or replace what's here.")
   await expect(page.getByRole('button', { name: /Add to my data|Replace my data/ })).toHaveCount(0)
 })

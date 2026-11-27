@@ -4,6 +4,7 @@ import { CSVImport, exportToCSV } from "../../../utils/csv";
 import { downloadCSV } from "../../../utils/download";
 import { mergeImport } from "../../../utils/importData";
 import { useUnitPrefs } from "../../../utils/unitPrefs";
+import { SecondaryButton } from "../../shared";
 import { DeleteAllData } from "./DeleteAllData";
 import { ImportSheet } from "./ImportSheet";
 import { ImportStep, readImport } from "./readImport";
@@ -91,12 +92,10 @@ export function DataSection({ plans, sessions, setPlans, setSessions, pickImport
           {count(plans.length, "plan")} · {count(sessions.length, "session")}
         </p>
         <div className="dataCard__actions">
-          <button type="button" className="dataCard__action" onClick={exportData}>
-            Export
-          </button>
-          <button type="button" className="dataCard__action" ref={importButton} onClick={chooseFile}>
+          <SecondaryButton onClick={exportData}>Export</SecondaryButton>
+          <SecondaryButton ref={importButton} onClick={chooseFile}>
             Import
-          </button>
+          </SecondaryButton>
         </div>
         <p className="settingsHint">Export saves a CSV. Import lets you add to or replace what's here.</p>
       </div>

@@ -326,3 +326,20 @@ test('import sheet: an error ends in Choose another file and Close', async ({ pa
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Import', exact: true })).toBeFocused()
 })
+
+for (const width of [320, 375, 768, 1280]) {
+  test(`secondary: Export and Import at ${width}px, side by side with their words inside`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 812 })
+    await page.getByRole('button', { name: 'Settings' }).click()
+    const boxes = []
+    for (const name of ['Export', 'Import']) {
+      const button = page.getByRole('button', { name, exact: true })
+      expect(await style(button)).toMatchObject(secondary)
+      expect(await button.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true)
+      boxes.push((await button.boundingBox())!)
+    }
+    expect(boxes[1].y).toBe(boxes[0].y)
+    expect(boxes[1].width).toBeCloseTo(boxes[0].width, 1)
+    expect(await page.locator('.dataCard').evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true)
+  })
+}
