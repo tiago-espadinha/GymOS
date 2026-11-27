@@ -255,7 +255,7 @@ test('rows are numbered and at least 44px; a row opens its exercise as a full sc
   await expect(page.locator('.sessionListRows')).toHaveCount(0)
 })
 
-test('one segment per exercise jumps to it; the next card names the next exercise and its target', async ({ page }) => {
+test('one segment per exercise jumps to it; the next card names the next exercise', async ({ page }) => {
   await row(page, 'Bench press').click()
   const segments = page.getByRole('navigation', { name: 'Exercises' }).getByRole('button')
   await expect(segments).toHaveCount(3)
@@ -264,9 +264,8 @@ test('one segment per exercise jumps to it; the next card names the next exercis
   for (const s of await segments.all()) expect((await s.boundingBox())!.height).toBeGreaterThanOrEqual(44)
   expect((await page.getByRole('button', { name: 'All exercises' }).boundingBox())!.height).toBeGreaterThanOrEqual(44)
 
-  // Last time's Cable row was 12, 12 and 10 reps, so the target is the set count.
   const next = page.getByRole('button', { name: /^Next Cable row/ })
-  await expect(next).toHaveText(/Cable row\s*3 sets/)
+  await expect(next).toHaveText('Next Cable row')
   expect((await next.boundingBox())!.height).toBeGreaterThanOrEqual(44)
   await expect(page.getByRole('button', { name: /Finish session/ })).toHaveCount(0)
 
@@ -279,7 +278,7 @@ test('one segment per exercise jumps to it; the next card names the next exercis
   await expect(page.getByRole('button', { name: /^Next / })).toHaveCount(0)
   const finish = page.getByRole('button', { name: 'Finish session', exact: true })
   await expect(finish).toBeDisabled()
-  // Only FINISH: no "Last exercise" kicker and no target.
+  // Only FINISH: no "Last exercise" kicker.
   await expect(finish).toHaveText('Finish session')
 
   // A done exercise's segment reads as done.

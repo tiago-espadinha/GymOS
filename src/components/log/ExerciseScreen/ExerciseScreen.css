@@ -151,13 +151,6 @@
   white-space: nowrap;
 }
 
-.exerciseNextCardTarget {
-  flex: none;
-  font-size: var(--text-small);
-  font-weight: 500;
-  color: var(--color-text-muted);
-}
-
 .exerciseNextCard--finish {
   border: var(--border-control);
   background: transparent;
