@@ -171,7 +171,6 @@ export function ExerciseLogger({ exercise, onChange, history, titleId, header, f
           setId={rest.setId}
           setNumber={restIndex + 1}
           meta={timed ? `${exercise.name} · set ${number} next` : undefined}
-          timed={timed}
           category={meta.category}
           autoStart={rest.fresh}
           onEnd={(seconds) => {

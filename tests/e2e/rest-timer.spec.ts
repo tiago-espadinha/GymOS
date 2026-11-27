@@ -123,9 +123,12 @@ test('the exercise view with a rest running has no detectable WCAG A/AA violatio
   expect(results.violations.map((v) => `${v.id} ${v.nodes.map((n) => n.html + n.any.map((a) => a.message).join())}`)).toEqual([])
 })
 
-test('−15s down to zero reads as a finished rest, not an empty one', async ({ page }) => {
+test('stepping down to zero reads as a finished rest, not an empty one', async ({ page }) => {
   await logAndRest(page)
-  for (let i = 0; i < 4; i++) await page.getByRole('button', { name: '−15s' }).click()
+  // From 1:00 the step is 15s; under a minute it is 5s.
+  await page.getByRole('button', { name: '−15s' }).click()
+  await expect(page.getByRole('button', { name: '−15s' })).toHaveCount(0)
+  for (let i = 0; i < 9; i++) await page.getByRole('button', { name: '−5s' }).click()
   await expect(page.getByText('00:00 done').first()).toBeVisible()
   await expect.poll(() => fillShare(page)).toBeCloseTo(1, 1)
   await page.clock.fastForward(1_000)

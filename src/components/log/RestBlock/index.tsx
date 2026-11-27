@@ -6,17 +6,11 @@ import { restTimerId } from "../../../utils/restTimers";
 import { ExerciseCategory } from "../../../types";
 import { TimerBlock, TimerButton } from "../TimerBlock";
 
-// A rest after a set of reps steps by 15s; one chained after a hold steps by its
-// target, like the hold (5s under a minute).
-const REPS_STEP_SEC = 15;
-
 interface RestBlockProps {
   setId: string;
   setNumber: number;
   /** Top right of the block; "Set n" by default. */
   meta?: string;
-  /** Chained after a timed set: the step follows the target. */
-  timed?: boolean;
   category: ExerciseCategory;
   // True right after "Set done": start the rest. A rest restored from storage is left as it was.
   autoStart: boolean;
@@ -24,7 +18,7 @@ interface RestBlockProps {
   onEnd: (restSeconds: number) => void;
 }
 
-export function RestBlock({ setId, setNumber, meta, timed = false, category, autoStart, onEnd }: RestBlockProps) {
+export function RestBlock({ setId, setNumber, meta, category, autoStart, onEnd }: RestBlockProps) {
   // A rest already stored keeps its own target; the length from Settings is for new ones.
   const { restSec } = useTimerPrefs();
   const {
@@ -33,7 +27,7 @@ export function RestBlock({ setId, setNumber, meta, timed = false, category, aut
   } = useTimer(restTimerId(setId), restSec[category]);
   // A target of 0 means the rest is already over (useTimer treats it as "no target").
   const over = isComplete || targetMs === 0;
-  const step = timed ? getAdjustStepSec(Math.round(targetMs / 1000)) : REPS_STEP_SEC;
+  const step = getAdjustStepSec(Math.round(targetMs / 1000));
 
   useEffect(() => {
     if (autoStart && !isRunning && elapsedMs === 0) start();
