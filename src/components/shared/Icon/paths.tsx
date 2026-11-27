@@ -19,7 +19,8 @@ export const PATHS = {
       <path d="M14.8 14.8L21.5 21.5" />
     </>
   ),
-  filter: <path className="icon__fill" d="M3 3h18l-7 9v9l-4-2.5V12z" />,
+  // A unit below centre: the wide cone carries the weight, so a centred box reads high.
+  filter: <path className="icon__fill" d="M3 4h18l-7 9v9l-4-2.5V13z" />,
   more: <path className="icon__fill" d="M2.5 9.75h4.5v4.5H2.5zM9.75 9.75h4.5v4.5h-4.5zM17 9.75h4.5v4.5H17z" />,
   info: (
     <path

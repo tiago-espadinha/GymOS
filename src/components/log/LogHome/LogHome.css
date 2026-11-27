@@ -152,6 +152,12 @@ span.logHomeLead {
   white-space: nowrap;
 }
 
+/* The row centres the label, so its bottom margin would lift it above the pill.
+   Without the pill that margin is the gap above the list, so it stays. */
+.logHomeRecentHead:has(.logHomeFilterButton) > .logHomeLabel {
+  margin-bottom: 0;
+}
+
 .logHomeRecentTools {
   display: flex;
   flex: 0 1 auto;
