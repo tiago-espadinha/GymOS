@@ -7,7 +7,7 @@ const exercise = { id: 'e1', name: 'Bench Press', muscleGroup: 'Chest' }
 const plans = [
   { id: 'p1', name: 'Push', desc: '', exercises: [exercise] },
   { id: 'p3', name: 'Core', desc: '', exercises: [{ id: 'e2', name: 'Plank', muscleGroup: 'Core', category: 'calisthenics', trackingType: 'time' }] },
-  { id: 'p2', name: 'Old block', desc: '', exercises: [exercise], isArchived: true, archivedAt: '2026-11-01' },
+  { id: 'p2', name: 'Old hypertrophyaccumulation block', desc: '', exercises: [exercise], isArchived: true, archivedAt: '2026-11-01' },
 ]
 
 const WHITE = 'rgb(255, 255, 255)'
@@ -51,18 +51,23 @@ const compact = { ...display, height: 44, size: '24px' }
 test('compact: Start and the archived row are 44 pills at 24, Delete in the danger colour', async ({ page }) => {
   expect(await style(page.getByRole('button', { name: 'Start Push' }))).toMatchObject(compact)
   await page.getByRole('button', { name: /^Archived/ }).click()
-  expect(await style(page.getByRole('button', { name: 'Restore Old block' }))).toMatchObject({ ...compact, border: `2px ${WHITE}`, fill: CLEAR })
-  expect(await style(page.getByRole('button', { name: 'Delete Old block' }))).toMatchObject({
+  expect(await style(page.getByRole('button', { name: 'Restore Old hypertrophyaccumulation block' }))).toMatchObject({ ...compact, border: `2px ${WHITE}`, fill: CLEAR })
+  expect(await style(page.getByRole('button', { name: 'Delete Old hypertrophyaccumulation block' }))).toMatchObject({
     ...compact,
     border: `2px ${DANGER}`,
     colour: DANGER,
     fill: CLEAR,
   })
+  // The wider buttons leave the name less room: it wraps rather than being cut off.
+  const clipped = await page
+    .locator('.planRow--archived .planRow__name, .planRow--archived .planRow__meta')
+    .evaluateAll((els) => els.filter((el) => el.scrollWidth > el.clientWidth).length)
+  expect(clipped).toBe(0)
 })
 
 test('confirm: a 44 title over a white Keep it and a secondary danger', async ({ page }) => {
   await page.getByRole('button', { name: /^Archived/ }).click()
-  await page.getByRole('button', { name: 'Delete Old block' }).click()
+  await page.getByRole('button', { name: 'Delete Old hypertrophyaccumulation block' }).click()
   const confirm = page.getByRole('alertdialog')
   await expect(confirm.getByRole('heading')).toHaveCSS('font-size', '44px')
   await expect(confirm.getByRole('button')).toHaveText(['Keep it', 'Delete plan'])
