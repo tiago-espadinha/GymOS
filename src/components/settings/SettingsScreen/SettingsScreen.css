@@ -19,18 +19,6 @@
   text-transform: uppercase;
 }
 
-.dataCard__action:focus-visible,
-.importChoice:focus-visible,
-.importAnother:focus-visible {
-  outline: var(--border-focus);
-  outline-offset: 2px;
-}
-
-/* Headings take focus only so a sheet step is announced; they are not controls. */
-.importTitle:focus {
-  outline: none;
-}
-
 .settingsSection {
   display: flex;
   flex-direction: column;
@@ -72,26 +60,6 @@
   margin-bottom: var(--space-3);
 }
 
-.dataCard__action {
-  min-height: var(--size-field);
-  border: var(--border-control);
-  border-radius: var(--radius-pill);
-  background: none;
-  color: var(--color-text);
-  font-family: var(--font-display);
-  font-weight: var(--weight-display);
-  font-size: var(--text-set-label);
-  letter-spacing: var(--tracking-button);
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: opacity var(--motion-press) linear;
-}
-
-.dataCard__action:active,
-.importAnother:active {
-  opacity: 0.8;
-}
-
 /* Under the card, on its own: destructive, so the danger colour, and quiet, so a link. */
 .dataDelete {
   align-self: flex-start;
@@ -110,94 +78,11 @@
   font-size: inherit;
 }
 
-/* The error kicker is the sheet's h2, so it undoes the heading face. */
-.importKicker {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin: 0;
-  font-family: inherit;
-  font-weight: 700;
-}
-
-.importKicker--accent {
-  color: var(--color-accent);
-}
-
-.importFile,
-.importMessage {
+.importFile {
   margin: 0;
   overflow-wrap: anywhere;
-}
-
-.importFile {
   font-size: var(--text-body-lg);
   font-weight: 700;
-}
-
-.importMessage {
-  font-size: var(--text-body);
-  font-weight: 500;
-  line-height: var(--leading-body);
-}
-
-.importAnother {
-  min-height: var(--size-field-lg);
-  border: var(--border-control);
-  border-radius: var(--radius-pill);
-  background: none;
-  color: var(--color-text);
-  font-family: inherit;
-  font-size: var(--text-body);
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.importChoice {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: calc(var(--space-1) / 2);
-  min-height: var(--size-row-summary);
-  padding: var(--space-3) var(--space-5);
-  border: 2px solid transparent;
-  border-radius: var(--radius-surface);
-  font-family: var(--font-body);
-  text-align: left;
-  cursor: pointer;
-  transition: opacity var(--motion-press) linear;
-}
-
-.importChoice:active {
-  opacity: 0.8;
-}
-
-.importChoiceTitle {
-  font-family: var(--font-display);
-  font-weight: var(--weight-display);
-  font-size: var(--text-set-label);
-  line-height: 1.1;
-  text-transform: uppercase;
-}
-
-.importChoiceHint {
-  font-size: var(--text-small);
-  font-weight: 500;
-}
-
-.importChoice--add {
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-}
-
-.importChoice--replace {
-  border-color: var(--color-danger);
-  background: none;
-  color: var(--color-text-muted);
-}
-
-.importChoice--replace .importChoiceTitle {
-  color: var(--color-danger);
 }
 
 .settingsRow {

@@ -314,7 +314,6 @@
 }
 
 .progressRanges .chip-group__chip {
-  min-height: var(--size-control);
   padding: 0;
   font-size: var(--text-small);
 }
@@ -512,7 +511,6 @@
 
   .progressDetail .progressRanges .chip-group__chip {
     min-width: 88px;
-    min-height: var(--size-chip);
     padding: 0 var(--space-5);
   }
 

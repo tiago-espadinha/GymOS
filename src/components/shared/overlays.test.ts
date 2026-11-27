@@ -54,6 +54,15 @@ describe('Sheet frame', () => {
     expect(html).toContain('3 exercises')
   })
 
+  it.each([
+    ['danger', 'sheet__kicker--danger'],
+    ['accent-kicker', 'sheet__kicker--accent'],
+  ] as const)('colours only the kicker for the %s tone', (tone, className) => {
+    const html = render(createElement(SheetHead, { titleId: 't', kicker: 'Import', title: 'Backup', tone }))
+    expect(html).toContain(`sheet__kicker ${className}`)
+    expect(css).toContain(`.${className}`)
+  })
+
   it('draws rows edge to edge in display type, danger in the danger colour', () => {
     const html = render(createElement(SheetRow, { title: 'Delete session', hint: 'for good', tone: 'danger' }))
     expect(html).toContain('type="button"')
@@ -63,6 +72,19 @@ describe('Sheet frame', () => {
     expect(css).toMatch(/\.sheet__row\s*{[^}]*font-family: var\(--font-display\)/)
     expect(css).toMatch(/\.sheet__row--danger\s*{[^}]*color: var\(--color-danger\)/)
     expect(css).toMatch(/\.sheet__row:focus-visible\s*{[^}]*outline: var\(--border-focus\)/)
+  })
+
+  it('fills the choice to take with the accent, hint and focus outline readable on it', () => {
+    expect(render(createElement(SheetRow, { title: 'Add', tone: 'accent' }))).toContain('sheet__row--accent')
+    expect(css).toMatch(/\.sheet__row--accent\s*{[^}]*background: var\(--color-accent\)/)
+    expect(css).toMatch(/\.sheet__row--accent \.sheet__hint\s*{[^}]*color: var\(--color-on-accent\)/)
+    expect(css).toMatch(/\.sheet__row--accent:focus-visible\s*{[^}]*outline-color: var\(--color-on-accent\)/)
+  })
+
+  it('lets the title take focus when asked, and not otherwise', () => {
+    const head = { titleId: 't', kicker: 'Import', title: 'Restore backup' }
+    expect(render(createElement(SheetHead, { ...head, focusTitle: true }))).toContain('tabindex="-1" data-autofocus="true"')
+    expect(render(createElement(SheetHead, head))).not.toContain('tabindex')
   })
 })
 

@@ -1,8 +1,8 @@
-import type { ButtonHTMLAttributes } from 'react';
+import type { ComponentProps } from 'react';
 import './SecondaryButton.css';
 
 interface SecondaryButtonProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'style'> {
+  extends Omit<ComponentProps<'button'>, 'className' | 'style'> {
   /** danger: the destructive answer, outlined in the danger colour. */
   tone?: 'default' | 'danger';
 }

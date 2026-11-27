@@ -45,11 +45,18 @@
 
 /* The small tracked label over a sheet's title: "PLAN", "DELETE FOR GOOD". */
 .sheet__kicker {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   font-size: var(--text-small);
   font-weight: 700;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--color-text-muted);
+}
+
+.sheet__kicker--accent {
+  color: var(--color-accent);
 }
 
 .sheet__kicker--danger {
@@ -127,6 +134,11 @@
   font-weight: 600;
 }
 
+/* A title takes focus only so it is announced; it is not a control. */
+.sheet__title:focus {
+  outline: none;
+}
+
 .sheet__rows {
   display: flex;
   flex-direction: column;
@@ -165,6 +177,15 @@
   padding-block: var(--space-3);
 }
 
+.sheet__row--accent {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.sheet__row--accent .sheet__hint {
+  color: var(--color-on-accent);
+}
+
 .sheet__row--danger {
   color: var(--color-danger);
 }
@@ -172,6 +193,12 @@
 .sheet__row:focus-visible {
   outline: var(--border-focus);
   outline-offset: -2px;
+}
+
+/* Further in, so accent shows around the dark ring and it reads as a ring. */
+.sheet__row--accent:focus-visible {
+  outline-color: var(--color-on-accent);
+  outline-offset: -6px;
 }
 
 .sheet__hint {
