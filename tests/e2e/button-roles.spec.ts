@@ -141,3 +141,25 @@ test('secondary: Pause, then Stop and Resume, below a hold', async ({ page }) =>
     expect(await style(page.getByRole('button', { name, exact: true }))).toMatchObject(secondary)
   }
 })
+
+test('plan sheet: display rows with the hint under, no outline, and a secondary Close', async ({ page }) => {
+  await page.getByRole('button', { name: 'More actions for Push' }).click()
+  const sheet = page.getByRole('dialog', { name: 'Push' })
+  const outer = (await sheet.boundingBox())!
+  for (const [name, title] of [[/^Edit plan/, 'Edit plan'], [/^Archive plan/, 'Archive plan']] as const) {
+    const row = sheet.getByRole('button', { name })
+    const box = (await row.boundingBox())!
+    expect(box.x).toBe(outer.x)
+    expect(box.width).toBe(outer.width)
+    expect(await style(row)).toMatchObject({ face: display.face, letters: 'uppercase', size: '28px', colour: WHITE, fill: CLEAR })
+    await expect(row).toHaveCSS('border-top-width', '0px')
+    await expect(row).toHaveCSS('border-bottom-width', '1px')
+    const label = (await row.getByText(title, { exact: true }).boundingBox())!
+    const hint = (await row.locator('.sheet__hint').boundingBox())!
+    expect(hint.y).toBeGreaterThanOrEqual(label.y + label.height)
+    expect(hint.x + hint.width).toBeLessThanOrEqual(box.x + box.width)
+  }
+  await expect(sheet.getByRole('button').last()).toHaveText('Close')
+  expect(await style(sheet.getByRole('button', { name: 'Close' }))).toMatchObject(secondary)
+  await axe(page)
+})
