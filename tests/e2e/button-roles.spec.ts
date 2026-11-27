@@ -169,3 +169,17 @@ test('secondary: Add exercise on the plan form', async ({ page }) => {
   expect(await style(page.getByRole('button', { name: 'Add exercise' }))).toMatchObject(secondary)
   await axe(page)
 })
+
+test('text: the plan overview and the session draw back the same way', async ({ page }) => {
+  const back = (el: Locator) =>
+    el.evaluate((node) => {
+      const s = getComputedStyle(node)
+      const box = node.getBoundingClientRect()
+      return [box.x, box.height, s.fontFamily, s.fontSize, s.fontWeight, s.textTransform, s.letterSpacing, s.color, s.gap]
+    })
+  await page.getByRole('button', { name: /^Push/ }).click()
+  const plans = await back(page.getByRole('button', { name: 'Back to Plans' }))
+  await page.getByRole('button', { name: 'Start Push' }).click()
+  await page.getByRole('button', { name: /^Bench Press/ }).click()
+  expect(plans).toEqual(await back(page.getByRole('button', { name: 'All exercises' })))
+})
