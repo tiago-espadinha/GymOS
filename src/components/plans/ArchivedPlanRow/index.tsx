@@ -18,10 +18,10 @@ export function ArchivedPlanRow({ plan, today, onRestore, onDelete }: ArchivedPl
         <span className="planRow__name">{plan.name}</span>
         <span className="planRow__meta">{archivedSummary(plan, today)}</span>
       </span>
-      <PillButton variant="outline-white" size="compact" onClick={() => onRestore(plan)} aria-label={`Restore ${plan.name}`}>
+      <PillButton variant="outline-white" onClick={() => onRestore(plan)} aria-label={`Restore ${plan.name}`}>
         Restore
       </PillButton>
-      <PillButton variant="outline-danger" size="compact" onClick={() => onDelete(plan)} aria-label={`Delete ${plan.name}`}>
+      <PillButton variant="outline-danger" onClick={() => onDelete(plan)} aria-label={`Delete ${plan.name}`}>
         Delete
       </PillButton>
     </li>

@@ -2,6 +2,8 @@ import type { ButtonHTMLAttributes } from 'react';
 import './PillButton.css';
 
 /**
+ * The compact button, a 44 pill inside a row or header:
+ *
  * accent: filled in the accent colour (Start)
  * white: filled white (Create New)
  * outline-white: outlined white (Finish)
@@ -13,13 +15,10 @@ export type PillVariant = 'accent' | 'white' | 'outline-white' | 'outline-black'
 interface PillButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'style'> {
   variant?: PillVariant;
-  /** compact: body type at 14px, for secondary row actions (Restore, Delete). */
-  size?: 'default' | 'compact';
 }
 
 export function PillButton({
   variant = 'white',
-  size = 'default',
   type = 'button',
   children,
   ...rest
@@ -28,7 +27,7 @@ export function PillButton({
     <button
       {...rest}
       type={type}
-      className={`pill-button pill-button--${variant}${size === 'compact' ? ' pill-button--compact' : ''}`}
+      className={`pill-button pill-button--${variant}`}
     >
       {children}
     </button>

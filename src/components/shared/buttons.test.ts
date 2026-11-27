@@ -36,11 +36,10 @@ describe('PillButton', () => {
     },
   )
 
-  it('has a compact size in body type that keeps the 44px hit area', () => {
-    expect(render(createElement(PillButton, { size: 'compact' }, 'Go'))).toContain('pill-button--compact')
-    expect(render(createElement(PillButton, null, 'Go'))).not.toContain('pill-button--compact')
-    expect(cssOf('PillButton')).toMatch(/\.pill-button--compact\s*{[^}]*font-family: var\(--font-body\)/)
-    expect(cssOf('PillButton')).not.toMatch(/\.pill-button--compact\s*{[^}]*min-height/)
+  it('is the compact role: display type at 24 on a 44px pill', () => {
+    expect(cssOf('PillButton')).toMatch(/\.pill-button\s*{[^}]*font-family: var\(--font-display\)/)
+    expect(cssOf('PillButton')).toMatch(/\.pill-button\s*{[^}]*font-size: var\(--text-button-compact\)/)
+    expect(cssOf('PillButton')).not.toContain('--font-body')
   })
 
   it('can be a submit button when asked', () => {
