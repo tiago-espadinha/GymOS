@@ -7,8 +7,8 @@ import "./ListboxSheet.css";
 export interface ListboxOption {
   key: string;
   name: string;
-  /** The muted line under the name. */
-  meta: string;
+  /** The muted line under the name, when there is something to add. */
+  meta?: string;
 }
 
 interface ListboxSheetProps {
@@ -50,7 +50,7 @@ export function ListboxSheet({ title, options, selectedKey, onPick, onClose, chi
             >
               <span className="planPicker__text">
                 <span className="planPicker__name">{option.name}</span>
-                <span className="planPicker__meta">{option.meta}</span>
+                {option.meta && <span className="planPicker__meta">{option.meta}</span>}
               </span>
               {selected && <Icon name="check" />}
             </button>

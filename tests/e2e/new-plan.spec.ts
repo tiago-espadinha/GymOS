@@ -168,7 +168,28 @@ test('a removed exercise is not saved', async ({ page }) => {
   expect(plan.exercises.map((e: { name: string }) => e.name)).toEqual(['Curl'])
 })
 
-test('muscle group opens a listbox sheet that works from the keyboard', async ({ page }) => {
+test('muscle group opens a full-screen list: accent on the chosen one, Close top right', async ({ page }) => {
+  await openForm(page)
+  const field = page.getByRole('button', { name: 'Muscle group Chest' })
+  await field.click()
+  const sheet = page.getByRole('dialog', { name: 'Muscle group' })
+  const screen = page.viewportSize()!
+  expect(await sheet.boundingBox()).toEqual({ x: 0, y: 0, width: screen.width, height: screen.height })
+  const chosen = sheet.getByRole('option', { name: 'Chest' })
+  await expect(chosen).toHaveCSS('background-color', 'rgb(198, 255, 61)')
+  await expect(chosen.locator('svg')).toHaveCount(1)
+  await expect(sheet.getByRole('button', { name: 'Cancel' })).toHaveCount(0)
+  const close = sheet.getByRole('button', { name: 'Close' })
+  const [closeBox, listBox] = [(await close.boundingBox())!, (await sheet.getByRole('listbox').boundingBox())!]
+  expect(closeBox.y + closeBox.height).toBeLessThanOrEqual(listBox.y)
+  expect(closeBox.x).toBeGreaterThan(screen.width / 2)
+  expect(closeBox.height).toBeGreaterThanOrEqual(44)
+  await close.click()
+  await expect(sheet).toHaveCount(0)
+  await expect(field).toBeFocused()
+})
+
+test('the muscle group list works from the keyboard', async ({ page }) => {
   await openForm(page)
   const select = page.getByRole('button', { name: 'Muscle group Chest' })
   await expect(select).toHaveAttribute('aria-haspopup', 'listbox')

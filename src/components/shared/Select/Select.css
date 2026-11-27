@@ -48,39 +48,3 @@
 .select__chevron {
   color: var(--color-text-muted);
 }
-
-.select__list {
-  display: flex;
-  flex-direction: column;
-  border-top: var(--border-hairline);
-}
-
-.select__option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  min-height: var(--size-row-summary);
-  padding: 0 var(--space-4);
-  border: 0;
-  border-bottom: var(--border-hairline);
-  background: none;
-  color: var(--color-text);
-  font-family: var(--font-body);
-  font-size: var(--text-body-lg);
-  font-weight: 600;
-  text-align: left;
-  cursor: pointer;
-}
-
-/* Selected is inverted with a check mark, never colour alone. */
-.select__option[aria-selected='true'] {
-  background: var(--color-inverse);
-  color: var(--color-on-inverse);
-  font-weight: 700;
-}
-
-.select__option:focus-visible {
-  outline: var(--border-focus);
-  outline-offset: -2px;
-}
