@@ -4,7 +4,7 @@ import { ExerciseLog, Set } from "../../../types";
 import { generateId } from "../../../utils/id";
 import { useUnitPrefs } from "../../../utils/unitPrefs";
 import { Column, copySet, setColumns } from "./columns";
-import SetField from "./SetField";
+import SetField from "../SetField";
 import "../ExerciseLogger/ExerciseLogger.css";
 import "./SavedSets.css";
 
@@ -64,6 +64,7 @@ export function SavedSets({ exercise, onChange, titleId, header, footer }: Saved
                 {columns.map((c) => (
                   <SetField
                     key={c.key}
+                    className="savedSetsField"
                     label={`Set ${i + 1} ${c.name}`}
                     value={set[c.key]}
                     format={c.format}
