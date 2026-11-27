@@ -194,7 +194,7 @@ test('cardio: a logged distance and time can be edited and survive a reload', as
   await button(page, 'Stop and log').click()
   await button(page, 'Edit set 1').click()
   await page.getByRole('textbox', { name: 'Distance · set 1' }).fill('2,5')
-  await page.getByRole('textbox', { name: 'Time', exact: true }).fill('240')
+  await page.getByRole('textbox', { name: 'Time', exact: true }).fill('400')
   await button(page, 'Save set 1').click()
   await expect(logged(page)).toHaveText('04:00 · 2.5 km')
   await expect(button(page, 'Edit set 1')).toBeFocused()
