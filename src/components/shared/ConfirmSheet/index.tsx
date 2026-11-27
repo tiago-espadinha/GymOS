@@ -1,6 +1,8 @@
 import { useId, type ReactNode } from "react";
 import { PrimaryButton } from "../PrimaryButton";
+import { SecondaryButton } from "../SecondaryButton";
 import { Sheet } from "../Sheet";
+import { SheetHead } from "../Sheet/frame";
 
 interface ConfirmSheetProps {
   /** The tracked danger label over the title, e.g. "Delete for good". */
@@ -26,19 +28,16 @@ export function ConfirmSheet({ kicker, title, text, confirmLabel, onConfirm, kee
   const bodyId = useId();
   return (
     <Sheet role="alertdialog" labelledBy={titleId} describedBy={bodyId} onClose={onClose}>
-      <span className="sheet__kicker sheet__kicker--danger">{kicker}</span>
-      <h2 id={titleId} className="sheet__title sheet__title--lg">
-        {title}
-      </h2>
+      <SheetHead titleId={titleId} tone="danger" kicker={kicker} title={title} />
       <p id={bodyId} className="sheet__text">
         {text}
       </p>
       <PrimaryButton tone="light" onClick={onClose} data-autofocus>
         {keepLabel}
       </PrimaryButton>
-      <button type="button" className="sheet__danger" onClick={onConfirm}>
+      <SecondaryButton tone="danger" onClick={onConfirm}>
         {confirmLabel}
-      </button>
+      </SecondaryButton>
     </Sheet>
   );
 }

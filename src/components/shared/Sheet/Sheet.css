@@ -99,20 +99,81 @@
   outline-offset: 2px;
 }
 
-/* The destructive choice of a confirm sheet: danger outline and label only. */
-.sheet__danger {
+/*
+ * The frame of a bottom sheet: a header, full-width rows and, last, a secondary
+ * button that dismisses. The accent header and the rows cancel the sheet's padding.
+ */
+.sheet__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* An accent block across the sheet's top edge, cancelling its padding. */
+.sheet__head--accent {
+  margin: calc(-1 * var(--space-6)) calc(-1 * var(--gutter)) 0;
+  padding: var(--space-5) var(--gutter);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.sheet__head--accent .sheet__kicker,
+.sheet__head--accent .sheet__title {
+  color: var(--color-on-accent);
+}
+
+.sheet__meta {
+  font-size: var(--text-secondary);
+  font-weight: 600;
+}
+
+.sheet__rows {
+  display: flex;
+  flex-direction: column;
+  margin: 0 calc(-1 * var(--gutter));
+}
+
+/* Rows sit flush under the accent block. */
+.sheet__head--accent + .sheet__rows {
+  margin-top: calc(-1 * var(--space-3));
+}
+
+.sheet__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
   min-height: var(--size-action);
-  border: 2px solid var(--color-danger);
-  border-radius: var(--radius-pill);
+  padding: 0 var(--gutter);
+  border: 0;
+  border-bottom: var(--border-hairline);
   background: none;
-  color: var(--color-danger);
-  font-family: inherit;
-  font-size: var(--text-body-lg);
-  font-weight: 700;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-row-title);
+  text-align: left;
+  text-transform: uppercase;
   cursor: pointer;
 }
 
-.sheet__danger:focus-visible {
+.sheet__row--danger {
+  color: var(--color-danger);
+}
+
+.sheet__row:focus-visible {
   outline: var(--border-focus);
-  outline-offset: 2px;
+  outline-offset: -2px;
+}
+
+.sheet__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: none;
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: none;
 }

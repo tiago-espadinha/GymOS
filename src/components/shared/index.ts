@@ -17,6 +17,7 @@ export { SetTicks } from './SetTicks';
 export { ListRow } from './ListRow';
 export { TabBar } from './TabBar';
 export { Sheet } from './Sheet';
+export { SheetHead, SheetRows, SheetRow } from './Sheet/frame';
 export { ConfirmSheet } from './ConfirmSheet';
 export { ListboxSheet } from './ListboxSheet';
 export { Toast } from './Toast';
