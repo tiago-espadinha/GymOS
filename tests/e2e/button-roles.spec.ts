@@ -343,3 +343,23 @@ for (const width of [320, 375, 768, 1280]) {
     expect(await page.locator('.dataCard').evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true)
   })
 }
+
+for (const width of [320, 375, 768, 1280]) {
+  test(`Stats range chips are 48 tall at ${width}px, all five on one row`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 812 })
+    await page.evaluate(() => {
+      const set = { id: 'x', weight: '60', reps: '8' }
+      const done = { id: 'e1', name: 'Bench Press', muscleGroup: 'Chest', category: 'strength', trackingType: 'reps', sets: [set] }
+      const sessions = [{ id: 's1', planId: 'p1', planName: 'Push', date: '2026-11-20', notes: '', exercises: [done] }]
+      localStorage.setItem('gym:sessions', JSON.stringify(sessions))
+    })
+    await page.reload()
+    await page.getByRole('button', { name: 'Stats', exact: true }).click()
+    const chips = page.getByRole('group', { name: 'Time range' }).getByRole('button')
+    await expect(chips).toHaveCount(5)
+    const boxes = await chips.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().toJSON()))
+    expect(boxes.map((b) => b.height)).toEqual([48, 48, 48, 48, 48])
+    expect(new Set(boxes.map((b) => b.y)).size).toBe(1)
+    await axe(page)
+  })
+}
