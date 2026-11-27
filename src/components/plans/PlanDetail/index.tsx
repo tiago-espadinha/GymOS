@@ -10,8 +10,8 @@ interface PlanDetailProps {
   plan: TrainingPlan;
   sessions: WorkoutSession[];
   today: string;
-  /** Just saved: the kicker confirms it, and on its own screen DONE leads back. */
-  saved?: boolean;
+  /** Just saved, as a new plan or as changes: the kicker confirms it, and on its own screen DONE leads back. */
+  saved?: "new" | "edited" | null;
   /** Given on the phone, where the overview is its own screen under a back link. */
   onBack?: () => void;
   onStart: (plan: TrainingPlan) => void;
@@ -19,7 +19,7 @@ interface PlanDetailProps {
 }
 
 /** A plan's overview: the wide Plans' right pane, or a screen of its own on the phone. */
-export function PlanDetail({ id, plan, sessions, today, saved = false, onBack, onStart, onMore }: PlanDetailProps) {
+export function PlanDetail({ id, plan, sessions, today, saved = null, onBack, onStart, onMore }: PlanDetailProps) {
   const titleId = `${id}-title`;
   const savedId = `${id}-saved`;
   const { distance } = useUnitPrefs();
@@ -37,7 +37,9 @@ export function PlanDetail({ id, plan, sessions, today, saved = false, onBack, o
         </div>
       )}
       {saved ? (
-        <p id={savedId} className="planDetail__kicker planDetail__kicker--saved">Plan saved</p>
+        <p id={savedId} className="planDetail__kicker planDetail__kicker--saved">
+          {saved === "edited" ? "Changes saved" : "Plan saved"}
+        </p>
       ) : (
         <p className="planDetail__kicker">{planDetailKicker(plan, sessions, today)}</p>
       )}

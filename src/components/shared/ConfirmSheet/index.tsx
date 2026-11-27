@@ -10,7 +10,9 @@ interface ConfirmSheetProps {
   /** The destructive choice, e.g. "Delete plan". */
   confirmLabel: string;
   onConfirm: () => void;
-  /** Keep it, Escape or a tap outside. */
+  /** The safe choice, which only closes the sheet. */
+  keepLabel?: string;
+  /** The keep button, Escape or a tap outside. */
   onClose: () => void;
 }
 
@@ -19,7 +21,7 @@ interface ConfirmSheetProps {
  * dialog. Keep it gets focus, even when the text holds a link; the destructive
  * choice is the danger outline below it.
  */
-export function ConfirmSheet({ kicker, title, text, confirmLabel, onConfirm, onClose }: ConfirmSheetProps) {
+export function ConfirmSheet({ kicker, title, text, confirmLabel, onConfirm, keepLabel = "Keep it", onClose }: ConfirmSheetProps) {
   const titleId = useId();
   const bodyId = useId();
   return (
@@ -32,7 +34,7 @@ export function ConfirmSheet({ kicker, title, text, confirmLabel, onConfirm, onC
         {text}
       </p>
       <PrimaryButton tone="light" onClick={onClose} data-autofocus>
-        Keep it
+        {keepLabel}
       </PrimaryButton>
       <button type="button" className="sheet__danger" onClick={onConfirm}>
         {confirmLabel}

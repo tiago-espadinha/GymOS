@@ -9,6 +9,7 @@ import { fromPlan } from "./utils/activeSession";
 import { today } from "./utils/date";
 import { TrainingPlan, WorkoutSession } from "./types";
 import { getFromStorage, saveToStorage } from "./utils/storage";
+import { carryRenames, updatePlan } from "./utils/plans";
 import "./GymTracker.css";
 
 const TABS = [
@@ -31,8 +32,8 @@ export default function GymTracker() {
   const [selectedExName, setSelectedExName] = useState<string>("");
   // Set by the empty-state import link: Settings opens the file picker once it shows.
   const [pickImport, setPickImport] = useState(false);
-  // New plan is modal-like: the tab bar hides and Cancel is the exit.
-  const [creatingPlan, setCreatingPlan] = useState(false);
+  // New plan and Edit plan are modal-like: the tab bar hides and Cancel is the exit.
+  const [planFormOpen, setPlanFormOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -87,6 +88,27 @@ export default function GymTracker() {
     return true;
   };
 
+  // Saving an edited plan also renames it in its past sessions. Sessions go first; if the
+  // plans write is then refused, the old sessions go back, so nothing is half saved.
+  const commitPlanEdit = (edited: TrainingPlan) => {
+    const before = plans.find((p) => p.id === edited.id);
+    if (!before) return false;
+    const nextPlans = updatePlan(plans, edited);
+    const { sessions: nextSessions, changed } = carryRenames(sessions, before, edited);
+    if (changed && !saveToStorage("gym:sessions", nextSessions)) return false;
+    if (!saveToStorage("gym:plans", nextPlans)) {
+      if (changed) saveToStorage("gym:sessions", sessions);
+      return false;
+    }
+    setPlans(nextPlans);
+    if (changed) setSessions(nextSessions);
+    // Stats keeps showing a renamed exercise under its new name.
+    const renamed = before.exercises.find((e) => e.name === selectedExName);
+    const now = renamed && edited.exercises.find((e) => e.id === renamed.id);
+    if (now) setSelectedExName(now.name);
+    return true;
+  };
+
   const handleStartPlan = (plan: TrainingPlan) => {
     activeSession.begin(fromPlan(plan, today()));
   };
@@ -115,8 +137,8 @@ export default function GymTracker() {
   const { session } = activeSession;
   // An active session takes over the screen: it shows the log and no tab bar.
   const visibleTab: TabId = session ? "log" : tab;
-  // New plan hides the tab bar, so no tab change can happen while it is open.
-  const showTabs = !session && !creatingPlan;
+  // The plan form hides the tab bar, so no tab change can happen while it is open.
+  const showTabs = !session && !planFormOpen;
 
   const changeTab = (next: TabId) => {
     setPickImport(false);
@@ -130,7 +152,7 @@ export default function GymTracker() {
 
   const newPlan = () => {
     changeTab("plans");
-    setCreatingPlan(true);
+    setPlanFormOpen(true);
   };
 
   // Import is offered on an empty tab only while the device holds no plans and no sessions.
@@ -160,10 +182,11 @@ export default function GymTracker() {
             sessions={sessions}
             setPlans={storePlans}
             commitPlans={commitPlans}
+            commitPlanEdit={commitPlanEdit}
             onStartPlan={handleStartPlan}
             onImport={importOffer}
-            creating={creatingPlan}
-            onCreatingChange={setCreatingPlan}
+            formOpen={planFormOpen}
+            onFormOpenChange={setPlanFormOpen}
           />
         )}
         {visibleTab === "log" && (

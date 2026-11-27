@@ -58,4 +58,10 @@ describe("buildPlan", () => {
     expect(errorCount(validatePlan("", []))).toBe(2);
     expect(errorCount(validatePlan("Push day", [run]))).toBe(0);
   });
+
+  it("keeps the id it is given, so an edited plan replaces the stored one", () => {
+    const result = buildPlan("Push day", "", [bench], "p1");
+    if (!("plan" in result)) throw new Error("expected a plan");
+    expect(result.plan.id).toBe("p1");
+  });
 });

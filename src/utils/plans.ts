@@ -107,3 +107,62 @@ export function plansTitle(active: number): string {
   if (active === 0) return "Plans";
   return `${active} Plan${active === 1 ? "" : "s"}`;
 }
+
+// An edited plan replaces the stored one in place, so it keeps its position and archive state.
+export function updatePlan(plans: TrainingPlan[], edited: TrainingPlan): TrainingPlan[] {
+  return plans.map((p) => (p.id === edited.id ? { ...p, ...edited } : p));
+}
+
+interface Rename {
+  from: string;
+  to: string;
+}
+
+function renamesOf(before: TrainingPlan, after: TrainingPlan) {
+  const exercises = new Map<string, Rename>();
+  for (const ex of after.exercises) {
+    const old = before.exercises.find((e) => e.id === ex.id);
+    // A name cleared to be retyped is not a rename yet.
+    if (old && ex.name && old.name !== ex.name) exercises.set(ex.id, { from: old.name, to: ex.name });
+  }
+  const plan = before.name !== after.name ? { from: before.name, to: after.name } : null;
+  return { exercises, plan };
+}
+
+// Renaming a plan or its exercises renames them in that plan's past sessions too, so Log
+// and Stats keep one name. Exercises match by id: an imported session without the plan's
+// ids keeps the old name. Unchanged sessions come back as the same objects.
+export function carryRenames(
+  sessions: WorkoutSession[],
+  before: TrainingPlan,
+  after: TrainingPlan,
+): { sessions: WorkoutSession[]; changed: number } {
+  const renames = renamesOf(before, after);
+  let changed = 0;
+  const next = sessions.map((s) => {
+    if (s.planId !== after.id) return s;
+    const hit = renames.plan || s.exercises.some((ex) => renames.exercises.has(ex.id));
+    if (!hit) return s;
+    changed += 1;
+    return {
+      ...s,
+      planName: renames.plan ? renames.plan.to : s.planName,
+      exercises: s.exercises.map((ex) => {
+        const r = renames.exercises.get(ex.id);
+        return r ? { ...ex, name: r.to } : ex;
+      }),
+    };
+  });
+  return { sessions: next, changed };
+}
+
+// The line over Save changes when a rename reaches past sessions, or null when none does.
+export function renameNote(before: TrainingPlan, after: TrainingPlan, changed: number): string | null {
+  if (changed === 0) return null;
+  const { exercises, plan } = renamesOf(before, after);
+  const where = `${changed} past session${changed === 1 ? "" : "s"}`;
+  const all = [...exercises.values()];
+  if (all.length === 1 && !plan) return `${all[0].from} is now ${all[0].to} in ${where} and in Stats.`;
+  if (all.length === 0 && plan) return `${plan.from} is now ${plan.to} in ${where}.`;
+  return `${all.length + Number(!!plan)} renames carry into ${where}${all.length ? " and Stats" : ""}.`;
+}

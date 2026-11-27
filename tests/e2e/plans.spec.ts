@@ -76,14 +76,15 @@ test.describe('with plans', () => {
     await expect(page.getByRole('heading', { name: 'Plans', level: 1 })).toBeFocused()
   })
 
-  test('⋯ opens a modal sheet with Archive only; Escape closes it and returns focus', async ({ page }) => {
+  test('⋯ opens a modal sheet with Edit and Archive; Escape closes it and returns focus', async ({ page }) => {
     await page.goto('/')
     await openActions(page, 'Push day')
     const sheet = page.getByRole('dialog', { name: 'Push day' })
     await expect(sheet).toBeVisible()
     await expect(sheet).toHaveAttribute('aria-modal', 'true')
     await expect(sheet.getByText('3 exercises · last trained 2 May')).toBeVisible()
-    await expect(sheet.getByRole('button', { name: /Archive plan/ })).toBeFocused()
+    await expect(sheet.getByRole('button', { name: /Edit plan/ })).toBeFocused()
+    await expect(sheet.getByRole('button', { name: /Archive plan/ })).toBeVisible()
     await expect(sheet.getByRole('button', { name: /Delete/ })).toHaveCount(0)
     await expect(page.locator('#root')).toHaveAttribute('inert', '')
     await page.keyboard.press('Escape')

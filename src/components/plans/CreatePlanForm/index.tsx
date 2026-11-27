@@ -1,23 +1,31 @@
 import { useEffect, useRef, useState } from "react";
-import { Field, Icon, PrimaryButton, SaveFailedAlert, Toast } from "../../shared";
+import { ConfirmSheet, Field, Icon, PrimaryButton, SaveFailedAlert, Toast } from "../../shared";
 import { TrainingPlan } from "../../../types";
-import { buildPlan, errorCount, validatePlan } from "./buildPlan";
+import { buildPlan, draftOf, errorCount, validatePlan } from "./buildPlan";
 import { ExerciseFields } from "./ExerciseFields";
 import { ExerciseSummary } from "./ExerciseSummary";
 import { ADD_BUTTON, useExerciseList } from "./useExerciseList";
 import "./CreatePlanForm.css";
 
 interface CreatePlanFormProps {
+  /** The plan to edit; without it the form makes a new one. */
+  plan?: TrainingPlan;
+  /** Editing: what saving the draft would rename in past sessions, or null. */
+  historyNote?: (draft: TrainingPlan) => string | null;
   /** Returns false when the browser refused to store the plan. */
   onSave: (plan: TrainingPlan) => boolean;
   onCancel: () => void;
 }
 
+const sameContent = (a: TrainingPlan, b: TrainingPlan) =>
+  a.name === b.name && a.desc === b.desc && JSON.stringify(a.exercises) === JSON.stringify(b.exercises);
+
 const PLAN_NAME = 'input[name="planName"]';
 
-export function CreatePlanForm({ onSave, onCancel }: CreatePlanFormProps) {
-  const [name, setName] = useState("");
-  const [desc, setDesc] = useState("");
+export function CreatePlanForm({ plan, historyNote, onSave, onCancel }: CreatePlanFormProps) {
+  const [name, setName] = useState(plan?.name ?? "");
+  const [desc, setDesc] = useState(plan?.desc ?? "");
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
   // Errors show after the first Save and then follow every edit.
   const [submitted, setSubmitted] = useState(false);
   // Refused Saves in a row; the form keeps its values meanwhile.
@@ -26,7 +34,7 @@ export function CreatePlanForm({ onSave, onCancel }: CreatePlanFormProps) {
   // A fresh object per request, so a repeated Save with the same errors still moves focus.
   const [focusRequest, setFocusRequest] = useState<{ selector: string } | null>(null);
   const focus = (selector: string) => setFocusRequest({ selector });
-  const list = useExerciseList(focus);
+  const list = useExerciseList(focus, plan?.exercises);
   const { exercises, openId, removed } = list;
 
   // Centre the control so the sticky Save bar never covers it.
@@ -39,9 +47,14 @@ export function CreatePlanForm({ onSave, onCancel }: CreatePlanFormProps) {
 
   const errors = submitted ? validatePlan(name, exercises) : null;
   const count = errors ? errorCount(errors) : 0;
+  const draft = plan && draftOf(plan.id, name, desc, exercises);
+  const note = draft && historyNote?.(draft);
+
+  // An edit with unsaved changes asks first; anything else just closes.
+  const cancel = () => (draft && !sameContent(draft, plan) ? setConfirmDiscard(true) : onCancel());
 
   const save = () => {
-    const result = buildPlan(name, desc, exercises);
+    const result = buildPlan(name, desc, exercises, plan?.id);
     if ("plan" in result) {
       if (!onSave(result.plan)) setSaveFailures((n) => n + 1);
       return;
@@ -62,8 +75,8 @@ export function CreatePlanForm({ onSave, onCancel }: CreatePlanFormProps) {
       }}
     >
       <header className="createPlanFormHeader">
-        <h1 id="createPlanFormTitle" className="createPlanFormTitle">New plan</h1>
-        <button type="button" className="createPlanFormCancel" onClick={onCancel}>Cancel</button>
+        <h1 id="createPlanFormTitle" className="createPlanFormTitle">{plan ? "Edit plan" : "New plan"}</h1>
+        <button type="button" className="createPlanFormCancel" onClick={cancel}>Cancel</button>
       </header>
 
       <div className="createPlanFormName">
@@ -115,8 +128,15 @@ export function CreatePlanForm({ onSave, onCancel }: CreatePlanFormProps) {
             screen. Try again.
           </SaveFailedAlert>
         )}
-        <PrimaryButton type="submit">{saveFailures > 0 ? "Try again" : "Save plan"}</PrimaryButton>
+        {note && <p className="createPlanFormNote">{note}</p>}
+        <PrimaryButton type="submit">{saveFailures > 0 ? "Try again" : plan ? "Save changes" : "Save plan"}</PrimaryButton>
       </div>
+
+      {confirmDiscard && plan && (
+        <ConfirmSheet kicker="Discard" title="Discard changes?" text={`Your edits are lost. ${plan.name} stays as it was.`}
+          confirmLabel="Discard changes" keepLabel="Keep editing" onConfirm={onCancel}
+          onClose={() => setConfirmDiscard(false)} />
+      )}
     </form>
   );
 }

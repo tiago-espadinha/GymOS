@@ -314,6 +314,16 @@
   background: var(--color-bg);
 }
 
+/* Editing: what a rename does to past sessions, just over Save changes. */
+.createPlanFormNote {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
 .createPlanFormSummary {
   display: flex;
   align-items: center;

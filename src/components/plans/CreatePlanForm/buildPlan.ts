@@ -28,16 +28,18 @@ export function errorCount(errors: PlanErrors): number {
 
 export type BuildPlanResult = { plan: TrainingPlan } | { errors: PlanErrors };
 
-export function buildPlan(name: string, desc: string, exercises: Exercise[]): BuildPlanResult {
+/** What the form would store: trimmed text, every exercise field kept. */
+export const draftOf = (id: string, name: string, desc: string, exercises: Exercise[]): TrainingPlan => ({
+  id,
+  name: name.trim(),
+  desc: desc.trim(),
+  exercises: exercises.map((e) => ({ ...e, name: e.name.trim() })),
+});
+
+/** `id` is kept when editing; a new plan gets a fresh one. */
+export function buildPlan(name: string, desc: string, exercises: Exercise[], id = generateId()): BuildPlanResult {
   const errors = validatePlan(name, exercises);
   if (errorCount(errors) > 0) return { errors };
 
-  return {
-    plan: {
-      id: generateId(),
-      name: name.trim(),
-      desc: desc.trim(),
-      exercises: exercises.map((e) => ({ ...e, name: e.name.trim() })),
-    },
-  };
+  return { plan: draftOf(id, name, desc, exercises) };
 }

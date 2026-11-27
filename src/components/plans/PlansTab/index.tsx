@@ -8,7 +8,7 @@ import DeletePlanSheet from '../DeletePlanSheet';
 import PlanDetail from '../PlanDetail';
 import PlanSelectRow from '../PlanSelectRow';
 import { useMediaQuery, WIDE_QUERY } from '../../../hooks/useMediaQuery';
-import { archivePlan, deletePlan, neighbourOf, plansTitle, restorePlan } from '../../../utils/plans';
+import { archivePlan, carryRenames, deletePlan, neighbourOf, plansTitle, renameNote, restorePlan } from '../../../utils/plans';
 import { today } from '../../../utils/date';
 import { TrainingPlan, WorkoutSession } from '../../../types';
 import './PlansTab.css';
@@ -19,17 +19,19 @@ interface PlansTabProps {
   setPlans: (plans: TrainingPlan[]) => void;
   /** Stores plans and reports whether the browser kept them. */
   commitPlans: (plans: TrainingPlan[]) => boolean;
+  /** Stores an edited plan, renaming it in its past sessions; false when the browser refused. */
+  commitPlanEdit: (plan: TrainingPlan) => boolean;
   onStartPlan: (plan: TrainingPlan) => void;
   /** Opens Settings to import a CSV; passed only while the device holds no data. */
   onImport?: () => void;
-  /** New plan is open; the shell hides the tab bar meanwhile. */
-  creating: boolean;
-  onCreatingChange: (creating: boolean) => void;
+  /** New plan or Edit plan is open; the shell hides the tab bar meanwhile. */
+  formOpen: boolean;
+  onFormOpenChange: (open: boolean) => void;
 }
 
 type Overlay = { kind: 'actions' | 'delete'; plan: TrainingPlan } | null;
 
-export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, onImport, creating, onCreatingChange }: PlansTabProps) {
+export function PlansTab({ plans, sessions, setPlans, commitPlans, commitPlanEdit, onStartPlan, onImport, formOpen, onFormOpenChange }: PlansTabProps) {
   const [archivedOpen, setArchivedOpen] = useState(false);
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [archived, setArchived] = useState<TrainingPlan | null>(null);
@@ -38,7 +40,9 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
   // Phone only: the selected plan's overview fills the screen instead of the list.
   const [overview, setOverview] = useState(false);
   // The plan just saved, whose overview says so until another plan is shown.
-  const [savedId, setSavedId] = useState<string | null>(null);
+  const [saved, setSaved] = useState<{ id: string; kind: 'new' | 'edited' } | null>(null);
+  // The plan open in the form; null while the form makes a new one.
+  const [editing, setEditing] = useState<TrainingPlan | null>(null);
   const wide = useMediaQuery(WIDE_QUERY);
   const root = useRef<HTMLDivElement>(null);
   // Where focus goes after the next render, when the control that had it is gone.
@@ -60,10 +64,11 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
 
   // A refused write keeps the form open with what was entered; a kept one shows the plan's overview.
   const savePlan = (p: TrainingPlan) => {
-    if (!commitPlans([...plans, p])) return false;
-    onCreatingChange(false);
+    if (!(editing ? commitPlanEdit(p) : commitPlans([...plans, p]))) return false;
+    onFormOpenChange(false);
+    setEditing(null);
     setSelectedId(p.id);
-    setSavedId(p.id);
+    setSaved({ id: p.id, kind: editing ? 'edited' : 'new' });
     setOverview(!wide);
     focusNext.current = '.planDetail__name';
     // The form was likely scrolled down to Save; the confirmation sits at the top.
@@ -71,15 +76,26 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
     return true;
   };
 
-  // The form is gone after this render, so focus lands on the Plans heading.
+  // The form is gone after this render: focus lands on the edited plan's ⋯, or the Plans heading.
   const closeForm = () => {
-    onCreatingChange(false);
-    focusNext.current = '.plansTabTitle';
+    onFormOpenChange(false);
+    setEditing(null);
+    focusNext.current = editing ? `[data-plan-actions="${CSS.escape(editing.id)}"]` : '.plansTabTitle';
   };
+
+  const edit = (plan: TrainingPlan) => {
+    setOverlay(null);
+    setEditing(plan);
+    onFormOpenChange(true);
+    window.scrollTo({ top: 0 });
+  };
+
+  const historyNote = (draft: TrainingPlan) =>
+    editing && renameNote(editing, draft, carryRenames(sessions, editing, draft).changed);
 
   const select = (plan: TrainingPlan) => {
     setSelectedId(plan.id);
-    if (plan.id !== savedId) setSavedId(null);
+    if (plan.id !== saved?.id) setSaved(null);
   };
 
   const openOverview = (plan: TrainingPlan) => {
@@ -91,13 +107,13 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
 
   const closeOverview = (plan: TrainingPlan) => {
     setOverview(false);
-    setSavedId(null);
+    setSaved(null);
     focusNext.current = `[data-plan-open="${CSS.escape(plan.id)}"]`;
   };
 
   const archive = (plan: TrainingPlan) => {
     setOverview(false);
-    setSavedId(null);
+    setSaved(null);
     if (plan.id === selected?.id) setSelectedId(neighbourOf(activePlans, plan.id)?.id ?? null);
     setPlans(archivePlan(plans, plan.id, todayStr));
     setOverlay(null);
@@ -128,8 +144,11 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
 
   const showEmpty = activePlans.length === 0;
 
-  // New plan replaces the whole screen, "Plans" heading included.
-  if (creating) return <CreatePlanForm onSave={savePlan} onCancel={closeForm} />;
+  // The plan form replaces the whole screen, "Plans" heading included.
+  if (formOpen) {
+    return <CreatePlanForm key={editing?.id ?? 'new'} plan={editing ?? undefined} historyNote={historyNote}
+      onSave={savePlan} onCancel={closeForm} />;
+  }
 
   // Empty: the block's kicker names the tab, so the title stays for screen readers only.
   const header = showEmpty ? (
@@ -137,7 +156,7 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
   ) : (
     <header className="plansTabHeader">
       <h1 className="plansTabTitle" tabIndex={-1}>{plansTitle(activePlans.length)}</h1>
-      <PillButton variant="white" onClick={() => onCreatingChange(true)}>
+      <PillButton variant="white" onClick={() => onFormOpenChange(true)}>
         <Icon name="plus" />
         Create New
       </PillButton>
@@ -168,7 +187,7 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
   const overlays = (
     <>
       {overlay?.kind === 'actions' && (
-        <PlanActionsSheet plan={overlay.plan} sessions={sessions} today={todayStr} onArchive={archive}
+        <PlanActionsSheet plan={overlay.plan} sessions={sessions} today={todayStr} onEdit={edit} onArchive={archive}
           onClose={() => closeActions(overlay.plan)} />
       )}
       {overlay?.kind === 'delete' && (
@@ -190,7 +209,7 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
   return (
     <div className={`plansTab${archived ? ' plansTab--toast' : ''}${panes ? ' plansTab--wide' : ''}`} ref={root}>
       {phoneOverview ? (
-        <PlanDetail id={detailId} plan={selected} sessions={sessions} today={todayStr} saved={selected.id === savedId}
+        <PlanDetail id={detailId} plan={selected} sessions={sessions} today={todayStr} saved={saved?.id === selected.id ? saved.kind : null}
           onBack={() => closeOverview(selected)} onStart={onStartPlan}
           onMore={(plan) => setOverlay({ kind: 'actions', plan })} />
       ) : panes ? (
@@ -205,7 +224,7 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
             </ul>
             {archivedSection}
           </div>
-          <PlanDetail id={detailId} plan={selected} sessions={sessions} today={todayStr} saved={selected.id === savedId}
+          <PlanDetail id={detailId} plan={selected} sessions={sessions} today={todayStr} saved={saved?.id === selected.id ? saved.kind : null}
             onStart={onStartPlan} onMore={(plan) => setOverlay({ kind: 'actions', plan })} />
         </>
       ) : (
@@ -218,7 +237,7 @@ export function PlansTab({ plans, sessions, setPlans, commitPlans, onStartPlan, 
               title="No plans yet"
               text="A plan is the list of exercises you repeat. Make one, then start it from here or from Log."
               action={<><Icon name="plus" />Create New</>}
-              onAction={() => onCreatingChange(true)}
+              onAction={() => onFormOpenChange(true)}
               onImport={onImport}
             />
           ) : (
