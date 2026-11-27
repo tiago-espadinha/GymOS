@@ -253,3 +253,24 @@ for (const width of [375, 1280]) {
     await axe(page)
   })
 }
+
+test('secondary: Download after a refused save', async ({ page }) => {
+  await page.getByRole('button', { name: 'Start Push' }).click()
+  await page.getByRole('button', { name: /^Bench Press/ }).click()
+  await logSet(page, '60', '8')
+  await page.getByRole('button', { name: 'All exercises' }).click()
+  await finishButton(page).click()
+  // Storage refuses every write from here on, as when it is full.
+  await page.evaluate(() => {
+    Storage.prototype.setItem = () => {
+      throw new DOMException('The quota has been exceeded.', 'QuotaExceededError')
+    }
+  })
+  await page.getByRole('button', { name: 'Save session' }).click()
+  // The label takes two lines on this 375 phone and one at 768; both are 64.
+  const download = page.getByRole('button', { name: 'Download this session (CSV)' })
+  expect(await style(download)).toMatchObject(secondary)
+  await page.setViewportSize({ width: 768, height: 812 })
+  expect(await style(download)).toMatchObject(secondary)
+  await axe(page)
+})

@@ -138,22 +138,11 @@
   padding: var(--space-4) 0 var(--space-5);
 }
 
-/* Secondary to Try again: outlined, in body type. */
-.finishDownload {
-  min-height: var(--size-action);
-  border: var(--border-control);
-  border-radius: var(--radius-pill);
-  background: none;
-  color: var(--color-text);
-  font-family: var(--font-body);
-  font-size: var(--text-body-lg);
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.finishDownload:focus-visible {
-  outline: var(--border-focus);
-  outline-offset: 2px;
+/* The download label takes two lines on a phone: set them tight enough to stay a 64 pill. */
+.finishActions > .secondary-button {
+  padding-block: var(--space-1);
+  line-height: 0.9;
+  text-wrap: balance;
 }
 
 /* Multi-line: notes keep their line breaks. */
