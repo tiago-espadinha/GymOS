@@ -102,8 +102,7 @@ span.logHomeLead {
 }
 
 .logHomeChoice:focus-visible,
-.logHomePlan:focus-visible,
-.logHomeChangePlan:focus-visible {
+.logHomePlan:focus-visible {
   outline: var(--border-focus);
   outline-offset: 2px;
 }
@@ -334,16 +333,11 @@ span.logHomeLead {
   outline-offset: -2px;
 }
 
-/* Below wide, the wide-only parts stay out of the layout and the wrappers add no box. */
+/* Below wide, the wide-only parts stay out of the layout. */
 .logHomeExercises,
 .logHomeMore,
-.logHomeChangePlan,
 .logHomeItemCell {
   display: none;
-}
-
-.logHomeActions {
-  display: contents;
 }
 
 /*
@@ -375,11 +369,6 @@ span.logHomeLead {
     margin-top: var(--space-2);
   }
 
-  /* Change plan sits beside Start instead. */
-  .logHomePlanChevron {
-    display: none;
-  }
-
   .logHomeExercises {
     display: flex;
     flex-direction: column;
@@ -396,31 +385,6 @@ span.logHomeLead {
     margin: 0 0 var(--space-4);
     font-size: var(--text-body);
     font-weight: 600;
-  }
-
-  .logHomeActions {
-    display: flex;
-    gap: var(--space-2);
-  }
-
-  .logHomeActions .primary-button {
-    flex-grow: 1;
-    width: auto;
-  }
-
-  .logHomeChangePlan {
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--size-action-primary);
-    padding: 0 var(--space-6);
-    border: 2px solid currentColor;
-    border-radius: var(--radius-pill);
-    background: none;
-    color: inherit;
-    font-family: var(--font-body);
-    font-size: var(--text-secondary);
-    font-weight: 700;
-    cursor: pointer;
   }
 
   .logHomeRecentHead {
