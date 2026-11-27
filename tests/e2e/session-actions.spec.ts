@@ -83,9 +83,9 @@ test('the new-session sheet: accent block, Discard session and an outlined Close
 
   await sessionActions(page).click()
   await expect(sheet(page)).toBeVisible()
-  await expect(sheet(page).locator('.sessionSheet__head')).toHaveCSS('background-color', ACCENT)
-  await expect(sheet(page).locator('.sessionSheet__head')).toContainText('Session · Sun 15 Nov')
-  await expect(sheet(page).locator('.sessionSheet__head')).toContainText('1 set logged')
+  await expect(sheet(page).locator('.sheet__head')).toHaveCSS('background-color', ACCENT)
+  await expect(sheet(page).locator('.sheet__head')).toContainText('Session · Sun 15 Nov')
+  await expect(sheet(page).locator('.sheet__head')).toContainText('1 set logged')
   await expect(sheet(page).getByRole('button')).toHaveText([/^Discard session/, 'Close'])
   await axe(page)
 
@@ -107,8 +107,8 @@ test('editing: accent kicker instead of the banner; the sheet changes date, and 
   await expect(page.getByText('✏')).toHaveCount(0)
 
   await sessionActions(page).click()
-  await expect(sheet(page).locator('.sessionSheet__head')).toContainText('Editing · saved Tue 10 Nov')
-  await expect(sheet(page).locator('.sessionSheet__head')).toContainText('2 sets · 1,080 kg')
+  await expect(sheet(page).locator('.sheet__head')).toContainText('Editing · saved Tue 10 Nov')
+  await expect(sheet(page).locator('.sheet__head')).toContainText('2 sets · 1,080 kg')
   await expect(sheet(page).getByRole('button')).toHaveText([/^Change date/, /^Discard changes/, /^Delete session/, 'Close'])
   await axe(page)
 
