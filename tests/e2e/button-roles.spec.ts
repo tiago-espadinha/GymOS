@@ -215,3 +215,62 @@ for (const width of [320, 360, 375]) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width)
   })
 }
+
+test('secondary: the date sheet ends in Close under a 44 title', async ({ page }) => {
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Log' }).click()
+  await page.getByRole('button', { name: /^Session date: / }).click()
+  const sheet = page.getByRole('dialog', { name: 'Session date' })
+  expect(await style(sheet.getByRole('button', { name: 'Close' }))).toMatchObject(secondary)
+  await expect(sheet.getByRole('heading', { name: 'Session date' })).toHaveCSS('font-size', '44px')
+  await axe(page)
+})
+
+for (const width of [375, 1280]) {
+  test(`secondary: Show more at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 812 })
+    const sessions = Array.from({ length: 8 }, (_, i) => ({
+      id: `s${i}`,
+      planId: 'p1',
+      planName: 'Push',
+      date: `2026-11-${String(i + 1).padStart(2, '0')}`,
+      exercises: [{ ...exercise, sets: [{ weight: 60, reps: 8 }] }],
+    }))
+    await page.evaluate((s) => localStorage.setItem('gym:sessions', JSON.stringify(s)), sessions)
+    await page.reload()
+    await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Log' }).click()
+    const more = page.getByRole('button', { name: 'Show more' })
+    expect(await style(more)).toMatchObject(secondary)
+    // Full width on a phone, sized to its label under the wide table.
+    const share = (await more.boundingBox())!.width / (await page.locator('.logHomeList').boundingBox())!.width
+    if (width < 1024) expect(share).toBeGreaterThan(0.9)
+    else expect(share).toBeLessThan(0.5)
+    // Tabbed to, so the keyboard focus ring shows.
+    await more.focus()
+    await page.keyboard.press('Shift+Tab')
+    await page.keyboard.press('Tab')
+    await expect(more).toBeFocused()
+    await expect(more).toHaveCSS('outline-style', 'solid')
+    await axe(page)
+  })
+}
+
+test('secondary: Download after a refused save', async ({ page }) => {
+  await page.getByRole('button', { name: 'Start Push' }).click()
+  await page.getByRole('button', { name: /^Bench Press/ }).click()
+  await logSet(page, '60', '8')
+  await page.getByRole('button', { name: 'All exercises' }).click()
+  await finishButton(page).click()
+  // Storage refuses every write from here on, as when it is full.
+  await page.evaluate(() => {
+    Storage.prototype.setItem = () => {
+      throw new DOMException('The quota has been exceeded.', 'QuotaExceededError')
+    }
+  })
+  await page.getByRole('button', { name: 'Save session' }).click()
+  // The label takes two lines on this 375 phone and one at 768; both are 64.
+  const download = page.getByRole('button', { name: 'Download this session (CSV)' })
+  expect(await style(download)).toMatchObject(secondary)
+  await page.setViewportSize({ width: 768, height: 812 })
+  expect(await style(download)).toMatchObject(secondary)
+  await axe(page)
+})

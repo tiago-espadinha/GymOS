@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import { Icon, Sheet } from "../../shared";
+import { Icon, SecondaryButton, Sheet } from "../../shared";
 import {
   dayBefore,
   formatDateMeta,
@@ -121,9 +121,7 @@ export function DateSheet({ value, onChange, onClose }: DateSheetProps) {
         )}
       </div>
       <Calendar key={value} value={value} min={EARLIEST} max={todayStr} onPick={pick} />
-      <button type="button" className="sheet__cancel" onClick={onClose}>
-        Close
-      </button>
+      <SecondaryButton onClick={onClose}>Close</SecondaryButton>
     </Sheet>
   );
 }

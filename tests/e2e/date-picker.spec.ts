@@ -172,6 +172,23 @@ test('returning to this month keeps focus on Next month, and Escape still closes
   await expect(sheet(page)).toHaveCount(0)
 })
 
+// November 2026 takes six week rows, and the error line makes the sheet its tallest.
+test('at 375x812 the sheet needs no scrolling, the error showing too', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await openSheet(page)
+  const today = (await sheet(page).getByRole('button', { name: /^Today/ }).boundingBox())!
+  const yesterday = (await sheet(page).getByRole('button', { name: /^Yesterday/ }).boundingBox())!
+  expect(yesterday.y).toBe(today.y)
+  const fits = async () => {
+    expect(await sheet(page).evaluate((el) => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(0)
+    await expect(sheet(page).getByRole('button', { name: 'Close' })).toBeInViewport({ ratio: 1 })
+  }
+  await fits()
+  await field(page).fill('31/02/2026')
+  await expect(sheet(page).locator('.dateSheet__error')).toBeVisible()
+  await fits()
+})
+
 test('the open picker fits the phone sheet: seven 44px day columns, nothing cut off', async ({ page }, testInfo) => {
   await openSheet(page)
   const layout = await sheet(page).evaluate((el) => {

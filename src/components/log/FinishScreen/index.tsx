@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { Icon, PrimaryButton, SaveFailedAlert } from "../../shared";
+import { Icon, PrimaryButton, SaveFailedAlert, SecondaryButton } from "../../shared";
 import { formatDateMeta } from "../../../utils/date";
 import { exerciseSummary, sessionTotals } from "../../../utils/sessionList";
 import { isLoggedSet, ActiveSession } from "../../../utils/activeSession";
@@ -109,9 +109,7 @@ export function FinishScreen({ session, onNotes, onDate, onSave, saveFailures, o
           {saveFailed ? "Try again" : editing ? "Save changes" : "Save session"}
         </PrimaryButton>
         {saveFailed && (
-          <button type="button" className="finishDownload" onClick={onDownload}>
-            Download this session (CSV)
-          </button>
+          <SecondaryButton onClick={onDownload}>Download this session (CSV)</SecondaryButton>
         )}
       </div>
 
