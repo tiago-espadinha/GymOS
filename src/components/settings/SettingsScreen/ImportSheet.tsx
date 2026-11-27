@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { Icon, PrimaryButton, Sheet } from "../../shared";
+import { Icon, PrimaryButton, SecondaryButton, Sheet, SheetHead, SheetRow, SheetRows } from "../../shared";
 import { CSVImport } from "../../../utils/csv";
 import { foundText } from "./importSummary";
 import { ImportStep } from "./readImport";
@@ -12,7 +12,7 @@ interface ImportSheetProps {
   onReplace: (data: CSVImport) => void;
   onChooseFile: () => void;
   onSeeStats: () => void;
-  /** Cancel import, Done, Escape or a tap outside. Nothing is written. */
+  /** Cancel import, Close, Done, Escape or a tap outside. Nothing is written. */
   onClose: () => void;
 }
 
@@ -23,54 +23,69 @@ export function ImportSheet({ step, deletes, onAdd, onReplace, onChooseFile, onS
     <Sheet labelledBy={titleId} onClose={onClose}>
       {step.kind === "ready" && (
         <>
-          <span className="sheet__kicker importKicker--accent">Import · file ready</span>
-          <h2 id={titleId} className="sheet__title importTitle" tabIndex={-1} data-autofocus>Restore backup</h2>
+          <SheetHead titleId={titleId} tone="accent-kicker" kicker="Import · file ready" title="Restore backup" focusTitle />
           <p className="importFile">{step.fileName}</p>
           <p className="sheet__text">{foundText(step.data)}</p>
-          <button type="button" className="importChoice importChoice--add" onClick={() => onAdd(step.data)}>
-            <span className="importChoiceTitle">Add to my data</span>
-            <span className="importChoiceHint">Keeps everything already on this device</span>
-          </button>
-          <button type="button" className="importChoice importChoice--replace" onClick={() => onReplace(step.data)}>
-            <span className="importChoiceTitle">Replace my data</span>
-            <span className="importChoiceHint">
-              {deletes ? `Deletes the ${deletes} on this device first` : "Nothing on this device to delete"}
-            </span>
-          </button>
-          <button type="button" className="sheet__cancel" onClick={onClose}>
-            Cancel import
-          </button>
+          <SheetRows>
+            <SheetRow
+              tone="accent"
+              title="Add to my data"
+              hint="Keeps everything already on this device"
+              hintUnder
+              onClick={() => onAdd(step.data)}
+            />
+            <SheetRow
+              tone="danger"
+              title="Replace my data"
+              hint={deletes ? `Deletes the ${deletes} on this device first` : "Nothing on this device to delete"}
+              hintUnder
+              onClick={() => onReplace(step.data)}
+            />
+          </SheetRows>
+          <SecondaryButton onClick={onClose}>Cancel import</SecondaryButton>
         </>
       )}
       {step.kind === "error" && (
         <>
           {/* An error is an icon and words, never colour alone. */}
-          <h2 id={titleId} className="sheet__kicker sheet__kicker--danger importKicker importTitle" tabIndex={-1} data-autofocus>
-            <Icon name="warning" />
-            Can't import this file
-          </h2>
+          <SheetHead
+            titleId={titleId}
+            tone="danger"
+            kicker={
+              <>
+                <Icon name="warning" />
+                Import
+              </>
+            }
+            title="Can't import this file"
+            focusTitle
+          />
           <p className="importFile">{step.fileName}</p>
-          <p className="importMessage">{step.message}</p>
+          <p className="sheet__text">{step.message}</p>
           <p className="sheet__text">Nothing on this device was changed.</p>
-          <button type="button" className="importAnother" onClick={onChooseFile}>
-            Choose another file
-          </button>
+          <SecondaryButton onClick={onChooseFile}>Choose another file</SecondaryButton>
+          <SecondaryButton onClick={onClose}>Close</SecondaryButton>
         </>
       )}
       {step.kind === "done" && (
         <>
-          <span className="sheet__kicker importKicker importKicker--accent">
-            <Icon name="check" />
-            Imported
-          </span>
-          <h2 id={titleId} className="sheet__title importTitle" tabIndex={-1} data-autofocus>Backup restored</h2>
-          <p className="importMessage">{step.message}</p>
+          <SheetHead
+            titleId={titleId}
+            tone="accent-kicker"
+            kicker={
+              <>
+                <Icon name="check" />
+                Imported
+              </>
+            }
+            title="Backup restored"
+            focusTitle
+          />
+          <p className="sheet__text">{step.message}</p>
           <PrimaryButton tone="accent" onClick={onSeeStats}>
             See stats
           </PrimaryButton>
-          <button type="button" className="sheet__cancel" onClick={onClose}>
-            Done
-          </button>
+          <SecondaryButton onClick={onClose}>Done</SecondaryButton>
         </>
       )}
     </Sheet>

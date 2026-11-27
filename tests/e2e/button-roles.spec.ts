@@ -14,6 +14,14 @@ const WHITE = 'rgb(255, 255, 255)'
 const DANGER = 'rgb(255, 138, 122)'
 const GREY = 'rgb(58, 58, 58)'
 const CLEAR = 'rgba(0, 0, 0, 0)'
+const ACCENT = 'rgb(198, 255, 61)'
+const BLACK = 'rgb(0, 0, 0)'
+const IMPORT_CSV = [
+  'type,date,name,desc_notes,exercise,muscle,category,tracking,weight,reps,duration,distance',
+  'session,2026-02-01,Legs,,Squat,Legs,strength,reps,100,5,,',
+].join('\n')
+
+const csvFile = (name: string, text: string) => ({ name, mimeType: 'text/csv', buffer: Buffer.from(text) })
 
 test.beforeEach(async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
@@ -273,4 +281,48 @@ test('secondary: Download after a refused save', async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 812 })
   expect(await style(download)).toMatchObject(secondary)
   await axe(page)
+})
+
+test('import sheet: file ready is two rows, Add in the accent, over Cancel import', async ({ page }) => {
+  await page.getByRole('button', { name: 'Settings' }).click()
+  await page.locator('input[type=file]').setInputFiles(csvFile('gym.csv', IMPORT_CSV))
+  const sheet = page.getByRole('dialog', { name: 'Restore backup' })
+  const outer = (await sheet.boundingBox())!
+  const add = sheet.getByRole('button', { name: /^Add to my data/ })
+  const replace = sheet.getByRole('button', { name: /^Replace my data/ })
+  for (const row of [add, replace]) {
+    const box = (await row.boundingBox())!
+    expect(box.x).toBe(outer.x)
+    expect(box.width).toBe(outer.width)
+    expect(await style(row)).toMatchObject({ face: display.face, letters: 'uppercase', size: '28px' })
+  }
+  expect(await style(add)).toMatchObject({ fill: ACCENT, colour: BLACK })
+  expect(await style(replace)).toMatchObject({ fill: CLEAR, colour: DANGER })
+  await expect(replace).toContainText('Deletes the')
+  await expect(sheet.getByRole('button').last()).toHaveText('Cancel import')
+  expect(await style(sheet.getByRole('button', { name: 'Cancel import' }))).toMatchObject(secondary)
+  await axe(page)
+
+  await add.click()
+  const done = page.getByRole('dialog', { name: 'Backup restored' })
+  await expect(done.getByRole('button')).toHaveText(['See stats', 'Done'])
+  expect(await style(done.getByRole('button', { name: 'See stats' }))).toMatchObject({ ...display, height: 72, fill: ACCENT })
+  expect(await style(done.getByRole('button', { name: 'Done' }))).toMatchObject(secondary)
+  await axe(page)
+})
+
+test('import sheet: an error ends in Choose another file and Close', async ({ page }) => {
+  await page.getByRole('button', { name: 'Settings' }).click()
+  const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('button', { name: 'Import', exact: true }).click()])
+  await chooser.setFiles(csvFile('notes.csv', 'name,weight'))
+  const sheet = page.getByRole('dialog', { name: "Can't import this file" })
+  await expect(sheet.getByRole('heading')).toHaveCSS('font-size', '44px')
+  await expect(sheet.getByRole('button')).toHaveText(['Choose another file', 'Close'])
+  for (const name of ['Choose another file', 'Close']) {
+    expect(await style(sheet.getByRole('button', { name }))).toMatchObject(secondary)
+  }
+  await axe(page)
+  await sheet.getByRole('button', { name: 'Close' }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Import', exact: true })).toBeFocused()
 })
