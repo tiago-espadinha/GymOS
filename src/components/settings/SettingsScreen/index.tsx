@@ -4,7 +4,7 @@ import { DataSection } from "./DataSection";
 import { PreferenceSections } from "./PreferenceSections";
 import "./SettingsScreen.css";
 
-/** The Settings tab: appearance, units, language and data, then About. */
+/** The Settings tab: appearance, units, timers, language and data, then About. */
 export function SettingsScreen(props: ComponentProps<typeof DataSection>) {
   return (
     <div className="dataScreen">

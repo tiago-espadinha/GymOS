@@ -91,6 +91,7 @@
   --size-field: 52px;
   --size-field-lg: 56px;
   --size-action: 64px;
+  --size-time-box: 112px; /* a typed rest length in Settings */
   --size-action-primary: 72px;
   --size-row-summary: 56px;
   --size-table-action: 77px; /* the sets table's action column, wide enough for its Editing tag */

@@ -1,40 +1,15 @@
-import { useId, useState, type ReactNode } from "react";
+import { useState } from "react";
 import { SaveFailedAlert, SegmentedControl } from "../../shared";
 import { AccentPicker } from "./AccentPicker";
+import { Section, SettingRow } from "./Section";
+import { TimerSection } from "./TimerSection";
 import {
   saveUnitPrefs,
   useUnitPrefs,
   type UnitPreferences,
 } from "../../../utils/unitPrefs";
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  const id = useId();
-  return (
-    <section className="settingsSection" aria-labelledby={id}>
-      <h2 id={id} className="dataKicker">
-        {title}
-      </h2>
-      {children}
-    </section>
-  );
-}
-
-function SettingRow({
-  label,
-  children,
-}: {
-  label: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="settingsRow">
-      <span className="settingsRowLabel">{label}</span>
-      {children}
-    </div>
-  );
-}
-
-/** Language, Units and Appearance. A unit choice the browser refuses to store is undone, so the screen shows what is stored. */
+/** Appearance, Units, Timers and Language. A unit choice the browser refuses to store is undone, so the screen shows what is stored. */
 export function PreferenceSections() {
   const units = useUnitPrefs();
   const [saveFailures, setSaveFailures] = useState(0);
@@ -87,6 +62,8 @@ export function PreferenceSections() {
           </SaveFailedAlert>
         )}
       </Section>
+
+      <TimerSection />
 
       <Section title="Language">
         <SettingRow label="App language">

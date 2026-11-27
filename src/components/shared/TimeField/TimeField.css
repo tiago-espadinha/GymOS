@@ -1,0 +1,25 @@
+/* The typed time itself; each place that uses it draws the box around it. */
+.timeField {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-row-title);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  caret-color: var(--color-accent);
+}
+
+.timeField::selection {
+  background: var(--color-inverse);
+  color: var(--color-on-inverse);
+}
+
+.timeField::placeholder {
+  color: var(--color-text-dim);
+}

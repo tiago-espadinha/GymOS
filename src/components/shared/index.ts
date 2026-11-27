@@ -25,3 +25,4 @@ export { Icon } from './Icon';
 export type { IconName } from './Icon/paths';
 export { EmptyState } from './EmptyState';
 export { BrandMark } from './BrandMark';
+export { TimeField } from './TimeField';

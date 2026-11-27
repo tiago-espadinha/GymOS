@@ -284,6 +284,32 @@
   min-width: var(--size-field-lg);
 }
 
+/* A switch here is a settings row like the others: flush, ruled, no box of its own. */
+.settingsSection .switch {
+  padding: var(--space-2) 0;
+  border-top: var(--border-hairline);
+  border-radius: 0;
+  background: none;
+}
+
+.settingsSection .switch + .switch {
+  margin-top: calc(-1 * var(--space-3));
+}
+
+/* A rest length: an inset box around the typed time, outlined while typing. */
+.settingsRow .settingsTime {
+  width: var(--size-time-box);
+  min-height: var(--size-control);
+  border-radius: var(--radius-nested);
+  background: var(--color-surface);
+  /* Focus scrolls the field clear of the tab bar, not under it. */
+  scroll-margin-bottom: calc(var(--size-action) + var(--space-6));
+}
+
+.settingsRow .settingsTime:focus {
+  outline: var(--border-focus);
+}
+
 /* About: the brand at the screen's end, below every setting. */
 .settingsAbout {
   display: flex;
