@@ -3,7 +3,7 @@ import { ExerciseCategory } from "../types";
 // Target chips offered for a hold or a cardio effort.
 export const WORK_PRESETS: Record<ExerciseCategory, number[]> = {
   strength: [30, 45, 60, 90],
-  calisthenics: [15, 20, 30, 45, 60],
+  calisthenics: [15, 30, 45, 60],
   cardio: [300, 600, 900, 1200, 1800],
 };
 

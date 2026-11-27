@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ChipGroup, PrimaryButton } from "../../shared";
+import { PrimaryButton } from "../../shared";
 import { formatClock, useTimer } from "../../../hooks/useTimer";
-import { WORK_PRESETS, formatPresetLabel } from "../../../constants/timerPresets";
 import { holdTimerId } from "../../../utils/restTimers";
 import { ExerciseCategory } from "../../../types";
 import { HoldTimer } from "./HoldTimer";
 import { holdPhase } from "./holdPhase";
 import DistanceField from "./DistanceField";
+import TargetChoice from "./TargetChoice";
 import "./TimedSetBlock.css";
 
 interface TimedSetBlockProps {
@@ -73,17 +73,7 @@ export function TimedSetBlock(props: TimedSetBlockProps) {
       {!resting && holdTimer}
       {props.heading}
       {timer.isComplete && <p className="timedSetHelp">Target reached. Keep going: the extra time counts.</p>}
-      {choosing && (
-        <div className="timedSetTarget">
-          <span className="timedSetLabel" aria-hidden="true">Target</span>
-          <ChipGroup
-            label="Target time"
-            options={WORK_PRESETS[category].map((s) => ({ value: String(s), label: formatPresetLabel(s) }))}
-            value={String(targetSec)}
-            onChange={(v) => timer.setTargetSec(Number(v))}
-          />
-        </div>
-      )}
+      {choosing && <TargetChoice category={category} targetSec={targetSec} onChange={timer.setTargetSec} />}
       {distanceUnit && !resting && <DistanceField setNumber={setNumber} unit={distanceUnit} value={distance} onChange={setDistance} />}
       {phase === "ready" ? (
         <PrimaryButton onClick={startNow}>{`Start ${name.toLowerCase()}${resting ? " now" : ""}`}</PrimaryButton>

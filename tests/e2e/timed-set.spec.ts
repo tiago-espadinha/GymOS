@@ -390,3 +390,47 @@ test('removing a logged hold never gives two sets the same id', async ({ page })
   )
   expect(new Set(ids).size).toBe(ids.length)
 })
+
+test('"Other" takes a typed target; typing a preset selects its chip, and tapping one closes the field', async ({ page }) => {
+  const chips = page.getByRole('group', { name: 'Target time' })
+  await expect(chips.getByRole('button')).toHaveText(['15s', '30s', '45s', '1m', 'Other'])
+  const other = page.getByRole('textbox', { name: 'Other target' })
+  await expect(other).toHaveCount(0)
+
+  await chips.getByRole('button', { name: 'Other' }).click()
+  await expect(other).toBeFocused()
+  await other.fill('115')
+  await other.press('Enter')
+  await expect(chips.getByRole('button', { name: 'Other' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(other).toHaveValue('01:15')
+  await expect(hold(page)).toContainText('01:15')
+
+  await other.fill('45')
+  await other.press('Enter')
+  await expect(chips.getByRole('button', { name: '45s' })).toHaveAttribute('aria-pressed', 'true')
+  await chips.getByRole('button', { name: '1m' }).click()
+  await expect(other).toHaveCount(0)
+
+  // Tapping Other and leaving without typing keeps the preset selected.
+  await chips.getByRole('button', { name: 'Other' }).click()
+  await other.blur()
+  await expect(chips.getByRole('button', { name: '1m' })).toHaveAttribute('aria-pressed', 'true')
+
+  // Typing the time already set selects its chip too.
+  await chips.getByRole('button', { name: 'Other' }).click()
+  await other.fill('100')
+  await other.press('Enter')
+  await expect(chips.getByRole('button', { name: '1m' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(other).toHaveValue('01:00')
+})
+
+test('a last hold that matches no chip is the next target, shown as Other', async ({ page }) => {
+  await button(page, 'Start hold').click()
+  await page.clock.fastForward(7_000)
+  await button(page, 'Stop and log').click()
+  await button(page, 'End rest').click()
+  const other = page.getByRole('textbox', { name: 'Other target' })
+  await expect(other).toHaveValue('00:07')
+  await expect(other).not.toBeFocused()
+  await expect(page.getByRole('group', { name: 'Target time' }).getByRole('button', { name: 'Other' })).toHaveAttribute('aria-pressed', 'true')
+})
