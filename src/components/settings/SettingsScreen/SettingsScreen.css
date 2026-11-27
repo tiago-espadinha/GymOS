@@ -14,7 +14,8 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: var(--weight-display);
-  font-size: var(--text-screen-title);
+  /* SETTINGS at full size is wider than a 320 column; it scales down below 352. */
+  font-size: min(var(--text-screen-title), 25vw);
   line-height: var(--leading-screen-title);
   text-transform: uppercase;
 }
