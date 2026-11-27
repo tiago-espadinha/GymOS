@@ -1,6 +1,7 @@
-import { PrimaryButton, StepperBlock } from "../../shared";
+import { PrimaryButton } from "../../shared";
 import { Set } from "../../../types";
-import { whole } from "../../../utils/typedNumber";
+import SetField from "../SetField";
+import { timeFormat } from "../SetField/timeFormat";
 import SetSteppers from "../SetSteppers";
 import DistanceField from "../TimedSetBlock/DistanceField";
 
@@ -19,23 +20,28 @@ interface EditSetPanelProps {
   onCancel: () => void;
 }
 
-// Outlined steppers for a logged set, then Save, with Cancel left and Delete right.
+// Outlined fields for a logged set (a time is typed, the rest step), then Save, with Cancel left and Delete right.
 export function EditSetPanel({ set, index, timed, trackWeight, distanceUnit, canSave, onChange, onSave, onDelete, onCancel }: EditSetPanelProps) {
   const n = index + 1;
   return (
     <>
       {timed ? (
         <div className="setSteppers setSteppers--single">
-          <StepperBlock
-            label="Time"
-            unit="sec"
-            step={5}
-            value={Number(set.duration) || 0}
-            onChange={(v) => onChange({ ...set, duration: String(v) })}
-            text={set.duration ?? ""}
-            onType={(t) => onChange({ ...set, duration: whole(t) })}
-            outlined
-          />
+          {/* A label, so a tap anywhere on the block reaches the field. */}
+          <label className="exerciseLoggerTime">
+            <SetField
+              // The panel stays up when another row's Edit is pressed; the field holds its own text.
+              key={set.id}
+              className="exerciseLoggerTimeField"
+              label="Time"
+              value={set.duration}
+              format={timeFormat}
+              onChange={(duration) => onChange({ ...set, duration })}
+            />
+            <span className="exerciseLoggerTimeUnit" aria-hidden="true">
+              Time
+            </span>
+          </label>
           {distanceUnit && (
             <DistanceField setNumber={n} unit={distanceUnit} value={set.distance ?? ""} onChange={(d) => onChange({ ...set, distance: d })} outlined />
           )}

@@ -87,3 +87,61 @@
     line-height: var(--leading-screen-title);
   }
 }
+
+/* The typed time of a set being edited: an outlined block the size of a stepper. */
+.exerciseLoggerTime {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--size-stepper);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-surface);
+  background: var(--color-surface);
+  outline: var(--border-control);
+  outline-offset: -2px;
+  cursor: text;
+}
+
+.exerciseLoggerTimeField {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-stepper);
+  line-height: var(--leading-stepper);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  caret-color: var(--color-accent);
+}
+
+/* The panel opens with the value selected, so the selection takes the theme's inverse pair. */
+.exerciseLoggerTimeField::selection {
+  background: var(--color-inverse);
+  color: var(--color-on-inverse);
+}
+
+.exerciseLoggerTimeField::placeholder {
+  color: var(--color-text-dim);
+}
+
+/* The ring takes the block's own outline; one around the field would cross it and the caption. */
+.exerciseLoggerTime:focus-within {
+  outline: var(--border-focus);
+}
+
+.exerciseLoggerTimeField:focus-visible {
+  outline: none;
+}
+
+.exerciseLoggerTimeUnit {
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
