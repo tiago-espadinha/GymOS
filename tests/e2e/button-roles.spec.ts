@@ -215,3 +215,12 @@ for (const width of [320, 360, 375]) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width)
   })
 }
+
+test('secondary: the date sheet ends in Close under a 44 title', async ({ page }) => {
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Log' }).click()
+  await page.getByRole('button', { name: /^Session date: / }).click()
+  const sheet = page.getByRole('dialog', { name: 'Session date' })
+  expect(await style(sheet.getByRole('button', { name: 'Close' }))).toMatchObject(secondary)
+  await expect(sheet.getByRole('heading', { name: 'Session date' })).toHaveCSS('font-size', '44px')
+  await axe(page)
+})
