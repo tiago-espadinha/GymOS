@@ -130,7 +130,10 @@ test.describe('wide session, 1280', () => {
     await expect(button(page, 'Start hold now')).toBeVisible()
 
     await button(page, 'End rest').click()
-    await page.getByRole('switch', { name: /^Then rest/ }).click()
+    // With "Rest after holds" off the hold runs past its target.
+    await page.evaluate(() => localStorage.setItem('gym:timerPrefs', JSON.stringify({ restAfterHolds: false })))
+    await page.reload()
+    await page.getByRole('button', { name: /^Plank/ }).click()
     await button(page, 'Start hold').click()
     await page.clock.fastForward(20_000)
     await expectSplit(page, /Hold · past target/)

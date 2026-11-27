@@ -28,7 +28,12 @@ test.beforeEach(async ({ page }) => {
 const hold = (page: Page) => page.getByRole('timer', { name: /^Hold/ })
 const rest = (page: Page) => page.getByRole('timer', { name: /^Rest/ })
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true })
-const restSwitch = (page: Page) => page.getByRole('switch', { name: /^Then rest/ })
+// Turns "Rest after holds" off for this device and reopens the exercise.
+const restOff = async (page: Page) => {
+  await page.evaluate(() => localStorage.setItem('gym:timerPrefs', JSON.stringify({ restAfterHolds: false })))
+  await page.reload()
+  await page.getByRole('button', { name: /^Plank/ }).click()
+}
 // Hidden exercise screens stay mounted; these look at the one on screen.
 const shown = (page: Page, selector: string) => page.locator(`.exerciseScreen:not([hidden]) ${selector}`)
 // The face is drawn twice (plain and on the fill); the first is the plain one.
@@ -49,7 +54,7 @@ test('idle shows the category target (calisthenics: 15s) and Start hold begins t
   await expect(label(page)).toContainText('Set 1 of 1')
   expect(await fillShare(page)).toBe(0)
   await expect(shown(page, '.timerBlockControls').getByRole('button')).toHaveCount(0)
-  await expect(restSwitch(page)).toHaveAttribute('aria-checked', 'true')
+  await expect(page.getByRole('switch')).toHaveCount(0)
   await button(page, 'Start hold').click()
   await page.clock.fastForward(5_000)
   await expect(hold(page)).toContainText('00:05')
@@ -99,7 +104,7 @@ test('a target chip sets the target', async ({ page }) => {
 })
 
 test('with the rest off, past the target the block is full and the time held is logged', async ({ page }) => {
-  await restSwitch(page).click()
+  await restOff(page)
   await button(page, 'Start hold').click()
   await page.clock.fastForward(20_000)
   await expect(hold(page)).toContainText('+0:05')
@@ -172,7 +177,6 @@ test('cardio: the distance has a label and is saved with the set on Stop and log
   await button(page, 'All exercises').click()
   await page.getByRole('button', { name: /^Rowing/ }).click()
   await expect(label(page)).toContainText('Effort · ready')
-  await expect(restSwitch(page)).toHaveAttribute('aria-checked', 'false')
   await button(page, 'Start effort').click()
   await expect(page.getByRole('group', { name: 'Target time' })).toHaveCount(0)
   const distance = page.getByRole('textbox', { name: 'Distance · set 1' })
@@ -184,6 +188,15 @@ test('cardio: the distance has a label and is saved with the set on Stop and log
   await button(page, 'Stop and log').click()
   await expect(logged(page)).toHaveText('00:30 · 1.2 km')
   await expect(page.getByRole('textbox', { name: 'Distance · set 2' })).toHaveValue('')
+})
+
+test('cardio never chains a rest: past its target the effort keeps counting', async ({ page }) => {
+  await button(page, 'All exercises').click()
+  await page.getByRole('button', { name: /^Rowing/ }).click()
+  await button(page, 'Start effort').click()
+  await page.clock.fastForward(305_000)
+  await expect(label(page)).toContainText('Effort · past target')
+  await expect(rest(page)).toHaveCount(0)
 })
 
 test('cardio: a logged distance and time can be edited and survive a reload', async ({ page }) => {
@@ -243,7 +256,7 @@ const axeStates: Record<string, (page: Page) => Promise<void>> = {
     await restStarted(page)
   },
   'past target': async (page) => {
-    await restSwitch(page).click()
+    await restOff(page)
     await button(page, 'Start hold').click()
     await page.clock.fastForward(20_000)
   },

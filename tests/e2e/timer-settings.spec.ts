@@ -145,3 +145,25 @@ test('Settings with the Timers section has no detectable WCAG A/AA violations', 
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations).toEqual([])
 })
+
+test('with "Rest after holds" off in Settings, a hold runs past its target and starts no rest', async ({ page }) => {
+  const core = {
+    id: 'p2',
+    name: 'Core day',
+    desc: '',
+    exercises: [{ id: 'e2', name: 'Plank', muscleGroup: 'Core', category: 'calisthenics', trackingType: 'time' }],
+  }
+  await page.goto('/')
+  await page.evaluate((p) => localStorage.setItem('gym:plans', JSON.stringify([p])), core)
+  await page.reload()
+  await openSettings(page)
+  await expect(toggle(page, 'Rest after holds')).toHaveAttribute('aria-checked', 'true')
+  await toggle(page, 'Rest after holds').click()
+  await page.getByRole('button', { name: 'Plans', exact: true }).click()
+  await page.getByRole('button', { name: 'Start Core day' }).click()
+  await page.getByRole('button', { name: /^Plank/ }).click()
+  await page.getByRole('button', { name: 'Start hold' }).click()
+  await page.clock.fastForward(20_000)
+  await expect(page.getByRole('timer', { name: /^Hold/ })).toContainText('+0:05')
+  await expect(rest(page)).toHaveCount(0)
+})

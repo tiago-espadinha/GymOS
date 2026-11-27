@@ -37,6 +37,12 @@ export function TimerSection() {
         ))}
       </div>
       <Switch
+        label="Rest after holds"
+        description="A hold ends at its target and rests. Not cardio."
+        checked={timers.restAfterHolds}
+        onChange={(restAfterHolds) => choose({ restAfterHolds })}
+      />
+      <Switch
         label="Sound"
         description="Beep when a timer reaches its target"
         checked={timers.soundEnabled}

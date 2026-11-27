@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ChipGroup, PrimaryButton, Switch } from "../../shared";
+import { ChipGroup, PrimaryButton } from "../../shared";
 import { formatClock, useTimer } from "../../../hooks/useTimer";
 import { WORK_PRESETS, formatPresetLabel } from "../../../constants/timerPresets";
-import { useTimerPrefs } from "../../../utils/timerPrefs";
 import { holdTimerId } from "../../../utils/restTimers";
 import { ExerciseCategory } from "../../../types";
 import { HoldTimer } from "./HoldTimer";
@@ -18,7 +17,6 @@ interface TimedSetBlockProps {
   initialTargetSec: number;
   // When on, reaching the target ends the hold; when off the hold runs on as overtime.
   chainRest: boolean;
-  onChainRestChange: (on: boolean) => void;
   /** Set when the exercise tracks distance. */
   distanceUnit?: "km" | "mi";
   /** A chained rest is on screen: this hold waits under it, ready to start early. */
@@ -33,11 +31,10 @@ interface TimedSetBlockProps {
   onEndRest: () => void;
 }
 
-// One hold: the block, the target, the rest switch, the distance and the main button.
+// One hold: the block, the target, the distance and the main button.
 export function TimedSetBlock(props: TimedSetBlockProps) {
   const { setId, setNumber, setTotal, category, initialTargetSec, chainRest, distanceUnit, resting } = props;
   const timer = useTimer(holdTimerId(setId), initialTargetSec);
-  const { restSec } = useTimerPrefs();
   // Written with the set, so a distance alone never logs one; lost on reload.
   const [distance, setDistance] = useState("");
 
@@ -86,14 +83,6 @@ export function TimedSetBlock(props: TimedSetBlockProps) {
             onChange={(v) => timer.setTargetSec(Number(v))}
           />
         </div>
-      )}
-      {choosing && !resting && (
-        <Switch
-          label={`Then rest ${formatClock(restSec[category] * 1000)}`}
-          description={`Rest starts when the ${name.toLowerCase()} ends`}
-          checked={chainRest}
-          onChange={props.onChainRestChange}
-        />
       )}
       {distanceUnit && !resting && <DistanceField setNumber={setNumber} unit={distanceUnit} value={distance} onChange={setDistance} />}
       {phase === "ready" ? (
