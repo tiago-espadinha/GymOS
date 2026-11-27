@@ -317,7 +317,7 @@ test('a logged hold can be edited, cancelled and deleted', async ({ page }) => {
   await expect(logged(page)).toHaveCount(0)
 })
 
-test('editing a saved timed session keeps its last set and offers the next hold', async ({ page }) => {
+test('editing a saved timed session keeps its last set and offers no hold', async ({ page }) => {
   await button(page, 'Start hold').click()
   await page.clock.fastForward(7_000)
   await button(page, 'Stop and log').click()
@@ -334,8 +334,8 @@ test('editing a saved timed session keeps its last set and offers the next hold'
   await page.reload()
   await page.getByRole('button', { name: /^Edit/ }).first().click()
   await page.getByRole('button', { name: /^Plank/ }).click()
-  await expect(logged(page)).toHaveText('00:07 · rest 00:00')
-  await expect(hold(page)).toBeVisible()
+  await expect(page.getByRole('textbox', { name: 'Set 1 time' })).toHaveValue('00:07')
+  await expect(hold(page)).toHaveCount(0)
 })
 
 test('discarding a session forgets a hold in progress', async ({ page }) => {

@@ -32,20 +32,24 @@ const sessions = [
   },
 ]
 
-// A new session, or the saved one opened with Edit (its exercises keep their logged sets).
-const open = async (page: Page, exercise: RegExp, edit = false) => {
+// A new session, or one resumed with the saved session's sets already logged.
+const open = async (page: Page, exercise: RegExp, resumed = false) => {
   await page.clock.install({ time: new Date('2026-11-15T10:00:00') })
   await page.addInitScript(
-    ([p, s]) => {
+    ([p, s, active]) => {
       if (localStorage.getItem('gym:plans')) return
       localStorage.setItem('gym:plans', JSON.stringify(p))
       localStorage.setItem('gym:sessions', JSON.stringify(s))
+      if (active) localStorage.setItem('gym:activeSession', JSON.stringify(active))
     },
-    [[plan], sessions],
+    [[plan], sessions, resumed ? { ...sessions[0], id: undefined, date: '2026-11-15' } : null] as const,
   )
   await page.goto('/')
-  await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Log' }).click()
-  await page.getByRole('button', edit ? { name: /^Edit Pull/ } : { name: 'Start', exact: true }).click()
+  // A resumed session opens on its list, with no tab bar.
+  if (!resumed) {
+    await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Log' }).click()
+    await page.getByRole('button', { name: 'Start', exact: true }).click()
+  }
   await page.getByRole('button', { name: exercise }).click()
 }
 
