@@ -17,17 +17,18 @@ interface SetFieldProps {
   label: string;
   value: string | undefined;
   format: FieldFormat;
+  className: string;
   onChange: (value: string | undefined) => void;
 }
 
-// One typeable value of a saved set. The text lives here so "60." survives typing,
+// One typeable value of a logged set. The text lives here so "60." survives typing,
 // and text left as it was first shown keeps the stored value at full precision.
-export function SetField({ label, value, format, onChange }: SetFieldProps) {
+export function SetField({ label, value, format, className, onChange }: SetFieldProps) {
   const [first] = useState(value);
   const [text, setText] = useState(() => format.show(value ?? ""));
   return (
     <input
-      className="savedSetsField"
+      className={className}
       aria-label={label}
       inputMode={format.inputMode}
       placeholder={format.placeholder}

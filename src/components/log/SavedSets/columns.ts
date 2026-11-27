@@ -1,10 +1,10 @@
 import { ExerciseLog, Set } from "../../../types";
 import { getExerciseMeta } from "../../../utils/metrics";
-import { secondsTime, timeSeconds, typedTime } from "../../../utils/timeField";
 import { decimal, whole } from "../../../utils/typedNumber";
 import type { UnitPreferences } from "../../../utils/unitPrefs";
 import { distanceText, storedDistance, storedWeight, weightLabel, weightText } from "../../../utils/units";
-import type { FieldFormat } from "./SetField";
+import type { FieldFormat } from "../SetField";
+import { timeFormat } from "../SetField/timeFormat";
 
 export interface Column {
   key: "weight" | "reps" | "duration" | "distance";
@@ -20,19 +20,7 @@ const asTyped = (text: string) => text;
 export function setColumns(exercise: ExerciseLog, units: UnitPreferences): Column[] {
   const meta = getExerciseMeta(exercise);
   if (meta.trackingType === "time") {
-    const time: Column = {
-      key: "duration",
-      heading: "Time",
-      name: "time",
-      format: {
-        inputMode: "numeric",
-        placeholder: "00:00",
-        show: secondsTime,
-        type: typedTime,
-        store: (text) => (text ? String(timeSeconds(text)) : ""),
-        settle: (text) => secondsTime(String(timeSeconds(text))),
-      },
-    };
+    const time: Column = { key: "duration", heading: "Time", name: "time", format: timeFormat };
     const distance: Column = {
       key: "distance",
       heading: units.distance,
