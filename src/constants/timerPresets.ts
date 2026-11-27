@@ -1,24 +1,17 @@
 import { ExerciseCategory } from "../types";
 
-export type TimerPhase = "work" | "rest";
+// Target chips offered for a hold or a cardio effort.
+export const WORK_PRESETS: Record<ExerciseCategory, number[]> = {
+  strength: [30, 45, 60, 90],
+  calisthenics: [15, 20, 30, 45, 60],
+  cardio: [300, 600, 900, 1200, 1800],
+};
 
-// Preset durations (seconds) offered per category + phase. "work" presets are
-// used for the primary timer (an isometric hold, a cardio interval/steady
-// run); "rest" presets are used for the recovery timer chained after it, and
-// also for the standalone rest timer offered on plain reps-based sets.
-export const DEFAULT_PRESETS: Record<ExerciseCategory, Record<TimerPhase, number[]>> = {
-  strength: {
-    work: [30, 45, 60, 90],
-    rest: [60, 90, 120, 180],
-  },
-  calisthenics: {
-    work: [15, 20, 30, 45, 60],
-    rest: [30, 45, 60, 90],
-  },
-  cardio: {
-    work: [300, 600, 900, 1200, 1800],
-    rest: [15, 30, 45, 60, 90],
-  },
+// The rest after a set until Settings says otherwise.
+export const DEFAULT_REST_SEC: Record<ExerciseCategory, number> = {
+  strength: 60,
+  calisthenics: 30,
+  cardio: 15,
 };
 
 // Formats a whole number of seconds as a short chip label, e.g. 45 -> "45s",

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { formatRestClock, useTimer } from "../../../hooks/useTimer";
-import { DEFAULT_PRESETS, getAdjustStepSec } from "../../../constants/timerPresets";
+import { getAdjustStepSec } from "../../../constants/timerPresets";
+import { useTimerPrefs } from "../../../utils/timerPrefs";
 import { restTimerId } from "../../../utils/restTimers";
 import { ExerciseCategory } from "../../../types";
 import { TimerBlock, TimerButton } from "../TimerBlock";
@@ -24,10 +25,12 @@ interface RestBlockProps {
 }
 
 export function RestBlock({ setId, setNumber, meta, timed = false, category, autoStart, onEnd }: RestBlockProps) {
+  // A rest already stored keeps its own target; the length from Settings is for new ones.
+  const { restSec } = useTimerPrefs();
   const {
     isRunning, isComplete, elapsedMs, targetMs, overtimeMs, progress, formattedTarget,
     start, reset, adjustTargetSec,
-  } = useTimer(restTimerId(setId), DEFAULT_PRESETS[category].rest[0]);
+  } = useTimer(restTimerId(setId), restSec[category]);
   // A target of 0 means the rest is already over (useTimer treats it as "no target").
   const over = isComplete || targetMs === 0;
   const step = timed ? getAdjustStepSec(Math.round(targetMs / 1000)) : REPS_STEP_SEC;

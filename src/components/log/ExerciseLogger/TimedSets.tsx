@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { DEFAULT_PRESETS } from "../../../constants/timerPresets";
+import { WORK_PRESETS } from "../../../constants/timerPresets";
 import { ExerciseLog, Set } from "../../../types";
 import { getExerciseMeta } from "../../../utils/metrics";
 import { generateId } from "../../../utils/id";
@@ -62,7 +62,7 @@ export function TimedSets(props: TimedSetsProps) {
         setNumber={number}
         setTotal={total}
         category={category}
-        initialTargetSec={lastHeldSec || DEFAULT_PRESETS[category].work[0]}
+        initialTargetSec={lastHeldSec || WORK_PRESETS[category][0]}
         chainRest={chainRest}
         onChainRestChange={setChainRest}
         distanceUnit={trackDistance ? units.distance : undefined}

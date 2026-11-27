@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChipGroup, PrimaryButton, Switch } from "../../shared";
 import { formatClock, useTimer } from "../../../hooks/useTimer";
-import { DEFAULT_PRESETS, formatPresetLabel } from "../../../constants/timerPresets";
+import { WORK_PRESETS, formatPresetLabel } from "../../../constants/timerPresets";
+import { useTimerPrefs } from "../../../utils/timerPrefs";
 import { holdTimerId } from "../../../utils/restTimers";
 import { ExerciseCategory } from "../../../types";
 import { HoldTimer } from "./HoldTimer";
@@ -36,6 +37,7 @@ interface TimedSetBlockProps {
 export function TimedSetBlock(props: TimedSetBlockProps) {
   const { setId, setNumber, setTotal, category, initialTargetSec, chainRest, distanceUnit, resting } = props;
   const timer = useTimer(holdTimerId(setId), initialTargetSec);
+  const { restSec } = useTimerPrefs();
   // Written with the set, so a distance alone never logs one; lost on reload.
   const [distance, setDistance] = useState("");
 
@@ -79,7 +81,7 @@ export function TimedSetBlock(props: TimedSetBlockProps) {
           <span className="timedSetLabel" aria-hidden="true">Target</span>
           <ChipGroup
             label="Target time"
-            options={DEFAULT_PRESETS[category].work.map((s) => ({ value: String(s), label: formatPresetLabel(s) }))}
+            options={WORK_PRESETS[category].map((s) => ({ value: String(s), label: formatPresetLabel(s) }))}
             value={String(targetSec)}
             onChange={(v) => timer.setTargetSec(Number(v))}
           />
@@ -87,7 +89,7 @@ export function TimedSetBlock(props: TimedSetBlockProps) {
       )}
       {choosing && !resting && (
         <Switch
-          label={`Then rest ${formatClock(DEFAULT_PRESETS[category].rest[0] * 1000)}`}
+          label={`Then rest ${formatClock(restSec[category] * 1000)}`}
           description={`Rest starts when the ${name.toLowerCase()} ends`}
           checked={chainRest}
           onChange={props.onChainRestChange}
