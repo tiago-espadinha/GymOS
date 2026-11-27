@@ -1,6 +1,7 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup as render } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
+import { IconButton } from './IconButton'
 import { PillButton } from './PillButton'
 import { PrimaryButton } from './PrimaryButton'
 import { SecondaryButton } from './SecondaryButton'
@@ -74,6 +75,25 @@ describe('SecondaryButton', () => {
     expect(css).toMatch(/:focus-visible\s*{[^}]*outline: var\(--border-focus\)/)
     expect(css).toMatch(/:disabled\s*{[^}]*opacity: 0\.4/)
     expect(render(createElement(SecondaryButton, { disabled: true }, 'Go'))).toContain('disabled=""')
+  })
+})
+
+describe('IconButton', () => {
+  it('is a named, non-submitting button around a hidden icon', () => {
+    const html = render(createElement(IconButton, { icon: 'more', 'aria-label': 'Session actions' }))
+    expect(html).toContain('type="button"')
+    expect(html).toContain('aria-label="Session actions"')
+    expect(html).toContain('aria-hidden="true"')
+    expect(html).toContain('icon-button--default')
+  })
+
+  it('is a 44 circle, or 72 beside a primary, with a grey outline and a focus ring', () => {
+    const css = cssOf('IconButton')
+    expect(css).toMatch(/\.icon-button\s*{[^}]*width: var\(--size-control\)/)
+    expect(css).toMatch(/\.icon-button--large\s*{[^}]*width: var\(--size-action-primary\)/)
+    expect(css).toMatch(/\.icon-button\s*{[^}]*border: var\(--border-chip\)/)
+    expect(css).toMatch(/:focus-visible\s*{[^}]*outline: var\(--border-focus\)/)
+    expect(css).toMatch(/:disabled\s*{[^}]*opacity: 0\.4/)
   })
 })
 

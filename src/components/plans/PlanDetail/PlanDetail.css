@@ -75,26 +75,6 @@
   width: var(--width-start-wide);
 }
 
-.planDetail__more {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: var(--size-action-primary);
-  height: var(--size-action-primary);
-  padding: 0;
-  border: var(--border-chip);
-  border-radius: var(--radius-pill);
-  background: none;
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-.planDetail__more:focus-visible {
-  outline: var(--border-focus);
-  outline-offset: 2px;
-}
-
 .planDetail__label {
   padding-top: var(--space-6);
 }

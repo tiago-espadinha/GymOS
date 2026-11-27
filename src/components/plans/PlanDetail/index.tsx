@@ -1,4 +1,4 @@
-import { Icon, PillButton, PrimaryButton } from "../../shared";
+import { Icon, IconButton, PillButton, PrimaryButton } from "../../shared";
 import { describeExercise } from "../CreatePlanForm/describeExercise";
 import { planDetailKicker, planSummary } from "../../../utils/plans";
 import { TrainingPlan, WorkoutSession } from "../../../types";
@@ -50,16 +50,14 @@ export function PlanDetail({ id, plan, sessions, today, saved = null, onBack, on
         <PrimaryButton tone="accent" onClick={() => onStart(plan)} aria-label={`Start ${plan.name}`}>
           Start
         </PrimaryButton>
-        <button
-          type="button"
-          className="planDetail__more"
+        <IconButton
+          icon="more"
+          size="large"
           data-plan-actions={plan.id}
           aria-label={`More actions for ${plan.name}`}
           aria-haspopup="dialog"
           onClick={() => onMore(plan)}
-        >
-          <Icon name="more" size="md" />
-        </button>
+        />
       </div>
       <Label className="planDetail__label">Exercises</Label>
       <ol className="planDetail__exercises">
