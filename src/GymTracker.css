@@ -100,8 +100,9 @@
     padding-inline: var(--gutter-wide);
   }
 
-  /* An open exercise spans the window: its timer is fixed on the left, the rest flows on the right. */
-  .mainContent:has(.exerciseScreen:not([hidden])) {
+  /* An open exercise spans the window: its timer is fixed on the left, the rest flows on the right.
+     A saved session's exercise has no timer and keeps the column. */
+  .mainContent:has(.exerciseScreen:not([hidden], .exerciseScreen--saved)) {
     max-width: none;
     padding: var(--space-7) var(--gutter-wide) var(--gutter-wide) calc(var(--width-timer-split) + var(--gutter-wide));
   }

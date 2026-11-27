@@ -87,6 +87,7 @@ export function SessionList({ planName, exercises, onChangeExercise, sessions, e
             exercise={ex}
             exercises={exercises}
             planName={planName}
+            saved={Boolean(editingId)}
             history={history.get(ex.name) ?? []}
             next={next}
             hidden={ex.id !== openId}

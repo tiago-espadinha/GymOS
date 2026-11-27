@@ -1,0 +1,110 @@
+/* Set number, one column per tracked value, then ✕; the header shares the columns. */
+.savedSetsRow {
+  display: grid;
+  grid-template-columns: var(--size-icon-xl) repeat(2, minmax(0, 1fr)) var(--size-control);
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--size-action);
+  border-bottom: var(--border-hairline);
+}
+
+.savedSetsGrid--one .savedSetsRow {
+  grid-template-columns: var(--size-icon-xl) minmax(0, 1fr) var(--size-control);
+}
+
+.savedSetsRow--head {
+  min-height: var(--size-segment-bar);
+  padding-bottom: var(--space-2);
+  font-size: var(--text-small);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.savedSetsList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.savedSetsNumber {
+  padding-left: var(--space-1);
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-set-label);
+  color: var(--color-accent);
+}
+
+.savedSetsField {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--size-chip);
+  padding: 0 var(--space-1);
+  border: 0;
+  border-radius: var(--radius-nested);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-row-title-lg);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.savedSetsField::placeholder {
+  color: var(--color-text-dim);
+}
+
+.savedSetsRemove {
+  display: grid;
+  place-items: center;
+  min-width: var(--size-control);
+  min-height: var(--size-control);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.savedSetsAdd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--size-action);
+  border: var(--border-control);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-button);
+  letter-spacing: var(--tracking-button);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.savedSetsField:focus-visible,
+.savedSetsRemove:focus-visible,
+.savedSetsAdd:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: 2px;
+}
+
+.savedSetsEmpty {
+  margin: 0;
+  padding: var(--space-6) 0;
+  border-block: var(--border-hairline);
+  font-size: var(--text-secondary);
+  color: var(--color-text-muted);
+}
+
+/* No timer half on wide: the name keeps the phone's size in the 600 column. */
+.savedSets .exerciseLoggerTitle {
+  font-size: var(--text-section-title-lg);
+  line-height: 0.9;
+}

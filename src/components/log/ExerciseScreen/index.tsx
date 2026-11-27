@@ -2,6 +2,7 @@ import { ExerciseLog, Set } from "../../../types";
 import { exerciseFinishId, exerciseProgress } from "../../../utils/sessionList";
 import { Icon } from "../../shared";
 import ExerciseLogger from "../ExerciseLogger";
+import SavedSets from "../SavedSets";
 import "./ExerciseScreen.css";
 
 export interface FinishAction {
@@ -17,6 +18,8 @@ interface ExerciseScreenProps {
   /** The exercise after this one; none on the last. */
   next?: ExerciseLog;
   planName: string;
+  /** A saved session being edited: its sets are corrected, not performed. */
+  saved: boolean;
   /** This exercise's sets from last time. */
   history: Set[];
   /** Hidden screens stay mounted so a running rest or hold keeps its timer. */
@@ -34,6 +37,7 @@ export function ExerciseScreen({
   exercises,
   next,
   planName,
+  saved,
   history,
   hidden,
   titleId,
@@ -87,30 +91,26 @@ export function ExerciseScreen({
     </button>
   );
 
+  const header = (setLabel: string, resting = false) => (
+    <div>
+      <div className="exerciseScreenTop">
+        <button type="button" className="exerciseScreenBack" onClick={onAllExercises}>
+          <Icon name="chevron-left" />
+          All exercises
+        </button>
+        <p className="exerciseScreenPlace">
+          <span className="exerciseScreenPlan">{planName}</span>
+          <span className={`exerciseScreenSet${resting ? " exerciseScreenSet--next" : ""}`}>{setLabel}</span>
+        </p>
+      </div>
+      {segments}
+    </div>
+  );
+  const shared = { exercise, onChange, titleId, header, footer: card };
+
   return (
-    <section className="exerciseScreen" hidden={hidden} aria-labelledby={titleId}>
-      <ExerciseLogger
-        exercise={exercise}
-        onChange={onChange}
-        history={history}
-        titleId={titleId}
-        header={(setLabel, resting) => (
-          <div>
-            <div className="exerciseScreenTop">
-              <button type="button" className="exerciseScreenBack" onClick={onAllExercises}>
-                <Icon name="chevron-left" />
-                All exercises
-              </button>
-              <p className="exerciseScreenPlace">
-                <span className="exerciseScreenPlan">{planName}</span>
-                <span className={`exerciseScreenSet${resting ? " exerciseScreenSet--next" : ""}`}>{setLabel}</span>
-              </p>
-            </div>
-            {segments}
-          </div>
-        )}
-        footer={card}
-      />
+    <section className={`exerciseScreen${saved ? " exerciseScreen--saved" : ""}`} hidden={hidden} aria-labelledby={titleId}>
+      {saved ? <SavedSets {...shared} /> : <ExerciseLogger {...shared} history={history} />}
     </section>
   );
 }
