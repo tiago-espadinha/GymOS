@@ -5,8 +5,8 @@
   fill: none;
   stroke: currentColor;
   stroke-width: var(--stroke-icon);
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  stroke-linecap: butt;
+  stroke-linejoin: miter;
 }
 
 .icon--md {
@@ -24,7 +24,8 @@
   height: var(--size-icon-xl);
 }
 
-/* A dot is a zero-length stroke; this makes it the weight of a ⋯ or the i's tittle. */
-.icon__dot {
-  stroke-width: var(--stroke-icon-dot);
+/* Dots, the funnel and the info and warning badges are filled shapes, not strokes. */
+.icon__fill {
+  fill: currentColor;
+  stroke: none;
 }

@@ -1,38 +1,34 @@
 import type { ReactNode } from 'react';
 
-// One set on a 24 grid: a single stroke (--stroke-icon), round caps and joins, currentColor.
-// Dots are short round-capped strokes, so they take the same weight.
+// One set on a 24 grid, cut like the display type: a single heavy stroke (--stroke-icon),
+// flat ends and sharp corners, tall narrow forms, currentColor.
+// Dots, the funnel and the info and warning badges are filled shapes (icon__fill),
+// the badges with their marks cut out.
 export const PATHS = {
-  'chevron-down': <path d="M6 9l6 6 6-6" />,
-  'chevron-left': <path d="M15 6l-6 6 6 6" />,
-  'chevron-right': <path d="M9 6l6 6-6 6" />,
-  'arrow-right': <path d="M4 12h16M14 6l6 6-6 6" />,
-  check: <path d="M4 12l5 5L20 6" />,
-  close: <path d="M6 6l12 12M18 6L6 18" />,
-  plus: <path d="M12 5v14M5 12h14" />,
-  minus: <path d="M5 12h14" />,
+  'chevron-down': <path d="M3.5 8L12 15.5 20.5 8" />,
+  'chevron-left': <path d="M15.5 3.5L8 12l7.5 8.5" />,
+  'chevron-right': <path d="M8.5 3.5L16 12l-7.5 8.5" />,
+  'arrow-right': <path d="M2.5 12h15.5M12.5 4.5l7 7.5-7 7.5" />,
+  check: <path d="M3 13l6 6L21 4.5" />,
+  close: <path d="M6 3.5l12 17M18 3.5l-12 17" />,
+  plus: <path d="M12 3v18M3.5 12h17" />,
+  minus: <path d="M3.5 12h17" />,
   search: (
     <>
-      <circle cx="11" cy="11" r="7" />
-      <path d="M20 20l-4-4" />
+      <circle cx="10" cy="10" r="6.5" />
+      <path d="M14.8 14.8L21.5 21.5" />
     </>
   ),
-  filter: <path d="M3 5h18l-7 8.5V20l-4-2v-4.5z" />,
-  more: <path className="icon__dot" d="M5 12h.01M12 12h.01M19 12h.01" />,
+  filter: <path className="icon__fill" d="M3 3h18l-7 9v9l-4-2.5V12z" />,
+  more: <path className="icon__fill" d="M2.5 9.75h4.5v4.5H2.5zM9.75 9.75h4.5v4.5h-4.5zM17 9.75h4.5v4.5H17z" />,
   info: (
-    <>
-      <circle cx="12" cy="12" r="10" />
-      <path d="M12 11v6" />
-      <path className="icon__dot" d="M12 7h.01" />
-    </>
+    <path
+      className="icon__fill"
+      fillRule="evenodd"
+      d="M8 2h8a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zM10.25 10h3.5v8h-3.5zM10.25 5h3.5v3.5h-3.5z"
+    />
   ),
-  warning: (
-    <>
-      <path d="M12 3l10 18H2z" />
-      <path d="M12 10v4" />
-      <path className="icon__dot" d="M12 17.5h.01" />
-    </>
-  ),
+  warning: <path className="icon__fill" fillRule="evenodd" d="M12 1.5l11 20H1zM10.25 8.5h3.5v6h-3.5zM10.25 16h3.5v3.5h-3.5z" />,
 } satisfies Record<string, ReactNode>;
 
 export type IconName = keyof typeof PATHS;
